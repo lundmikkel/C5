@@ -68,6 +68,8 @@
     <Compile Include="hashing\HashTable.cs" />
     <Compile Include="heaps\IntervalHeap.cs" />
     <Compile Include="Interfaces.cs" />
+    <Compile Include="intervaled\IntervalBase.cs" />
+    <Compile Include="intervaled\IntervalComparer.cs" />
     <Compile Include="linkedlists\HashedLinkedList.cs" />
     <Compile Include="linkedlists\LinkedList.cs" />
     <Compile Include="Logger.cs" />
@@ -86,6 +88,7 @@
   <ItemGroup>
     <None Include="C5.snk" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
