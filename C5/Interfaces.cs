@@ -2040,4 +2040,96 @@ namespace C5
       /// <returns>True if equal</returns>
       bool Equals(T item1, T item2);
     }*/
+
+
+    /// <summary>
+    /// An interval with a low (left) and high (right) point with or without included endpoints.
+    /// </summary>
+    /// <typeparam name="T">The generic value for an interval's endpoint values</typeparam>
+    public interface IInterval<T> where T : IComparable<T>
+    {
+        /// <summary>
+        /// The low endpoint for the interval. Also known as left, start, first, or lower endpoint.
+        /// </summary>
+        T Low { get; }
+        /// <summary>
+        /// The high endpoint for the interval. Also known as right, end, last, or higher endpoint.
+        /// </summary>
+        T High { get; }
+
+        /// <summary>
+        /// If true the low endpoint is included in the interval. If false a stabbing query on the low endpoint will not include the interval.
+        /// </summary>
+        bool LowIncluded { get; }
+
+        /// <summary>
+        /// If true the high endpoint is included in the interval. If false a stabbing query on the high endpoint will not include the interval.
+        /// </summary>
+        bool HighIncluded { get; }
+    }
+
+    /// <summary>
+    /// A collection that allows fast quering on collections of intervals.
+    /// </summary>
+    /// <typeparam name="T">The generic value for an interval's endpoint values</typeparam>
+    public interface IIntervaled<T> : ICollectionValue<IInterval<T>> where T : IComparable<T>
+    {
+        /// <summary>
+        /// The smallest interval that spans all intervals in the collection.
+        /// The lowest endpoint in the collection makes up the low endpoint of the span, and the highest the high endpoint. The span's endpoints are closed and open in accordance with the lowest and highest endpoint in the collection.
+        /// <code>coll.Overlap(coll.Span())</code> will by definition return all intervals in the collection.
+        /// </summary>
+        /// <returns>The smallest spanning interval</returns>
+        /// <exception cref="InvalidOperationException">Thrown if called on an empty collection, as it can't have a span</exception>
+        IInterval<T> Span { get; }
+
+        // @design: made to spare the user of making a point interval ([q:q]) and allow for more effective implementations of the interface
+        /// <summary>
+        /// Create an enumerable, enumerating all intervals that overlap the query point.
+        /// </summary>
+        /// <param name="query">The query point</param>
+        /// <returns>All intervals that overlap the query point</returns>
+        /// <exception cref="NullReferenceException">Thrown if query is null</exception>
+        SCG.IEnumerable<IInterval<T>> Overlap(T query);
+
+        /// <summary>
+        /// Create an enumerable, enumerating all intervals in the collection that overlap the query interval.
+        /// </summary>
+        /// <param name="query">The query interval</param>
+        /// <returns>All intervals that overlap the query interval</returns>
+        /// <exception cref="NullReferenceException">Thrown if query is null</exception>
+        SCG.IEnumerable<IInterval<T>> Overlap(IInterval<T> query);
+
+        // @design: only implemented with interval that it is most unlikely to query a single point. If that would be needed it would still be possible to query a point with a closed single-point interval ([q:q])
+        /// <summary>
+        /// Check if there exists an interval in the collection that overlaps the query point.
+        /// </summary>
+        /// <param name="query">The query point</param>
+        /// <returns>True if at least one such interval exists</returns>
+        bool OverlapExists(IInterval<T> query);
+
+        /// <summary>
+        /// The maximum number of overlapping intervals at a single point in the collection.
+        /// The actual point may not be representable with the generic type, as it could be between two descrete values.
+        /// </summary>
+        int MaximumOverlap { get; }
+    }
+
+    /// <summary>
+    /// A collection that allows fast quering on static collections of intervals.
+    /// The static collections are faster than the dynamic collections, but don't allow changes to the collection.
+    /// </summary>
+    /// <typeparam name="T">The generic value for an interval's endpoint values</typeparam>
+    public interface IStaticIntervaled<T> : IIntervaled<T> where T : IComparable<T>
+    {
+    }
+
+    /// <summary>
+    /// A collection that allows fast quering on dynamic collections of intervals.
+    /// The dynamic collections are slower than the static collections, but allow changes to the collection.
+    /// </summary>
+    /// <typeparam name="T">The generic value for an interval's endpoint values</typeparam>
+    public interface IDynamicIntervaled<T> : IIntervaled<T>, SCG.ICollection<IInterval<T>> where T : IComparable<T>
+    {
+    }
 }
