@@ -84,22 +84,17 @@ namespace C5.intervaled
             if (ReferenceEquals(null, that)) return false;
             if (ReferenceEquals(this, that)) return true;
             if (GetType() != that.GetType()) return false;
-            return Equals((IntervalBase<T>) that);
-        }
-
-        protected bool Equals(IntervalBase<T> that)
-        {
-            return IntervalComparer<T>.StaticEquals(this, that);
+            return IntervalExtensions.Equals(this, (IInterval<T>) that);
         }
 
         public override int GetHashCode()
         {
-            return IntervalComparer<T>.StaticGetHashCode(this);
+            return IntervalExtensions.GetHashCode(this);
         }
 
         public override string ToString()
         {
-            return IntervalComparer<T>.ToString(this);
+            return IntervalExtensions.ToString(this);
         }
     }
 }

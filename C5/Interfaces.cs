@@ -2077,7 +2077,7 @@ namespace C5
         /// <summary>
         /// The smallest interval that spans all intervals in the collection.
         /// The lowest endpoint in the collection makes up the low endpoint of the span, and the highest the high endpoint. The span's endpoints are closed and open in accordance with the lowest and highest endpoint in the collection.
-        /// <code>coll.Overlap(coll.Span())</code> will by definition return all intervals in the collection.
+        /// <code>coll.FindOverlaps(coll.Span())</code> will by definition return all intervals in the collection.
         /// </summary>
         /// <returns>The smallest spanning interval</returns>
         /// <exception cref="InvalidOperationException">Thrown if called on an empty collection, as it can't have a span</exception>
@@ -2090,7 +2090,7 @@ namespace C5
         /// <param name="query">The query point</param>
         /// <returns>All intervals that overlap the query point</returns>
         /// <exception cref="NullReferenceException">Thrown if query is null</exception>
-        SCG.IEnumerable<IInterval<T>> Overlap(T query);
+        SCG.IEnumerable<IInterval<T>> FindOverlaps(T query);
 
         /// <summary>
         /// Create an enumerable, enumerating all intervals in the collection that overlap the query interval.
@@ -2098,7 +2098,7 @@ namespace C5
         /// <param name="query">The query interval</param>
         /// <returns>All intervals that overlap the query interval</returns>
         /// <exception cref="NullReferenceException">Thrown if query is null</exception>
-        SCG.IEnumerable<IInterval<T>> Overlap(IInterval<T> query);
+        SCG.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query);
 
         // @design: only implemented with interval that it is most unlikely to query a single point. If that would be needed it would still be possible to query a point with a closed single-point interval ([q:q])
         /// <summary>

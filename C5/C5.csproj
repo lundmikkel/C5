@@ -69,7 +69,7 @@
     <Compile Include="heaps\IntervalHeap.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="intervaled\IntervalBase.cs" />
-    <Compile Include="intervaled\IntervalComparer.cs" />
+    <Compile Include="intervaled\IntervalExtensions.cs" />
     <Compile Include="linkedlists\HashedLinkedList.cs" />
     <Compile Include="linkedlists\LinkedList.cs" />
     <Compile Include="Logger.cs" />
