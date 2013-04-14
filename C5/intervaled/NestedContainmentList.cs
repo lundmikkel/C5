@@ -281,8 +281,8 @@ namespace C5.intervaled
 
         public SCG.IEnumerable<IInterval<T>> FindOverlaps(T query)
         {
-            if (query == null)
-                throw new NullReferenceException("Query can't be null");
+            if (ReferenceEquals(query, null))
+                return Enumerable.Empty<IInterval<T>>();
 
             return findOverlap(_list, new IntervalBase<T>(query));
         }
@@ -420,7 +420,7 @@ namespace C5.intervaled
         public SCG.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
         {
             if (query == null)
-                throw new NullReferenceException("Query can't be null");
+                return Enumerable.Empty<IInterval<T>>();
 
             return findOverlap(_list, query);
         }
@@ -428,7 +428,7 @@ namespace C5.intervaled
         public bool OverlapExists(IInterval<T> query)
         {
             if (query == null)
-                throw new NullReferenceException("Query can't be null");
+                return false;
 
             // Check if query overlaps the collection at all
             if (_list.IsEmpty() || !query.Overlaps(Span))

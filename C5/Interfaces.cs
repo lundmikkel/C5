@@ -2089,7 +2089,6 @@ namespace C5
         /// </summary>
         /// <param name="query">The query point</param>
         /// <returns>All intervals that overlap the query point</returns>
-        /// <exception cref="NullReferenceException">Thrown if query is null</exception>
         SCG.IEnumerable<IInterval<T>> FindOverlaps(T query);
 
         /// <summary>
@@ -2097,7 +2096,6 @@ namespace C5
         /// </summary>
         /// <param name="query">The query interval</param>
         /// <returns>All intervals that overlap the query interval</returns>
-        /// <exception cref="NullReferenceException">Thrown if query is null</exception>
         SCG.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query);
 
         // @design: only implemented with interval that it is most unlikely to query a single point. If that would be needed it would still be possible to query a point with a closed single-point interval ([q:q])

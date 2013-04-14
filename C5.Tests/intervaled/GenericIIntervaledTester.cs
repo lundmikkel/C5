@@ -98,16 +98,16 @@ namespace C5.Tests.intervaled
                 _intervaled = Factory(Enumerable.Empty<IInterval<int>>());
             }
 
-            [Test, ExpectedException(typeof(NullReferenceException))]
+            [Test]
             public void Overlap_NullQuery_ThrowsException()
             {
-                var overlaps = _intervaled.FindOverlaps(null);
+                CollectionAssert.IsEmpty(_intervaled.FindOverlaps(null));
             }
 
-            [Test, ExpectedException(typeof(NullReferenceException))]
+            [Test]
             public void OverlapExists_NullQuery_ThrowsException()
             {
-                _intervaled.OverlapExists(null);
+                Assert.IsFalse(_intervaled.OverlapExists(null));
             }
 
             [Test]
@@ -210,7 +210,7 @@ namespace C5.Tests.intervaled
             [SetUp]
             public void Init()
             {
-                _intervaled = Factory(new[] { A, B, C, D, E1, E2, F, G, H }); ;
+                _intervaled = Factory(new[] { A, B, C, D, E1, E2, F, G, H });
             }
 
             private void range(IInterval<int> query, SCG.IEnumerable<IInterval<int>> expected)

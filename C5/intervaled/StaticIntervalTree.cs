@@ -175,10 +175,8 @@ namespace C5.intervaled
 
         private static T getK(IList<T> list, int k)
         {
-            if (k < 0 || list.Count < k)
-                throw new ArgumentOutOfRangeException();
-
             list.Shuffle();
+
             int low = 0, high = list.Count - 1;
 
             while (high > low)
@@ -438,7 +436,7 @@ namespace C5.intervaled
         public SCG.IEnumerable<IInterval<T>> FindOverlaps(T query)
         {
             if (ReferenceEquals(query, null))
-                throw new NullReferenceException("Query can't be null");
+                return Enumerable.Empty<IInterval<T>>();
 
             return findOverlap(_root, query);
         }
@@ -505,7 +503,7 @@ namespace C5.intervaled
         public SCG.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
         {
             if (ReferenceEquals(query, null))
-                throw new NullReferenceException("Query can't be null");
+                yield break;
 
             // Break if collection is empty or the query is outside the collections span
             if (IsEmpty || !Span.Overlaps(query))
@@ -528,7 +526,7 @@ namespace C5.intervaled
         public bool OverlapExists(IInterval<T> query)
         {
             if (query == null)
-                throw new NullReferenceException("Query can't be null");
+                return false;
 
             return FindOverlaps(query).GetEnumerator().MoveNext();
         }
