@@ -1,10 +1,10 @@
 ﻿using System;
 using SCG = System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace C5.intervaled
 {
+    // TODO: Document reference equality duplicates
     public class IntervalBinarySearchTree<T> : CollectionValueBase<IInterval<T>>, IDynamicIntervaled<T> where T : IComparable<T>
     {
         private const bool RED = true;
@@ -12,23 +12,6 @@ namespace C5.intervaled
 
         private Node _root;
         private int _count;
-
-        #region IEqualityComparer
-
-        public class IntervalReferenceEqualityComparer : SCG.IEqualityComparer<IInterval<T>>
-        {
-            public bool Equals(IInterval<T> i, IInterval<T> j)
-            {
-                return ReferenceEquals(i, j);
-            }
-
-            public int GetHashCode(IInterval<T> i)
-            {
-                return i.GetHashCode();
-            }
-        }
-
-        #endregion
 
         #region Red-black tree helper methods
 
@@ -177,7 +160,7 @@ namespace C5.intervaled
 
         public sealed class NodeSet : HashSet<IInterval<T>>
         {
-            private static SCG.IEqualityComparer<IInterval<T>> _comparer = new IntervalReferenceEqualityComparer();
+            private static SCG.IEqualityComparer<IInterval<T>> _comparer = ComparerFactory<IInterval<T>>.CreateEqualityComparer(ReferenceEquals, IntervalExtensions.GetHashCode);
 
             public NodeSet(SCG.IEnumerable<IInterval<T>> intervals)
                 : base(_comparer)
@@ -186,7 +169,7 @@ namespace C5.intervaled
             }
 
             public NodeSet()
-                : base(new IntervalReferenceEqualityComparer())
+                : base(_comparer)
             {
             }
 
