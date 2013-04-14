@@ -78,7 +78,7 @@ namespace C5.Tests.intervaled
         }
 
         [TestFixture]
-        public class NestedContainmentListPerfomance : PerformanceVorFrue
+        public class NestedContainmentListPerfomance : Performance23333
         {
             protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {

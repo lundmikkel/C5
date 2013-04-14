@@ -469,7 +469,7 @@ namespace C5.Tests.intervaled
         }
 
         [Ignore]
-        public abstract class PerformanceVorFrue
+        public abstract class Performance23333
         {
             protected IIntervaled<int> Intervaled;
 
@@ -490,7 +490,7 @@ namespace C5.Tests.intervaled
                 }
 
                 var sw = Stopwatch.StartNew();
-                const int count = 10;
+                const int count = 1; // 000;
                 for (var i = 0; i < count; i++)
                 {
                     Intervaled = Factory(intervalList);
@@ -505,7 +505,7 @@ namespace C5.Tests.intervaled
                 Assert.That(Intervaled.FindOverlaps(new IntervalBase<int>(1357516800, 1358121599)).Count() == 42);
 
                 var sw = Stopwatch.StartNew();
-                const int count = 1000;
+                const int count = 1; // 000;
                 for (var i = 0; i < count; i++)
                 {
                     Intervaled.FindOverlaps(new IntervalBase<int>(1357516800, 1358121599)).Count();

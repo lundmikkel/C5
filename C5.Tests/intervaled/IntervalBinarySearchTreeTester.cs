@@ -57,7 +57,7 @@ namespace C5.Tests.intervaled
         }
 
         [TestFixture]
-        public class IBSPerformance : Generic.PerformanceVorFrue
+        public class IBSPerformance : Generic.Performance23333
         {
             protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
