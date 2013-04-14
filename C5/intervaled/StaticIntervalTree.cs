@@ -148,7 +148,8 @@ namespace C5.intervaled
 
                 IInterval<T> span = new IntervalBase<T>(intervalArray.First());
 
-                MaximumOverlap = IntervaledHelper<T>.MaximumOverlap(intervalArray);
+                // TODO: Figure out how Orcomp does it
+                // MaximumOverlap = IntervaledHelper<T>.MaximumOverlap(intervalArray);
 
                 _root = new Node(intervalArray, ref span);
 

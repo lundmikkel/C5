@@ -105,7 +105,8 @@ namespace C5.intervaled
 
             Sorting.IntroSort(intervalsArray, 0, intervalsArray.Count(), ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareTo));
 
-            MaximumOverlap = IntervaledHelper<T>.MaximumOverlap(intervalsArray);
+            // TODO: Figure out how Orcomp does it
+            //MaximumOverlap = IntervaledHelper<T>.MaximumOverlap(intervalsArray);
 
             // Build nested containment list recursively and save the upper-most list in the class
             _list = createList(intervalsArray);
