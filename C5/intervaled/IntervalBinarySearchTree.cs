@@ -106,21 +106,21 @@ namespace C5.intervaled
         {
             public T Key { get; private set; }
 
-            private NodeSet _less;
-            private NodeSet _equal;
-            private NodeSet _greater;
+            private IntervalSet _less;
+            private IntervalSet _equal;
+            private IntervalSet _greater;
 
-            public NodeSet Less
+            public IntervalSet Less
             {
-                get { return _less ?? (_less = new NodeSet()); }
+                get { return _less ?? (_less = new IntervalSet()); }
             }
-            public NodeSet Equal
+            public IntervalSet Equal
             {
-                get { return _equal ?? (_equal = new NodeSet()); }
+                get { return _equal ?? (_equal = new IntervalSet()); }
             }
-            public NodeSet Greater
+            public IntervalSet Greater
             {
-                get { return _greater ?? (_greater = new NodeSet()); }
+                get { return _greater ?? (_greater = new IntervalSet()); }
             }
 
             public Node Left { get; internal set; }
@@ -158,37 +158,37 @@ namespace C5.intervaled
             }
         }
 
-        public sealed class NodeSet : HashSet<IInterval<T>>
+        public sealed class IntervalSet : HashSet<IInterval<T>>
         {
             private static SCG.IEqualityComparer<IInterval<T>> _comparer = ComparerFactory<IInterval<T>>.CreateEqualityComparer(ReferenceEquals, IntervalExtensions.GetHashCode);
 
-            public NodeSet(SCG.IEnumerable<IInterval<T>> intervals)
+            public IntervalSet(SCG.IEnumerable<IInterval<T>> intervals)
                 : base(_comparer)
             {
                 AddAll(intervals);
             }
 
-            public NodeSet()
+            public IntervalSet()
                 : base(_comparer)
             {
             }
 
-            public static NodeSet operator -(NodeSet s1, NodeSet s2)
+            public static IntervalSet operator -(IntervalSet s1, IntervalSet s2)
             {
                 if (s1 == null || s2 == null)
                     throw new ArgumentNullException("Set-Set");
 
-                var res = new NodeSet(s1);
+                var res = new IntervalSet(s1);
                 res.RemoveAll(s2);
                 return res;
             }
 
-            public static NodeSet operator +(NodeSet s1, NodeSet s2)
+            public static IntervalSet operator +(IntervalSet s1, IntervalSet s2)
             {
                 if (s1 == null || s2 == null)
                     throw new ArgumentNullException("Set+Set");
 
-                var res = new NodeSet(s1);
+                var res = new IntervalSet(s1);
                 res.AddAll(s2);
                 return res;
             }
@@ -419,7 +419,7 @@ namespace C5.intervaled
             if (ReferenceEquals(query, null))
                 return Enumerable.Empty<IInterval<T>>();
 
-            var set = new NodeSet();
+            var set = new IntervalSet();
 
             foreach (var interval in findOverlap(_root, query))
                 set.Add(interval);
@@ -465,7 +465,7 @@ namespace C5.intervaled
             if (IsEmpty || !Span.Overlaps(query))
                 yield break;
 
-            var set = new NodeSet();
+            var set = new IntervalSet();
 
             var splitNode = _root;
             // Use a lambda instead of out, as out or ref isn't allowed for itorators
