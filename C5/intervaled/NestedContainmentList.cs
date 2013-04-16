@@ -46,16 +46,15 @@ namespace C5.intervaled
         /// </summary>
         /// <param name="intervals">Sorted intervals</param>
         /// <returns>A list of nodes</returns>
-        private static IList<Node> createList(SCG.IEnumerable<IInterval<T>> intervals)
+        private static IList<Node> createList(IInterval<T>[] intervals)
         {
-            // TODO: Make an in-place version
             // List to hold the nodes
             IList<Node> list = new ArrayList<Node>(); // TODO: Null and then init in if?
             // Remember the number of nodes before the current node to allow fast count operation
             var nodesBefore = 0;
 
             // Iterate through the intervals to build the list
-            var enumerator = intervals.GetEnumerator();
+            var enumerator = intervals.Cast<IInterval<T>>().GetEnumerator();
             if (enumerator.MoveNext())
             {
                 // Remember the previous node so we can check if the next nodes are contained in it
@@ -73,7 +72,7 @@ namespace C5.intervaled
                     else
                     {
                         // The current interval wasn't contained in the prevoius node, so we can finally add the previous to the list
-                        list.Add(new Node(previous, (sublist.IsEmpty ? null : createList(sublist)), nodesBefore, sublist.Count));
+                        list.Add(new Node(previous, (sublist.IsEmpty ? null : createList(sublist.ToArray())), nodesBefore, sublist.Count));
                         // Add the sublist count and the current node to the nodes before
                         nodesBefore += sublist.Count + 1;
 
@@ -84,7 +83,7 @@ namespace C5.intervaled
                 }
 
                 // Add the last node to the list when we are done looping through them
-                list.Add(new Node(previous, createList(sublist), nodesBefore, sublist.Count));
+                list.Add(new Node(previous, createList(sublist.ToArray()), nodesBefore, sublist.Count));
             }
 
             return list;
