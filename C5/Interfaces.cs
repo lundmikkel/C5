@@ -2106,11 +2106,13 @@ namespace C5
         /// <returns>True if at least one such interval exists</returns>
         bool OverlapExists(IInterval<T> query);
 
+        /*
         /// <summary>
         /// The maximum number of overlapping intervals at a single point in the collection.
         /// The actual point may not be representable with the generic type, as it could be between two descrete values.
         /// </summary>
         int MaximumOverlap { get; }
+        */
     }
 
     /// <summary>

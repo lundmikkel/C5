@@ -88,7 +88,7 @@ namespace C5.Tests.intervaled
 
         public abstract class IntervaledNullCollection
         {
-            private IIntervaled<int> _intervaled;
+            protected IIntervaled<int> _intervaled;
 
             internal abstract IIntervaled<int> Factory(SCG.IEnumerable<IInterval<int>> intervals);
 
@@ -109,17 +109,11 @@ namespace C5.Tests.intervaled
             {
                 Assert.IsFalse(_intervaled.OverlapExists(null));
             }
-
-            [Test]
-            public void MaximumOverlap_EmptyCollection_Returns0()
-            {
-                Assert.AreEqual(0, _intervaled.MaximumOverlap);
-            }
         }
 
         public abstract class IntervaledEmptyCollection
         {
-            private IIntervaled<int> _intervaled;
+            protected IIntervaled<int> _intervaled;
 
             internal abstract IIntervaled<int> Factory(SCG.IEnumerable<IInterval<int>> intervals);
 
@@ -169,12 +163,6 @@ namespace C5.Tests.intervaled
             {
                 Assert.IsFalse(_intervaled.OverlapExists(new IntervalOfInt(0, 5)));
             }
-
-            [Test]
-            public void MaximumOverlap_EmptyCollection_Returns0()
-            {
-                Assert.AreEqual(0, _intervaled.MaximumOverlap);
-            }
         }
 
         public abstract class IBS
@@ -193,7 +181,7 @@ namespace C5.Tests.intervaled
             //           
             //************************************
 
-            private IIntervaled<int> _intervaled;
+            protected IIntervaled<int> _intervaled;
 
             private static readonly IInterval<int> A = new IntervalOfInt(9, 19, true, true);
             private static readonly IInterval<int> B = new IntervalOfInt(2, 7, true, true);
@@ -256,12 +244,6 @@ namespace C5.Tests.intervaled
                 var span = _intervaled.Span;
                 var expected = new IntervalOfInt(int.MinValue, 20, false, true);
                 Assert.That(expected.Equals(span));
-            }
-
-            [Test]
-            public void MaximumOverlap_EmptyCollection_Returns5()
-            {
-                Assert.AreEqual(5, _intervaled.MaximumOverlap);
             }
         }
 
@@ -412,7 +394,7 @@ namespace C5.Tests.intervaled
             // | 0    5    10   15   20   25   30   35|
             // ****************************************
 
-            private IIntervaled<int> _intervaled;
+            protected IIntervaled<int> _intervaled;
 
             // ReSharper disable InconsistentNaming
             private static readonly IInterval<int> A = new IntervalOfInt(5, 9, true, true);
@@ -459,12 +441,6 @@ namespace C5.Tests.intervaled
                     new object[] { new IntervalOfInt( 10,  11, true, true), new[] { B }},
                     new object[] { new IntervalOfInt(  5,  15, true, false), new[] { A, B }}
                 };
-            }
-
-            [Test]
-            public void MaximumOverlap_EmptyCollection_Returns2()
-            {
-                Assert.AreEqual(2, _intervaled.MaximumOverlap);
             }
         }
 
