@@ -212,6 +212,8 @@ namespace C5.intervaled
 
         #region ICollection, IExtensible
 
+        #region insertion
+
         private Node addLow(Node root, Node right, IInterval<T> interval)
         {
             if (root == null)
@@ -320,6 +322,334 @@ namespace C5.intervaled
             _root.Color = BLACK;
         }
 
+        #endregion
+
+        #region deletion
+       
+        private Node removeByLow(Node root, Node right, IInterval<T> interval)
+        {
+            if (root == null)
+                return null;
+            
+            var compareTo = root.Key.CompareTo(interval.Low);
+
+            if (compareTo < 0)
+            {
+                root.Right = removeByLow(root.Right, right, interval);
+            }
+            else if (compareTo == 0)
+            {
+                // Remove interval from Greater set
+                if (right != null && right.Key.CompareTo(interval.High) <= 0)
+                    root.Greater.Remove(interval);
+
+                // Remove interval from Equal set
+                if (interval.LowIncluded)
+                    root.Equal.Remove(interval);
+
+                // Update delta
+                if (interval.LowIncluded)
+                    root.Delta--;
+                else
+                    root.DeltaAfter--;
+            }
+            else if (compareTo > 0)
+            {
+                // Everything in the right subtree of root will lie within the interval
+                if (right != null && right.Key.CompareTo(interval.High) <= 0)
+                    root.Greater.Remove(interval);
+
+                // root key is between interval.low and interval.high
+                if (root.Key.CompareTo(interval.High) < 0)
+                    root.Equal.Remove(interval);
+
+                // TODO: Figure this one out: if (interval.low != -inf.)
+                root.Left = removeByLow(root.Left, root, interval);
+            }
+
+            // Update PMO
+            root.UpdateMaximumOverlap();
+
+            return root;
+        }
+
+        private Node removeByHigh(Node root, Node left, IInterval<T> interval)
+        {
+            if (root == null)
+                return null;
+
+            var compareTo = root.Key.CompareTo(interval.High);
+
+            if (compareTo > 0)
+            {
+                root.Left = removeByHigh(root.Left, left, interval);
+            }
+            else if (compareTo == 0)
+            {
+                // If everything in the right subtree of root will lie within the interval
+                if (left != null && left.Key.CompareTo(interval.Low) >= 0)
+                    root.Less.Remove(interval);
+
+                if (interval.HighIncluded)
+                    root.Equal.Remove(interval);
+
+                if (!interval.HighIncluded)
+                    root.Delta++;
+                else
+                    root.DeltaAfter++;
+            }
+            else if (compareTo < 0)
+            {
+                // Everything in the right subtree of root will lie within the interval
+                if (left != null && left.Key.CompareTo(interval.Low) >= 0)
+                    root.Less.Remove(interval);
+
+                // root key is between interval.low and interval.high
+                if (root.Key.CompareTo(interval.Low) > 0)
+                    root.Equal.Remove(interval);
+
+                // TODO: Figure this one out: if (interval.low != -inf.)
+                root.Right = removeByHigh(root.Right, root, interval);
+            }
+            // Update PMO
+            root.UpdateMaximumOverlap();
+
+            return root;
+        }
+
+        private bool notAlone(Node root, T endpoint)
+        {
+            Node nodeForEndpoint = findNode(root, endpoint);
+
+            if (nodeForEndpoint != null)
+            {
+                foreach (IInterval<T> interval in nodeForEndpoint.Greater)
+                {
+                    if (interval.Low.Equals(endpoint) || interval.High.Equals(endpoint))
+                    {
+                        return true;
+                    }
+                }
+
+                foreach (IInterval<T> interval in nodeForEndpoint.Less)
+                {
+                    if (interval.Low.Equals(endpoint) || interval.High.Equals(endpoint))
+                    {
+                        return true;
+                    }
+                }
+
+                // Check if any endpoint in the sets greater, less and equal has same endpoint value as endpoint 
+                if (!nodeForEndpoint.Equal.IsEmpty())
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private Node findNode(Node root, T endpoint)
+        {
+            if (root.Key.CompareTo(endpoint) == 0)
+            {
+                return root;
+            }
+
+            if (root.Key.CompareTo(endpoint) < 0)
+            {
+                return findNode(root.Right, endpoint);
+            }
+
+            if (root.Key.CompareTo(endpoint) > 0)
+            {
+                return findNode(root.Left, endpoint);
+            }
+
+            return null;
+        }
+
+        // Flip the colors of a node and its two children
+        private void flipColors(Node h)
+        {
+            // h must have opposite color of its two children
+            if ((h != null) && (h.Left != null) && (h.Right != null) 
+                && ((!isRed(h) && isRed(h.Left) && isRed(h.Right))
+                || (isRed(h) && !isRed(h.Left) && !isRed(h.Right))))
+            {
+                h.Color = !h.Color;
+                h.Left.Color = !h.Left.Color;
+                h.Right.Color = !h.Right.Color;
+            }
+        }
+
+        // Assuming that h is red and both h.left and h.left.left
+        // are black, make h.left or one of its children red.
+        private Node moveRedLeft(Node h) 
+        {
+            flipColors(h);
+            if (isRed(h.Right.Left))
+            {
+                h.Right = rotateRight(h.Right);
+                h = rotateLeft(h);
+                // flipColors(h);
+            }
+            return h;
+        }
+
+        // Assuming that h is red and both h.right and h.right.left
+        // are black, make h.right or one of its children red.
+        private Node moveRedRight(Node h) 
+        {
+            flipColors(h);
+            if (isRed(h.Left.Left)) { 
+                h = rotateRight(h);
+                // flipColors(h);
+            }
+            return h;
+        }
+
+        // Delete the key-value pair with the minimum key
+        public void deleteMin() {
+
+        // if both children of root are black, set root to red
+        if (!isRed(_root.Left) && !isRed(_root.Right))
+            _root.Color = RED;
+
+        _root = deleteMin(_root);
+        // TODO: if (!isEmpty()) root.color = BLACK;
+    }
+
+        // Delete the key-value pair with the minimum key rooted at h
+        private Node deleteMin(Node h)
+        {
+            if (h.Left == null)
+                return null;
+
+            if (!isRed(h.Left) && !isRed(h.Left.Left))
+                h = moveRedLeft(h);
+
+            h.Left = deleteMin(h.Left);
+            return rotate(h);
+        }
+
+        // the smallest key; null if no such key
+        public T min()
+        {
+            return min(_root).Key;
+        }
+
+        // the smallest key in subtree rooted at x; null if no such key
+        private Node min(Node x) {
+            if (x.Left == null) 
+                return x; 
+            return min(x.Left); 
+        }
+
+        // delete the key-value pair with the given key
+        public void remove(T endpoint)
+        {
+
+            // if both children of root are black, set root to red
+            if (!isRed(_root.Left) && !isRed(_root.Right))
+                _root.Color = RED;
+
+            _root = remove(_root, null, false, endpoint);
+            // TODO: if (!isEmpty()) root.color = BLACK;
+        }
+
+        // delete the key-value pair with the given key rooted at h
+        private Node remove(Node root, Node parent, bool left, T endpoint) {
+
+            if (endpoint.CompareTo(root.Key) < 0)
+            {
+                if (!isRed(root.Left) && !isRed(root.Left.Left))
+                {
+                    if (isRed(root))
+                        root = moveRedLeft(root);
+                    root.Left = remove(root.Left, root, true, endpoint);
+                }
+            }
+            else {
+                if (isRed(root.Left))
+                    root = rotateRight(root);
+                if (endpoint.CompareTo(root.Key) == 0 && (root.Right == null))
+                    return null;
+                if (!isRed(root.Right) && !isRed(root.Right.Left))
+                    if (isRed(root))
+                        root = moveRedRight(root);
+                if (endpoint.CompareTo(root.Key) == 0)
+                {
+                    // Save the Greater and Less set of root
+                    IntervalSet rootGreater = root.Greater;
+                    IntervalSet rootLess = root.Less;
+
+                    // Save key and sets of right child's minimum
+                    Node minChild = min(root.Right);
+                    IntervalSet minGreater = minChild.Greater;
+                    IntervalSet minLess = minChild.Less;
+                    IntervalSet minEqual = minChild.Equal;
+
+                    // Make new node with the Key of the right child's minimum
+                    if (parent == null)
+                    {
+                        var node = new Node(root.Key) { Left = _root.Left, Right = _root.Right };
+                        node.Greater.AddAll(minGreater);
+                        node.Less.AddAll(minLess);
+                        node.Equal.AddAll(minEqual);
+
+                        node.Greater.AddAll(root.Greater);
+                        node.Less.AddAll(root.Less);
+                        node.Equal.AddAll(root.Equal);
+                        _root = node;
+                    }
+                    else
+                    {
+                        var node = new Node(root.Key) { Left = _root.Left, Right = _root.Right };
+                        node.Greater.AddAll(minGreater);
+                        node.Less.AddAll(minLess);
+                        node.Equal.AddAll(minEqual);
+
+                        node.Greater.AddAll(root.Greater);
+                        node.Less.AddAll(root.Less);
+                        node.Equal.AddAll(root.Equal);
+
+                        if (left)
+                            parent.Left = node;
+                        else parent.Right = node;
+                    }
+
+                    root.Right = deleteMin(root.Right);
+                }
+                else root.Right = remove(root.Right, root, false, endpoint);
+            }
+            return rotate(root);
+        }
+
+        public bool Remove(IInterval<T> interval)
+        {
+            // Delete the interval from the sets
+            _root = removeByLow(_root, null, interval);
+            _root = removeByHigh(_root, null, interval);
+
+            // If no other interval has the same endpoint, delete the endpoint
+            if (!notAlone(_root, interval.Low))
+            {
+                // Delete endpoint
+                remove(interval.Low);
+            }
+
+            if (!notAlone(_root, interval.High))
+            {
+                // Delete endpoint
+                remove(interval.High);
+            }
+
+            return true;
+        }
+
+        #endregion
+
         public void Clear()
         {
             _root = null;
@@ -334,11 +664,6 @@ namespace C5.intervaled
 
 
         public override bool IsEmpty { get { return _root == null; } }
-
-        public bool Remove(IInterval<T> item)
-        {
-            throw new NotImplementedException();
-        }
 
         // TODO: Implement
         public override int Count
