@@ -183,7 +183,7 @@ namespace C5.Tests.intervaled
 
             public class Interval : IntervalBase<int>
             {
-                private string _name;
+                private readonly string _name;
 
                 public Interval(string name, int query)
                     : base(query)
