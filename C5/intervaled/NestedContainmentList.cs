@@ -467,9 +467,8 @@ namespace C5.intervaled
 
         public int OverlapCount(IInterval<T> query)
         {
-            // TODO: Exception?
             if (query == null)
-                return -1;
+                return 0;
 
             // The number of overlaps is the difference between the number of nodes not after the last overlap
             // and the number of nodes before the first overlap
