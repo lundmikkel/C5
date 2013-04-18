@@ -76,21 +76,7 @@ namespace C5.intervaled
                 // If both include or exclude their low endpoint, we don't care which one is first
                 if (i.LowIncluded == j.LowIncluded)
                 {
-                    var highCompare = i.High.CompareTo(j.High);
-                    // Check if i finishes j - their highs are the same
-                    if (highCompare == 0)
-                    {
-                        // If both include or exclude the high endpoint, we don't care which one is first
-                        if (i.HighIncluded == j.HighIncluded)
-                            return 0;
-
-                        // i.HighIncluded and j.HighIncluded are different
-                        // So if i.HighIncluded is true it comes before j in the sorting order - we don't know anything about their actual relation
-                        return i.HighIncluded ? 1 : -1;
-                    }
-
-                    // We can simply compare their high points - but we swap the order as the highest endpoint has the lowest sorting order
-                    return highCompare;
+                    return CompareHigh(i, j);
                 }
 
                 // i.LowIncluded and j.LowIncluded are different
@@ -100,6 +86,26 @@ namespace C5.intervaled
 
             // We can simply compare their low points
             return lowCompare;
+        }
+
+        public static int CompareHigh<T>(this IInterval<T> i, IInterval<T> j) where T : IComparable<T>
+        {
+            var highCompare = i.High.CompareTo(j.High);
+
+            // Check if i finishes j - their highs are the same
+            if (highCompare == 0)
+            {
+                // If both include or exclude the high endpoint, we don't care which one is first
+                if (i.HighIncluded == j.HighIncluded)
+                    return 0;
+
+                // i.HighIncluded and j.HighIncluded are different
+                // So if i.HighIncluded is true it comes before j in the sorting order - we don't know anything about their actual relation
+                return !i.HighIncluded ? -1 : 1;
+            }
+
+            // We can simply compare their high points - but we swap the order as the highest endpoint has the lowest sorting order
+            return highCompare;
         }
 
         /// <summary>
