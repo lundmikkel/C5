@@ -46,7 +46,7 @@ namespace C5.intervaled
 
             public override string ToString()
             {
-                return Interval.ToString();
+                return String.Format("{0} - {1}/{2}", Interval, Sublist.Length, Sublist.Offset);
             }
         }
 
