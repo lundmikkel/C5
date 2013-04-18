@@ -54,7 +54,7 @@ namespace C5.intervaled
 
         /// <summary>
         /// Compare two intervals to determine which one is first in a sorting order.
-        /// The interval that starts first and is shortes will come first.
+        /// The interval that starts first and is shortest will come first.
         /// 
         /// Sorting order is determined as follows:
         /// The interval with the lowest low endpoint comes first.
