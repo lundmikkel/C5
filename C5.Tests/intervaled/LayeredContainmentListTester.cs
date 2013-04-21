@@ -332,6 +332,12 @@ namespace C5.Tests.intervaled
                 }
 
                 [Test]
+                public void Print()
+                {
+                    Console.WriteLine(((LayeredContainmentList<int>) _intervaled).Graphviz());
+                }
+
+                [Test]
                 public void Count()
                 {
                     Assert.AreEqual(4, _intervaled.OverlapCount(new IntervalOfInt(8, 10, true, true)));

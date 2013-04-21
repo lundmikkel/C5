@@ -248,6 +248,12 @@ namespace C5.Tests.intervaled
                 CollectionAssert.AreEquivalent(expected, _intervaled.FindOverlaps(query));
             }
 
+            [Test]
+            public void Print()
+            {
+                Console.WriteLine(((LayeredContainmentList<int>) _intervaled).Graphviz());
+            }
+
             [TestCaseSource(typeof(IBS), "StabCases")]
             public void Overlap_StabbingAtKeyPoints_ReturnsSpecifiedIntervals_TestCase(int query, SCG.IEnumerable<IInterval<int>> expected)
             {

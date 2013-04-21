@@ -388,5 +388,33 @@ namespace C5.intervaled
             // Check if index is in bound and if the interval overlaps the query
             return 0 <= i && i < _counts[0] && _layers[0][i].Interval.Overlaps(query);
         }
+
+        public string Graphviz()
+        {
+            return String.Format("digraph LayeredContainmentList {{\n\tnode [shape=record];\n\n{0}\n}}", graphviz());
+        }
+
+        private string graphviz()
+        {
+            var s = String.Empty;
+
+            for (var layer = 0; layer < _counts.Length; layer++)
+            {
+                var l = new ArrayList<string>();
+                var p = String.Empty;
+                for (var i = 0; i <= _counts[layer]; i++)
+                {
+                    l.Add(String.Format("<n{0}> {0}: {1}", i, _layers[layer][i]));
+
+                    p += String.Format("layer{0}:n{1} -> layer{2}:n{3};\n\t", layer, i, layer + 1, _layers[layer][i].Pointer);
+                }
+
+                s += String.Format("\tlayer{0} [label=\"{1}\"];\n\t{2}\n", layer, String.Join("|", l.ToArray()), p);
+            }
+
+            s += String.Format("\tlayer{0} [label=\"<n0> *\"];", _counts.Length);
+
+            return s;
+        }
     }
 }
