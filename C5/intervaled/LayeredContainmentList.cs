@@ -412,7 +412,7 @@ namespace C5.intervaled
                 s += String.Format("\tlayer{0} [label=\"{1}\"];\n\t{2}\n", layer, String.Join("|", l.ToArray()), p);
             }
 
-            s += String.Format("\tlayer{0} [label=\"<n0> *\"];", _counts.Length);
+            s += String.Format("\tlayer{0} [label=\"<n0> 0: *\"];", _counts.Length);
 
             return s;
         }
