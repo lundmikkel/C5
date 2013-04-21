@@ -42,6 +42,19 @@ namespace C5.Tests.intervaled
         }
 
         [TestFixture]
+        //************************************
+        //   0     5    10    15    20    25
+        //   |     |     |     |     |     |
+        //                        F*
+        //            E[----]   
+        //        H(-----)
+        //    B[-----]         
+        //   C[-)
+        //                      D(---]                 
+        //             A[----------]                
+        //...--------------------]G
+        //           
+        //************************************
         public class LCListIBS : Generic.IBS
         {
             internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
