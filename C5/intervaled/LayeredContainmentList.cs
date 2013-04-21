@@ -184,29 +184,36 @@ namespace C5.intervaled
 
         public int OverlapCount(IInterval<T> query)
         {
-            throw new NotImplementedException();
-
-            // No overlaps
-            if (query == null)
+            // Break if we won't find any overlaps
+            if (ReferenceEquals(query, null) || IsEmpty)
                 return 0;
 
-            var before = 0;
+            return overlapCount(0, 0, _counts[0], query);
+        }
 
-            var low = 0;
-            for (var i = 0; i < _counts.Length; i++)
+        private int overlapCount(int layer, int lower, int upper, IInterval<T> query)
+        {
+            // Theorem 2
+            if (lower >= upper)
+                return 0;
+
+            var first = lower;
+
+            // The first interval doesn't overlap we need to search for it
+            if (!_layers[layer][first].Interval.Overlaps(query))
             {
-                before += low;
+                // We know first doesn't overlap so we can increment it before searching
+                first = searchHighInLows(layer, ++first, upper, query);
 
-                if (low < _counts[i])
-                {
-                    var node = _layers[i][low];
-                    low = node.Pointer;
-                }
+                // If index is out of bound, or found interval doesn't overlap, then the list won't contain any overlaps
+                if (first < lower || upper <= first || !_layers[layer][first].Interval.Overlaps(query))
+                    return 0;
             }
 
-            var notAfter = 0;
+            // We can use first as lower to speed up the search
+            var last = searchLowInHighs(layer, first, upper, query);
 
-            return notAfter - before;
+            return last - first + overlapCount(layer + 1, _layers[layer][first].Pointer, _layers[layer][last].Pointer, query);
         }
 
         private int searchLowInHighs(int layer, int lower, int upper, IInterval<T> query)
