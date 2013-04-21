@@ -78,13 +78,11 @@ namespace C5.intervaled
                 {
                     var nextInterval = intervals[s + 1];
 
-                    if (interval.Contains(nextInterval))
-                    {
-                        contained++;
-                        s++;
-                    }
-                    else
+                    if (!interval.Contains(nextInterval))
                         break;
+
+                    contained++;
+                    s++;
                 }
 
                 if (contained > 0)
