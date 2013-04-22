@@ -1,0 +1,85 @@
+digraph IntervalBinarySearchTree {
+	node [shape=record];
+	struct0 [label="{<key> 9|{empty|(-2147483648:17]
+(5:10)
+[8:12]
+[8:12]
+[9:19]|empty}}"];
+	struct1 [label="{<key> 4|{empty|(-2147483648:17]
+[2:7]
+[1:4]|(-2147483648:17]}}"];
+	struct0 -> struct1;
+	struct2 [label="{<key> 2|{empty|[1:3)
+[2:7]
+(-2147483648:17]
+[1:4]|(-2147483648:17]
+[2:7]
+[1:4]}}"];
+	struct1 -> struct2;
+	struct3 [label="{<key> 1|{empty|[1:3)
+(-2147483648:17]
+[1:4]|[1:3)
+[1:4]
+(-2147483648:17]}}"];
+	struct2 -> struct3;
+	struct4 [label="{<key> -2147483648|{empty|empty|(-2147483648:17]}}"];
+	struct3 -> struct4;
+	leaf0[shape=point];
+	struct4:left -> leaf0;
+	leaf1[shape=point];
+	struct4:right -> leaf1;
+	leaf2[shape=point];
+	struct3:right -> leaf2;
+	struct5 [label="{<key> 3|{[1:3)|empty|empty}}"];
+	struct2 -> struct5;
+	leaf3[shape=point];
+	struct5:left -> leaf3;
+	leaf4[shape=point];
+	struct5:right -> leaf4;
+	struct6 [label="{<key> 7|{[2:7]|[2:7]
+(5:10)|(5:10)}}"];
+	struct1 -> struct6;
+	struct7 [label="{<key> 5|{empty|empty|(5:10)}}"];
+	struct6 -> struct7;
+	leaf5[shape=point];
+	struct7:left -> leaf5;
+	leaf6[shape=point];
+	struct7:right -> leaf6;
+	struct8 [label="{<key> 8|{empty|[8:12]
+[8:12]|[8:12]
+[8:12]}}"];
+	struct6 -> struct8;
+	leaf7[shape=point];
+	struct8:left -> leaf7;
+	leaf8[shape=point];
+	struct8:right -> leaf8;
+	struct9 [label="{<key> 19|{[9:19]|[9:19]
+(17:20]|empty}}"];
+	struct0 -> struct9;
+	struct10 [label="{<key> 17|{(-2147483648:17]|(-2147483648:17]|(17:20]}}"];
+	struct9 -> struct10;
+	struct11 [label="{<key> 12|{[8:12]
+[8:12]|[8:12]
+[8:12]|empty}}"];
+	struct10 -> struct11;
+	struct12 [label="{<key> 10|{(5:10)|empty|empty}}"];
+	struct11 -> struct12;
+	leaf9[shape=point];
+	struct12:left -> leaf9;
+	leaf10[shape=point];
+	struct12:right -> leaf10;
+	leaf11[shape=point];
+	struct11:right -> leaf11;
+	struct13 [label="{<key> 18|{empty|[18:18]|empty}}"];
+	struct10 -> struct13;
+	leaf12[shape=point];
+	struct13:left -> leaf12;
+	leaf13[shape=point];
+	struct13:right -> leaf13;
+	struct14 [label="{<key> 20|{(17:20]|(17:20]|empty}}"];
+	struct9 -> struct14;
+	leaf14[shape=point];
+	struct14:left -> leaf14;
+	leaf15[shape=point];
+	struct14:right -> leaf15;
+}
