@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using C5.Tests.intervaled.Generic;
 using C5.intervaled;
@@ -105,8 +106,8 @@ namespace C5.Tests.intervaled
             private static readonly IInterval<int> G = new IntervalOfInt(int.MinValue, 17, false, true);
             private static readonly IInterval<int> H = new IntervalOfInt(5, 10, false, false);
             private static readonly IInterval<int> A1 = new IntervalOfInt(1, 2, true, true);
-            private static readonly IInterval<int> A2 = new IntervalOfInt(1, 3, true, true);
-            private static readonly IInterval<int> A3 = new IntervalOfInt(4, 12, true, true);
+            private static readonly IInterval<int> A2 = new IntervalOfInt(1, 4, true, true);
+            private static readonly IInterval<int> A3 = new IntervalOfInt(6, 12, true, true);
             private static readonly IInterval<int> A4 = new IntervalOfInt(5, 21, true, true);
 
             [SetUp]
@@ -127,12 +128,18 @@ namespace C5.Tests.intervaled
                 _intervales.Remove(A4);
             }
 
+            [Test]
+            public void Print()
+            {
+                File.WriteAllText(@"../../intervaled/data/IBSRemove4.gv", _intervales.Graphviz());
+            }
+
             private void range(IInterval<int> query, IEnumerable<IInterval<int>> expected)
             {
                 CollectionAssert.AreEquivalent(expected, _intervales.FindOverlaps(query));
             }
 
-            [TestCaseSource(typeof(IBS), "StabCases")]
+            [TestCaseSource(typeof(IBSRemove), "StabCases")]
             public void Overlap_StabbingAtKeyPoints_ReturnsSpecifiedIntervals_TestCase(int query, IEnumerable<IInterval<int>> expected)
             {
                 CollectionAssert.AreEquivalent(expected, _intervales.FindOverlaps(query));
@@ -173,7 +180,7 @@ namespace C5.Tests.intervaled
             }
 
             [Test]
-            public void MaximumOverlap_EmptyCollection_Returns5()
+            public void MaximumOverlap_IBS_Returns5()
             {
                 Assert.AreEqual(5, _intervales.MaximumOverlap);
             }
