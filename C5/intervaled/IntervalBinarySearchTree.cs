@@ -439,10 +439,12 @@ namespace C5.intervaled
                     }
                 }
 
-                // Check if any endpoint in the sets greater, less and equal has same endpoint value as endpoint 
-                if (!nodeForEndpoint.Equal.IsEmpty())
+                foreach (IInterval<T> interval in nodeForEndpoint.Equal)
                 {
-                    return true;
+                    if (interval.Low.Equals(endpoint) || interval.High.Equals(endpoint))
+                    {
+                        return true;
+                    }
                 }
             }
 
@@ -509,27 +511,20 @@ namespace C5.intervaled
             return h;
         }
 
-        // Delete the key-value pair with the minimum key
-        public void deleteMin() {
-
-        // if both children of root are black, set root to red
-        if (!isRed(_root.Left) && !isRed(_root.Right))
-            _root.Color = RED;
-
-        _root = deleteMin(_root);
-        // TODO: if (!isEmpty()) root.color = BLACK;
-    }
-
-        // Delete the key-value pair with the minimum key rooted at h
-        private Node deleteMin(Node h)
+        // 
+        private Node deleteNode(Node h, Node toRemove)
         {
-            if (h.Left == null)
+            if (h.Left == toRemove)
+            {
+                h.Left = null;
                 return null;
+            }
 
             if (!isRed(h.Left) && !isRed(h.Left.Left))
                 h = moveRedLeft(h);
 
-            h.Left = deleteMin(h.Left);
+            h.Left = deleteNode(h.Left, toRemove);
+
             return rotate(h);
         }
 
@@ -567,8 +562,8 @@ namespace C5.intervaled
                 {
                     if (isRed(root))
                         root = moveRedLeft(root);
-                    root.Left = remove(root.Left, root, true, endpoint);
                 }
+                root.Left = remove(root.Left, root, true, endpoint);
             }
             else {
                 if (isRed(root.Left))
@@ -591,37 +586,33 @@ namespace C5.intervaled
                     IntervalSet minEqual = minChild.Equal;
 
                     // Make new node with the Key of the right child's minimum
-                    if (parent == null)
-                    {
-                        var node = new Node(root.Key) { Left = _root.Left, Right = _root.Right };
-                        node.Greater.AddAll(minGreater);
-                        node.Less.AddAll(minLess);
-                        node.Equal.AddAll(minEqual);
+                    var node = new Node(minChild.Key) { Left = root.Left, Right = root.Right };
+                    node.Greater.AddAll(minGreater);
+                    node.Less.AddAll(minLess);
+                    node.Equal.AddAll(minEqual);
 
-                        node.Greater.AddAll(root.Greater);
-                        node.Less.AddAll(root.Less);
-                        node.Equal.AddAll(root.Equal);
+                    node.Greater.AddAll(root.Greater);
+                    node.Less.AddAll(root.Less);
+                    node.Equal.AddAll(root.Equal);
+
+                    // Update deltas
+                    node.Delta = root.Delta + minChild.Delta;
+                    node.DeltaAfter = root.DeltaAfter + minChild.DeltaAfter;
+
+                    if (parent == null)
                         _root = node;
-                    }
                     else
                     {
-                        var node = new Node(root.Key) { Left = _root.Left, Right = _root.Right };
-                        node.Greater.AddAll(minGreater);
-                        node.Less.AddAll(minLess);
-                        node.Equal.AddAll(minEqual);
-
-                        node.Greater.AddAll(root.Greater);
-                        node.Less.AddAll(root.Less);
-                        node.Equal.AddAll(root.Equal);
-
                         if (left)
                             parent.Left = node;
                         else parent.Right = node;
                     }
 
-                    root.Right = deleteMin(root.Right);
+                    deleteNode(root.Right, minChild);
+                    
+                    return rotate(node);
                 }
-                else root.Right = remove(root.Right, root, false, endpoint);
+                root.Right = remove(root.Right, root, false, endpoint);
             }
             return rotate(root);
         }
