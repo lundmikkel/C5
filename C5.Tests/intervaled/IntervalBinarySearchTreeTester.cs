@@ -21,6 +21,12 @@ namespace C5.Tests.intervaled
             {
                 return new IntervalBinarySearchTree<int>(intervals);
             }
+
+            [Test]
+            public void MaximumOverlap_IBS_Returns5()
+            {
+                Assert.AreEqual(5, ((IntervalBinarySearchTree<int>) _intervaled).MaximumOverlap);
+            }
         }
 
         [TestFixture]
@@ -39,6 +45,12 @@ namespace C5.Tests.intervaled
             {
                 return new IntervalBinarySearchTree<int>(intervals);
             }
+
+            [Test]
+            public void MaximumOverlap_EmptyCollection_Returns0()
+            {
+                Assert.AreEqual(0, ((IntervalBinarySearchTree<int>) _intervaled).MaximumOverlap);
+            }
         }
 
         [TestFixture]
@@ -47,6 +59,12 @@ namespace C5.Tests.intervaled
             internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new IntervalBinarySearchTree<int>(intervals);
+            }
+
+            [Test]
+            public void MaximumOverlap_EmptyCollection_Returns0()
+            {
+                Assert.AreEqual(0, ((IntervalBinarySearchTree<int>) _intervaled).MaximumOverlap);
             }
         }
 
@@ -74,6 +92,12 @@ namespace C5.Tests.intervaled
             protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new IntervalBinarySearchTree<int>(intervals);
+            }
+
+            [Test]
+            public void MaximumOverlap_BensCollection_Returns2()
+            {
+                Assert.AreEqual(2, ((IntervalBinarySearchTree<int>) _intervaled).MaximumOverlap);
             }
         }
 
