@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using C5.Tests.intervaled.Generic;
@@ -91,11 +92,51 @@ namespace C5.Tests.intervaled
         }
 
         [TestFixture]
-        public class LCListPerfomance : Performance23333
+        public class LCListInPlacePerfomance : Performance23333
         {
             protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new LayeredContainmentList<int>(intervals);
+            }
+        }
+
+        [TestFixture]
+        public class LCListInPlace100000Perfomance : Performance100000
+        {
+            protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            {
+                return new LayeredContainmentList<int>(intervals);
+            }
+
+
+            [Test, Ignore]
+            public void Print()
+            {
+                File.WriteAllText(@"../../intervaled/data/lclist100000.gv", ((LayeredContainmentList<int>) Intervaled).Graphviz());
+            }
+        }
+
+        [TestFixture]
+        public class LCListOutOfPlacePerfomance : Performance23333
+        {
+            protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            {
+                return new LayeredContainmentList<int>(intervals, true);
+            }
+        }
+
+        [TestFixture]
+        public class LCListOutOfPlace100000Perfomance : Performance100000
+        {
+            protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            {
+                return new LayeredContainmentList<int>(intervals, true);
+            }
+
+            [Test]
+            public void Print()
+            {
+                Console.WriteLine(((LayeredContainmentList<int>) Intervaled).Graphviz());
             }
         }
 

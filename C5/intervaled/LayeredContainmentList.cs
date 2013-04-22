@@ -71,8 +71,39 @@ namespace C5.intervaled
                 // Save the span once
                 _span = new IntervalBase<T>(_layers[0][0].Interval, _layers[0][_counts[0] - 1].Interval);
             }
+        }
 
-            // TODO: Should we do anything if the collection is empty?
+        public LayeredContainmentList(IEnumerable<IInterval<T>> intervals, bool b)
+        {
+            // Make intervals to array to allow fast sorting and counting
+            var intervalArray = intervals as IInterval<T>[] ?? intervals.ToArray();
+
+            // Only do the work if we have something to work with
+            if (!intervalArray.IsEmpty())
+            {
+                // Count intervals so we can use it later on
+                _count = intervalArray.Length;
+
+                // Sort intervals
+                var comparer = ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareTo);
+                Sorting.IntroSort(intervalArray, 0, _count, comparer);
+
+                // Put intervals in the arrays
+                var lists = createArrayLists(intervalArray);
+
+                // Create the list that contains the containment lists
+                _layers = new Node[lists.Count][];
+                _counts = new int[lists.Count];
+                // Create each containment list
+                for (var i = 0; i < _counts.Length; i++)
+                {
+                    _layers[i] = lists[i].ToArray();
+                    _counts[i] = lists[i].Count - 1; // Subtract one for the dummy node
+                }
+
+                // Save the span once
+                _span = new IntervalBase<T>(_layers[0][0].Interval, _layers[0][_counts[0] - 1].Interval);
+            }
         }
 
         private void createLists(IEnumerable<IInterval<T>> intervalArray)
@@ -118,6 +149,49 @@ namespace C5.intervaled
             }
         }
 
+        private ArrayList<ArrayList<Node>> createArrayLists(IInterval<T>[] intervals)
+        {
+            // Use a stack to keep track of current containment
+            IStack<IInterval<T>> stack = new ArrayList<IInterval<T>>();
+            var lists = new ArrayList<ArrayList<Node>>();
+            lists.Add(new ArrayList<Node>(intervals.Length));
+
+            foreach (var interval in intervals)
+            {
+                // Track containment
+                while (!stack.IsEmpty)
+                {
+                    var popped = stack.Pop();
+
+                    // If the interval is contained in the top of the stack, leave it...
+                    // if (popped.Contains(interval)) // We just need to compare the highs
+                    if (interval.CompareHigh(popped) < 0)
+                    {
+                        //...by pushing it back
+                        stack.Push(popped);
+                        break;
+                    }
+                }
+                stack.Push(interval);
+
+                if (lists.Count < stack.Count + 1)
+                    lists.Add(new ArrayList<Node>());
+
+                var list = stack.Count - 1;
+
+                lists[list].Add(new Node(interval, lists[list + 1].Count));
+            }
+
+            var lastCount = 0;
+            for (int i = lists.Count - 1; i >= 0; i--)
+            {
+                lists[i].Add(new Node(lastCount));
+                lastCount = lists[i].Count;
+            }
+
+            return lists;
+        }
+
         /// <summary>
         /// Analyze the intervals to find out how many layers, we need and how big each is
         /// </summary>
@@ -136,7 +210,7 @@ namespace C5.intervaled
                     var popped = stack.Pop();
 
                     // If the interval is contained in the top of the stack, leave it...
-                    // if (popped.Contains(interval)) // We just need to compare the highs
+                    //if (popped.Contains(interval)) // We just need to compare the highs
                     if (interval.CompareHigh(popped) < 0)
                     {
                         //...by pushing it back

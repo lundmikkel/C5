@@ -492,7 +492,6 @@ namespace C5.Tests.intervaled
             }
         }
 
-        [Ignore]
         public abstract class Performance23333
         {
             protected IIntervaled<int> Intervaled;
@@ -514,7 +513,7 @@ namespace C5.Tests.intervaled
                 }
 
                 var sw = Stopwatch.StartNew();
-                const int count = 1; // 000;
+                const int count = 1;// 000;
                 for (var i = 0; i < count; i++)
                 {
                     Intervaled = Factory(intervalList);
@@ -529,10 +528,58 @@ namespace C5.Tests.intervaled
                 Assert.That(Intervaled.FindOverlaps(new IntervalBase<int>(1357516800, 1358121599)).Count() == 42);
 
                 var sw = Stopwatch.StartNew();
-                const int count = 1; // 000;
+                const int count = 1;// 000;
                 for (var i = 0; i < count; i++)
                 {
                     Intervaled.FindOverlaps(new IntervalBase<int>(1357516800, 1358121599)).Count();
+                }
+                sw.Stop();
+                Console.WriteLine("Time: " + ((float) sw.ElapsedMilliseconds / count));
+            }
+        }
+
+        public abstract class Performance100000
+        {
+            protected IIntervaled<int> Intervaled;
+
+            protected abstract IIntervaled<int> Factory(SCG.IEnumerable<IInterval<int>> intervals);
+
+            [SetUp]
+            public void Init()
+            {
+                var intervals = File.ReadAllLines(@"../../intervaled/data/performance_100000.csv").Select(line => line.Split(','));
+                var intervalList = new ArrayList<IInterval<int>>();
+
+                foreach (var interval in intervals)
+                {
+                    var low = Convert.ToInt32(interval[1]);
+                    var high = Convert.ToInt32(interval[2]);
+
+                    intervalList.Add(new IntervalOfInt(low, high));
+                }
+
+                var sw = Stopwatch.StartNew();
+                const int count = 1;// 000;
+                for (var i = 0; i < count; i++)
+                {
+                    Intervaled = Factory(intervalList);
+                }
+                sw.Stop();
+                Console.WriteLine("Creation time: " + (sw.ElapsedMilliseconds / count));
+            }
+
+            [Test, Category("Simple performance")]
+            public void Range()
+            {
+                Console.WriteLine(Intervaled.FindOverlaps(new IntervalBase<int>(9231, 24228)).Count());
+
+                Assert.That(Intervaled.FindOverlaps(new IntervalBase<int>(9231, 24228)).Count() == 20929);
+
+                var sw = Stopwatch.StartNew();
+                const int count = 1000;
+                for (var i = 0; i < count; i++)
+                {
+                    Intervaled.FindOverlaps(new IntervalBase<int>(9231, 24228)).Count();
                 }
                 sw.Stop();
                 Console.WriteLine("Time: " + ((float) sw.ElapsedMilliseconds / count));

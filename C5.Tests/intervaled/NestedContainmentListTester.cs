@@ -86,6 +86,15 @@ namespace C5.Tests.intervaled
             }
         }
 
+        [TestFixture]
+        public class NestedContainmentList100000Perfomance : Performance100000
+        {
+            protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            {
+                return new NestedContainmentList<int>(intervals);
+            }
+        }
+
         //***************************************
         //   0     5    10    15    20    25   30
         //   |     |     |     |     |     |    |
