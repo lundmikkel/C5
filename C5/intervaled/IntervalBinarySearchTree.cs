@@ -679,6 +679,71 @@ namespace C5.intervaled
 
         #endregion
 
+        #region GraphViz
+
+        /// <summary>
+        /// Print the tree structure in Graphviz format
+        /// </summary>
+        /// <returns></returns>
+        public string Graphviz()
+        {
+            return "digraph IntervalBinarySearchTree {\n"
+                + "\tnode [shape=record];\n"
+                + graphviz(_root, "root", null)
+                + "}\n";
+        }
+
+        private int nodeCounter;
+        private int nullCounter;
+
+        private string graphviz(IntervalBinarySearchTree<T>.Node root, string parent, string direction)
+        {
+            int id; 
+            if (root == null)
+            {
+                id = nullCounter++;
+                return "\tleaf" + id + "[shape=point];\n"
+                    + "\t" + parent + ":" + direction + " -> leaf" + id + ";\n";
+            }
+
+            id = nodeCounter++;
+            string rootString;
+            if (direction == null)
+                rootString = "";
+            else rootString = "\t" + parent + " -> struct" + id + ";\n";
+
+            return
+                // Creates the structid: structid [label="<key> keyValue|{lessSet|equalSet|greaterSet}|{<idleft> leftChild|<idright> rightChild}"];
+                "\tstruct" + id + " [label=\"{<key> " + root.Key + "|{"
+                + graphSet(root.Less) + "|" + graphSet(root.Equal) + "|" + graphSet(root.Greater)
+                + "}}\"];\n"
+
+                // Links the parents leftChild to nodeid: parent:left -> structid:key;
+                + rootString
+
+                // Calls graphviz() recursively on leftChild
+                + graphviz(root.Left, "struct" + id, "left")
+
+                // Calls graphviz() recursively on rightChild
+                + graphviz(root.Right, "struct" + id, "right");
+        }
+
+        private string graphSet(IntervalSet set)
+        {
+            var s = new ArrayList<string>();
+
+            foreach (var interval in set)
+            {
+                s.Add(interval.ToString());
+            }
+
+            if (s.IsEmpty())
+                return "empty";
+            return String.Join("\n", s.ToArray());
+        }
+
+        #endregion
+
         #region ICollectionValue
 
         public override IInterval<T> Choose()
