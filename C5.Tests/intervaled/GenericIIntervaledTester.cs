@@ -366,7 +366,7 @@ namespace C5.Tests.intervaled
                     _intervals[40],
                 });
 
-                range(new IntervalOfInt(97, 97), new ArrayList<IInterval<int>>{
+                range(new IntervalOfInt(97), new ArrayList<IInterval<int>>{
                     _intervals[49],
                 });
 
@@ -509,7 +509,7 @@ namespace C5.Tests.intervaled
                     var low = Convert.ToInt32(interval[1]);
                     var high = Convert.ToInt32(interval[2]);
 
-                    intervalList.Add(new IntervalOfInt(low, high));
+                    intervalList.Add(low < high ? new IntervalOfInt(low, high) : new IntervalOfInt(low));
                 }
 
                 var sw = Stopwatch.StartNew();
@@ -555,7 +555,8 @@ namespace C5.Tests.intervaled
                     var low = Convert.ToInt32(interval[1]);
                     var high = Convert.ToInt32(interval[2]);
 
-                    intervalList.Add(new IntervalOfInt(low, high));
+
+                    intervalList.Add(low < high ? new IntervalOfInt(low, high) : new IntervalOfInt(low));
                 }
 
                 var sw = Stopwatch.StartNew();
