@@ -604,13 +604,13 @@ namespace C5.Tests.intervaled
                 [Test]
                 public void OverlapCount_InfiniteQuery_ReturnsZero()
                 {
-                    Assert.AreEqual(0, _intervaled.OverlapCount(new IntervalOfInt(int.MinValue, int.MaxValue, false, false)));
+                    Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalOfInt(int.MinValue, int.MaxValue, false, false)));
                 }
 
                 [Test]
                 public void OverlapCount_RandomQuery_ReturnsZero()
                 {
-                    Assert.AreEqual(0, _intervaled.OverlapCount(new IntervalOfInt(0, 5)));
+                    Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalOfInt(0, 5)));
                 }
             }
         }

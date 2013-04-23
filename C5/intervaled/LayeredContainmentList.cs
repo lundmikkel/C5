@@ -256,7 +256,7 @@ namespace C5.intervaled
 
         #endregion
 
-        public int OverlapCount(IInterval<T> query)
+        public int CountOverlaps(IInterval<T> query)
         {
             // Break if we won't find any overlaps
             if (ReferenceEquals(query, null) || IsEmpty)

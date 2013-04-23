@@ -463,7 +463,7 @@ namespace C5.intervaled
 
         #region Static Intervaled
 
-        public int OverlapCount(IInterval<T> query)
+        public int CountOverlaps(IInterval<T> query)
         {
             if (query == null)
                 return 0;

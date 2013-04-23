@@ -2122,7 +2122,7 @@ namespace C5
     /// <typeparam name="T">The generic value for an interval's endpoint values</typeparam>
     public interface IStaticIntervaled<T> : IIntervaled<T> where T : IComparable<T>
     {
-        int OverlapCount(IInterval<T> query);
+        int CountOverlaps(IInterval<T> query);
     }
 
     /// <summary>
