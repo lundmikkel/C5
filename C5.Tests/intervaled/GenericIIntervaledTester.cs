@@ -248,12 +248,6 @@ namespace C5.Tests.intervaled
                 CollectionAssert.AreEquivalent(expected, _intervaled.FindOverlaps(query));
             }
 
-            [Test]
-            public void Print()
-            {
-                Console.WriteLine(((LayeredContainmentList<int>) _intervaled).Graphviz());
-            }
-
             [TestCaseSource(typeof(IBS), "StabCases")]
             public void Overlap_StabbingAtKeyPoints_ReturnsSpecifiedIntervals_TestCase(int query, SCG.IEnumerable<IInterval<int>> expected)
             {
@@ -513,7 +507,7 @@ namespace C5.Tests.intervaled
                 }
 
                 var sw = Stopwatch.StartNew();
-                const int count = 1;// 000;
+                const int count = 1000;
                 for (var i = 0; i < count; i++)
                 {
                     Intervaled = Factory(intervalList);
@@ -528,7 +522,7 @@ namespace C5.Tests.intervaled
                 Assert.That(Intervaled.FindOverlaps(new IntervalBase<int>(1357516800, 1358121599)).Count() == 42);
 
                 var sw = Stopwatch.StartNew();
-                const int count = 1;// 000;
+                const int count = 1000;
                 for (var i = 0; i < count; i++)
                 {
                     Intervaled.FindOverlaps(new IntervalBase<int>(1357516800, 1358121599)).Count();
@@ -556,7 +550,8 @@ namespace C5.Tests.intervaled
                     var high = Convert.ToInt32(interval[2]);
 
 
-                    intervalList.Add(low < high ? new IntervalOfInt(low, high) : new IntervalOfInt(low));
+                    intervalList.Add(new IntervalOfInt(low, high, true, true));
+                    //intervalList.Add(low < high ? new IntervalOfInt(low, high) : new IntervalOfInt(low));
                 }
 
                 var sw = Stopwatch.StartNew();
@@ -572,18 +567,86 @@ namespace C5.Tests.intervaled
             [Test, Category("Simple performance")]
             public void Range()
             {
-                Console.WriteLine(Intervaled.FindOverlaps(new IntervalBase<int>(9231, 24228)).Count());
+                Console.WriteLine(Intervaled.FindOverlaps(new IntervalBase<int>(9231, 24228, true, true)).Count());
 
-                Assert.That(Intervaled.FindOverlaps(new IntervalBase<int>(9231, 24228)).Count() == 20929);
+                //Assert.That(((LayeredContainmentList<int>) Intervaled).OverlapCount(new IntervalBase<int>(9231, 24228)) == 20930);
+                Assert.That(Intervaled.FindOverlaps(new IntervalBase<int>(9231, 24228)).Count() == 20930);
 
                 var sw = Stopwatch.StartNew();
-                const int count = 1000;
+                const int count = 1;// 000;
                 for (var i = 0; i < count; i++)
                 {
                     Intervaled.FindOverlaps(new IntervalBase<int>(9231, 24228)).Count();
                 }
                 sw.Stop();
                 Console.WriteLine("Time: " + ((float) sw.ElapsedMilliseconds / count));
+            }
+        }
+
+
+        public abstract class LargeTest_100000
+        {
+            protected IStaticIntervaled<int> Intervaled;
+
+            protected abstract IStaticIntervaled<int> Factory(SCG.IEnumerable<IInterval<int>> intervals);
+
+            [TestFixtureSetUp]
+            public void SetUp()
+            {
+                var intervals = File.ReadAllLines(@"../../intervaled/data/performance_100000.csv").Select(line => line.Split(','));
+                var intervalList = new ArrayList<IInterval<int>>();
+
+                foreach (var interval in intervals)
+                {
+                    var low = Convert.ToInt32(interval[1]);
+                    var high = Convert.ToInt32(interval[2]);
+
+                    intervalList.Add(low < high ? new IntervalOfInt(low, high) : new IntervalOfInt(low));
+                }
+
+                Intervaled = Factory(intervalList);
+            }
+
+            [TestCaseSource(typeof(LargeTest_100000), "CountCases")]
+            public void FindOverlaps(int expected, IntervalOfInt query)
+            {
+                var actual = Intervaled.FindOverlaps(query).Count();
+                Assert.AreEqual(expected, actual);
+            }
+
+            [TestCaseSource(typeof(LargeTest_100000), "CountCases")]
+            public void CountOverlaps(int expected, IntervalOfInt query)
+            {
+                var actual = Intervaled.CountOverlaps(query);
+                Assert.AreEqual(expected, actual);
+            }
+
+            public static object[] CountCases()
+            {
+                return new object[] {
+                    //*
+                    new object[] { 10000, new IntervalOfInt(22514, 33893)},
+                    new object[] { 20001, new IntervalOfInt(374460, 525081)},
+                    new object[] { 30000, new IntervalOfInt(101517, 1658000)},
+                    new object[] { 40000, new IntervalOfInt(-1234, 21538)},
+                    new object[] { 50000, new IntervalOfInt(100, 32408)},
+                    /*/
+                    /*
+                    new object[] { 1, new IntervalOfInt( 26,  26)},
+                    new object[] { 1, new IntervalOfInt( 27,  29)},
+                    new object[] { 1, new IntervalOfInt( 26,  30)},
+                    new object[] { 1, new IntervalOfInt( 26,  35)},
+                    new object[] { 1, new IntervalOfInt( 30,  35)},
+                    new object[] { 1, new IntervalOfInt( 31,  35)},
+                    new object[] { 1, new IntervalOfInt(  0,   4)},
+                    new object[] { 1, new IntervalOfInt(  0,   5)},
+                    new object[] { 1, new IntervalOfInt(  0,  10)},
+                    new object[] { 1, new IntervalOfInt(  5,   9)},
+                    new object[] { 1, new IntervalOfInt(  6,   8)},
+                    new object[] { 1, new IntervalOfInt( 10,  10)},
+                    new object[] { 1, new IntervalOfInt( 10,  11)},
+                    new object[] { 1, new IntervalOfInt(  5,  15)}*/
+                };
             }
         }
 

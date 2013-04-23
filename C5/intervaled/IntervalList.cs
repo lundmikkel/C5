@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace C5.intervaled
 {
-    class IntervalList<T> : CollectionValueBase<IInterval<T>>, IIntervaled<T> where T : IComparable<T>
+    class IntervalList<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
     {
         private readonly IEnumerable<IInterval<T>> _intervals;
 
@@ -34,6 +34,11 @@ namespace C5.intervaled
                 return _intervals.First();
 
             throw new NoSuchItemException();
+        }
+
+        public int CountOverlaps(IInterval<T> query)
+        {
+            return FindOverlaps(query).Count();
         }
 
         public override IEnumerator<IInterval<T>> GetEnumerator()

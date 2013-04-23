@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -92,7 +93,7 @@ namespace C5.Tests.intervaled
         }
 
         [TestFixture]
-        public class LCListInPlacePerfomance : Performance23333
+        public class LCListPerfomance : Performance23333
         {
             protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
@@ -101,13 +102,44 @@ namespace C5.Tests.intervaled
         }
 
         [TestFixture]
-        public class LCListInPlace100000Perfomance : Performance100000
+        public class LayeredContainmentList_LargeTest : LargeTest_100000
+        {
+            protected override IStaticIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            {
+                return new LayeredContainmentList<int>(intervals);
+            }
+        }
+
+        [TestFixture]
+        public class LCList100000Perfomance : Performance100000
         {
             protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new LayeredContainmentList<int>(intervals);
             }
 
+            [Test]
+            public void CountTest()
+            {
+                var query = new IntervalBase<int>(9231, 24228);
+
+                Console.WriteLine(Intervaled.FindOverlaps(query).Count());
+                Console.WriteLine(((IStaticIntervaled<int>) Intervaled).CountOverlaps(query));
+
+                var comparer = ComparerFactory<IInterval<int>>.CreateEqualityComparer(IntervalExtensions.Equals, IntervalExtensions.GetHashCode);
+
+                var set = new HashSet<IInterval<int>>(comparer);
+
+                foreach (var interval in Intervaled.FindOverlaps(query))
+                    set.Add(interval);
+
+                foreach (var interval in Intervaled.Where(interval => interval.Overlaps(query)))
+                    set.Remove(interval);
+
+                Console.WriteLine(set);
+
+                Assert.That(Intervaled.FindOverlaps(query).Count() == 20930);
+            }
 
             [Test, Ignore]
             public void Print()
@@ -116,28 +148,54 @@ namespace C5.Tests.intervaled
             }
         }
 
+        //*******************
+        //   0    5   10 
+        //   |    |    | 
+        //   
+        //   [---------) A
+        //    [------) B
+        //     [---) C
+        //      [-----) D
+        //       [) E
+        //           
+        //*******************
         [TestFixture]
-        public class LCListOutOfPlacePerfomance : Performance23333
+        public class LCListContainmentInSameLayer
         {
-            protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new LayeredContainmentList<int>(intervals, true);
-            }
-        }
+            private IStaticIntervaled<int> _intervaled;
 
-        [TestFixture]
-        public class LCListOutOfPlace100000Perfomance : Performance100000
-        {
-            protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            private static readonly IInterval<int> A = new IntervalOfInt(0, 10);
+            private static readonly IInterval<int> B = new IntervalOfInt(1, 8);
+            private static readonly IInterval<int> C = new IntervalOfInt(2, 6);
+            private static readonly IInterval<int> D = new IntervalOfInt(3, 9);
+            private static readonly IInterval<int> E = new IntervalOfInt(4, 5);
+
+            [SetUp]
+            public void SetUp()
             {
-                return new LayeredContainmentList<int>(intervals, true);
+                _intervaled = new LayeredContainmentList<int>(new[] { A, B, C, D, E });
             }
 
-            [Test]
-            public void Print()
+            [TestCaseSource("StabCases")]
+            public void Overlap_StabbingAtKeyPoints_ReturnsSpecifiedIntervals_TestCase(int low, int high, IEnumerable<IInterval<int>> expected)
             {
-                Console.WriteLine(((LayeredContainmentList<int>) Intervaled).Graphviz());
+                var query = new IntervalOfInt(low, high, true, true);
+                CollectionAssert.AreEquivalent(expected, _intervaled.FindOverlaps(query));
             }
+
+            public static object[] StabCases = new object[] {
+                new object[] {0, 0, new[] { A }},
+                new object[] {0, 1, new[] { A, B }},
+                new object[] {0, 2, new[] { A, B, C }},
+                new object[] {0, 3, new[] { A, B, C, D }},
+                new object[] {0, 4, new[] { A, B, C, D, E }},
+                new object[] {0, 5, new[] { A, B, C, D, E }},
+                new object[] {0, 6, new[] { A, B, C, D, E }},
+                new object[] {0, 7, new[] { A, B, C, D, E }},
+                new object[] {0, 8, new[] { A, B, C, D, E }},
+                new object[] {0, 9, new[] { A, B, C, D, E }},
+                new object[] {0, 10, new[] { A, B, C, D, E }}
+            };
         }
 
         [TestFixture]

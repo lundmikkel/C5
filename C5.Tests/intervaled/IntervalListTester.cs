@@ -77,4 +77,13 @@ namespace C5.Tests.intervaled
             return new IntervalList<int>(intervals);
         }
     }
+
+    [TestFixture]
+    public class IntervalListLargeTest : LargeTest_100000
+    {
+        protected override IStaticIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        {
+            return new IntervalList<int>(intervals);
+        }
+    }
 }
