@@ -225,7 +225,7 @@ namespace C5.intervaled
 
         #region IEnumerable
 
-        public int OverlapCount(IInterval<T> query)
+        public int CountOverlaps(IInterval<T> query)
         {
             throw new NotImplementedException();
         }

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using C5.Tests.intervaled.Generic;
@@ -100,6 +102,103 @@ namespace C5.Tests.intervaled
             }
         }
         #endregion
+
+        [TestFixture]
+        public class LayeredContainmentList_LargeTest : LargeTest_100000
+        {
+            protected override IStaticIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            {
+                return new LayeredContainmentList<int>(intervals);
+            }
+        }
+
+        [TestFixture]
+        public class LCList100000Perfomance : Performance100000
+        {
+            protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            {
+                return new LayeredContainmentList<int>(intervals);
+            }
+
+            [Test]
+            public void CountTest()
+            {
+                var query = new IntervalBase<int>(9231, 24228);
+
+                Console.WriteLine(Intervaled.FindOverlaps(query).Count());
+                Console.WriteLine(((IStaticIntervaled<int>) Intervaled).CountOverlaps(query));
+
+                var comparer = ComparerFactory<IInterval<int>>.CreateEqualityComparer(IntervalExtensions.Equals, IntervalExtensions.GetHashCode);
+
+                var set = new HashSet<IInterval<int>>(comparer);
+
+                foreach (var interval in Intervaled.FindOverlaps(query))
+                    set.Add(interval);
+
+                foreach (var interval in Intervaled.Where(interval => interval.Overlaps(query)))
+                    set.Remove(interval);
+
+                Console.WriteLine(set);
+
+                Assert.That(Intervaled.FindOverlaps(query).Count() == 20930);
+            }
+
+            [Test, Ignore]
+            public void Print()
+            {
+                File.WriteAllText(@"../../intervaled/data/lclist100000.gv", ((LayeredContainmentList<int>) Intervaled).Graphviz());
+            }
+        }
+
+        //*******************
+        //   0    5   10 
+        //   |    |    | 
+        //   
+        //   [---------) A
+        //    [------) B
+        //     [---) C
+        //      [-----) D
+        //       [) E
+        //           
+        //*******************
+        [TestFixture]
+        public class LCListContainmentInSameLayer
+        {
+            private IStaticIntervaled<int> _intervaled;
+
+            private static readonly IInterval<int> A = new IntervalOfInt(0, 10);
+            private static readonly IInterval<int> B = new IntervalOfInt(1, 8);
+            private static readonly IInterval<int> C = new IntervalOfInt(2, 6);
+            private static readonly IInterval<int> D = new IntervalOfInt(3, 9);
+            private static readonly IInterval<int> E = new IntervalOfInt(4, 5);
+
+            [SetUp]
+            public void SetUp()
+            {
+                _intervaled = new LayeredContainmentList<int>(new[] { A, B, C, D, E });
+            }
+
+            [TestCaseSource("StabCases")]
+            public void Overlap_StabbingAtKeyPoints_ReturnsSpecifiedIntervals_TestCase(int low, int high, IEnumerable<IInterval<int>> expected)
+            {
+                var query = new IntervalOfInt(low, high, true, true);
+                CollectionAssert.AreEquivalent(expected, _intervaled.FindOverlaps(query));
+            }
+
+            public static object[] StabCases = new object[] {
+                new object[] {0, 0, new[] { A }},
+                new object[] {0, 1, new[] { A, B }},
+                new object[] {0, 2, new[] { A, B, C }},
+                new object[] {0, 3, new[] { A, B, C, D }},
+                new object[] {0, 4, new[] { A, B, C, D, E }},
+                new object[] {0, 5, new[] { A, B, C, D, E }},
+                new object[] {0, 6, new[] { A, B, C, D, E }},
+                new object[] {0, 7, new[] { A, B, C, D, E }},
+                new object[] {0, 8, new[] { A, B, C, D, E }},
+                new object[] {0, 9, new[] { A, B, C, D, E }},
+                new object[] {0, 10, new[] { A, B, C, D, E }}
+            };
+        }
 
         [TestFixture]
         public class LCListExample
@@ -219,25 +318,25 @@ namespace C5.Tests.intervaled
                 [Test]
                 public void CountNone()
                 {
-                    Assert.AreEqual(0, _intervaled.OverlapCount(new IntervalOfInt(9, 9, true, true)));
-                    Assert.AreEqual(0, _intervaled.OverlapCount(new IntervalOfInt(29, 30, true, true)));
-                    Assert.AreEqual(0, _intervaled.OverlapCount(new IntervalOfInt(int.MinValue, -2, true, true)));
+                    Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalOfInt(9, 9, true, true)));
+                    Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalOfInt(29, 30, true, true)));
+                    Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalOfInt(int.MinValue, -2, true, true)));
                 }
 
                 [Test]
                 public void CountSingle()
                 {
-                    Assert.AreEqual(1, _intervaled.OverlapCount(new IntervalOfInt(0, 0, true, true)));
-                    Assert.AreEqual(2, _intervaled.OverlapCount(new IntervalOfInt(6, 9, true, true)));
-                    Assert.AreEqual(1, _intervaled.OverlapCount(new IntervalOfInt(21, 30, true, true)));
+                    Assert.AreEqual(1, _intervaled.CountOverlaps(new IntervalOfInt(0, 0, true, true)));
+                    Assert.AreEqual(2, _intervaled.CountOverlaps(new IntervalOfInt(6, 9, true, true)));
+                    Assert.AreEqual(1, _intervaled.CountOverlaps(new IntervalOfInt(21, 30, true, true)));
                 }
 
                 [Test]
                 public void CountGroup()
                 {
-                    Assert.AreEqual(3, _intervaled.OverlapCount(new IntervalOfInt(0, 6, true, true)));
-                    Assert.AreEqual(5, _intervaled.OverlapCount(new IntervalOfInt(12, 19, true, true)));
-                    Assert.AreEqual(3, _intervaled.OverlapCount(new IntervalOfInt(18, 19, true, true)));
+                    Assert.AreEqual(3, _intervaled.CountOverlaps(new IntervalOfInt(0, 6, true, true)));
+                    Assert.AreEqual(5, _intervaled.CountOverlaps(new IntervalOfInt(12, 19, true, true)));
+                    Assert.AreEqual(3, _intervaled.CountOverlaps(new IntervalOfInt(18, 19, true, true)));
                 }
             }
 
@@ -279,23 +378,23 @@ namespace C5.Tests.intervaled
                 [Test]
                 public void CountNone()
                 {
-                    Assert.AreEqual(0, _intervaled.OverlapCount(new IntervalOfInt(31, int.MaxValue, true, true)));
-                    Assert.AreEqual(0, _intervaled.OverlapCount(new IntervalOfInt(int.MinValue, -2, true, true)));
+                    Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalOfInt(31, int.MaxValue, true, true)));
+                    Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalOfInt(int.MinValue, -2, true, true)));
                 }
 
                 [Test]
                 public void CountSingle()
                 {
-                    Assert.AreEqual(1, _intervaled.OverlapCount(new IntervalOfInt(0, 0, true, true)));
-                    Assert.AreEqual(1, _intervaled.OverlapCount(new IntervalOfInt(30, 35, true, true)));
+                    Assert.AreEqual(1, _intervaled.CountOverlaps(new IntervalOfInt(0, 0, true, true)));
+                    Assert.AreEqual(1, _intervaled.CountOverlaps(new IntervalOfInt(30, 35, true, true)));
                 }
 
                 [Test]
                 public void CountGroup()
                 {
-                    Assert.AreEqual(2, _intervaled.OverlapCount(new IntervalOfInt(23, 25, true, true)));
-                    Assert.AreEqual(4, _intervaled.OverlapCount(new IntervalOfInt(5, 8, true, true)));
-                    Assert.AreEqual(9, _intervaled.OverlapCount(new IntervalOfInt(13, 13, true, true)));
+                    Assert.AreEqual(2, _intervaled.CountOverlaps(new IntervalOfInt(23, 25, true, true)));
+                    Assert.AreEqual(4, _intervaled.CountOverlaps(new IntervalOfInt(5, 8, true, true)));
+                    Assert.AreEqual(9, _intervaled.CountOverlaps(new IntervalOfInt(13, 13, true, true)));
                 }
             }
 
@@ -342,11 +441,11 @@ namespace C5.Tests.intervaled
                 [Test]
                 public void Count()
                 {
-                    Assert.AreEqual(4, _intervaled.OverlapCount(new IntervalOfInt(8, 10, true, true)));
-                    Assert.AreEqual(3, _intervaled.OverlapCount(new IntervalOfInt(2, 3, true, true)));
-                    Assert.AreEqual(4, _intervaled.OverlapCount(new IntervalOfInt(17, 19, true, true)));
-                    Assert.AreEqual(2, _intervaled.OverlapCount(new IntervalOfInt(14, 15, true, true)));
-                    Assert.AreEqual(1, _intervaled.OverlapCount(new IntervalOfInt(-5, -4, true, true)));
+                    Assert.AreEqual(4, _intervaled.CountOverlaps(new IntervalOfInt(8, 10, true, true)));
+                    Assert.AreEqual(3, _intervaled.CountOverlaps(new IntervalOfInt(2, 3, true, true)));
+                    Assert.AreEqual(4, _intervaled.CountOverlaps(new IntervalOfInt(17, 19, true, true)));
+                    Assert.AreEqual(2, _intervaled.CountOverlaps(new IntervalOfInt(14, 15, true, true)));
+                    Assert.AreEqual(1, _intervaled.CountOverlaps(new IntervalOfInt(-5, -4, true, true)));
                 }
             }
         }

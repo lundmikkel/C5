@@ -53,6 +53,7 @@
     </Compile>
     <Compile Include="InterfacesTest.cs" />
     <Compile Include="intervaled\Benchmarker.cs" />
+    <Compile Include="intervaled\IntervalListTester.cs" />
     <Compile Include="intervaled\LayeredContainmentListTester.cs" />
     <Compile Include="intervaled\GenericIIntervaledTester.cs" />
     <Compile Include="intervaled\IntervalBinarySearchTreeTester.cs" />

@@ -30,7 +30,7 @@ namespace C5.intervaled
         /// <exception cref="ArgumentException">Thrown if interval is an empty point set</exception>
         public IntervalBase(T low, T high)
         {
-            if (high.CompareTo(low) < 0)
+            if (low.CompareTo(high) >= 0)
                 throw new ArgumentException("Low must be smaller than high!");
 
             Low = low;
