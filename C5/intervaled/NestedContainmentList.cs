@@ -306,31 +306,19 @@ namespace C5.intervaled
         }
 
         // TODO: Test speed difference between version that takes overlap-loop and upper and low bound loop
-        private SCG.IEnumerable<IInterval<T>> findOverlap(Section section, IInterval<T> query, bool contained = false)
+        private SCG.IEnumerable<IInterval<T>> findOverlap(Section section, IInterval<T> query)
         {
             if (_list == null || section.Length == 0)
                 yield break;
 
-            int first, last;
+            // Find first overlapping interval
+            var first = searchHighInLows(section, query);
 
-            // If all intervals are contained in the query, just loop through all nodes
-            if (contained)
-            {
-                first = section.Offset;
-                last = section.Offset + section.Length - 1;
-            }
-            // If not, we need to search for the bounds
-            else
-            {
-                // Find first overlapping interval
-                first = searchHighInLows(section, query);
+            // If index is out of bound, or interval doesn't overlap, we can just stop our search
+            if (first < section.Offset || section.Offset + section.Length - 1 < first || !_list[first].Interval.Overlaps(query))
+                yield break;
 
-                // If index is out of bound, or interval doesn't overlap, we can just stop our search
-                if (first < section.Offset || section.Offset + section.Length - 1 < first || !_list[first].Interval.Overlaps(query))
-                    yield break;
-
-                last = searchLowInHighs(section, query);
-            }
+            var last = searchLowInHighs(section, query);
 
             while (first <= last)
             {
@@ -339,14 +327,9 @@ namespace C5.intervaled
                 yield return node.Interval;
 
                 if (node.Sublist.Length > 0)
-                {
                     // If the interval is contained in the query, all intervals in the sublist must overlap the query
-                    if (!contained)
-                        contained = query.Contains(node.Interval);
-
-                    foreach (var interval in findOverlap(node.Sublist, query, contained))
+                    foreach (var interval in findOverlap(node.Sublist, query))
                         yield return interval;
-                }
             }
         }
 
