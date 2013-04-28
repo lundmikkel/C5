@@ -607,45 +607,50 @@ namespace C5.Tests.intervaled
                 Intervaled = Factory(intervalList);
             }
 
-            [TestCaseSource(typeof(LargeTest_100000), "CountCases")]
+            [TestCaseSource(typeof(LargeTest_100000), "CountCases"), Category("Large tests")]
             public void FindOverlaps(int expected, IntervalOfInt query)
             {
+                var sw = Stopwatch.StartNew();
+
+                const int count = 1000;
+
+                for (var i = 0; i < count; i++)
+                    Intervaled.FindOverlaps(query).Count();
+
+                sw.Stop();
+                Console.WriteLine("Query time: " + ((float) sw.ElapsedMilliseconds / count));
+
                 var actual = Intervaled.FindOverlaps(query).Count();
                 Assert.AreEqual(expected, actual);
             }
 
-            [TestCaseSource(typeof(LargeTest_100000), "CountCases")]
+            [TestCaseSource(typeof(LargeTest_100000), "CountCases"), Category("Large tests")]
             public void CountOverlaps(int expected, IntervalOfInt query)
             {
                 var actual = Intervaled.CountOverlaps(query);
                 Assert.AreEqual(expected, actual);
+                var sw = Stopwatch.StartNew();
+
+                const int count = 1;
+
+                for (var i = 0; i < count; i++)
+                    Intervaled.CountOverlaps(query);
+
+                sw.Stop();
+                Console.WriteLine("Query time: " + ((float) sw.ElapsedMilliseconds / count));
+
             }
 
             public static object[] CountCases()
             {
                 return new object[] {
-                    //*
+                    new object[] { 61, new IntervalOfInt(98696, 98796)},
+                    new object[] { 147, new IntervalOfInt(4633, 4675)},
                     new object[] { 10000, new IntervalOfInt(22514, 33893)},
                     new object[] { 20001, new IntervalOfInt(374460, 525081)},
                     new object[] { 30000, new IntervalOfInt(101517, 1658000)},
                     new object[] { 40000, new IntervalOfInt(-1234, 21538)},
-                    new object[] { 50000, new IntervalOfInt(100, 32408)},
-                    /*/
-                    /*
-                    new object[] { 1, new IntervalOfInt( 26,  26)},
-                    new object[] { 1, new IntervalOfInt( 27,  29)},
-                    new object[] { 1, new IntervalOfInt( 26,  30)},
-                    new object[] { 1, new IntervalOfInt( 26,  35)},
-                    new object[] { 1, new IntervalOfInt( 30,  35)},
-                    new object[] { 1, new IntervalOfInt( 31,  35)},
-                    new object[] { 1, new IntervalOfInt(  0,   4)},
-                    new object[] { 1, new IntervalOfInt(  0,   5)},
-                    new object[] { 1, new IntervalOfInt(  0,  10)},
-                    new object[] { 1, new IntervalOfInt(  5,   9)},
-                    new object[] { 1, new IntervalOfInt(  6,   8)},
-                    new object[] { 1, new IntervalOfInt( 10,  10)},
-                    new object[] { 1, new IntervalOfInt( 10,  11)},
-                    new object[] { 1, new IntervalOfInt(  5,  15)}*/
+                    new object[] { 50000, new IntervalOfInt(100, 32408)}
                 };
             }
         }

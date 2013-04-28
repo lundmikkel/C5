@@ -95,6 +95,15 @@ namespace C5.Tests.intervaled
             }
         }
 
+        [TestFixture]
+        public class NestedContainmentList_LargeTest : LargeTest_100000
+        {
+            protected override IStaticIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            {
+                return new NestedContainmentList<int>(intervals);
+            }
+        }
+
         //***************************************
         //   0     5    10    15    20    25   30
         //   |     |     |     |     |     |    |
