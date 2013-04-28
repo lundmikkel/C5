@@ -16,6 +16,7 @@ namespace C5.Tests.intervaled
 
     namespace LayeredContainmentList
     {
+        #region generic tests
         [TestFixture]
         public class LCListEndpointInclusion : IntervaledEndpointInclusion
         {
@@ -100,6 +101,7 @@ namespace C5.Tests.intervaled
                 return new LayeredContainmentList<int>(intervals);
             }
         }
+        #endregion
 
         [TestFixture]
         public class LayeredContainmentList_LargeTest : LargeTest_100000
@@ -625,5 +627,234 @@ namespace C5.Tests.intervaled
                     };
             }
         }
+
+        #region White box-testing
+
+        #region Statement testing
+
+        [TestFixture]
+        public class Statement
+        {
+            private LayeredContainmentList<int> _empty;
+            private LayeredContainmentList<int> _moreThanOneInterval;
+            private LayeredContainmentList<int> _oneInterval;
+            private LayeredContainmentList<int> _twoContainmentLayers;
+
+            // ReSharper disable InconsistentNaming
+            private static readonly IInterval<int> A = new IntervalOfInt( 1,   5, true, true);
+            private static readonly IInterval<int> B = new IntervalOfInt( 3,   8, true, true);
+            private static readonly IInterval<int> C = new IntervalOfInt( 9,  15, true, true);
+            private static readonly IInterval<int> D = new IntervalOfInt(12,  20, true, true);
+            private static readonly IInterval<int> E = new IntervalOfInt( 2,   7, true, true);
+            private static readonly IInterval<int> F = new IntervalOfInt( 2,  14, true, true);
+            private static readonly IInterval<int> G = new IntervalOfInt( 3,   8, true, true);
+            private static readonly IInterval<int> H = new IntervalOfInt( 5,  12, true, true);
+            private static readonly IInterval<int> I = new IntervalOfInt(11,  16, true, true);
+            private static readonly IInterval<int> J = new IntervalOfInt(22,  25, true, true);
+            private static readonly IInterval<int> K = new IntervalOfInt(23,  24, true, true);
+            private static readonly IInterval<int> L = new IntervalOfInt(23,  25, true, true);
+
+            // ReSharper restore InconsistentNaming
+
+            [SetUp]
+            public void Init()
+            {
+                _empty = new LayeredContainmentList<int>(Enumerable.Empty<IInterval<int>>());
+                _oneInterval = new LayeredContainmentList<int>(new[] { E });
+                _moreThanOneInterval = new LayeredContainmentList<int>(new[] { A, B, C, D });
+                _twoContainmentLayers = new LayeredContainmentList<int>(new[] { F, G, H, I });
+            }
+
+            #region Constructor
+
+            [Test, Ignore] // Test number: 3, 5, 8, 11, 16, 19, 22
+            public void Constructor_Empty()
+            {
+                var empty = new LayeredContainmentList<int>(Enumerable.Empty<IInterval<int>>());
+                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), empty);
+            }
+
+            [Test] // Test number: 6, 9, 20
+            public void Constructor_OneInterval()
+            {
+                var oneInterval = new LayeredContainmentList<int>(new[] { E });
+                CollectionAssert.AreEquivalent(new[] { E }, oneInterval);
+            }
+
+            [Test] // Test number: 4, 7, 10, 12, 17, 21, 23, 24
+            public void Constructor_MoreThanOneIntervalAndOneContainmentLayer()
+            {
+                var moreThanOne = new LayeredContainmentList<int>(new[] { A, B, C, D});
+                CollectionAssert.AreEquivalent(new[] { A, B, C, D }, moreThanOne);
+            }
+
+            [Test] // Test number: 13, 18, 24
+            public void Constructor_MoreThanOneIntervalAndMoreContainmentLayers() 
+            {
+                var moreThanOne = new LayeredContainmentList<int>(new[] { F, G, H, I });
+                CollectionAssert.AreEquivalent(new[] { F, G, H, I }, moreThanOne);
+            }
+
+            [Test] // Test number: 14, 25
+            public void Constructor_FirstContainssecondEndLess()
+            {
+                var moreThanOne = new LayeredContainmentList<int>(new[] { J, K });
+                CollectionAssert.AreEquivalent(new[] { J, K }, moreThanOne);
+            }
+
+            [Test] // Test number: 15, 26
+            public void Constructor_FirstContainssecondEndEqual()
+            {
+                var moreThanOne = new LayeredContainmentList<int>(new[] { J, L });
+                CollectionAssert.AreEquivalent(new[] { J, L }, moreThanOne);
+            }
+
+            #endregion
+
+            #region CountOverlap
+
+            [Test, Ignore] // Test number: 31
+            public void CountOverlap_Empty()
+            {
+                Assert.Equals(0, _empty.OverlapCount(new IntervalOfInt(2, 7, true, true)));
+            }
+
+            [Test, Ignore] // Test number: 32
+            public void CountOverlap_OneInterval()
+            {
+                Assert.Equals(1, _oneInterval.OverlapCount(new IntervalOfInt(2, 7, true, true)));
+            }
+
+            [Test, Ignore] // Test number: 30, 33
+            public void CountOverlap_MoreThanOne()
+            {
+                Assert.Equals(2, _oneInterval.OverlapCount(new IntervalOfInt(2, 7, true, true)));
+            }
+
+            [Test, Ignore] // Test number: 29
+            public void CountOverlap_MoreThanOneQueryNull()
+            {
+                Assert.Equals(0, _oneInterval.OverlapCount(null));
+            }
+
+            #endregion
+
+            #region FindOverlaps
+
+            #region Stabbing
+            
+            [Test] // Test number: 68(, 72?)
+            public void FindOverlapsStabbing_NullQueryZeroIntervals()
+            {
+                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), _empty.FindOverlaps(null));
+            }
+
+            [Test] // Test number: 
+            public void FindOverlapsStabbing_NullQueryOneOrMoreIntervals()
+            {
+                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), _moreThanOneInterval.FindOverlaps(null));
+            }
+
+            [Test] // Test number: 
+            public void FindOverlapsStabbing_QueryZeroIntervals()
+            {
+                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), _empty.FindOverlaps(2));
+            }
+
+            [Test] // Test number: 
+            public void FindOverlapsStabbing_QueryOneOrMoreIntervals()
+            {
+                CollectionAssert.AreEquivalent(new[]{ A }, _moreThanOneInterval.FindOverlaps(2));
+            }
+
+            #endregion
+
+            #region Range
+
+            [Test] // Test number: 
+            public void FindOverlapsRange_NullQueryOneOrMoreIntervals()
+            {
+                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), _moreThanOneInterval.FindOverlaps(null));
+            }
+
+            [Test] // Test number: 
+            public void FindOverlapsRange_QueryZeroIntervals()
+            {
+                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), _empty.FindOverlaps(new IntervalOfInt(2, 7, true, true)));
+            }
+
+            [Test] // Test number: 
+            public void FindOverlapsRange_QueryOneOrMoreIntervals()
+            {
+                CollectionAssert.AreEquivalent(new[] { A, B }, _moreThanOneInterval.FindOverlaps(new IntervalOfInt(2, 7, true, true)));
+            }
+
+            #endregion
+
+            #endregion
+
+            #region Enumerator
+
+            [Test, Ignore] // Test number: 58, 63
+            public void Enumerator_Empty()
+            {
+                var result = new ArrayList<IInterval<int>>();
+                foreach (IInterval<int> interval in _empty)
+                {
+                    result.Add(interval);
+                }
+                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), result);
+            }
+
+            [Test] // Test number: 59, 64
+            public void Enumerator_OneInterval()
+            {
+                var result = new ArrayList<IInterval<int>>();
+                foreach (IInterval<int> interval in _oneInterval)
+                {
+                    result.Add(interval);
+                }
+                CollectionAssert.AreEquivalent(new[] { E }, result);
+            }
+
+            [Test] // Test number: 60, 61, 62, 65
+            public void Enumerator_MoreThanOne()
+            {
+                var result = new ArrayList<IInterval<int>>();
+                foreach (IInterval<int> interval in _moreThanOneInterval)
+                {
+                    result.Add(interval);
+                }
+                CollectionAssert.AreEquivalent(new[]{ A, B, C, D}, result);
+            }
+
+            #endregion
+
+            #region Span
+
+            [Test] // Test number: 67
+            public void Span_Empty()
+            {
+                Assert.Throws<InvalidOperationException>(() => { var span = _empty.Span; });
+            }
+
+            [Test] // Test number: 68
+            public void Span_MoreThanOne()
+            {
+                Assert.That(_moreThanOneInterval.Span.Equals(new IntervalOfInt(1, 20, true, true)));
+            }
+
+            #endregion
+
+        }
+
+        #endregion
+
+        #region Path testing
+
+
+        #endregion
+
+        #endregion
     }
 }
