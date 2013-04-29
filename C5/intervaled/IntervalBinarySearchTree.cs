@@ -325,12 +325,12 @@ namespace C5.intervaled
         #endregion
 
         #region deletion
-       
+
         private Node removeByLow(Node root, Node right, IInterval<T> interval)
         {
             if (root == null)
                 return null;
-            
+
             var compareTo = root.Key.CompareTo(interval.Low);
 
             if (compareTo < 0)
@@ -475,7 +475,7 @@ namespace C5.intervaled
         private void flipColors(Node h)
         {
             // h must have opposite color of its two children
-            if ((h != null) && (h.Left != null) && (h.Right != null) 
+            if ((h != null) && (h.Left != null) && (h.Right != null)
                 && ((!isRed(h) && isRed(h.Left) && isRed(h.Right))
                 || (isRed(h) && !isRed(h.Left) && !isRed(h.Right))))
             {
@@ -487,7 +487,7 @@ namespace C5.intervaled
 
         // Assuming that h is red and both h.left and h.left.left
         // are black, make h.left or one of its children red.
-        private Node moveRedLeft(Node h) 
+        private Node moveRedLeft(Node h)
         {
             flipColors(h);
             if (isRed(h.Right.Left))
@@ -501,10 +501,11 @@ namespace C5.intervaled
 
         // Assuming that h is red and both h.right and h.right.left
         // are black, make h.right or one of its children red.
-        private Node moveRedRight(Node h) 
+        private Node moveRedRight(Node h)
         {
             flipColors(h);
-            if (isRed(h.Left.Left)) { 
+            if (isRed(h.Left.Left))
+            {
                 h = rotateRight(h);
                 // flipColors(h);
             }
@@ -535,10 +536,11 @@ namespace C5.intervaled
         }
 
         // the smallest key in subtree rooted at x; null if no such key
-        private Node min(Node x) {
-            if (x.Left == null) 
-                return x; 
-            return min(x.Left); 
+        private Node min(Node x)
+        {
+            if (x.Left == null)
+                return x;
+            return min(x.Left);
         }
 
         // delete the key-value pair with the given key
@@ -554,7 +556,8 @@ namespace C5.intervaled
         }
 
         // delete the key-value pair with the given key rooted at h
-        private Node remove(Node root, Node parent, bool left, T endpoint) {
+        private Node remove(Node root, Node parent, bool left, T endpoint)
+        {
 
             if (endpoint.CompareTo(root.Key) < 0)
             {
@@ -565,7 +568,8 @@ namespace C5.intervaled
                 }
                 root.Left = remove(root.Left, root, true, endpoint);
             }
-            else {
+            else
+            {
                 if (isRed(root.Left))
                     root = rotateRight(root);
                 if (endpoint.CompareTo(root.Key) == 0 && (root.Right == null))
@@ -609,7 +613,7 @@ namespace C5.intervaled
                     }
 
                     deleteNode(root.Right, minChild);
-                    
+
                     return rotate(node);
                 }
                 root.Right = remove(root.Right, root, false, endpoint);
@@ -698,7 +702,7 @@ namespace C5.intervaled
 
         private string graphviz(IntervalBinarySearchTree<T>.Node root, string parent, string direction)
         {
-            int id; 
+            int id;
             if (root == null)
             {
                 id = nullCounter++;
@@ -1041,6 +1045,11 @@ namespace C5.intervaled
                 return false;
 
             return FindOverlaps(query).GetEnumerator().MoveNext();
+        }
+
+        public int CountOverlaps(IInterval<T> query)
+        {
+            return FindOverlaps(query).Count();
         }
 
         public int MaximumOverlap

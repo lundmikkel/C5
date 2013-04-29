@@ -641,18 +641,18 @@ namespace C5.Tests.intervaled
             private LayeredContainmentList<int> _twoContainmentLayers;
 
             // ReSharper disable InconsistentNaming
-            private static readonly IInterval<int> A = new IntervalOfInt( 1,   5, true, true);
-            private static readonly IInterval<int> B = new IntervalOfInt( 3,   8, true, true);
-            private static readonly IInterval<int> C = new IntervalOfInt( 9,  15, true, true);
-            private static readonly IInterval<int> D = new IntervalOfInt(12,  20, true, true);
-            private static readonly IInterval<int> E = new IntervalOfInt( 2,   7, true, true);
-            private static readonly IInterval<int> F = new IntervalOfInt( 2,  14, true, true);
-            private static readonly IInterval<int> G = new IntervalOfInt( 3,   8, true, true);
-            private static readonly IInterval<int> H = new IntervalOfInt( 5,  12, true, true);
-            private static readonly IInterval<int> I = new IntervalOfInt(11,  16, true, true);
-            private static readonly IInterval<int> J = new IntervalOfInt(22,  25, true, true);
-            private static readonly IInterval<int> K = new IntervalOfInt(23,  24, true, true);
-            private static readonly IInterval<int> L = new IntervalOfInt(23,  25, true, true);
+            private static readonly IInterval<int> A = new IntervalOfInt(1, 5, true, true);
+            private static readonly IInterval<int> B = new IntervalOfInt(3, 8, true, true);
+            private static readonly IInterval<int> C = new IntervalOfInt(9, 15, true, true);
+            private static readonly IInterval<int> D = new IntervalOfInt(12, 20, true, true);
+            private static readonly IInterval<int> E = new IntervalOfInt(2, 7, true, true);
+            private static readonly IInterval<int> F = new IntervalOfInt(2, 14, true, true);
+            private static readonly IInterval<int> G = new IntervalOfInt(3, 8, true, true);
+            private static readonly IInterval<int> H = new IntervalOfInt(5, 12, true, true);
+            private static readonly IInterval<int> I = new IntervalOfInt(11, 16, true, true);
+            private static readonly IInterval<int> J = new IntervalOfInt(22, 25, true, true);
+            private static readonly IInterval<int> K = new IntervalOfInt(23, 24, true, true);
+            private static readonly IInterval<int> L = new IntervalOfInt(23, 25, true, true);
 
             // ReSharper restore InconsistentNaming
 
@@ -684,12 +684,12 @@ namespace C5.Tests.intervaled
             [Test] // Test number: 4, 7, 10, 12, 17, 21, 23, 24
             public void Constructor_MoreThanOneIntervalAndOneContainmentLayer()
             {
-                var moreThanOne = new LayeredContainmentList<int>(new[] { A, B, C, D});
+                var moreThanOne = new LayeredContainmentList<int>(new[] { A, B, C, D });
                 CollectionAssert.AreEquivalent(new[] { A, B, C, D }, moreThanOne);
             }
 
             [Test] // Test number: 13, 18, 24
-            public void Constructor_MoreThanOneIntervalAndMoreContainmentLayers() 
+            public void Constructor_MoreThanOneIntervalAndMoreContainmentLayers()
             {
                 var moreThanOne = new LayeredContainmentList<int>(new[] { F, G, H, I });
                 CollectionAssert.AreEquivalent(new[] { F, G, H, I }, moreThanOne);
@@ -716,25 +716,25 @@ namespace C5.Tests.intervaled
             [Test, Ignore] // Test number: 31
             public void CountOverlap_Empty()
             {
-                Assert.Equals(0, _empty.OverlapCount(new IntervalOfInt(2, 7, true, true)));
+                Assert.Equals(0, _empty.CountOverlaps(new IntervalOfInt(2, 7, true, true)));
             }
 
             [Test, Ignore] // Test number: 32
             public void CountOverlap_OneInterval()
             {
-                Assert.Equals(1, _oneInterval.OverlapCount(new IntervalOfInt(2, 7, true, true)));
+                Assert.Equals(1, _oneInterval.CountOverlaps(new IntervalOfInt(2, 7, true, true)));
             }
 
             [Test, Ignore] // Test number: 30, 33
             public void CountOverlap_MoreThanOne()
             {
-                Assert.Equals(2, _oneInterval.OverlapCount(new IntervalOfInt(2, 7, true, true)));
+                Assert.Equals(2, _oneInterval.CountOverlaps(new IntervalOfInt(2, 7, true, true)));
             }
 
             [Test, Ignore] // Test number: 29
             public void CountOverlap_MoreThanOneQueryNull()
             {
-                Assert.Equals(0, _oneInterval.OverlapCount(null));
+                Assert.Equals(0, _oneInterval.CountOverlaps(null));
             }
 
             #endregion
@@ -742,7 +742,7 @@ namespace C5.Tests.intervaled
             #region FindOverlaps
 
             #region Stabbing
-            
+
             [Test] // Test number: 68(, 72?)
             public void FindOverlapsStabbing_NullQueryZeroIntervals()
             {
@@ -764,7 +764,7 @@ namespace C5.Tests.intervaled
             [Test] // Test number: 
             public void FindOverlapsStabbing_QueryOneOrMoreIntervals()
             {
-                CollectionAssert.AreEquivalent(new[]{ A }, _moreThanOneInterval.FindOverlaps(2));
+                CollectionAssert.AreEquivalent(new[] { A }, _moreThanOneInterval.FindOverlaps(2));
             }
 
             #endregion
@@ -825,7 +825,7 @@ namespace C5.Tests.intervaled
                 {
                     result.Add(interval);
                 }
-                CollectionAssert.AreEquivalent(new[]{ A, B, C, D}, result);
+                CollectionAssert.AreEquivalent(new[] { A, B, C, D }, result);
             }
 
             #endregion
