@@ -101,7 +101,6 @@ namespace C5.Tests.intervaled
                 return new LayeredContainmentList<int>(intervals);
             }
         }
-        #endregion
 
         [TestFixture]
         public class LayeredContainmentList_LargeTest : LargeTest_100000
@@ -150,6 +149,7 @@ namespace C5.Tests.intervaled
             }
         }
 
+        #endregion
         //*******************
         //   0    5   10 
         //   |    |    | 
