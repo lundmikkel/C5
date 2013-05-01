@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using C5.intervaled;
 using NUnit.Framework;
+using System.Linq;
 
 namespace C5.Tests.intervaled
 {
@@ -27,11 +28,11 @@ namespace C5.Tests.intervaled
     abstract class WithoutContainment
     {
         protected IIntervaled<int> Intervaled;
-        private const int Repetitions = 100;
+        private const int Repetitions = 5000000;
 
         protected abstract IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals);
 
-        public IInterval<int>[] GenerateIntervals(int count = 1000000)
+        public IInterval<int>[] GenerateIntervals(int count)
         {
             var intervals = new IInterval<int>[count];
 
@@ -48,7 +49,78 @@ namespace C5.Tests.intervaled
 
             var sw = new Stopwatch();
 
-            const int tenth = Repetitions / 10;
+            for (var i = 0; i < Repetitions; i++)
+            {
+                intervals.Shuffle();
+                sw.Start();
+                Intervaled = Factory(intervals);
+                sw.Stop();
+            }
+
+            sw.Stop();
+            Console.WriteLine("Average creation time for {0} intervals: {1} ms", intervals.Length, sw.ElapsedMilliseconds / Repetitions);
+        }
+
+        public static int[] ConstructorCounts = new[]
+            {
+                100000,
+                200000,
+                300000,
+                400000,
+                500000,
+                600000,
+                700000,
+                800000,
+                900000,
+                1000000
+            };
+
+        [Test, TestCaseSource(typeof(WithoutContainment), "ConstructorCounts")]
+        public void Stabbing(int count)
+        {
+            Intervaled = Factory(GenerateIntervals(count));
+
+            var span = Intervaled.Span;
+            var step = (float)(span.High - span.Low) / Repetitions;
+            var sw = new Stopwatch();
+            sw.Start();
+
+            for (var i = 0; i < Repetitions; i++)
+            {
+                // var query =; // random.Next(span.Low, span.High);
+                Intervaled.FindOverlaps((int)(step * i)).Count();
+            }
+            sw.Stop();
+
+            Console.WriteLine("Average creation time for {0} intervals: {1} ms", Intervaled.Count, (float)sw.ElapsedMilliseconds / Repetitions);
+        }
+    }
+
+    abstract class ContainmentOnly
+    {
+        protected IIntervaled<int> Intervaled;
+        private const int Repetitions = 1;
+
+        protected abstract IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals);
+
+        public IInterval<int>[] GenerateIntervals(int count = 1000000)
+        {
+            var intervals = new IInterval<int>[count];
+            var mid = count / 2;
+
+            for (var i = 0; i < count; i++)
+                intervals[i] = new IntervalBase<int>(mid - i, mid + i + 1);
+
+            return intervals;
+        }
+
+        [Test, TestCaseSource(typeof(ContainmentOnly), "ConstructorCounts")]
+        public void Constroctor(int count)
+        {
+            var intervals = GenerateIntervals(count);
+
+            var sw = new Stopwatch();
+
             for (var i = 0; i < Repetitions; i++)
             {
                 intervals.Shuffle();
@@ -86,10 +158,14 @@ namespace C5.Tests.intervaled
         public IInterval<int>[] GenerateIntervals(int count = 1000000)
         {
             var intervals = new IInterval<int>[count];
-            var mid = count / 2;
+            var mid = 0;
 
-            for (var i = 0; i < count; i++)
-                intervals[i] = new IntervalBase<int>(mid - i, mid + (i+1) * 2);
+            for (int i = 0; i < count / 5; i++)
+            {
+                mid = i * 5;
+                for (var j = 0; j < 5; j++)
+                    intervals[mid + j] = new IntervalBase<int>(mid - j, mid + j + 1);
+            }
 
             return intervals;
         }
@@ -169,6 +245,30 @@ namespace C5.Tests.intervaled
     }
 
     class SIT_WithContainment : WithContainment
+    {
+        protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        {
+            return new StaticIntervalTree<int>(intervals);
+        }
+    }
+
+    class LCList_ContainmentOnly : ContainmentOnly
+    {
+        protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        {
+            return new LayeredContainmentList<int>(intervals);
+        }
+    }
+
+    class NCList_ContainmentOnly : ContainmentOnly
+    {
+        protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        {
+            return new NestedContainmentList<int>(intervals);
+        }
+    }
+
+    class SIT_ContainmentOnly : ContainmentOnly
     {
         protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
