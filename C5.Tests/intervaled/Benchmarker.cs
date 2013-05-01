@@ -27,7 +27,7 @@ namespace C5.Tests.intervaled
     abstract class WithoutContainment
     {
         protected IIntervaled<int> Intervaled;
-        private const int Repetitions = 100;
+        private const int Repetitions = 200;
 
         protected abstract IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals);
 
