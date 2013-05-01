@@ -146,6 +146,15 @@ namespace C5.Tests.intervaled
         }
     }
 
+    [TestFixture]
+    public class StaticIntervalTree_LargeTest : LargeTest_100000
+    {
+        protected override IStaticIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        {
+            return new StaticIntervalTree<int>(intervals);
+        }
+    }
+
     // TODO: This was to test sorting order on RightList. Should this be kept in its current state?
     //************************************
     //   0     5    10    15    20    25

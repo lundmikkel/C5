@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace C5.intervaled
 {
-    class LayeredContainmentList<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
+    public class LayeredContainmentList<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
     {
         private readonly int _count;
         private readonly Node[][] _layers;
@@ -59,10 +59,10 @@ namespace C5.intervaled
                 // Put intervals in the arrays
                 var layers = createLayers(intervalArray);
 
-                // Create the list that contains the containment lists
+                // Create the list that contains the containment layers
                 _layers = new Node[layers.Count][];
                 _counts = new int[layers.Count];
-                // Create each containment list
+                // Create each containment layer
                 for (var i = 0; i < _counts.Length; i++)
                 {
                     _layers[i] = layers[i].ToArray();
@@ -77,33 +77,31 @@ namespace C5.intervaled
         private ArrayList<ArrayList<Node>> createLayers(IInterval<T>[] intervals)
         {
             // Use a stack to keep track of current containment
-            IStack<IInterval<T>> stack = new ArrayList<IInterval<T>>();
-            var layers = new ArrayList<ArrayList<Node>> { new ArrayList<Node>(intervals.Length) };
+            var layer = 0;
+            var layers = new ArrayList<ArrayList<Node>> { new ArrayList<Node>() };
 
             foreach (var interval in intervals)
             {
                 // Track containment
-                while (!stack.IsEmpty)
+                while (layer > 0)
                 {
                     // If the interval is contained in the top of the stack, leave it...
-                    if (stack.Last().Contains(interval))
+                    if (layers[layer - 1].Last.Interval.Contains(interval))
                         break;
 
-                    stack.Pop();
+                    layer--;
                 }
 
                 // Check if interval will be contained in the next layer
-                while (!layers[stack.Count].IsEmpty && layers[stack.Count].Last.Interval.Contains(interval))
-                    stack.Push(layers[stack.Count].Last.Interval);
+                while (!layers[layer].IsEmpty && layers[layer].Last.Interval.Contains(interval))
+                    layer++;
 
-                stack.Push(interval);
+                layer++;
 
-                while (layers.Count < stack.Count + 1)
+                while (layers.Count < layer + 1)
                     layers.Add(new ArrayList<Node>());
 
-                var list = stack.Count - 1;
-
-                layers[list].Add(new Node(interval, layers[list + 1].Count));
+                layers[layer - 1].Add(new Node(interval, layers[layer].Count));
             }
 
             var lastCount = 0;
@@ -114,46 +112,6 @@ namespace C5.intervaled
             }
 
             return layers;
-        }
-
-        /// <summary>
-        /// Analyze the intervals to find out how many layers, we need and how big each is
-        /// </summary>
-        /// <param name="intervalArray">Sorted intervals that should be analyzed</param>
-        private static int[] analyzeContainment(IInterval<T>[] intervalArray)
-        {
-            // Use a stack to keep track of current containment
-            IStack<IInterval<T>> stack = new ArrayList<IInterval<T>>();
-            var listCounts = new ArrayList<int>();
-
-            for (int i = 0; i < intervalArray.Length; i++)
-            {
-                var interval = intervalArray[i];
-
-                if (i > 21725)
-                    i = i;
-
-                // Track containment
-                while (!stack.IsEmpty)
-                {
-                    var container = stack.Last();
-
-                    // If the interval is contained in the top of the stack, leave it...
-                    if (container.Contains(interval))
-                        break;
-
-                    stack.Pop();
-                }
-                stack.Push(interval);
-
-                if (listCounts.Count < stack.Count)
-                    listCounts.Add(0);
-
-                // Increament the count for the containment list on the right layer
-                listCounts[stack.Count - 1]++;
-            }
-
-            return listCounts.ToArray();
         }
 
         #endregion
@@ -188,10 +146,10 @@ namespace C5.intervaled
             if (ReferenceEquals(query, null) || IsEmpty)
                 return 0;
 
-            return overlapCount(0, 0, _counts[0], query);
+            return countOverlaps(0, 0, _counts[0], query);
         }
 
-        private int overlapCount(int layer, int lower, int upper, IInterval<T> query)
+        private int countOverlaps(int layer, int lower, int upper, IInterval<T> query)
         {
             // Theorem 2
             if (lower >= upper)
@@ -205,7 +163,7 @@ namespace C5.intervaled
                 // We know first doesn't overlap so we can increment it before searching
                 first = searchHighInLows(layer, ++first, upper, query);
 
-                // If index is out of bound, or found interval doesn't overlap, then the list won't contain any overlaps
+                // If index is out of bound, or found interval doesn't overlap, then the layer won't contain any overlaps
                 if (first < lower || upper <= first || !_layers[layer][first].Interval.Overlaps(query))
                     return 0;
             }
@@ -213,7 +171,7 @@ namespace C5.intervaled
             // We can use first as lower to speed up the search
             var last = searchLowInHighs(layer, first, upper, query);
 
-            return last - first + overlapCount(layer + 1, _layers[layer][first].Pointer, _layers[layer][last].Pointer, query);
+            return last - first + countOverlaps(layer + 1, _layers[layer][first].Pointer, _layers[layer][last].Pointer, query);
         }
 
         private int searchLowInHighs(int layer, int lower, int upper, IInterval<T> query)
@@ -267,7 +225,7 @@ namespace C5.intervaled
                 // Check if 
                 if (interval.Overlaps(query))
                 {
-                    // TODO: Check that the next exists
+                    // We don't need to check if for out-of-bound errors, as we've added 1 to lower before doing the search
                     var previousInterval = _layers[layer][mid - 1].Interval;
 
                     if (!previousInterval.Overlaps(query))

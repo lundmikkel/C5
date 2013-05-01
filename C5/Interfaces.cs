@@ -2070,6 +2070,7 @@ namespace C5
 
     /// <summary>
     /// A collection that allows fast quering on collections of intervals.
+    /// Beware that none of the data structures support updates on the intervals' values. If you wish to change the endpoints or their inclusion, the interval should be removed from the data structure first, changed and then added agian. Changing it otherwise
     /// </summary>
     /// <typeparam name="T">The generic value for an interval's endpoint values</typeparam>
     public interface IIntervaled<T> : ICollectionValue<IInterval<T>> where T : IComparable<T>
@@ -2106,6 +2107,15 @@ namespace C5
         /// <returns>True if at least one such interval exists</returns>
         bool OverlapExists(IInterval<T> query);
 
+
+        /// <summary>
+        /// Count the number of intervals overlapping the query interval.
+        /// Beware that not all data structure support this operation any faster than FindOverlaps.Count().
+        /// </summary>
+        /// <param name="query">The query interval</param>
+        /// <returns>The number of intervals that overlap the query</returns>
+        int CountOverlaps(IInterval<T> query);
+
         /*
         /// <summary>
         /// The maximum number of overlapping intervals at a single point in the collection.
@@ -2122,7 +2132,6 @@ namespace C5
     /// <typeparam name="T">The generic value for an interval's endpoint values</typeparam>
     public interface IStaticIntervaled<T> : IIntervaled<T> where T : IComparable<T>
     {
-        int CountOverlaps(IInterval<T> query);
     }
 
     /// <summary>
@@ -2132,5 +2141,8 @@ namespace C5
     /// <typeparam name="T">The generic value for an interval's endpoint values</typeparam>
     public interface IDynamicIntervaled<T> : IIntervaled<T>, SCG.ICollection<IInterval<T>> where T : IComparable<T>
     {
+        void Add(IInterval<T> interval);
+
+        bool Remove(IInterval<T> interval);
     }
 }
