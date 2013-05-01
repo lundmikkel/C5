@@ -580,8 +580,8 @@ namespace C5.intervaled
                 if (endpoint.CompareTo(root.Key) == 0)
                 {
                     // Save the Greater and Less set of root
-                    IntervalSet rootGreater = root.Greater;
-                    IntervalSet rootLess = root.Less;
+                    //IntervalSet rootGreater = root.Greater;
+                    //IntervalSet rootLess = root.Less;
 
                     // Save key and sets of right child's minimum
                     Node minChild = min(root.Right);
