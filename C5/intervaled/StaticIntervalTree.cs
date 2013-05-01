@@ -227,7 +227,7 @@ namespace C5.intervaled
 
         public int CountOverlaps(IInterval<T> query)
         {
-            throw new NotImplementedException();
+            return FindOverlaps(query).Count();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
