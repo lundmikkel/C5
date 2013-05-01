@@ -76,6 +76,58 @@ namespace C5.Tests.intervaled
             };
     }
 
+    abstract class WithContainment
+    {
+        protected IIntervaled<int> Intervaled;
+        private const int Repetitions = 1;
+
+        protected abstract IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals);
+
+        public IInterval<int>[] GenerateIntervals(int count = 1000000)
+        {
+            var intervals = new IInterval<int>[count];
+            var mid = count / 2;
+
+            for (var i = 0; i < count; i++)
+                intervals[i] = new IntervalBase<int>(mid - i, mid + (i+1) * 2);
+
+            return intervals;
+        }
+
+        [Test, TestCaseSource(typeof(WithContainment), "ConstructorCounts")]
+        public void Constroctor(int count)
+        {
+            var intervals = GenerateIntervals(count);
+
+            var sw = new Stopwatch();
+
+            for (var i = 0; i < Repetitions; i++)
+            {
+                intervals.Shuffle();
+                sw.Start();
+                Intervaled = Factory(intervals);
+                sw.Stop();
+            }
+
+            sw.Stop();
+            Console.WriteLine("Average creation time for {0} intervals: {1} ms", intervals.Length, sw.ElapsedMilliseconds / Repetitions);
+        }
+
+        public static int[] ConstructorCounts = new[]
+            {
+                100000,
+                200000,
+                300000,
+                400000,
+                500000,
+                600000,
+                700000,
+                800000,
+                900000,
+                1000000
+            };
+    }
+
     class LCList_WithoutContainment : WithoutContainment
     {
         protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
@@ -93,6 +145,30 @@ namespace C5.Tests.intervaled
     }
 
     class SIT_WithoutContainment : WithoutContainment
+    {
+        protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        {
+            return new StaticIntervalTree<int>(intervals);
+        }
+    }
+
+    class LCList_WithContainment : WithContainment
+    {
+        protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        {
+            return new LayeredContainmentList<int>(intervals);
+        }
+    }
+
+    class NCList_WithContainment : WithContainment
+    {
+        protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        {
+            return new NestedContainmentList<int>(intervals);
+        }
+    }
+
+    class SIT_WithContainment : WithContainment
     {
         protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
