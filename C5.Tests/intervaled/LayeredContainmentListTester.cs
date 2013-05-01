@@ -716,25 +716,25 @@ namespace C5.Tests.intervaled
             [Test, Ignore] // Test number: 31
             public void CountOverlap_Empty()
             {
-                Assert.Equals(0, _empty.OverlapCount(new IntervalOfInt(2, 7, true, true)));
+                Assert.Equals(0, _empty.CountOverlaps(new IntervalOfInt(2, 7, true, true)));
             }
 
             [Test, Ignore] // Test number: 32
             public void CountOverlap_OneInterval()
             {
-                Assert.Equals(1, _oneInterval.OverlapCount(new IntervalOfInt(2, 7, true, true)));
+                Assert.Equals(1, _oneInterval.CountOverlaps(new IntervalOfInt(2, 7, true, true)));
             }
 
             [Test, Ignore] // Test number: 30, 33
             public void CountOverlap_MoreThanOne()
             {
-                Assert.Equals(2, _oneInterval.OverlapCount(new IntervalOfInt(2, 7, true, true)));
+                Assert.Equals(2, _oneInterval.CountOverlaps(new IntervalOfInt(2, 7, true, true)));
             }
 
             [Test, Ignore] // Test number: 29
             public void CountOverlap_MoreThanOneQueryNull()
             {
-                Assert.Equals(0, _oneInterval.OverlapCount(null));
+                Assert.Equals(0, _oneInterval.CountOverlaps(null));
             }
 
             #endregion
