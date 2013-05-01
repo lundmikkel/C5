@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace C5.intervaled
 {
-    class LayeredContainmentList<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
+    public class LayeredContainmentList<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
     {
         private readonly int _count;
         private readonly Node[][] _layers;
@@ -77,33 +77,31 @@ namespace C5.intervaled
         private ArrayList<ArrayList<Node>> createLayers(IInterval<T>[] intervals)
         {
             // Use a stack to keep track of current containment
-            IStack<IInterval<T>> stack = new ArrayList<IInterval<T>>();
+            var layer = 0;
             var layers = new ArrayList<ArrayList<Node>> { new ArrayList<Node>() };
 
             foreach (var interval in intervals)
             {
                 // Track containment
-                while (!stack.IsEmpty)
+                while (layer > 0)
                 {
                     // If the interval is contained in the top of the stack, leave it...
-                    if (stack.Last().Contains(interval))
+                    if (layers[layer - 1].Last.Interval.Contains(interval))
                         break;
 
-                    stack.Pop();
+                    layer--;
                 }
 
                 // Check if interval will be contained in the next layer
-                while (!layers[stack.Count].IsEmpty && layers[stack.Count].Last.Interval.Contains(interval))
-                    stack.Push(layers[stack.Count].Last.Interval);
+                while (!layers[layer].IsEmpty && layers[layer].Last.Interval.Contains(interval))
+                    layer++;
 
-                stack.Push(interval);
+                layer++;
 
-                while (layers.Count < stack.Count + 1)
+                while (layers.Count < layer + 1)
                     layers.Add(new ArrayList<Node>());
 
-                var layer = stack.Count - 1;
-
-                layers[layer].Add(new Node(interval, layers[layer + 1].Count));
+                layers[layer - 1].Add(new Node(interval, layers[layer].Count));
             }
 
             var lastCount = 0;
