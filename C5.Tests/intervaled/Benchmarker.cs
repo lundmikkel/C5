@@ -28,7 +28,7 @@ namespace C5.Tests.intervaled
     abstract class WithoutContainment
     {
         protected IIntervaled<int> Intervaled;
-        private const int Repetitions = 5000000;
+        private const int Repetitions = 200;
 
         protected abstract IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals);
 
@@ -79,11 +79,11 @@ namespace C5.Tests.intervaled
     abstract class WithoutContainmentOrOverlaps
     {
         protected IIntervaled<int> Intervaled;
-        private const int Repetitions = 200;
+        private const int Repetitions = 100000;
 
         protected abstract IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals);
 
-        public IInterval<int>[] GenerateIntervals(int count = 1000000)
+        public IInterval<int>[] GenerateIntervals(int count)
         {
             var intervals = new IInterval<int>[count];
 
@@ -93,8 +93,8 @@ namespace C5.Tests.intervaled
             return intervals;
         }
 
-        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "ConstructorCounts")]
-        public void Constroctor(int count)
+        [Test]
+        public void Constroctor([Range(100000, 1000000, 100000)] int count)
         {
             var intervals = GenerateIntervals(count);
 
@@ -112,45 +112,31 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average creation time for {0} intervals: {1} ms", intervals.Length, sw.ElapsedMilliseconds / Repetitions);
         }
 
-        public static int[] ConstructorCounts = new[]
-            {
-                100000,
-                200000,
-                300000,
-                400000,
-                500000,
-                600000,
-                700000,
-                800000,
-                900000,
-                1000000
-            };
-
-        [Test, TestCaseSource(typeof(WithoutContainment), "ConstructorCounts")]
-        public void Stabbing(int count)
+        [Test]
+        public void Stabbing([Range(1000000, 10000000, 1000000)] int count)
         {
             Intervaled = Factory(GenerateIntervals(count));
 
             var span = Intervaled.Span;
             var step = (float) (span.High - span.Low) / Repetitions;
             var sw = new Stopwatch();
+            IInterval<int> interval = null;
             sw.Start();
-
             for (var i = 0; i < Repetitions; i++)
             {
-                // var query =; // random.Next(span.Low, span.High);
-                Intervaled.FindOverlaps((int) (step * i)).Count();
+                foreach (var overlap in Intervaled.FindOverlaps((int) (step * i)))
+                    interval = overlap;
             }
             sw.Stop();
 
-            Console.WriteLine("Average creation time for {0} intervals: {1} ms", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions);
+            Console.WriteLine("Average creation time for {0} intervals: {1} ms (total: {2})", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions, sw.ElapsedMilliseconds);
         }
     }
 
     abstract class ContainmentOnly
     {
         protected IIntervaled<int> Intervaled;
-        private const int Repetitions = 1;
+        private const int Repetitions = 200;
 
         protected abstract IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals);
 
@@ -202,7 +188,7 @@ namespace C5.Tests.intervaled
     abstract class WithContainment
     {
         protected IIntervaled<int> Intervaled;
-        private const int Repetitions = 1;
+        private const int Repetitions = 200;
 
         protected abstract IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals);
 
