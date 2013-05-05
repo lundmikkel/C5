@@ -74,6 +74,48 @@ namespace C5.Tests.intervaled
                 900000,
                 1000000
             };
+
+        [Test, TestCaseSource(typeof(WithoutContainment), "ConstructorCounts")]
+        public void Stabbing(int count)
+        {
+            Intervaled = Factory(GenerateIntervals(count));
+
+            var span = Intervaled.Span;
+            var step = (float)(span.High - span.Low) / Repetitions;
+            var sw = new Stopwatch();
+            sw.Start();
+
+            for (var i = 0; i < Repetitions; i++)
+            {
+                // var query =; // random.Next(span.Low, span.High);
+                Intervaled.FindOverlaps((int)(step * i)).Count();
+            }
+            sw.Stop();
+
+            Console.WriteLine("Average creation time for {0} intervals: {1} ms", Intervaled.Count, (float)sw.ElapsedMilliseconds / Repetitions);
+        }
+
+        [Test, TestCaseSource(typeof(WithoutContainment), "ConstructorCounts")]
+        public void RangeQuery(int count)
+        {
+            Intervaled = Factory(GenerateIntervals(count));
+
+            var length = 10;
+            var span = Intervaled.Span;
+            var step = (float)(span.High - span.Low - 20) / Repetitions;
+            var sw = new Stopwatch();
+            sw.Start();
+
+            for (var i = 0; i < Repetitions; i++)
+            {
+                var query = (int)(step * i);
+                // var query =; // random.Next(span.Low, span.High);
+                Intervaled.FindOverlaps(new IntervalBase<int>(query, query + length)).Count();
+            }
+            sw.Stop();
+
+            Console.WriteLine("Average creation time for {0} intervals: {1} ms", Intervaled.Count, (float)sw.ElapsedMilliseconds / Repetitions);
+        }
     }
 
     abstract class WithoutContainmentOrOverlaps
@@ -125,49 +167,6 @@ namespace C5.Tests.intervaled
                 900000,
                 1000000
             };
-
-        [Test, TestCaseSource(typeof(WithoutContainment), "ConstructorCounts")]
-        public void Stabbing(int count)
-        {
-            Intervaled = Factory(GenerateIntervals(count));
-
-            var span = Intervaled.Span;
-            var step = (float) (span.High - span.Low) / Repetitions;
-            var sw = new Stopwatch();
-            sw.Start();
-
-            for (var i = 0; i < Repetitions; i++)
-            {
-                // var query =; // random.Next(span.Low, span.High);
-                Intervaled.FindOverlaps((int) (step * i)).Count();
-            }
-            sw.Stop();
-
-            Console.WriteLine("Average creation time for {0} intervals: {1} ms", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions);
-        }
-
-        [Test, TestCaseSource(typeof(WithoutContainment), "ConstructorCounts")]
-        public void RangeQuery(int count)
-        {
-            Intervaled = Factory(GenerateIntervals(count));
-
-            var length = 10;
-            var span = Intervaled.Span;
-            var step = (float)(span.High - span.Low - 20) / Repetitions;
-            var sw = new Stopwatch();
-            sw.Start();
-
-            for (var i = 0; i < Repetitions; i++)
-            {
-                var query = (int)(step * i);
-                // var query =; // random.Next(span.Low, span.High);
-                Intervaled.FindOverlaps(new IntervalBase<int>(query, query + length)).Count();
-            }
-            sw.Stop();
-
-            Console.WriteLine("Average creation time for {0} intervals: {1} ms", Intervaled.Count, (float)sw.ElapsedMilliseconds / Repetitions);
-        }
-
     }
 
     abstract class ContainmentOnly
