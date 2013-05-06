@@ -139,7 +139,7 @@ namespace C5.Tests.intervaled
 
                 Console.WriteLine(set);
 
-                Assert.That(Intervaled.FindOverlaps(query).Count() == 20930);
+                Assert.That(Intervaled.FindOverlaps(query).Count() == 20931);
             }
 
             [Test, Ignore]
