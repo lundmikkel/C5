@@ -5,11 +5,12 @@ using System.Linq;
 
 namespace C5.intervaled
 {
-    public class NestedContainmentList<T> : IStaticIntervaled<T> where T : IComparable<T>
+    public class NestedContainmentList<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
     {
         private readonly Node[] _list;
-        private IInterval<T> _span;
-        private Section _section;
+        private readonly IInterval<T> _span;
+        private readonly Section _section;
+        private readonly int _count;
 
         struct Section
         {
@@ -31,17 +32,11 @@ namespace C5.intervaled
             internal IInterval<T> Interval { get; private set; }
             internal Section Sublist { get; private set; }
 
-            internal int NodesBefore { get; private set; }
-            internal int NodesInSublist { get; private set; }
-
-            internal Node(IInterval<T> interval, Section section, int nodesBefore, int nodesInSublist)
+            internal Node(IInterval<T> interval, Section section)
                 : this()
             {
                 Interval = interval;
                 Sublist = section;
-
-                NodesBefore = nodesBefore;
-                NodesInSublist = nodesInSublist;
             }
 
             public override string ToString()
@@ -64,10 +59,7 @@ namespace C5.intervaled
             var end = target.Offset + target.Length;
             var t = target.Offset;
 
-            // Remember the number of nodes before the current node to allow fast count operation
-            var nodesBefore = 0;
-
-            for (int s = source.Offset; s < source.Offset + source.Length; s++)
+            for (var s = source.Offset; s < source.Offset + source.Length; s++)
             {
                 var interval = intervals[s];
                 var contained = 0;
@@ -91,9 +83,7 @@ namespace C5.intervaled
                     length = createList(intervals, new Section(s - contained + 1, contained), new Section(end, contained));
                 }
 
-                _list[t++] = new Node(interval, new Section(end, length), nodesBefore, contained);
-
-                nodesBefore += contained + 1;
+                _list[t++] = new Node(interval, new Section(end, length));
             }
 
             return t - target.Offset;
@@ -109,9 +99,9 @@ namespace C5.intervaled
 
             if (!intervalsArray.IsEmpty())
             {
-                Count = intervalsArray.Count();
+                _count = intervalsArray.Count();
 
-                Sorting.IntroSort(intervalsArray, 0, Count, ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareTo));
+                Sorting.IntroSort(intervalsArray, 0, _count, ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareTo));
 
                 // TODO: Figure out how Orcomp does it
                 //MaximumOverlap = IntervaledHelper<T>.MaximumOverlap(intervalsArray);
@@ -123,13 +113,7 @@ namespace C5.intervaled
                 _section = new Section(0, createList(intervalsArray, totalSection, totalSection));
 
                 // Save span to allow for constant speeds on later requests
-                IInterval<T> i = _list[_section.Offset].Interval, j = _list[_section.Length + _section.Offset - 1].Interval;
-                Span = new IntervalBase<T>(i.Low, j.High, i.LowIncluded, j.HighIncluded);
-            }
-            else
-            {
-                _list = new Node[0];
-                _section = new Section(0, 0);
+                _span = new IntervalBase<T>(_list[_section.Offset].Interval, _list[_section.Length + _section.Offset - 1].Interval);
             }
         }
 
@@ -143,15 +127,6 @@ namespace C5.intervaled
         }
 
         // TODO: Test the order is still the same as when sorted with IntervalComparer. This should be that case!
-        /// <summary>
-        /// Create an enumerator, enumerating the intervals in sorted order - sorted on low endpoint with shortest intervals first
-        /// </summary>
-        /// <returns>Enumerator</returns>
-        // TODO: Test the order is still the same as when sorted with IntervalComparer. This should be that case!
-        public SCG.IEnumerator<IInterval<T>> GetEnumerator()
-        {
-            return getEnumerator(_section);
-        }
 
         private SCG.IEnumerator<IInterval<T>> getEnumerator(Section section)
         {
@@ -159,9 +134,10 @@ namespace C5.intervaled
             if (_list == null || section.Length == 0)
                 yield break;
 
-            for (int i = section.Offset; i < section.Offset + section.Length; i++)
+            for (var i = section.Offset; i < section.Offset + section.Length; i++)
             {
                 var node = _list[i];
+
                 // Yield the interval itself before the sublist to maintain sorting order
                 yield return node.Interval;
 
@@ -187,6 +163,17 @@ namespace C5.intervaled
 
         #region IShowable
 
+
+        /// <summary>
+        /// Create an enumerator, enumerating the intervals in sorted order - sorted on low endpoint with shortest intervals first
+        /// </summary>
+        /// <returns>Enumerator</returns>
+        // TODO: Test the order is still the same as when sorted with IntervalComparer. This should be that case!
+        public override SCG.IEnumerator<IInterval<T>> GetEnumerator()
+        {
+            return getEnumerator(_section);
+        }
+
         public bool Show(System.Text.StringBuilder stringbuilder, ref int rest, IFormatProvider formatProvider)
         {
             throw new NotImplementedException();
@@ -198,83 +185,16 @@ namespace C5.intervaled
 
         #region ICollectionValue
 
-        #region Events
+        public override bool IsEmpty { get { return Count == 0; } }
+        public override int Count { get { return _count; } }
+        public override Speed CountSpeed { get { return Speed.Constant; } }
 
-        // The structure is static and has therefore no meaningful events
-        public EventTypeEnum ListenableEvents { get { return EventTypeEnum.None; } }
-        public EventTypeEnum ActiveEvents { get { return EventTypeEnum.None; } }
-
-        public event CollectionChangedHandler<IInterval<T>> CollectionChanged;
-        public event CollectionClearedHandler<IInterval<T>> CollectionCleared;
-        public event ItemsAddedHandler<IInterval<T>> ItemsAdded;
-        public event ItemInsertedHandler<IInterval<T>> ItemInserted;
-        public event ItemsRemovedHandler<IInterval<T>> ItemsRemoved;
-        public event ItemRemovedAtHandler<IInterval<T>> ItemRemovedAt;
-
-        #endregion
-
-        public bool IsEmpty { get { return Count == 0; } }
-        public int Count { get; private set; }
-        public Speed CountSpeed { get { return Speed.Constant; } }
-
-        public void CopyTo(IInterval<T>[] array, int index)
-        {
-            if (index < 0 || index + Count > array.Length)
-                throw new ArgumentOutOfRangeException();
-
-            foreach (var item in this)
-                array[index++] = item;
-        }
-
-        public IInterval<T>[] ToArray()
-        {
-            var res = new IInterval<T>[Count];
-            var i = 0;
-
-            foreach (var item in this)
-                res[i++] = item;
-
-            return res;
-        }
-
-        public void Apply(Action<IInterval<T>> action)
-        {
-            foreach (var item in this)
-                action(item);
-        }
-
-        public bool Exists(Func<IInterval<T>, bool> predicate)
-        {
-            return this.Any(predicate);
-        }
-
-        public bool Find(Func<IInterval<T>, bool> predicate, out IInterval<T> item)
-        {
-            foreach (var jtem in this.Where(predicate))
-            {
-                item = jtem;
-                return true;
-            }
-            item = default(IInterval<T>);
-            return false;
-        }
-
-        public bool All(Func<IInterval<T>, bool> predicate)
-        {
-            return Enumerable.All(this, predicate);
-        }
-
-        public IInterval<T> Choose()
+        public override IInterval<T> Choose()
         {
             if (Count > 0)
                 return _list[_section.Offset].Interval;
 
             throw new NoSuchItemException();
-        }
-
-        public SCG.IEnumerable<IInterval<T>> Filter(Func<IInterval<T>, bool> filter)
-        {
-            return this.Where(filter);
         }
 
         #endregion
@@ -285,17 +205,12 @@ namespace C5.intervaled
         {
             get
             {
-                // TODO: Use a better exception? Return null for empty collection?
                 if (IsEmpty)
                     throw new InvalidOperationException("An empty collection has no span");
 
                 return _span;
             }
-
-            private set { _span = value; }
         }
-
-        public Speed SpanSpeed { get { return Speed.Constant; } }
 
         public SCG.IEnumerable<IInterval<T>> FindOverlaps(T query)
         {
@@ -305,7 +220,6 @@ namespace C5.intervaled
             return findOverlap(_section, new IntervalBase<T>(query));
         }
 
-        // TODO: Test speed difference between version that takes overlap-loop and upper and low bound loop
         private SCG.IEnumerable<IInterval<T>> findOverlap(Section section, IInterval<T> query)
         {
             if (_list == null || section.Length == 0)
@@ -336,9 +250,6 @@ namespace C5.intervaled
         /// <summary>
         /// Get the index of the first node with an interval the overlaps the query
         /// </summary>
-        /// <param name="list"></param>
-        /// <param name="query"></param>
-        /// <returns></returns>
         private int searchHighInLows(Section section, IInterval<T> query)
         {
             if (query == null || section.Length == 0)
@@ -348,7 +259,7 @@ namespace C5.intervaled
 
             while (min <= max)
             {
-                var middle = (max + min) / 2;
+                var middle = min + ((max - min) >> 1);
 
                 if (query.Overlaps(_list[middle].Interval))
                 {
@@ -379,9 +290,6 @@ namespace C5.intervaled
         /// <summary>
         /// Get the index of the last node with an interval the overlaps the query
         /// </summary>
-        /// <param name="list"></param>
-        /// <param name="query"></param>
-        /// <returns></returns>
         private int searchLowInHighs(Section section, IInterval<T> query)
         {
             if (query == null || section.Length == 0)
@@ -428,11 +336,8 @@ namespace C5.intervaled
 
         public bool OverlapExists(IInterval<T> query)
         {
-            if (query == null)
-                return false;
-
             // Check if query overlaps the collection at all
-            if (_list.IsEmpty() || !query.Overlaps(Span))
+            if (query == null || _list == null || !query.Overlaps(Span))
                 return false;
 
             // Find first overlap
@@ -442,79 +347,11 @@ namespace C5.intervaled
             return _section.Offset <= i && i < _section.Offset + _section.Length && _list[i].Interval.Overlaps(query);
         }
 
-        public int MaximumOverlap { get; private set; }
-
-        #region Static Intervaled
-
         public int CountOverlaps(IInterval<T> query)
         {
-            if (query == null)
-                return 0;
-
-            // The number of overlaps is the difference between the number of nodes not after the last overlap
-            // and the number of nodes before the first overlap
-            return countNotAfter(_section, query) - countBefore(_section, query);
+            return FindOverlaps(query).Count();
         }
 
-        private int countBefore(Section section, IInterval<T> query)
-        {
-            // Return 0 if list is empty
-            if (_list == null || section.Length == 0)
-                return 0;
-
-            var i = searchHighInLows(section, query);
-
-            // query is before the list's span
-            if (i == section.Offset && !query.Overlaps(_list[section.Offset].Interval))
-                return 0;
-
-            // query is after the list's span
-            if (i >= section.Offset + section.Length)
-                return nodesInList(section);
-
-            // The interval overlaps so all intervals before don't
-            // We still need to check the sublist though
-            if (query.Overlaps(_list[i].Interval))
-                return _list[i].NodesBefore + countBefore(_list[i].Sublist, query);
-
-            return _list[i].NodesBefore;
-        }
-
-        private int countNotAfter(Section section, IInterval<T> query)
-        {
-            // Return 0 if list is empty
-            if (_list == null || section.Length == 0)
-                return 0;
-
-            var i = searchLowInHighs(section, query);
-
-            // query is after the list's span
-            if (i == section.Offset + section.Length - 1 && !query.Overlaps(_list[section.Offset].Interval))
-                return nodesInList(section);
-
-            // query is before the list's span
-            if (i < section.Offset)
-                return 0;
-
-            // If the interval doesn't overlap
-            if (!query.Overlaps(_list[i].Interval))
-                return nodesBeforeNext(_list[i]);
-
-            return _list[i].NodesBefore + 1 + countNotAfter(_list[i].Sublist, query);
-        }
-
-        private int nodesInList(Section section)
-        {
-            return nodesBeforeNext(_list[section.Offset + section.Length - 1]);
-        }
-
-        private static int nodesBeforeNext(Node node)
-        {
-            // Nodes before the node, one for the node itself and the number of nodes in the sublist
-            return node.NodesBefore + 1 + node.NodesInSublist;
-        }
-
-        #endregion
 
         #endregion
     }
