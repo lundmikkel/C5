@@ -507,7 +507,7 @@ namespace C5.Tests.intervaled
                 }
 
                 var sw = Stopwatch.StartNew();
-                const int count = 1000;
+                const int count = 1;
                 for (var i = 0; i < count; i++)
                 {
                     Intervaled = Factory(intervalList);
@@ -522,7 +522,7 @@ namespace C5.Tests.intervaled
                 Assert.That(Intervaled.FindOverlaps(new IntervalBase<int>(1357516800, 1358121599)).Count() == 42);
 
                 var sw = Stopwatch.StartNew();
-                const int count = 1000;
+                const int count = 1;
                 for (var i = 0; i < count; i++)
                 {
                     Intervaled.FindOverlaps(new IntervalBase<int>(1357516800, 1358121599)).Count();
@@ -569,8 +569,7 @@ namespace C5.Tests.intervaled
             {
                 Console.WriteLine(Intervaled.FindOverlaps(new IntervalBase<int>(9231, 24228, true, true)).Count());
 
-                //Assert.That(((LayeredContainmentList<int>) Intervaled).OverlapCount(new IntervalBase<int>(9231, 24228)) == 20930);
-                Assert.That(Intervaled.FindOverlaps(new IntervalBase<int>(9231, 24228)).Count() == 20930);
+                Assert.That(Intervaled.FindOverlaps(new IntervalBase<int>(9231, 24228)).Count() == 20931);
 
                 var sw = Stopwatch.StartNew();
                 const int count = 1;// 000;
@@ -612,7 +611,7 @@ namespace C5.Tests.intervaled
             {
                 var sw = Stopwatch.StartNew();
 
-                const int count = 1000;
+                const int count = 1;
 
                 for (var i = 0; i < count; i++)
                     Intervaled.FindOverlaps(query).Count();

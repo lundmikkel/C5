@@ -28,7 +28,7 @@ namespace C5.Tests.intervaled
     abstract class WithoutContainment
     {
         protected IIntervaled<int> Intervaled;
-        private const int Repetitions = 200;
+        private const int Repetitions = 1000000;
 
         protected abstract IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals);
 
@@ -40,6 +40,27 @@ namespace C5.Tests.intervaled
                 intervals[i] = new IntervalBase<int>(i, i + 5);
 
             return intervals;
+        }
+
+        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "DoubleCounts")]
+        public void RangeQuery(string name, int count)
+        {
+            Intervaled = Factory(GenerateIntervals(count));
+
+            var length = 20;
+            var span = Intervaled.Span;
+            var step = (float) (span.High - span.Low - 20) / Repetitions;
+            var sw = new Stopwatch();
+            sw.Start();
+
+            for (var i = 0; i < Repetitions; i++)
+            {
+                var low = (int) (step * i);
+                Intervaled.FindOverlaps(new IntervalBase<int>(low, low + length)).Count();
+            }
+            sw.Stop();
+
+            Console.WriteLine("Average creation time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
         }
 
         [Test, TestCaseSource(typeof(WithoutContainment), "ConstructorCounts")]
@@ -61,6 +82,26 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average creation time for {0} intervals: {1} ms", intervals.Length, sw.ElapsedMilliseconds / Repetitions);
         }
 
+        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "QueryLengths")]
+        public void RangeFixCountQuery(string name, int length)
+        {
+            Intervaled = Factory(GenerateIntervals(1000000));
+
+            var span = Intervaled.Span;
+            var step = (float) (span.High - span.Low - 20 - length) / Repetitions;
+            var sw = new Stopwatch();
+            sw.Start();
+
+            for (var i = 0; i < Repetitions; i++)
+            {
+                var low = (int) (step * i);
+                Intervaled.FindOverlaps(new IntervalBase<int>(low, low + length)).Count();
+            }
+            sw.Stop();
+
+            Console.WriteLine("Average query time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
+        }
+
         public static int[] ConstructorCounts = new[]
             {
                 100000,
@@ -79,7 +120,7 @@ namespace C5.Tests.intervaled
     abstract class WithoutContainmentOrOverlaps
     {
         protected IIntervaled<int> Intervaled;
-        private const int Repetitions = 100000;
+        private const int Repetitions = 1000000;
 
         protected abstract IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals);
 
@@ -132,34 +173,83 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average creation time for {0} intervals: {1} ms (total: {2})", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions, sw.ElapsedMilliseconds);
         }
 
-        [Test, TestCaseSource(typeof(WithoutContainment), "ConstructorCounts")]
-        public void RangeQuery(int count)
+        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "DoubleCounts")]
+        public void RangeQuery(string name, int count)
         {
             Intervaled = Factory(GenerateIntervals(count));
 
-            var length = 10;
+            var length = 20;
             var span = Intervaled.Span;
-            var step = (float)(span.High - span.Low - 20) / Repetitions;
+            var step = (float) (span.High - span.Low - 20) / Repetitions;
             var sw = new Stopwatch();
             sw.Start();
 
             for (var i = 0; i < Repetitions; i++)
             {
-                var query = (int)(step * i);
-                // var query =; // random.Next(span.Low, span.High);
-                Intervaled.FindOverlaps(new IntervalBase<int>(query, query + length)).Count();
+                var low = (int) (step * i);
+                Intervaled.FindOverlaps(new IntervalBase<int>(low, low + length)).Count();
             }
             sw.Stop();
 
-            Console.WriteLine("Average creation time for {0} intervals: {1} ms", Intervaled.Count, (float)sw.ElapsedMilliseconds / Repetitions);
+            Console.WriteLine("Average creation time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
         }
 
+        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "QueryLengths")]
+        public void RangeFixCountQuery(string name, int length)
+        {
+            Intervaled = Factory(GenerateIntervals(1000000));
+
+            var span = Intervaled.Span;
+            var step = (float) (span.High - span.Low - 20 - length) / Repetitions;
+            var sw = new Stopwatch();
+            sw.Start();
+
+            for (var i = 0; i < Repetitions; i++)
+            {
+                var low = (int) (step * i);
+                Intervaled.FindOverlaps(new IntervalBase<int>(low, low + length)).Count();
+            }
+            sw.Stop();
+
+            Console.WriteLine("Average query time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
+        }
+
+
+        public static object[] DoubleCounts = new object[]
+            {
+               new object[] {"A", 8000 * (int) Math.Pow(2, 0)},
+               new object[] {"B", 8000 * (int) Math.Pow(2, 1)},
+               new object[] {"C", 8000 * (int) Math.Pow(2, 2)},
+               new object[] {"D", 8000 * (int) Math.Pow(2, 3)},
+               new object[] {"E", 8000 * (int) Math.Pow(2, 4)},
+               new object[] {"F", 8000 * (int) Math.Pow(2, 5)},
+               new object[] {"G", 8000 * (int) Math.Pow(2, 6)},
+               new object[] {"H", 8000 * (int) Math.Pow(2, 7)},
+               new object[] {"I", 8000 * (int) Math.Pow(2, 8)},
+               new object[] {"J", 8000 * (int) Math.Pow(2, 9)},
+               new object[] {"K", 8000 * (int) Math.Pow(2, 10)},
+               new object[] {"L", 8000 * (int) Math.Pow(2, 11)}
+            };
+
+        public static object[] QueryLengths = new object[]
+            {
+               new object[] {"A",  100},
+               new object[] {"B",  200},
+               new object[] {"C",  300},
+               new object[] {"D",  400},
+               new object[] {"E",  500},
+               new object[] {"F",  600},
+               new object[] {"G",  700},
+               new object[] {"H",  800},
+               new object[] {"I",  900},
+               new object[] {"J", 1000}
+            };
     }
 
     abstract class ContainmentOnly
     {
         protected IIntervaled<int> Intervaled;
-        private const int Repetitions = 200;
+        private const int Repetitions = 1000000;
 
         protected abstract IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals);
 
@@ -193,6 +283,47 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average creation time for {0} intervals: {1} ms", intervals.Length, sw.ElapsedMilliseconds / Repetitions);
         }
 
+        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "QueryLengths")]
+        public void RangeFixCountQuery(string name, int length)
+        {
+            Intervaled = Factory(GenerateIntervals(1000000));
+
+            var span = Intervaled.Span;
+            var step = (float) (span.High - span.Low - 20 - length) / Repetitions;
+            var sw = new Stopwatch();
+            sw.Start();
+
+            for (var i = 0; i < Repetitions; i++)
+            {
+                var low = (int) (step * i);
+                Intervaled.FindOverlaps(new IntervalBase<int>(low, low + length)).Count();
+            }
+            sw.Stop();
+
+            Console.WriteLine("Average query time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
+        }
+
+        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "DoubleCounts")]
+        public void RangeQuery(string name, int count)
+        {
+            Intervaled = Factory(GenerateIntervals(count));
+
+            var length = 20;
+            var span = Intervaled.Span;
+            var step = (float) (span.High - span.Low - 20) / Repetitions;
+            var sw = new Stopwatch();
+            sw.Start();
+
+            for (var i = 0; i < Repetitions; i++)
+            {
+                var low = (int) (step * i);
+                Intervaled.FindOverlaps(new IntervalBase<int>(low, low + length)).Count();
+            }
+            sw.Stop();
+
+            Console.WriteLine("Average creation time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
+        }
+
         public static int[] ConstructorCounts = new[]
             {
                 100000,
@@ -211,7 +342,7 @@ namespace C5.Tests.intervaled
     abstract class WithContainment
     {
         protected IIntervaled<int> Intervaled;
-        private const int Repetitions = 200;
+        private const int Repetitions = 1000000;
 
         protected abstract IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals);
 
@@ -249,6 +380,27 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average creation time for {0} intervals: {1} ms", intervals.Length, sw.ElapsedMilliseconds / Repetitions);
         }
 
+        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "DoubleCounts")]
+        public void RangeQuery(string name, int count)
+        {
+            Intervaled = Factory(GenerateIntervals(count));
+
+            var length = 20;
+            var span = Intervaled.Span;
+            var step = (float) (span.High - span.Low - 20) / Repetitions;
+            var sw = new Stopwatch();
+            sw.Start();
+
+            for (var i = 0; i < Repetitions; i++)
+            {
+                var low = (int) (step * i);
+                Intervaled.FindOverlaps(new IntervalBase<int>(low, low + length)).Count();
+            }
+            sw.Stop();
+
+            Console.WriteLine("Average creation time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
+        }
+
         public static int[] ConstructorCounts = new[]
             {
                 100000,
@@ -261,6 +413,41 @@ namespace C5.Tests.intervaled
                 800000,
                 900000,
                 1000000
+            };
+
+        [Test, TestCaseSource(typeof(WithContainment), "RangeCounts")]
+        public void RangeFixCountQuery(string name, int length)
+        {
+            Intervaled = Factory(GenerateIntervals(1000000));
+
+            var span = Intervaled.Span;
+            var step = (float) (span.High - span.Low - 20 - length) / Repetitions;
+            var sw = new Stopwatch();
+            sw.Start();
+
+            for (var i = 0; i < Repetitions; i++)
+            {
+                var low = (int) (step * i);
+                Intervaled.FindOverlaps(new IntervalBase<int>(low, low + length)).Count();
+            }
+            sw.Stop();
+
+            Console.WriteLine("Average query time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
+        }
+
+
+        public static object[] RangeCounts = new object[]
+            {
+               new object[] {"A",  100},
+               new object[] {"B",  200},
+               new object[] {"C",  300},
+               new object[] {"D",  400},
+               new object[] {"E",  500},
+               new object[] {"F",  600},
+               new object[] {"G",  700},
+               new object[] {"H",  800},
+               new object[] {"I",  900},
+               new object[] {"J", 1000}
             };
     }
 
