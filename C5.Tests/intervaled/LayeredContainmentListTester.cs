@@ -125,7 +125,7 @@ namespace C5.Tests.intervaled
                 var query = new IntervalBase<int>(9231, 24228);
 
                 Console.WriteLine(Intervaled.FindOverlaps(query).Count());
-                Console.WriteLine(((IStaticIntervaled<int>) Intervaled).CountOverlaps(query));
+                Console.WriteLine(((IStaticIntervaled<int>)Intervaled).CountOverlaps(query));
 
                 var comparer = ComparerFactory<IInterval<int>>.CreateEqualityComparer(IntervalExtensions.Equals, IntervalExtensions.GetHashCode);
 
@@ -145,7 +145,7 @@ namespace C5.Tests.intervaled
             [Test, Ignore]
             public void Print()
             {
-                File.WriteAllText(@"../../intervaled/data/lclist100000.gv", ((LayeredContainmentList<int>) Intervaled).Graphviz());
+                File.WriteAllText(@"../../intervaled/data/lclist100000.gv", ((LayeredContainmentList<int>)Intervaled).Graphviz());
             }
         }
 
@@ -435,7 +435,7 @@ namespace C5.Tests.intervaled
                 [Test]
                 public void Print()
                 {
-                    Console.WriteLine(((LayeredContainmentList<int>) _intervaled).Graphviz());
+                    Console.WriteLine(((LayeredContainmentList<int>)_intervaled).Graphviz());
                 }
 
                 [Test]
@@ -713,25 +713,25 @@ namespace C5.Tests.intervaled
 
             #region CountOverlap
 
-            [Test, Ignore] // Test number: 31
+            [Test] // Test number: 31
             public void CountOverlap_Empty()
             {
                 Assert.Equals(0, _empty.CountOverlaps(new IntervalOfInt(2, 7, true, true)));
             }
 
-            [Test, Ignore] // Test number: 32
+            [Test] // Test number: 32
             public void CountOverlap_OneInterval()
             {
                 Assert.Equals(1, _oneInterval.CountOverlaps(new IntervalOfInt(2, 7, true, true)));
             }
 
-            [Test, Ignore] // Test number: 30, 33
+            [Test] // Test number: 30, 33
             public void CountOverlap_MoreThanOne()
             {
                 Assert.Equals(2, _oneInterval.CountOverlaps(new IntervalOfInt(2, 7, true, true)));
             }
 
-            [Test, Ignore] // Test number: 29
+            [Test] // Test number: 29
             public void CountOverlap_MoreThanOneQueryNull()
             {
                 Assert.Equals(0, _oneInterval.CountOverlaps(null));
