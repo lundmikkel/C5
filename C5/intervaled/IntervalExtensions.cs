@@ -11,45 +11,45 @@ namespace C5.intervaled
         /// <summary>
         /// Compare two intervals to see if they overlap
         /// </summary>
-        /// <param name="i">First interval</param>
-        /// <param name="j">Second interval</param>
+        /// <param name="x">First interval</param>
+        /// <param name="y">Second interval</param>
         /// <returns>True if the intervals overlap, otherwise false</returns>
-        public static bool Overlaps<T>(this IInterval<T> i, IInterval<T> j) where T : IComparable<T>
+        public static bool Overlaps<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             // Save compare values to avoid comparing twice in case CompareTo() should be expensive
-            int ijCompare = i.Low.CompareTo(j.High), jiCompare = j.Low.CompareTo(i.High);
-            return (ijCompare < 0 || ijCompare == 0 && i.LowIncluded && j.HighIncluded)
-                && (jiCompare < 0 || jiCompare == 0 && j.LowIncluded && i.HighIncluded);
+            int ijCompare = x.Low.CompareTo(y.High), jiCompare = y.Low.CompareTo(x.High);
+            return (ijCompare < 0 || ijCompare == 0 && x.LowIncluded && y.HighIncluded)
+                && (jiCompare < 0 || jiCompare == 0 && y.LowIncluded && x.HighIncluded);
         }
 
         /// <summary>
         /// Compare an interval with a point interval to see if they overlap
         /// </summary>
-        /// <param name="i">Interval</param>
-        /// <param name="j">Point interval</param>
+        /// <param name="x">Interval</param>
+        /// <param name="p">Point interval</param>
         /// <returns>True if the intervals overlap, otherwise false</returns>
-        public static bool Overlaps<T>(this IInterval<T> i, T j) where T : IComparable<T>
+        public static bool Overlaps<T>(this IInterval<T> x, T p) where T : IComparable<T>
         {
-            return Overlaps(i, new IntervalBase<T>(j));
+            return Overlaps(x, new IntervalBase<T>(p));
         }
 
         /// <summary>
         /// Check if one interval contains another interval.
-        /// i contains j if i.Low is lower than j.Low and j.High is lower than i.High.
+        /// x contains y if x.Low is lower than y.Low and y.High is lower than x.High.
         /// If endpoints are equal endpoint inclusion is also taken into account.
         /// </summary>
-        /// <param name="i">Container interval</param>
-        /// <param name="j">Contained interval</param>
-        /// <returns>True if j is contained in i</returns>
-        public static bool Contains<T>(this IInterval<T> i, IInterval<T> j) where T : IComparable<T>
+        /// <param name="x">Container interval</param>
+        /// <param name="y">Contained interval</param>
+        /// <returns>True if y is contained in x</returns>
+        public static bool Contains<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             // Save compare values to avoid comparing twice in case CompareTo() should be expensive
-            int lowCompare = i.Low.CompareTo(j.Low), highCompare = j.High.CompareTo(i.High);
+            int lowCompare = x.Low.CompareTo(y.Low), highCompare = y.High.CompareTo(x.High);
             return
                 // Low
-                (lowCompare < 0 || (lowCompare == 0 && i.LowIncluded && !j.LowIncluded))
+                (lowCompare < 0 || (lowCompare == 0 && x.LowIncluded && !y.LowIncluded))
                 // High
-                && (highCompare < 0 || (highCompare == 0 && !j.HighIncluded && i.HighIncluded));
+                && (highCompare < 0 || (highCompare == 0 && !y.HighIncluded && x.HighIncluded));
         }
 
         /// <summary>
@@ -63,45 +63,45 @@ namespace C5.intervaled
         /// If the high endpoints are equal, the interval with excluded high endpoint comes first.
         /// If the high endpoint inclusions are equal, the interval are equal.
         /// </summary>
-        /// <param name="i">First interval</param>
-        /// <param name="j">Second interval</param>
-        /// <returns>Negative integer if i comes before j, 0 if they are equal, positive integer if i comes after j</returns>
-        public static int CompareTo<T>(this IInterval<T> i, IInterval<T> j) where T : IComparable<T>
+        /// <param name="x">First interval</param>
+        /// <param name="y">Second interval</param>
+        /// <returns>Negative integer if x comes before y, 0 if they are equal, positive integer if x comes after y</returns>
+        public static int CompareTo<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
-            var lowCompare = i.Low.CompareTo(j.Low);
+            var lowCompare = x.Low.CompareTo(y.Low);
 
-            // Check if i starts j - their lows are the same
+            // Check if x starts y - their lows are the same
             if (lowCompare == 0)
             {
                 // If both include or exclude their low endpoint, we don't care which one is first
-                if (i.LowIncluded == j.LowIncluded)
+                if (x.LowIncluded == y.LowIncluded)
                 {
-                    return CompareHigh(i, j);
+                    return CompareHigh(x, y);
                 }
 
-                // i.LowIncluded and j.LowIncluded are different
-                // So if i.LowIncluded is true it comes before j
-                return i.LowIncluded ? -1 : 1;
+                // x.LowIncluded and y.LowIncluded are different
+                // So if x.LowIncluded is true it comes before y
+                return x.LowIncluded ? -1 : 1;
             }
 
             // We can simply compare their low points
             return lowCompare;
         }
 
-        public static int CompareHigh<T>(this IInterval<T> i, IInterval<T> j) where T : IComparable<T>
+        public static int CompareHigh<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
-            var highCompare = i.High.CompareTo(j.High);
+            var highCompare = x.High.CompareTo(y.High);
 
-            // Check if i finishes j - their highs are the same
+            // Check if x finishes y - their highs are the same
             if (highCompare == 0)
             {
                 // If both include or exclude the high endpoint, we don't care which one is first
-                if (i.HighIncluded == j.HighIncluded)
+                if (x.HighIncluded == y.HighIncluded)
                     return 0;
 
-                // i.HighIncluded and j.HighIncluded are different
-                // So if i.HighIncluded is true it comes before j in the sorting order - we don't know anything about their actual relation
-                return !i.HighIncluded ? -1 : 1;
+                // x.HighIncluded and y.HighIncluded are different
+                // So if x.HighIncluded is true it comes before y in the sorting order - we don't know anything about their actual relation
+                return !x.HighIncluded ? -1 : 1;
             }
 
             // We can simply compare their high points - but we swap the order as the highest endpoint has the lowest sorting order
@@ -111,29 +111,29 @@ namespace C5.intervaled
         /// <summary>
         /// Check if two intervals are equal, i.e. have the same low and high endpoint including endpoint inclusion
         /// </summary>
-        /// <param name="i">First interval</param>
-        /// <param name="j">Second interval</param>
+        /// <param name="x">First interval</param>
+        /// <param name="y">Second interval</param>
         /// <returns>True if Low, High, LowIncluded, HighIncluded for both intervals are equal</returns>
-        public static bool Equals<T>(this IInterval<T> i, IInterval<T> j) where T : IComparable<T>
+        public static bool Equals<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
-            return CompareTo(i, j) == 0;
+            return CompareTo(x, y) == 0;
         }
 
         /// <summary>
         /// Get the hashcode for an interval.
         /// Uses the low and high endpoints as well as endpoint inclusion.
         /// </summary>
-        /// <param name="i">The interval</param>
+        /// <param name="x">The interval</param>
         /// <typeparam name="T">The generic endpoint type</typeparam>
         /// <returns>The hashcode based on the interval</returns>
-        public static int GetHashCode<T>(this IInterval<T> i) where T : IComparable<T>
+        public static int GetHashCode<T>(this IInterval<T> x) where T : IComparable<T>
         {
             // TODO: Check implement
             var hash = 17;
-            hash = hash * 31 + i.Low.GetHashCode();
-            hash = hash * 31 + i.High.GetHashCode();
-            hash = hash * 31 + i.LowIncluded.GetHashCode();
-            hash = hash * 31 + i.HighIncluded.GetHashCode();
+            hash = hash * 31 + x.Low.GetHashCode();
+            hash = hash * 31 + x.High.GetHashCode();
+            hash = hash * 31 + x.LowIncluded.GetHashCode();
+            hash = hash * 31 + x.HighIncluded.GetHashCode();
             return hash;
         }
 
@@ -141,15 +141,15 @@ namespace C5.intervaled
         /// Create a string representing the interval.
         /// Closed intervals are represented with square brackets [a:b] and open with round brackets (a:b).
         /// </summary>
-        /// <param name="i">The interval</param>
+        /// <param name="x">The interval</param>
         /// <returns>The string representation</returns>
-        public static string ToString<T>(this IInterval<T> i) where T : IComparable<T>
+        public static string ToString<T>(this IInterval<T> x) where T : IComparable<T>
         {
             return String.Format("{0}{1}:{2}{3}",
-                i.LowIncluded ? "[" : "(",
-                i.Low,
-                i.High,
-                i.HighIncluded ? "]" : ")");
+                x.LowIncluded ? "[" : "(",
+                x.Low,
+                x.High,
+                x.HighIncluded ? "]" : ")");
         }
     }
 }
