@@ -151,10 +151,10 @@ namespace C5.intervaled
 
         private int countOverlaps(int layer, int lower, int upper, IInterval<T> query)
         {
-            // Theorem 2
-            if (lower >= upper)
-                return 0;
+            var count = 0;
 
+            while (lower < upper)
+            {
             var first = lower;
 
             // The first interval doesn't overlap we need to search for it
@@ -171,7 +171,14 @@ namespace C5.intervaled
             // We can use first as lower to speed up the search
             var last = searchLowInHighs(layer, first, upper, query);
 
-            return last - first + countOverlaps(layer + 1, _layers[layer][first].Pointer, _layers[layer][last].Pointer, query);
+                lower = _layers[layer][first].Pointer;
+                upper = _layers[layer][last].Pointer;
+                layer++;
+
+                count += last - first;
+
+            }
+            return count;
         }
 
         private int searchLowInHighs(int layer, int lower, int upper, IInterval<T> query)
