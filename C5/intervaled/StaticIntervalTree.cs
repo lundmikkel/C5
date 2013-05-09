@@ -6,9 +6,16 @@ using System.Text;
 
 namespace C5.intervaled
 {
-    //TODO: Find another class for these methods
-    public static class Utils
+    /// <summary>
+    /// Extension methods used to find the median endpoint
+    /// </summary>
+    static class StaticIntervalTreeExtensions
     {
+        /// <summary>
+        /// Randomly shuffles a list in linear time
+        /// </summary>
+        /// <param name="list">The list</param>
+        /// <typeparam name="T">The element type</typeparam>
         public static void Shuffle<T>(this IList<T> list)
         {
             var random = new Random();
@@ -17,6 +24,13 @@ namespace C5.intervaled
                 list.Swap(random.Next(n + 1), n);
         }
 
+        /// <summary>
+        /// Swaps two elements in a list
+        /// </summary>
+        /// <param name="list">The list</param>
+        /// <param name="i">The index of the first element</param>
+        /// <param name="j">The index of the second element</param>
+        /// <typeparam name="T">The element type</typeparam>
         public static void Swap<T>(this IList<T> list, int i, int j)
         {
             var tmp = list[i];
@@ -25,11 +39,10 @@ namespace C5.intervaled
         }
     }
 
-
-    // TODO: Duplicates?
-    public class StaticIntervalTree<T> : IStaticIntervaled<T> where T : IComparable<T>
+    public class StaticIntervalTree<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
     {
         private readonly Node _root;
+        private readonly int _count;
         private IInterval<T> _span;
 
         #region Node nested classes
@@ -138,18 +151,19 @@ namespace C5.intervaled
 
         #region Constructors
 
+        /// <summary>
+        /// Create a static interval tree from a collection of intervals.
+        /// </summary>
+        /// <param name="intervals">Interval collection</param>
         public StaticIntervalTree(SCG.IEnumerable<IInterval<T>> intervals)
         {
             var intervalArray = intervals as IInterval<T>[] ?? intervals.ToArray();
 
             if (!intervalArray.IsEmpty())
             {
-                Count = intervalArray.Count();
+                _count = intervalArray.Count();
 
                 IInterval<T> span = new IntervalBase<T>(intervalArray.First());
-
-                // TODO: Figure out how Orcomp does it
-                // MaximumOverlap = IntervaledHelper<T>.MaximumOverlap(intervalArray);
 
                 _root = new Node(intervalArray, ref span);
 
@@ -194,7 +208,6 @@ namespace C5.intervaled
             return list[k];
         }
 
-
         private static int partition(IList<T> list, int low, int high)
         {
             int i = low, j = high + 1;
@@ -233,11 +246,6 @@ namespace C5.intervaled
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }
-
-        public SCG.IEnumerator<IInterval<T>> GetEnumerator()
-        {
-            return getEnumerator(_root);
         }
 
         private SCG.IEnumerator<IInterval<T>> getEnumerator(Node node)
@@ -341,6 +349,12 @@ namespace C5.intervaled
 
         #region IShowable
 
+        public override SCG.IEnumerator<IInterval<T>> GetEnumerator()
+        {
+            return getEnumerator(_root);
+        }
+
+
         public bool Show(StringBuilder stringbuilder, ref int rest, IFormatProvider formatProvider)
         {
             throw new NotImplementedException();
@@ -367,66 +381,16 @@ namespace C5.intervaled
 
         #endregion
 
-        public bool IsEmpty { get { return _root == null; } }
-        public int Count { get; private set; }
-        public Speed CountSpeed { get { return Speed.Constant; } }
+        public override bool IsEmpty { get { return _root == null; } }
+        public override int Count { get { return _count; } }
+        public override Speed CountSpeed { get { return Speed.Constant; } }
 
-        public void CopyTo(IInterval<T>[] array, int index)
-        {
-            if (index < 0 || index + Count > array.Length)
-                throw new ArgumentOutOfRangeException();
-
-            foreach (var item in this) array[index++] = item;
-        }
-
-        public IInterval<T>[] ToArray()
-        {
-            var res = new IInterval<T>[Count];
-            int i = 0;
-
-            foreach (var item in this) res[i++] = item;
-
-            return res;
-        }
-
-        public void Apply(Action<IInterval<T>> action)
-        {
-            foreach (var item in this)
-                action(item);
-        }
-
-        public bool Exists(Func<IInterval<T>, bool> predicate)
-        {
-            return this.Any(predicate);
-        }
-
-        public bool Find(Func<IInterval<T>, bool> predicate, out IInterval<T> item)
-        {
-            foreach (var jtem in this.Where(predicate))
-            {
-                item = jtem;
-                return true;
-            }
-            item = default(IInterval<T>);
-            return false;
-        }
-
-        public bool All(Func<IInterval<T>, bool> predicate)
-        {
-            return Enumerable.All(this, predicate);
-        }
-
-        public IInterval<T> Choose()
+        public override IInterval<T> Choose()
         {
             if (_root == null)
                 throw new NoSuchItemException();
 
             return _root.LeftList.Interval;
-        }
-
-        public SCG.IEnumerable<IInterval<T>> Filter(Func<IInterval<T>, bool> filter)
-        {
-            return this.Where(filter);
         }
 
         #endregion
@@ -441,13 +405,14 @@ namespace C5.intervaled
             return findOverlap(_root, query);
         }
 
-        private SCG.IEnumerable<IInterval<T>> findOverlap(Node root, T query)
+        private static SCG.IEnumerable<IInterval<T>> findOverlap(Node root, T query)
         {
             // Don't search empty leaves
             if (root == null) yield break;
 
             // If query matches root key, we just yield all intervals in root and stop our search
-            if (query.CompareTo(root.Key) == 0)
+            var compare = query.CompareTo(root.Key);
+            if (compare == 0)
             {
                 // yield all elements in lists
                 var currentListNode = root.LeftList;
@@ -460,7 +425,7 @@ namespace C5.intervaled
                 }
             }
             // If query comes before root key, we go through LeftList to find all intervals with a Low smaller than our query
-            else if (query.CompareTo(root.Key) < 0)
+            else if (compare < 0)
             {
                 var currentListNode = root.LeftList;
                 while (currentListNode != null
@@ -475,11 +440,9 @@ namespace C5.intervaled
 
                 // Recurse Left
                 foreach (var interval in findOverlap(root.Left, query))
-                {
                     yield return interval;
-                }
             }
-            else if (root.Key.CompareTo(query) < 0)
+            else
             {
                 var currentListNode = root.RightList;
                 while (currentListNode != null
@@ -494,9 +457,7 @@ namespace C5.intervaled
 
                 // Recurse Right
                 foreach (var interval in findOverlap(root.Right, query))
-                {
                     yield return interval;
-                }
             }
         }
 
@@ -530,8 +491,6 @@ namespace C5.intervaled
 
             return FindOverlaps(query).GetEnumerator().MoveNext();
         }
-
-        public int MaximumOverlap { get; private set; }
 
         /// <summary>
         /// Create an enumerable, enumerating all intersecting intervals on the path to the split node. Returns the split node in splitNode.
