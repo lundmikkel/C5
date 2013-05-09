@@ -42,6 +42,26 @@ namespace C5.Tests.intervaled
             return intervals;
         }
 
+        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "QueryLengths")]
+        public void RangeFixCount(string name, int length)
+        {
+            Intervaled = Factory(GenerateIntervals(1000000));
+
+            var span = Intervaled.Span;
+            var step = (float) (span.High - span.Low - 20 - length) / Repetitions;
+            var sw = new Stopwatch();
+
+            sw.Start();
+            for (var i = 0; i < Repetitions; i++)
+            {
+                var low = (int) (step * i);
+                Intervaled.CountOverlaps(new IntervalBase<int>(low, low + length));
+            }
+            sw.Stop();
+
+            Console.WriteLine("Average query time for {0} intervals: {1} micros", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
+        }
+
         [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "DoubleCounts")]
         public void RangeQuery(string name, int count)
         {
@@ -214,6 +234,26 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average query time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
         }
 
+        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "QueryLengths")]
+        public void RangeFixCount(string name, int length)
+        {
+            Intervaled = Factory(GenerateIntervals(1000000));
+
+            var span = Intervaled.Span;
+            var step = (float) (span.High - span.Low - 20 - length) / Repetitions;
+            var sw = new Stopwatch();
+
+            sw.Start();
+            for (var i = 0; i < Repetitions; i++)
+            {
+                var low = (int) (step * i);
+                Intervaled.CountOverlaps(new IntervalBase<int>(low, low + length));
+            }
+            sw.Stop();
+
+            Console.WriteLine("Average query time for {0} intervals: {1} micros", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
+        }
+
 
         public static object[] DoubleCounts = new object[]
             {
@@ -297,6 +337,26 @@ namespace C5.Tests.intervaled
             {
                 var low = (int) (step * i);
                 Intervaled.FindOverlaps(new IntervalBase<int>(low, low + length)).Count();
+            }
+            sw.Stop();
+
+            Console.WriteLine("Average query time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
+        }
+
+        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "QueryLengths")]
+        public void RangeFixCount(string name, int length)
+        {
+            Intervaled = Factory(GenerateIntervals(1000000));
+
+            var span = Intervaled.Span;
+            var step = (float) (span.High - span.Low - 20 - length) / Repetitions;
+            var sw = new Stopwatch();
+            sw.Start();
+
+            for (var i = 0; i < Repetitions; i++)
+            {
+                var low = (int) (step * i);
+                Intervaled.CountOverlaps(new IntervalBase<int>(low, low + length));
             }
             sw.Stop();
 
@@ -433,6 +493,26 @@ namespace C5.Tests.intervaled
             sw.Stop();
 
             Console.WriteLine("Average query time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
+        }
+
+        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "QueryLengths")]
+        public void RangeFixCount(string name, int length)
+        {
+            Intervaled = Factory(GenerateIntervals(1000000));
+
+            var span = Intervaled.Span;
+            var step = (float) (span.High - span.Low - 20 - length) / Repetitions;
+            var sw = new Stopwatch();
+
+            sw.Start();
+            for (var i = 0; i < Repetitions; i++)
+            {
+                var low = (int) (step * i);
+                Intervaled.CountOverlaps(new IntervalBase<int>(low, low + length));
+            }
+            sw.Stop();
+
+            Console.WriteLine("Average query time for {0} intervals: {1} micros", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
         }
 
 
