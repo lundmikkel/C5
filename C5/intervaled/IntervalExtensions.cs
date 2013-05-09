@@ -17,9 +17,9 @@ namespace C5.intervaled
         public static bool Overlaps<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             // Save compare values to avoid comparing twice in case CompareTo() should be expensive
-            int ijCompare = x.Low.CompareTo(y.High), jiCompare = y.Low.CompareTo(x.High);
-            return (ijCompare < 0 || ijCompare == 0 && x.LowIncluded && y.HighIncluded)
-                && (jiCompare < 0 || jiCompare == 0 && y.LowIncluded && x.HighIncluded);
+            int xLowYHighCompare = x.Low.CompareTo(y.High), yLowXHighCompare = y.Low.CompareTo(x.High);
+            return (xLowYHighCompare < 0 || xLowYHighCompare == 0 && x.LowIncluded && y.HighIncluded)
+                && (yLowXHighCompare < 0 || yLowXHighCompare == 0 && y.LowIncluded && x.HighIncluded);
         }
 
         /// <summary>
