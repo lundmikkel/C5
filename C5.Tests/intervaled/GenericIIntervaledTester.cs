@@ -528,7 +528,7 @@ namespace C5.Tests.intervaled
                     Intervaled.FindOverlaps(new IntervalBase<int>(1357516800, 1358121599)).Count();
                 }
                 sw.Stop();
-                Console.WriteLine("Time: " + ((float) sw.ElapsedMilliseconds / count));
+                Console.WriteLine("Time: " + ((float)sw.ElapsedMilliseconds / count));
             }
         }
 
@@ -578,7 +578,7 @@ namespace C5.Tests.intervaled
                     Intervaled.FindOverlaps(new IntervalBase<int>(9231, 24228)).Count();
                 }
                 sw.Stop();
-                Console.WriteLine("Time: " + ((float) sw.ElapsedMilliseconds / count));
+                Console.WriteLine("Time: " + ((float)sw.ElapsedMilliseconds / count));
             }
         }
 
@@ -617,7 +617,7 @@ namespace C5.Tests.intervaled
                     Intervaled.FindOverlaps(query).Count();
 
                 sw.Stop();
-                Console.WriteLine("Query time: " + ((float) sw.ElapsedMilliseconds / count));
+                Console.WriteLine("Query time: " + ((float)sw.ElapsedMilliseconds / count));
 
                 var actual = Intervaled.FindOverlaps(query).Count();
                 Assert.AreEqual(expected, actual);
@@ -636,7 +636,7 @@ namespace C5.Tests.intervaled
                     Intervaled.CountOverlaps(query);
 
                 sw.Stop();
-                Console.WriteLine("Query time: " + ((float) sw.ElapsedMilliseconds / count));
+                Console.WriteLine("Query time: " + ((float)sw.ElapsedMilliseconds / count));
 
             }
 
