@@ -255,6 +255,9 @@ namespace C5.intervaled
 
         public override IEnumerator<IInterval<T>> GetEnumerator()
         {
+            if (IsEmpty)
+                return (new IInterval<T>[] { }).Cast<IInterval<T>>().GetEnumerator();
+
             return getEnumerator(0, 0, _counts[0]);
         }
 
