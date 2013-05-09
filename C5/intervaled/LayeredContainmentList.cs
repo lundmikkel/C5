@@ -164,7 +164,7 @@ namespace C5.intervaled
                 first = searchHighInLows(layer, ++first, upper, query);
 
                 // If index is out of bound, or found interval doesn't overlap, then the layer won't contain any overlaps
-                if (first < lower || upper <= first || !_layers[layer][first].Interval.Overlaps(query))
+                if (upper <= first || !_layers[layer][first].Interval.Overlaps(query))
                     return 0;
             }
 
@@ -319,10 +319,10 @@ namespace C5.intervaled
                 {
                     // We know first doesn't overlap so we can increment it before searching
                     // TODO: Optimize binary search
-                    first = searchFirst(layer, ++first, upper, query);
+                    first = searchHighInLows(layer, ++first, upper, query);
 
                     // If index is out of bound, or found interval doesn't overlap, then the list won't contain any overlaps
-                    if (first < lower || upper <= first || !currentLayer[first].Interval.Overlaps(query))
+                    if (upper <= first || !currentLayer[first].Interval.Overlaps(query))
                         yield break;
                 }
 
@@ -352,10 +352,10 @@ namespace C5.intervaled
             if (!currentLayer[first].Interval.Overlaps(query))
             {
                 // We know first doesn't overlap so we can increment it before searching
-                first = searchFirst(layer, ++first, upper, query);
+                first = searchHighInLows(layer, ++first, upper, query);
 
                 // If index is out of bound, or found interval doesn't overlap, then the list won't contain any overlaps
-                if (first < lower || upper <= first || !currentLayer[first].Interval.Overlaps(query))
+                if (upper <= first || !currentLayer[first].Interval.Overlaps(query))
                     yield break;
             }
 
