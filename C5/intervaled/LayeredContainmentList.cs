@@ -63,7 +63,7 @@ namespace C5.intervaled
                 _layers = new Node[layers.Count][];
                 _counts = new int[layers.Count];
                 // Create each containment layer
-                for (var i = 0; i < _counts.Length; i++)
+                for (var i = 0; i < _counts.Length - 1; i++)
                 {
                     _layers[i] = layers[i].ToArray();
                     _counts[i] = layers[i].Count - 1; // Subtract one for the dummy node
@@ -395,7 +395,7 @@ namespace C5.intervaled
         {
             var s = String.Empty;
 
-            for (var layer = 0; layer < _counts.Length; layer++)
+            for (var layer = 0; layer < _counts.Length - 1; layer++)
             {
                 var l = new ArrayList<string>();
                 var p = String.Empty;
