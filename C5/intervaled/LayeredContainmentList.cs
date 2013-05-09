@@ -165,7 +165,7 @@ namespace C5.intervaled
 
                     // If index is out of bound, or found interval doesn't overlap, then the layer won't contain any overlaps
                     if (upper <= first || !_layers[layer][first].Interval.Overlaps(query))
-                        return 0;
+                        return count;
                 }
 
                 // We can use first as lower to speed up the search
