@@ -155,21 +155,21 @@ namespace C5.intervaled
 
             while (lower < upper)
             {
-            var first = lower;
+                var first = lower;
 
-            // The first interval doesn't overlap we need to search for it
-            if (!_layers[layer][first].Interval.Overlaps(query))
-            {
-                // We know first doesn't overlap so we can increment it before searching
-                first = searchHighInLows(layer, ++first, upper, query);
+                // The first interval doesn't overlap we need to search for it
+                if (!_layers[layer][first].Interval.Overlaps(query))
+                {
+                    // We know first doesn't overlap so we can increment it before searching
+                    first = searchFirst(layer, ++first, upper, query);
 
-                // If index is out of bound, or found interval doesn't overlap, then the layer won't contain any overlaps
-                if (upper <= first || !_layers[layer][first].Interval.Overlaps(query))
-                    return 0;
-            }
+                    // If index is out of bound, or found interval doesn't overlap, then the layer won't contain any overlaps
+                    if (upper <= first || !_layers[layer][first].Interval.Overlaps(query))
+                        return 0;
+                }
 
-            // We can use first as lower to speed up the search
-            var last = searchLowInHighs(layer, first, upper, query);
+                // We can use first as lower to speed up the search
+                var last = searchLast(layer, first, upper, query);
 
                 lower = _layers[layer][first].Pointer;
                 upper = _layers[layer][last].Pointer;
@@ -181,7 +181,7 @@ namespace C5.intervaled
             return count;
         }
 
-        private int searchLowInHighs(int layer, int lower, int upper, IInterval<T> query)
+        private int searchLast(int layer, int lower, int upper, IInterval<T> query)
         {
             int min = lower, max = upper - 1;
 
@@ -222,9 +222,9 @@ namespace C5.intervaled
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
-        private int searchHighInLows(int layer, int lower, int upper, IInterval<T> query)
+        private int searchFirst(int layer, int lower, int upper, IInterval<T> query)
         {
-            // Upper is excluded so we subtract by one
+            //Upper is excluded so we subtract by one
             int min = lower, max = upper - 1;
 
             while (min <= max)
@@ -329,7 +329,7 @@ namespace C5.intervaled
                 {
                     // We know first doesn't overlap so we can increment it before searching
                     // TODO: Optimize binary search
-                    first = searchHighInLows(layer, ++first, upper, query);
+                    first = searchFirst(layer, ++first, upper, query);
 
                     // If index is out of bound, or found interval doesn't overlap, then the list won't contain any overlaps
                     if (upper <= first || !currentLayer[first].Interval.Overlaps(query))
@@ -337,7 +337,7 @@ namespace C5.intervaled
                 }
 
                 // We can use first as lower to speed up the search
-                var last = searchLowInHighs(layer, first, upper, query);
+                var last = searchLast(layer, first, upper, query);
 
                 // Save values for next iteration
                 layer++;
@@ -362,7 +362,7 @@ namespace C5.intervaled
             if (!currentLayer[first].Interval.Overlaps(query))
             {
                 // We know first doesn't overlap so we can increment it before searching
-                first = searchHighInLows(layer, ++first, upper, query);
+                first = searchFirst(layer, ++first, upper, query);
 
                 // If index is out of bound, or found interval doesn't overlap, then the list won't contain any overlaps
                 if (upper <= first || !currentLayer[first].Interval.Overlaps(query))
@@ -370,7 +370,7 @@ namespace C5.intervaled
             }
 
             // We can use first as lower to speed up the search
-            var last = searchLowInHighs(layer, first, upper, query);
+            var last = searchLast(layer, first, upper, query);
 
             // Find intervals in sublist
             foreach (var interval in findOverlapsRecursive(layer + 1, currentLayer[first].Pointer, currentLayer[last].Pointer, query))
@@ -387,7 +387,7 @@ namespace C5.intervaled
                 return false;
 
             // Find first overlap
-            var i = searchHighInLows(0, 0, _counts[0], query);
+            var i = searchFirst(0, 0, _counts[0], query);
 
             // Check if index is in bound and if the interval overlaps the query
             return 0 <= i && i < _counts[0] && _layers[0][i].Interval.Overlaps(query);
