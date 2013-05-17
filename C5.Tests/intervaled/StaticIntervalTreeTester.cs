@@ -111,6 +111,12 @@ namespace C5.Tests.intervaled
         {
             return new StaticIntervalTree<int>(intervals);
         }
+
+        [Test]
+        public void Print()
+        {
+            File.WriteAllText(@"../../intervaled/data/sit_graph.gv", ((StaticIntervalTree<int>)_intervaled).Graphviz());
+        }
     }
 
     public class StaticIntervalSample100 : Sample100
@@ -124,7 +130,7 @@ namespace C5.Tests.intervaled
         [Test]
         public void Print()
         {
-            File.WriteAllText(@"../../intervaled/data/sit100.gv", ((StaticIntervalTree<int>) Intervaled).Graphviz());
+            File.WriteAllText(@"../../intervaled/data/sit100.gv", ((StaticIntervalTree<int>)Intervaled).Graphviz());
         }
     }
 
