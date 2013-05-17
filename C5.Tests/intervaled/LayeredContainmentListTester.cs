@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using C5.Tests.intervaled.Generic;
 using C5.Tests.intervaled.Generic.Static;
 using C5.intervaled;
@@ -25,7 +23,7 @@ namespace C5.Tests.intervaled
                 return new LayeredContainmentList<int>(intervals);
             }
         }
-
+            
         [TestFixture]
         public class LCListNullCollection : IntervaledNullCollection
         {
@@ -131,7 +129,7 @@ namespace C5.Tests.intervaled
                 var query = new IntervalBase<int>(9231, 24228);
 
                 Console.WriteLine(Intervaled.FindOverlaps(query).Count());
-                Console.WriteLine(((IStaticIntervaled<int>)Intervaled).CountOverlaps(query));
+                Console.WriteLine(((IStaticIntervaled<int>) Intervaled).CountOverlaps(query));
 
                 var comparer = ComparerFactory<IInterval<int>>.CreateEqualityComparer(IntervalExtensions.Equals, IntervalExtensions.GetHashCode);
 
@@ -151,7 +149,7 @@ namespace C5.Tests.intervaled
             [Test, Ignore]
             public void Print()
             {
-                File.WriteAllText(@"../../intervaled/data/lclist100000.gv", ((LayeredContainmentList<int>)Intervaled).Graphviz());
+                File.WriteAllText(@"../../intervaled/data/lclist100000.gv", ((LayeredContainmentList<int>) Intervaled).Graphviz());
             }
         }
 
@@ -441,7 +439,7 @@ namespace C5.Tests.intervaled
                 [Test]
                 public void Print()
                 {
-                    Console.WriteLine(((LayeredContainmentList<int>)_intervaled).Graphviz());
+                    Console.WriteLine(((LayeredContainmentList<int>) _intervaled).Graphviz());
                 }
 
                 [Test]

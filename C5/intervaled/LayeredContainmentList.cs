@@ -183,35 +183,20 @@ namespace C5.intervaled
 
         private int searchLast(int layer, int lower, int upper, IInterval<T> query)
         {
-            int min = lower, max = upper - 1;
+            int min = lower - 1, max = upper;
 
-            while (min <= max)
+            while (max - min > 1)
             {
                 var middle = min + ((max - min) >> 1); // Shift one is the same as dividing by 2
 
                 var interval = _layers[layer][middle].Interval;
 
-                if (query.Overlaps(interval))
-                {
-                    // We know we have an overlap, but we need to check if it's the last one
-                    // Only if the next interval to the overlapping interval does not overlap, we have found the right one
-                    if (middle == upper - 1 || !query.Overlaps(_layers[layer][middle + 1].Interval))
-                        // The right interval is found, return the index for the next interval
-                        return middle + 1;
+                var compare = interval.Low.CompareTo(query.High);
 
-                    // The previous interval overlap as well, move right
-                    min = middle + 1;
-                }
+                if (compare < 0 || compare == 0 && interval.LowIncluded && query.HighIncluded)
+                    min = middle;
                 else
-                {
-                    // The interval does not overlap, find out whether query is lower or higher
-                    if (query.CompareTo(interval) < 0)
-                        // The query is lower than the interval, move left
-                        max = middle - 1;
-                    else
-                        // The query is higher than the interval, move right
-                        min = middle + 1;
-                }
+                    max = middle;
             }
 
             return max;
@@ -224,40 +209,23 @@ namespace C5.intervaled
         /// <returns></returns>
         private int searchFirst(int layer, int lower, int upper, IInterval<T> query)
         {
-            //Upper is excluded so we subtract by one
-            int min = lower, max = upper - 1;
+            int min = lower - 1, max = upper;
 
-            while (min <= max)
+            while (max - min > 1)
             {
                 var middle = min + ((max - min) >> 1); // Shift one is the same as dividing by 2
 
                 var interval = _layers[layer][middle].Interval;
 
-                if (query.Overlaps(interval))
-                {
-                    // Only if the previous interval to the overlapping interval does not overlap, we have found the right one
-                    // TODO: Why middle == lower? For lower = 1, upper = 2, we stop instantly...
-                    if (middle == lower || !query.Overlaps(_layers[layer][middle - 1].Interval))
-                        // The right interval is found
-                        return middle;
+                var compare = query.Low.CompareTo(interval.High);
 
-                    // The previous interval overlap as well, move left
-                    max = middle - 1;
-                }
+                if (compare < 0 || compare == 0 && query.LowIncluded && interval.HighIncluded)
+                    max = middle;
                 else
-                {
-                    // The interval does not overlap, find out whether query is lower or higher
-                    if (query.CompareTo(interval) < 0)
-                        // The query is lower than the interval, move left
-                        max = middle - 1;
-                    else
-                        // The query is higher than the interval, move right
-                        min = middle + 1;
-                }
+                    min = middle;
             }
 
-            // We return min so we know if the query was lower or higher than the list
-            return min;
+            return max;
         }
 
         public override IEnumerator<IInterval<T>> GetEnumerator()
