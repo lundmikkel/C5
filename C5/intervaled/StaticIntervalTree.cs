@@ -304,7 +304,7 @@ namespace C5.intervaled
         {
             // Leaf
             int id;
-            if (root == null || root.Left == null)
+            if (root == null)
             {
                 id = nullCounter++;
                 return "\tleaf" + id + "[shape=point];\n"
