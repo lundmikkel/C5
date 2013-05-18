@@ -25,7 +25,7 @@ namespace C5.Tests.intervaled
             [Test]
             public void MaximumOverlap_IBS_Returns5()
             {
-                Assert.AreEqual(5, ((IntervalBinarySearchTree<int>) _intervaled).MaximumOverlap);
+                Assert.AreEqual(5, ((IntervalBinarySearchTree<int>) Intervaled).MaximumOverlap);
             }
         }
 
