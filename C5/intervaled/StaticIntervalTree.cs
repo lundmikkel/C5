@@ -301,7 +301,7 @@ namespace C5.intervaled
         public string Graphviz()
         {
             return "digraph StaticIntervalTree {\n"
-                + "\troot [fontname=helvetica,shape=plaintext,label=\"Root\"];\n"
+                + "\troot [fontname=consolas,shape=plaintext,label=\"Root\"];\n"
                 + graphviz(_root, "root")
                 + "}\n";
         }
@@ -322,12 +322,12 @@ namespace C5.intervaled
 
             id = nodeCounter++;
             return
-                String.Format("\tnode{0} [fontname=helvetica,label=\"{1}\"];\n", id, root.Key) +
+                String.Format("\tnode{0} [fontname=consolas,label=\"{1}\"];\n", id, root.Key) +
                 String.Format("\t{0} -> node{1};\n", parent, id) +
                 graphviz(root.Left, "node" + id) +
-                String.Format("\tnode{0}left [fontname=helvetica,shape=plaintext, label=\"{1}\"];\n", id, graphvizList(root.LeftList, false)) +
+                String.Format("\tnode{0}left [fontname=consolas,shape=plaintext, label=\"{1}\"];\n", id, graphvizList(root.LeftList, false)) +
                 String.Format("\tnode{0} -> node{0}left [style=dotted];\n", id) +
-                String.Format("\tnode{0}right [fontname=helvetica,shape=plaintext, label=\"{1}\"];\n", id, graphvizList(root.RightList, true)) +
+                String.Format("\tnode{0}right [fontname=consolas,shape=plaintext, label=\"{1}\"];\n", id, graphvizList(root.RightList, true)) +
                 String.Format("\tnode{0} -> node{0}right [style=dotted];\n", id) +
                 graphviz(root.Right, "node" + id);
         }
