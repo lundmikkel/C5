@@ -23,7 +23,7 @@ namespace C5.Tests.intervaled
                 return new LayeredContainmentList<int>(intervals);
             }
         }
-            
+
         [TestFixture]
         public class LCListNullCollection : IntervaledNullCollection
         {
@@ -61,6 +61,12 @@ namespace C5.Tests.intervaled
             internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new LayeredContainmentList<int>(intervals);
+            }
+
+            [Test]
+            public void Print()
+            {
+                File.WriteAllText(@"../../intervaled/data/LCList_graph.gv", ((LayeredContainmentList<int>)_intervaled).Graphviz());
             }
         }
 
@@ -123,7 +129,7 @@ namespace C5.Tests.intervaled
                 var query = new IntervalBase<int>(9231, 24228);
 
                 Console.WriteLine(Intervaled.FindOverlaps(query).Count());
-                Console.WriteLine(((IStaticIntervaled<int>) Intervaled).CountOverlaps(query));
+                Console.WriteLine(((IStaticIntervaled<int>)Intervaled).CountOverlaps(query));
 
                 var comparer = ComparerFactory<IInterval<int>>.CreateEqualityComparer(IntervalExtensions.Equals, IntervalExtensions.GetHashCode);
 
@@ -143,7 +149,7 @@ namespace C5.Tests.intervaled
             [Test, Ignore]
             public void Print()
             {
-                File.WriteAllText(@"../../intervaled/data/lclist100000.gv", ((LayeredContainmentList<int>) Intervaled).Graphviz());
+                File.WriteAllText(@"../../intervaled/data/lclist100000.gv", ((LayeredContainmentList<int>)Intervaled).Graphviz());
             }
         }
 
@@ -433,7 +439,7 @@ namespace C5.Tests.intervaled
                 [Test]
                 public void Print()
                 {
-                    Console.WriteLine(((LayeredContainmentList<int>) _intervaled).Graphviz());
+                    Console.WriteLine(((LayeredContainmentList<int>)_intervaled).Graphviz());
                 }
 
                 [Test]
@@ -903,17 +909,34 @@ namespace C5.Tests.intervaled
 
             #endregion
 
+            #region OverlapExists
+
+
+
+            #endregion
+
+            [Test]
+            public void CountSpeed_NotEmpty()
+            {
+                Assert.That(new LayeredContainmentList<int>(dataSetA).CountSpeed.Equals(Speed.Constant));
+            }
+
+            [Test]
+            public void Choose_Empty()
+            {
+                Assert.Throws<NoSuchItemException>(() =>
+                    { var choose = new LayeredContainmentList<int>(Enumerable.Empty<IInterval<int>>()).Choose(); });
+            }
+
+            [Test]
+            public void Choose_NotEmpty()
+            {
+                Assert.NotNull(new LayeredContainmentList<int>(dataSetA).Choose());
+            }
+
         }
 
         #endregion
-
-        #region Path testing
-
-
-        #endregion
-
-
-
 
         #endregion
     }
