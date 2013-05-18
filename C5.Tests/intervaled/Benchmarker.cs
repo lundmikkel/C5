@@ -25,9 +25,74 @@ namespace C5.Tests.intervaled
         }
     }
 
-    abstract class WithoutContainment
+    public static class BenchmarkTestCases
+    {
+        public static int ConstructorRepetitions { get { return 200; } }
+        public static int QueryRepetitions { get { return 1000000; } }
+
+        public static int[] ConstructorCounts = new[]
+            {
+                 100000,
+                 200000,
+                 300000,
+                 400000,
+                 500000,
+                 600000,
+                 700000,
+                 800000,
+                 900000,
+                1000000
+            };
+
+        public static object[] DoubleCounts = new object[]
+            {
+                new object[] {"A", 8000 * (int) Math.Pow(2, 0)},
+                new object[] {"B", 8000 * (int) Math.Pow(2, 1)},
+                new object[] {"C", 8000 * (int) Math.Pow(2, 2)},
+                new object[] {"D", 8000 * (int) Math.Pow(2, 3)},
+                new object[] {"E", 8000 * (int) Math.Pow(2, 4)},
+                new object[] {"F", 8000 * (int) Math.Pow(2, 5)},
+                new object[] {"G", 8000 * (int) Math.Pow(2, 6)},
+                new object[] {"H", 8000 * (int) Math.Pow(2, 7)},
+                new object[] {"I", 8000 * (int) Math.Pow(2, 8)},
+                new object[] {"J", 8000 * (int) Math.Pow(2, 9)},
+                new object[] {"K", 8000 * (int) Math.Pow(2, 10)},
+                new object[] {"L", 8000 * (int) Math.Pow(2, 11)}
+            };
+
+        public static object[] QueryLengths = new object[]
+            {
+                new object[] {"A",  100},
+                new object[] {"B",  200},
+                new object[] {"C",  300},
+                new object[] {"D",  400},
+                new object[] {"E",  500},
+                new object[] {"F",  600},
+                new object[] {"G",  700},
+                new object[] {"H",  800},
+                new object[] {"I",  900},
+                new object[] {"J", 1000}
+            };
+
+        public static object[] RangeCounts = new object[]
+            {
+                new object[] {"A",  100},
+                new object[] {"B",  200},
+                new object[] {"C",  300},
+                new object[] {"D",  400},
+                new object[] {"E",  500},
+                new object[] {"F",  600},
+                new object[] {"G",  700},
+                new object[] {"H",  800},
+                new object[] {"I",  900},
+                new object[] {"J", 1000}
+            };
+    }
+
+    abstract class Overlapping
     {
         protected IIntervaled<int> Intervaled;
+
         private const int Repetitions = 1000000;
 
         protected abstract IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals);
@@ -42,7 +107,7 @@ namespace C5.Tests.intervaled
             return intervals;
         }
 
-        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "QueryLengths")]
+        [Test, TestCaseSource(typeof(BenchmarkTestCases), "QueryLengths")]
         public void RangeFixCount(string name, int length)
         {
             Intervaled = Factory(GenerateIntervals(1000000));
@@ -62,7 +127,7 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average query time for {0} intervals: {1} micros", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
         }
 
-        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "DoubleCounts")]
+        [Test, TestCaseSource(typeof(BenchmarkTestCases), "DoubleCounts")]
         public void RangeQuery(string name, int count)
         {
             Intervaled = Factory(GenerateIntervals(count));
@@ -83,7 +148,7 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average creation time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
         }
 
-        [Test, TestCaseSource(typeof(WithoutContainment), "ConstructorCounts")]
+        [Test, TestCaseSource(typeof(BenchmarkTestCases), "ConstructorCounts")]
         public void Constroctor(int count)
         {
             var intervals = GenerateIntervals(count);
@@ -102,7 +167,7 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average creation time for {0} intervals: {1} ms", intervals.Length, sw.ElapsedMilliseconds / Repetitions);
         }
 
-        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "QueryLengths")]
+        [Test, TestCaseSource(typeof(BenchmarkTestCases), "QueryLengths")]
         public void RangeFixCountQuery(string name, int length)
         {
             Intervaled = Factory(GenerateIntervals(1000000));
@@ -122,24 +187,13 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average query time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
         }
 
-        public static int[] ConstructorCounts = new[]
-            {
-                100000,
-                200000,
-                300000,
-                400000,
-                500000,
-                600000,
-                700000,
-                800000,
-                900000,
-                1000000
-            };
+
     }
 
     abstract class WithoutContainmentOrOverlaps
     {
         protected IIntervaled<int> Intervaled;
+
         private const int Repetitions = 1000000;
 
         protected abstract IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals);
@@ -193,7 +247,7 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average creation time for {0} intervals: {1} ms (total: {2})", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions, sw.ElapsedMilliseconds);
         }
 
-        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "DoubleCounts")]
+        [Test, TestCaseSource(typeof(BenchmarkTestCases), "DoubleCounts")]
         public void RangeQuery(string name, int count)
         {
             Intervaled = Factory(GenerateIntervals(count));
@@ -214,7 +268,7 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average creation time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
         }
 
-        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "QueryLengths")]
+        [Test, TestCaseSource(typeof(BenchmarkTestCases), "QueryLengths")]
         public void RangeFixCountQuery(string name, int length)
         {
             Intervaled = Factory(GenerateIntervals(1000000));
@@ -234,7 +288,7 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average query time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
         }
 
-        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "QueryLengths")]
+        [Test, TestCaseSource(typeof(BenchmarkTestCases), "QueryLengths")]
         public void RangeFixCount(string name, int length)
         {
             Intervaled = Factory(GenerateIntervals(1000000));
@@ -253,37 +307,6 @@ namespace C5.Tests.intervaled
 
             Console.WriteLine("Average query time for {0} intervals: {1} micros", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
         }
-
-
-        public static object[] DoubleCounts = new object[]
-            {
-               new object[] {"A", 8000 * (int) Math.Pow(2, 0)},
-               new object[] {"B", 8000 * (int) Math.Pow(2, 1)},
-               new object[] {"C", 8000 * (int) Math.Pow(2, 2)},
-               new object[] {"D", 8000 * (int) Math.Pow(2, 3)},
-               new object[] {"E", 8000 * (int) Math.Pow(2, 4)},
-               new object[] {"F", 8000 * (int) Math.Pow(2, 5)},
-               new object[] {"G", 8000 * (int) Math.Pow(2, 6)},
-               new object[] {"H", 8000 * (int) Math.Pow(2, 7)},
-               new object[] {"I", 8000 * (int) Math.Pow(2, 8)},
-               new object[] {"J", 8000 * (int) Math.Pow(2, 9)},
-               new object[] {"K", 8000 * (int) Math.Pow(2, 10)},
-               new object[] {"L", 8000 * (int) Math.Pow(2, 11)}
-            };
-
-        public static object[] QueryLengths = new object[]
-            {
-               new object[] {"A",  100},
-               new object[] {"B",  200},
-               new object[] {"C",  300},
-               new object[] {"D",  400},
-               new object[] {"E",  500},
-               new object[] {"F",  600},
-               new object[] {"G",  700},
-               new object[] {"H",  800},
-               new object[] {"I",  900},
-               new object[] {"J", 1000}
-            };
     }
 
     abstract class ContainmentOnly
@@ -304,7 +327,7 @@ namespace C5.Tests.intervaled
             return intervals;
         }
 
-        [Test, TestCaseSource(typeof(ContainmentOnly), "ConstructorCounts")]
+        [Test, TestCaseSource(typeof(BenchmarkTestCases), "ConstructorCounts")]
         public void Constroctor(int count)
         {
             var intervals = GenerateIntervals(count);
@@ -323,7 +346,7 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average creation time for {0} intervals: {1} ms", intervals.Length, sw.ElapsedMilliseconds / Repetitions);
         }
 
-        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "QueryLengths")]
+        [Test, TestCaseSource(typeof(BenchmarkTestCases), "QueryLengths")]
         public void RangeFixCountQuery(string name, int length)
         {
             Intervaled = Factory(GenerateIntervals(1000000));
@@ -343,7 +366,7 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average query time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
         }
 
-        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "QueryLengths")]
+        [Test, TestCaseSource(typeof(BenchmarkTestCases), "QueryLengths")]
         public void RangeFixCount(string name, int length)
         {
             Intervaled = Factory(GenerateIntervals(1000000));
@@ -363,7 +386,7 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average query time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
         }
 
-        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "DoubleCounts")]
+        [Test, TestCaseSource(typeof(BenchmarkTestCases), "DoubleCounts")]
         public void RangeQuery(string name, int count)
         {
             Intervaled = Factory(GenerateIntervals(count));
@@ -383,25 +406,12 @@ namespace C5.Tests.intervaled
 
             Console.WriteLine("Average creation time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
         }
-
-        public static int[] ConstructorCounts = new[]
-            {
-                100000,
-                200000,
-                300000,
-                400000,
-                500000,
-                600000,
-                700000,
-                800000,
-                900000,
-                1000000
-            };
     }
 
     abstract class WithContainment
     {
         protected IIntervaled<int> Intervaled;
+
         private const int Repetitions = 1000000;
 
         protected abstract IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals);
@@ -421,7 +431,7 @@ namespace C5.Tests.intervaled
             return intervals;
         }
 
-        [Test, TestCaseSource(typeof(WithContainment), "ConstructorCounts")]
+        [Test, TestCaseSource(typeof(BenchmarkTestCases), "ConstructorCounts")]
         public void Constroctor(int count)
         {
             var intervals = GenerateIntervals(count);
@@ -440,7 +450,7 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average creation time for {0} intervals: {1} ms", intervals.Length, sw.ElapsedMilliseconds / Repetitions);
         }
 
-        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "DoubleCounts")]
+        [Test, TestCaseSource(typeof(BenchmarkTestCases), "DoubleCounts")]
         public void RangeQuery(string name, int count)
         {
             Intervaled = Factory(GenerateIntervals(count));
@@ -461,21 +471,9 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average creation time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
         }
 
-        public static int[] ConstructorCounts = new[]
-            {
-                100000,
-                200000,
-                300000,
-                400000,
-                500000,
-                600000,
-                700000,
-                800000,
-                900000,
-                1000000
-            };
 
-        [Test, TestCaseSource(typeof(WithContainment), "RangeCounts")]
+
+        [Test, TestCaseSource(typeof(BenchmarkTestCases), "RangeCounts")]
         public void RangeFixCountQuery(string name, int length)
         {
             Intervaled = Factory(GenerateIntervals(1000000));
@@ -495,7 +493,7 @@ namespace C5.Tests.intervaled
             Console.WriteLine("Average query time for {0} intervals: {1} ns", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
         }
 
-        [Test, TestCaseSource(typeof(WithoutContainmentOrOverlaps), "QueryLengths")]
+        [Test, TestCaseSource(typeof(BenchmarkTestCases), "QueryLengths")]
         public void RangeFixCount(string name, int length)
         {
             Intervaled = Factory(GenerateIntervals(1000000));
@@ -514,24 +512,9 @@ namespace C5.Tests.intervaled
 
             Console.WriteLine("Average query time for {0} intervals: {1} micros", Intervaled.Count, (float) sw.ElapsedMilliseconds / Repetitions * 1000);
         }
-
-
-        public static object[] RangeCounts = new object[]
-            {
-               new object[] {"A",  100},
-               new object[] {"B",  200},
-               new object[] {"C",  300},
-               new object[] {"D",  400},
-               new object[] {"E",  500},
-               new object[] {"F",  600},
-               new object[] {"G",  700},
-               new object[] {"H",  800},
-               new object[] {"I",  900},
-               new object[] {"J", 1000}
-            };
     }
 
-    class LCList_WithoutContainment : WithoutContainment
+    class LcListOverlapping : Overlapping
     {
         protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
@@ -539,7 +522,7 @@ namespace C5.Tests.intervaled
         }
     }
 
-    class NCList_WithoutContainment : WithoutContainment
+    class NcListOverlapping : Overlapping
     {
         protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
@@ -547,7 +530,7 @@ namespace C5.Tests.intervaled
         }
     }
 
-    class SIT_WithoutContainment : WithoutContainment
+    class SitOverlapping : Overlapping
     {
         protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
@@ -624,46 +607,6 @@ namespace C5.Tests.intervaled
         protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
             return new StaticIntervalTree<int>(intervals);
-        }
-    }
-
-    class Benchmarker
-    {
-        [Test, Ignore]
-        public void Construction()
-        {
-            var intervals = generateRandomIntervals(1000000, 10000000);
-            var count = 10;
-
-            var sw = Stopwatch.StartNew();
-            for (int i = 0; i < count; i++)
-            {
-                var intervaled = new NestedContainmentList<int>(intervals);
-            }
-            sw.Stop();
-
-            Console.WriteLine("Creation time: " + (sw.ElapsedMilliseconds / count));
-        }
-
-        public static IEnumerable<IInterval<int>> generateRandomIntervals(int count, int width)
-        {
-            var size = count / 5;
-
-            var list = new ArrayList<IInterval<int>>(count);
-            var random = new Random();
-
-            var lengths = new[] { 1, 10, 100, 1000, 10000 };
-
-            foreach (var length in lengths)
-            {
-                for (int i = 0; i < size; i++)
-                {
-                    var low = random.Next(width);
-                    list.Add(new IntervalBase<int>(low, low + length));
-                }
-            }
-
-            return list;
         }
     }
 }
