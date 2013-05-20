@@ -164,7 +164,7 @@ namespace C5.Tests.intervaled
             private static readonly IInterval<int> B =  new Interval("B", 2, 7, true, true);
             private static readonly IInterval<int> C =  new Interval("C", 1, 3);
             private static readonly IInterval<int> D =  new Interval("D", 17, 20, false, true);
-            private static readonly IInterval<int> E1 = new Interval("E", 8, 12, true, true);
+            private static readonly IInterval<int> E1 = new Interval("E1", 8, 12, true, true);
             private static readonly IInterval<int> E2 = new Interval("E2", 8, 12, true, true);
             private static readonly IInterval<int> F =  new Interval("F", 18);
             private static readonly IInterval<int> G =  new Interval("G", int.MinValue, 17, false, true);
@@ -179,7 +179,7 @@ namespace C5.Tests.intervaled
             {
                 _intervales = new IntervalBinarySearchTree<int>()
                     {
-                        A, B, C, D, E1, F, G
+                        A, B, C, D, E1, E2, F, G, H
                     };
 
                 //_intervales.Add(A1);
@@ -195,7 +195,7 @@ namespace C5.Tests.intervaled
             [Test]
             public void Print()
             {
-                File.WriteAllText(@"../../intervaled/data/IBS_graph.gv", _intervales.Graphviz());
+                File.WriteAllText(@"../../intervaled/data/ibs9_graph.gv", _intervales.Graphviz());
             }
 
             private void range(IInterval<int> query, IEnumerable<IInterval<int>> expected)
