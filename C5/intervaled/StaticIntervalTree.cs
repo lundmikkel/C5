@@ -301,7 +301,7 @@ namespace C5.intervaled
         public string Graphviz()
         {
             return "digraph StaticIntervalTree {\n"
-                + "\troot [shape=plaintext,label=\"Root\"];\n"
+                + "\troot [fontname=helvetica,shape=plaintext,label=\"Root\"];\n"
                 + graphviz(_root, "root")
                 + "}\n";
         }
@@ -315,19 +315,21 @@ namespace C5.intervaled
             if (root == null)
             {
                 id = nullCounter++;
-                return "\tleaf" + id + "[shape=point];\n"
-                    + "\t" + parent + " -> leaf" + id + ";\n";
+                return
+                    String.Format("\tleaf{0} [shape=point];\n", id) +
+                    String.Format("\t{0} -> leaf{1};\n", parent, id);
             }
 
             id = nodeCounter++;
-            return "\tnode" + id + " [label=\"" + root.Key + "\"];\n"
-                + "\t" + parent + " -> node" + id + ";\n"
-                + graphviz(root.Left, "node" + id)
-                + "\tnode" + id + "left [shape=plaintext, label=\"" + graphvizList(root.LeftList, false) + "\"];\n"
-                + "\tnode" + id + " -> node" + id + "left;\n"
-                + "\tnode" + id + "right [shape=plaintext, label=\"" + graphvizList(root.RightList, true) + "\"];\n"
-                + "\tnode" + id + " -> node" + id + "right;\n"
-                + graphviz(root.Right, "node" + id);
+            return
+                String.Format("\tnode{0} [fontname=helvetica,label=\"{1}\"];\n", id, root.Key) +
+                String.Format("\t{0} -> node{1};\n", parent, id) +
+                graphviz(root.Left, "node" + id) +
+                String.Format("\tnode{0}left [fontname=helvetica,shape=plaintext, label=\"{1}\"];\n", id, graphvizList(root.LeftList, false)) +
+                String.Format("\tnode{0} -> node{0}left [style=dotted];\n", id) +
+                String.Format("\tnode{0}right [fontname=helvetica,shape=plaintext, label=\"{1}\"];\n", id, graphvizList(root.RightList, true)) +
+                String.Format("\tnode{0} -> node{0}right [style=dotted];\n", id) +
+                graphviz(root.Right, "node" + id);
         }
 
         private string graphvizList(ListNode root, bool revert)

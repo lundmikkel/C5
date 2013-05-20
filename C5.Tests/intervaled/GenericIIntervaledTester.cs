@@ -222,7 +222,7 @@ namespace C5.Tests.intervaled
             }
 
 
-            protected IIntervaled<int> _intervaled;
+            protected IIntervaled<int> Intervaled;
 
             private static readonly IInterval<int> A = new Interval("A", 9, 19, true, true);
             private static readonly IInterval<int> B = new Interval("B", 2, 7, true, true);
@@ -240,18 +240,18 @@ namespace C5.Tests.intervaled
             [SetUp]
             public void Init()
             {
-                _intervaled = Factory(new[] { A, B, C, D, E1, E2, F, G, H });
+                Intervaled = Factory(new[] { A, B, C, D, E1, E2, F, G, H });
             }
 
             private void range(IInterval<int> query, SCG.IEnumerable<IInterval<int>> expected)
             {
-                CollectionAssert.AreEquivalent(expected, _intervaled.FindOverlaps(query));
+                CollectionAssert.AreEquivalent(expected, Intervaled.FindOverlaps(query));
             }
 
             [TestCaseSource(typeof(IBS), "StabCases")]
             public void Overlap_StabbingAtKeyPoints_ReturnsSpecifiedIntervals_TestCase(int query, SCG.IEnumerable<IInterval<int>> expected)
             {
-                CollectionAssert.AreEquivalent(expected, _intervaled.FindOverlaps(query));
+                CollectionAssert.AreEquivalent(expected, Intervaled.FindOverlaps(query));
             }
 
             public static object[] StabCases = new object[] {
@@ -283,7 +283,7 @@ namespace C5.Tests.intervaled
             [Test]
             public void Span_IBS_ReturnSpan()
             {
-                var span = _intervaled.Span;
+                var span = Intervaled.Span;
                 var expected = new IntervalOfInt(int.MinValue, 20, false, true);
                 Assert.That(expected.Equals(span));
             }
@@ -528,7 +528,7 @@ namespace C5.Tests.intervaled
                     Intervaled.FindOverlaps(new IntervalBase<int>(1357516800, 1358121599)).Count();
                 }
                 sw.Stop();
-                Console.WriteLine("Time: " + ((float)sw.ElapsedMilliseconds / count));
+                Console.WriteLine("Time: " + ((float) sw.ElapsedMilliseconds / count));
             }
         }
 
@@ -578,7 +578,7 @@ namespace C5.Tests.intervaled
                     Intervaled.FindOverlaps(new IntervalBase<int>(9231, 24228)).Count();
                 }
                 sw.Stop();
-                Console.WriteLine("Time: " + ((float)sw.ElapsedMilliseconds / count));
+                Console.WriteLine("Time: " + ((float) sw.ElapsedMilliseconds / count));
             }
         }
 
@@ -617,7 +617,7 @@ namespace C5.Tests.intervaled
                     Intervaled.FindOverlaps(query).Count();
 
                 sw.Stop();
-                Console.WriteLine("Query time: " + ((float)sw.ElapsedMilliseconds / count));
+                Console.WriteLine("Query time: " + ((float) sw.ElapsedMilliseconds / count));
 
                 var actual = Intervaled.FindOverlaps(query).Count();
                 Assert.AreEqual(expected, actual);
@@ -636,7 +636,7 @@ namespace C5.Tests.intervaled
                     Intervaled.CountOverlaps(query);
 
                 sw.Stop();
-                Console.WriteLine("Query time: " + ((float)sw.ElapsedMilliseconds / count));
+                Console.WriteLine("Query time: " + ((float) sw.ElapsedMilliseconds / count));
 
             }
 
@@ -681,6 +681,33 @@ namespace C5.Tests.intervaled
                     Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalOfInt(0, 5)));
                 }
             }
+        }
+    }
+
+    class ExtentionOutputs
+    {
+        [Test]
+        public void Print()
+        {
+            var x = new IntervalBase<int>(1, 5);
+            var y = new IntervalBase<int>(2, 3, true, true);
+
+            x.Overlaps(y); // true
+            y.Overlaps(x); // true
+
+            x.Contains(y); // true
+            y.Contains(x); // false
+
+            x.CompareTo(y); // -1
+            y.CompareTo(x); // 1
+
+            x.Equals(y); // false
+
+            x.GetHashCode(); //15734484
+            y.GetHashCode(); //15762354
+
+            x.ToString(); // [1:5)
+            y.ToString(); // [2:3]
         }
     }
 

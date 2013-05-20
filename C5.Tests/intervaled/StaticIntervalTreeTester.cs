@@ -115,7 +115,7 @@ namespace C5.Tests.intervaled
         [Test]
         public void Print()
         {
-            File.WriteAllText(@"../../intervaled/data/sit_graph.gv", ((StaticIntervalTree<int>)_intervaled).Graphviz());
+            File.WriteAllText(@"../../intervaled/data/static_interval_tree.gv", ((StaticIntervalTree<int>) Intervaled).Graphviz());
         }
     }
 
@@ -130,7 +130,7 @@ namespace C5.Tests.intervaled
         [Test]
         public void Print()
         {
-            File.WriteAllText(@"../../intervaled/data/sit100.gv", ((StaticIntervalTree<int>)Intervaled).Graphviz());
+            File.WriteAllText(@"../../intervaled/data/sit100.gv", ((StaticIntervalTree<int>) Intervaled).Graphviz());
         }
     }
 
