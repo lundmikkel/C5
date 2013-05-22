@@ -66,7 +66,7 @@ namespace C5.Tests.intervaled
             [Test]
             public void Print()
             {
-                File.WriteAllText(@"../../intervaled/data/LCList_graph.gv", ((LayeredContainmentList<int>)_intervaled).Graphviz());
+                File.WriteAllText(@"../../intervaled/data/LCList_graph.gv", ((LayeredContainmentList<int>)Intervaled).Graphviz());
             }
         }
 
@@ -451,6 +451,28 @@ namespace C5.Tests.intervaled
                     Assert.AreEqual(2, _intervaled.CountOverlaps(new IntervalOfInt(14, 15, true, true)));
                     Assert.AreEqual(1, _intervaled.CountOverlaps(new IntervalOfInt(-5, -4, true, true)));
                 }
+
+                [TestCaseSource(typeof(LCListMixedContainments), "StabCases")]
+                public void Overlap_StabbingAtKeyPoints_ReturnsSpecifiedIntervals_TestCase(IInterval<int> range, bool expected)
+                {
+                    Assert.AreEqual(_intervaled.OverlapExists(range), expected);
+                }
+
+                public static object[] StabCases()
+                {
+                    return new object[]
+                        {
+                            new object[] {new IntervalOfInt( 1,  2, true, true), true},
+                            new object[] {new IntervalOfInt( 3,  8, true, true), true},
+                            new object[] {new IntervalOfInt( 5,  10, true, false), true},
+                            new object[] {new IntervalOfInt( 11, 11, true, true), true},
+                            new object[] {new IntervalOfInt( 17, 19, false, true), true},
+                            new object[] {new IntervalOfInt( 20, 30, true, false), true},
+                            new object[] {new IntervalOfInt( 20, 30, false, false), false},
+                            new object[] {new IntervalOfInt( 21, 22, true, true), false},
+                            new object[] {new IntervalOfInt( -5, -3, true, false), true}
+                        };
+                }
             }
         }
 
@@ -704,14 +726,24 @@ namespace C5.Tests.intervaled
                 CollectionAssert.AreEquivalent(dataSetD, new LayeredContainmentList<int>(dataSetD));
             }
 
-            /*
             [Test]
-            public void Constructor_FirstContainssecondEndLess()
+            public void Constructor_ThreeContainments()
             {
-                var moreThanOne = new LayeredContainmentList<int>(new[] { J, K });
-                CollectionAssert.AreEquivalent(new[] { J, K }, moreThanOne);
+                var moreThanOne = new LayeredContainmentList<int>(new[]
+                    {
+                        new IntervalOfInt(1, 7, true, true),
+                        new IntervalOfInt(2, 6, true, true),
+                        new IntervalOfInt(3, 8, true, true),
+                        new IntervalOfInt(4, 5, true, true)
+                    });
+                CollectionAssert.AreEquivalent(new[] 
+                    { 
+                        new IntervalOfInt(1, 7, true, true),
+                        new IntervalOfInt(2, 6, true, true),
+                        new IntervalOfInt(3, 8, true, true),
+                        new IntervalOfInt(4, 5, true, true) }, moreThanOne);
             }
-
+            /*
             [Test]
             public void Constructor_FirstContainssecondEndEqual()
             {
@@ -726,56 +758,277 @@ namespace C5.Tests.intervaled
             [Test]
             public void CountOverlap_Empty()
             {
-                Assert.AreEqual(0, new LayeredContainmentList<int>(Enumerable.Empty<IInterval<int>>()).CountOverlaps(new IntervalOfInt(2, 7, true, true)));
+                Assert.AreEqual(0, new LayeredContainmentList<int>(Enumerable.Empty<IInterval<int>>()).
+                    CountOverlaps(new IntervalOfInt(2, 7, true, true)));
             }
 
             [Test]
             public void CountOverlap_Empty_NullQuery()
             {
-                Assert.AreEqual(0, new LayeredContainmentList<int>(Enumerable.Empty<IInterval<int>>()).CountOverlaps(null));
+                Assert.AreEqual(0, new LayeredContainmentList<int>(Enumerable.Empty<IInterval<int>>()).
+                    CountOverlaps(null));
             }
 
             [Test]
             public void CountOverlap_OneInterval()
             {
-                Assert.AreEqual(1, new LayeredContainmentList<int>(dataSetA).CountOverlaps(new IntervalOfInt(2, 7, true, true)));
+                Assert.AreEqual(1, new LayeredContainmentList<int>(dataSetA).
+                    CountOverlaps(new IntervalOfInt(2, 7, true, true)));
+            }
+
+            [Test]
+            public void CountOverlap_OneInterval2()
+            {
+                Assert.AreEqual(1, new LayeredContainmentList<int>(new[] { new IntervalOfInt(2, 7, false, true) }).
+                    CountOverlaps(new IntervalOfInt(2, 7, true, true)));
+            }
+
+            [Test]
+            public void CountOverlap_MoreIntervals3()
+            {
+                Assert.AreEqual(1, new LayeredContainmentList<int>(new[]
+                    {
+                        new IntervalOfInt(2, 7, true, true),
+                        new IntervalOfInt(1, 6, true, true),
+                        new IntervalOfInt(4, 5, true, true)
+                    }).
+                    CountOverlaps(new IntervalOfInt(0, 1, true, true)));
+            }
+
+            [Test]
+            public void CountOverlap_MoreIntervals4()
+            {
+                Assert.AreEqual(1, new LayeredContainmentList<int>(new[]
+                    {
+                        new IntervalOfInt(2, 7, false, true),
+                        new IntervalOfInt(0, 6, true, true),
+                        new IntervalOfInt(4, 5, true, true)
+                    }).
+                    CountOverlaps(new IntervalOfInt(-1, 1, true, false)));
+            }
+
+            [Test]
+            public void CountOverlap_MoreIntervals5()
+            {
+                Assert.AreEqual(1, new LayeredContainmentList<int>(new[]
+                    {
+                        new IntervalOfInt(2, 7, false, true),
+                        new IntervalOfInt(0, 6, true, true),
+                        new IntervalOfInt(4, 5, true, true)
+                    }).
+                    CountOverlaps(new IntervalOfInt(-1, 1, true, true)));
+            }
+
+            [Test]
+            public void CountOverlap_MoreIntervals6()
+            {
+                Assert.AreEqual(1, new LayeredContainmentList<int>(new[]
+                    {
+                        new IntervalOfInt(2, 7, true, true),
+                        new IntervalOfInt(0, 6, true, true),
+                        new IntervalOfInt(4, 5, true, true)
+                    }).
+                    CountOverlaps(new IntervalOfInt(-1, 2, true, false)));
+            }
+
+            [Test]
+            public void CountOverlap_MoreIntervals61()
+            {
+                Assert.AreEqual(1, new LayeredContainmentList<int>(new[]
+                    {
+                        new IntervalOfInt(2, 7, false, true),
+                        new IntervalOfInt(0, 6, true, true),
+                        new IntervalOfInt(4, 5, true, true)
+                    }).
+                    CountOverlaps(new IntervalOfInt(-1, 2, true, true)));
+            }
+
+            [Test]
+            public void CountOverlap_MoreIntervals7()
+            {
+                Assert.AreEqual(1, new LayeredContainmentList<int>(new[]
+                    {
+                        new IntervalOfInt(2, 7, false, true),
+                        new IntervalOfInt(0, 6, true, true),
+                        new IntervalOfInt(4, 5, true, true)
+                    }).
+                    CountOverlaps(new IntervalOfInt(-1, 2, true, false)));
+            }
+
+            [Test]
+            public void CountOverlap_MoreIntervals8()
+            {
+                Assert.AreEqual(1, new LayeredContainmentList<int>(new[]
+                    {
+                        new IntervalOfInt(2, 7, true, true),
+                        new IntervalOfInt(0, 6, true, true),
+                        new IntervalOfInt(4, 5, true, true)
+                    }).
+                    CountOverlaps(new IntervalOfInt(-1, 1, true, false)));
+            }
+
+            // ******************
+
+            [Test]
+            public void CountOverlap_MoreIntervals9()
+            {
+                Assert.AreEqual(1, new LayeredContainmentList<int>(new[]
+                    {
+                        new IntervalOfInt(2, 7, true, true),
+                        new IntervalOfInt(1, 6, true, true),
+                        new IntervalOfInt(4, 5, true, true)
+                    }).
+                    CountOverlaps(new IntervalOfInt(7, 8, true, true)));
+            }
+
+            [Test]
+            public void CountOverlap_MoreIntervals10()
+            {
+                Assert.AreEqual(0, new LayeredContainmentList<int>(new[]
+                    {
+                        new IntervalOfInt(2, 7, true, false),
+                        new IntervalOfInt(1, 6, true, true),
+                        new IntervalOfInt(4, 5, true, true)
+                    }).
+                    CountOverlaps(new IntervalOfInt(7, 8, true, true)));
+            }
+
+            [Test]
+            public void CountOverlap_MoreIntervals11()
+            {
+                Assert.AreEqual(0, new LayeredContainmentList<int>(new[]
+                    {
+                        new IntervalOfInt(2, 7, true, true),
+                        new IntervalOfInt(1, 6, true, true),
+                        new IntervalOfInt(4, 5, true, true)
+                    }).
+                    CountOverlaps(new IntervalOfInt(7, 8, false, true)));
+            }
+
+            [Test]
+            public void CountOverlap_MoreIntervals12()
+            {
+                Assert.AreEqual(0, new LayeredContainmentList<int>(new[]
+                    {
+                        new IntervalOfInt(2, 7, true, false),
+                        new IntervalOfInt(1, 6, true, true),
+                        new IntervalOfInt(4, 5, true, true)
+                    }).
+                    CountOverlaps(new IntervalOfInt(7, 8, false, true)));
+            }
+
+            [Test]
+            public void CountOverlap_MoreIntervals13()
+            {
+                Assert.AreEqual(0, new LayeredContainmentList<int>(new[]
+                    {
+                        new IntervalOfInt(2, 7, true, false),
+                        new IntervalOfInt(1, 6, true, true),
+                        new IntervalOfInt(4, 5, true, true)
+                    }).
+                    CountOverlaps(new IntervalOfInt(8, 9, false, true)));
+            }
+
+            [Test]
+            public void CountOverlap_MoreIntervals14()
+            {
+                Assert.AreEqual(0, new LayeredContainmentList<int>(new[]
+                    {
+                        new IntervalOfInt(2, 7, true, false),
+                        new IntervalOfInt(1, 6, true, true),
+                        new IntervalOfInt(4, 5, true, true)
+                    }).
+                    CountOverlaps(new IntervalOfInt(8, 9, true, true)));
+            }
+
+            [Test]
+            public void CountOverlap_MoreIntervals15()
+            {
+                Assert.AreEqual(0, new LayeredContainmentList<int>(new[]
+                    {
+                        new IntervalOfInt(2, 7, true, true),
+                        new IntervalOfInt(1, 6, true, true),
+                        new IntervalOfInt(4, 5, true, true)
+                    }).
+                    CountOverlaps(new IntervalOfInt(8, 9, false, true)));
+            }
+
+            [Test]
+            public void CountOverlap_MoreIntervals16()
+            {
+                Assert.AreEqual(0, new LayeredContainmentList<int>(new[]
+                    {
+                        new IntervalOfInt(2, 7, true, true),
+                        new IntervalOfInt(1, 6, true, true),
+                        new IntervalOfInt(4, 5, true, true)
+                    }).
+                    CountOverlaps(new IntervalOfInt(8, 9, true, true)));
+            }
+
+            [Test]
+            public void CountOverlap_MoreIntervals17()
+            {
+                Assert.AreEqual(1, new LayeredContainmentList<int>(new[]
+                    {
+                        new IntervalOfInt(2, 7, true, true),
+                        new IntervalOfInt(1, 5, true, true),
+                        new IntervalOfInt(4, 5, true, true)
+                    }).
+                    CountOverlaps(new IntervalOfInt(6, 9, true, true)));
+            }
+
+            [Test]
+            public void CountOverlap_MoreIntervals18()
+            {
+                Assert.AreEqual(1, new LayeredContainmentList<int>(new[]
+                    {
+                        new IntervalOfInt(2, 7, true, true),
+                        new IntervalOfInt(1, 5, true, true),
+                        new IntervalOfInt(4, 5, true, true),
+                        new IntervalOfInt(0, 1, true, true),
+                        new IntervalOfInt(8, 12, true, true)
+                    }).
+                    CountOverlaps(new IntervalOfInt(6, 7, true, true)));
             }
 
             [Test]
             public void CountOverlap_MoreThanOneInterval()
             {
-                Assert.AreEqual(5, new LayeredContainmentList<int>(dataSetD).CountOverlaps(new IntervalOfInt(6, 9, true, true)));
+                Assert.AreEqual(5, new LayeredContainmentList<int>(dataSetD).
+                    CountOverlaps(new IntervalOfInt(6, 9, true, true)));
             }
 
             [Test]
             public void CountOverlap_MoreThanOneIntervalQueryNull()
             {
-                Assert.AreEqual(0, new LayeredContainmentList<int>(dataSetB).CountOverlaps(null));
+                Assert.AreEqual(0, new LayeredContainmentList<int>(dataSetB).
+                    CountOverlaps(null));
             }
 
             [Test]
             public void CountOverlap_ContainmentQueryHits()
             {
-                Assert.AreEqual(3, new LayeredContainmentList<int>(dataSetF).CountOverlaps(new IntervalOfInt(6, 7, true, true)));
+                Assert.AreEqual(3, new LayeredContainmentList<int>(dataSetF).
+                    CountOverlaps(new IntervalOfInt(6, 7, true, true)));
             }
 
             [Test]
             public void CountOverlap_MoreThanOneIntervalQueryBefore()
             {
-                Assert.AreEqual(0, new LayeredContainmentList<int>(dataSetE).CountOverlaps(new IntervalOfInt(1, 2, true, true)));
+                Assert.AreEqual(0, new LayeredContainmentList<int>(dataSetE).
+                    CountOverlaps(new IntervalOfInt(1, 2, true, true)));
             }
 
             [Test]
             public void CountOverlap_MoreThanOneIntervalQueryAfter()
             {
-                Assert.AreEqual(0, new LayeredContainmentList<int>(dataSetE).CountOverlaps(new IntervalOfInt(21, 23, true, true)));
+                Assert.AreEqual(0, new LayeredContainmentList<int>(dataSetE).
+                    CountOverlaps(new IntervalOfInt(21, 23, true, true)));
             }
 
             #endregion
 
             #region FindOverlaps
-
-            #region Query
 
             [Test]
             public void FindOverlaps_NullQueryZeroIntervals()
@@ -824,8 +1077,6 @@ namespace C5.Tests.intervaled
             {
                 Assert.AreEqual(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentList<int>(dataSetE).FindOverlaps(new IntervalOfInt(1, 2, true, true)));
             }
-
-            #endregion
 
             #endregion
 
@@ -911,7 +1162,36 @@ namespace C5.Tests.intervaled
 
             #region OverlapExists
 
+            [Test]
+            public void OverlapExists_NullQuery()
+            {
+                Assert.False(new LayeredContainmentList<int>(dataSetB).OverlapExists(null));
+            }
 
+            [Test]
+            public void OverlapExists_Empty()
+            {
+                Assert.False(new LayeredContainmentList<int>(Enumerable.Empty<IInterval<int>>()).
+                    OverlapExists(new IntervalOfInt(4, 5, true, true)));
+            }
+
+            [Test]
+            public void OverlapExists_QueryOutOfSpan()
+            {
+                Assert.False(new LayeredContainmentList<int>(dataSetB).OverlapExists(new IntervalOfInt(21, 23, true, true)));
+            }
+
+            [Test]
+            public void OverlapExists_Hit()
+            {
+                Assert.True(new LayeredContainmentList<int>(dataSetB).OverlapExists(new IntervalOfInt(4, 5, true, true)));
+            }
+
+            [Test]
+            public void OverlapExists_NoHit()
+            {
+                Assert.False(new LayeredContainmentList<int>(dataSetE).OverlapExists(new IntervalOfInt(9, 11, true, true)));
+            }
 
             #endregion
 
@@ -932,6 +1212,20 @@ namespace C5.Tests.intervaled
             public void Choose_NotEmpty()
             {
                 Assert.NotNull(new LayeredContainmentList<int>(dataSetA).Choose());
+            }
+
+            [Test]
+            public void ToString_Null()
+            {
+                var list = new LayeredContainmentList<int>(Enumerable.Empty<IInterval<int>>());
+                Assert.AreEqual("{  }", list.ToString());
+            }
+
+            [Test]
+            public void ToString_NotNull()
+            {
+                var list = new LayeredContainmentList<int>(dataSetA);
+                Assert.AreEqual("{ [2:7] }", list.ToString());
             }
 
         }
