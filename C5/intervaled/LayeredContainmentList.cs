@@ -161,7 +161,7 @@ namespace C5.intervaled
                 if (!_layers[layer][first].Interval.Overlaps(query))
                 {
                     // We know first doesn't overlap so we can increment it before searching
-                    first = searchFirst(layer, ++first, upper, query);
+                    first = findFirst(layer, ++first, upper, query);
 
                     // If index is out of bound, or found interval doesn't overlap, then the layer won't contain any overlaps
                     if (upper <= first || !_layers[layer][first].Interval.Overlaps(query))
@@ -169,7 +169,7 @@ namespace C5.intervaled
                 }
 
                 // We can use first as lower to speed up the search
-                var last = searchLast(layer, first, upper, query);
+                var last = findLast(layer, first, upper, query);
 
                 lower = _layers[layer][first].Pointer;
                 upper = _layers[layer][last].Pointer;
@@ -181,33 +181,12 @@ namespace C5.intervaled
             return count;
         }
 
-        private int searchLast(int layer, int lower, int upper, IInterval<T> query)
-        {
-            int min = lower - 1, max = upper;
-
-            while (max - min > 1)
-            {
-                var middle = min + ((max - min) >> 1); // Shift one is the same as dividing by 2
-
-                var interval = _layers[layer][middle].Interval;
-
-                var compare = interval.Low.CompareTo(query.High);
-
-                if (compare < 0 || compare == 0 && interval.LowIncluded && query.HighIncluded)
-                    min = middle;
-                else
-                    max = middle;
-            }
-
-            return max;
-        }
-
         /// <summary>
         /// Will return the index of the first interval that overlaps the query
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
-        private int searchFirst(int layer, int lower, int upper, IInterval<T> query)
+        private int findFirst(int layer, int lower, int upper, IInterval<T> query)
         {
             int min = lower - 1, max = upper;
 
@@ -223,6 +202,27 @@ namespace C5.intervaled
                     max = middle;
                 else
                     min = middle;
+            }
+
+            return max;
+        }
+
+        private int findLast(int layer, int lower, int upper, IInterval<T> query)
+        {
+            int min = lower - 1, max = upper;
+
+            while (max - min > 1)
+            {
+                var middle = min + ((max - min) >> 1); // Shift one is the same as dividing by 2
+
+                var interval = _layers[layer][middle].Interval;
+
+                var compare = interval.Low.CompareTo(query.High);
+
+                if (compare < 0 || compare == 0 && interval.LowIncluded && query.HighIncluded)
+                    min = middle;
+                else
+                    max = middle;
             }
 
             return max;
@@ -296,8 +296,7 @@ namespace C5.intervaled
                 if (!currentLayer[first].Interval.Overlaps(query))
                 {
                     // We know first doesn't overlap so we can increment it before searching
-                    // TODO: Optimize binary search
-                    first = searchFirst(layer, ++first, upper, query);
+                    first = findFirst(layer, ++first, upper, query);
 
                     // If index is out of bound, or found interval doesn't overlap, then the list won't contain any overlaps
                     if (upper <= first || !currentLayer[first].Interval.Overlaps(query))
@@ -305,7 +304,7 @@ namespace C5.intervaled
                 }
 
                 // We can use first as lower to speed up the search
-                var last = searchLast(layer, first, upper, query);
+                var last = findLast(layer, first, upper, query);
 
                 // Save values for next iteration
                 layer++;
@@ -330,7 +329,7 @@ namespace C5.intervaled
             if (!currentLayer[first].Interval.Overlaps(query))
             {
                 // We know first doesn't overlap so we can increment it before searching
-                first = searchFirst(layer, ++first, upper, query);
+                first = findFirst(layer, ++first, upper, query);
 
                 // If index is out of bound, or found interval doesn't overlap, then the list won't contain any overlaps
                 if (upper <= first || !currentLayer[first].Interval.Overlaps(query))
@@ -338,7 +337,7 @@ namespace C5.intervaled
             }
 
             // We can use first as lower to speed up the search
-            var last = searchLast(layer, first, upper, query);
+            var last = findLast(layer, first, upper, query);
 
             // Find intervals in sublist
             foreach (var interval in findOverlapsRecursive(layer + 1, currentLayer[first].Pointer, currentLayer[last].Pointer, query))
@@ -355,7 +354,7 @@ namespace C5.intervaled
                 return false;
 
             // Find first overlap
-            var i = searchFirst(0, 0, _counts[0], query);
+            var i = findFirst(0, 0, _counts[0], query);
 
             // Check if index is in bound and if the interval overlaps the query
             return 0 <= i && i < _counts[0] && _layers[0][i].Interval.Overlaps(query);
@@ -363,7 +362,7 @@ namespace C5.intervaled
 
         public string Graphviz()
         {
-            return String.Format("digraph LayeredContainmentList {{\n\tnode [shape=record];\n\n{0}\n}}", graphviz());
+            return String.Format("digraph LayeredContainmentList {{\n\trankdir=BT;\n\tnode [shape=record];\n\n{0}\n}}", graphviz());
         }
 
         private string graphviz()
@@ -381,10 +380,10 @@ namespace C5.intervaled
                     p += String.Format("layer{0}:n{1} -> layer{2}:n{3};\n\t", layer, i, layer + 1, _layers[layer][i].Pointer);
                 }
 
-                s += String.Format("\tlayer{0} [label=\"{1}\"];\n\t{2}\n", layer, String.Join("|", l.ToArray()), p);
+                s += String.Format("\tlayer{0} [fontname=consola, label=\"{1}\"];\n\t{2}\n", layer, String.Join("|", l.ToArray()), p);
             }
 
-            s += String.Format("\tlayer{0} [label=\"<n0> 0: *\"];", _counts.Length);
+            s += String.Format("\tlayer{0} [fontname=consola, label=\"<n0> 0: *\"];", _counts.Length - 1);
 
             return s;
         }

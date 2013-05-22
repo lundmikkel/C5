@@ -66,7 +66,7 @@ namespace C5.Tests.intervaled
             [Test]
             public void Print()
             {
-                File.WriteAllText(@"../../intervaled/data/LCList_graph.gv", ((LayeredContainmentList<int>)Intervaled).Graphviz());
+                File.WriteAllText(@"../../intervaled/data/layered_containment_list.gv", ((LayeredContainmentList<int>)Intervaled).Graphviz());
             }
         }
 

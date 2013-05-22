@@ -678,7 +678,13 @@ namespace C5.intervaled
 
         public override SCG.IEnumerator<IInterval<T>> GetEnumerator()
         {
-            throw new NotImplementedException();
+            var set = new IntervalSet();
+
+            var enumerator = getEnumerator(_root);
+            while (enumerator.MoveNext())
+                set.Add(enumerator.Current);
+
+            return set.GetEnumerator();
         }
 
         #endregion
@@ -692,7 +698,7 @@ namespace C5.intervaled
         public string Graphviz()
         {
             return "digraph IntervalBinarySearchTree {\n"
-                + "\tnode [shape=record];\n"
+                + "\tnode [shape=record, style=rounded];\n"
                 + graphviz(_root, "root", null)
                 + "}\n";
         }
@@ -700,27 +706,23 @@ namespace C5.intervaled
         private int nodeCounter;
         private int nullCounter;
 
-        private string graphviz(IntervalBinarySearchTree<T>.Node root, string parent, string direction)
+        private string graphviz(Node root, string parent, string direction)
         {
             int id;
             if (root == null)
             {
                 id = nullCounter++;
-                return "\tleaf" + id + "[shape=point];\n"
-                    + "\t" + parent + ":" + direction + " -> leaf" + id + ";\n";
+                return String.Format("\tleaf{0} [shape=point];\n", id) +
+                    String.Format("\t{0}:{1} -> leaf{2};\n", parent, direction, id);
             }
 
             id = nodeCounter++;
-            string rootString;
-            if (direction == null)
-                rootString = "";
-            else rootString = "\t" + parent + " -> struct" + id + ";\n";
+            var color = isRed(root) ? "red" : "black";
+            var rootString = direction == null ? "" : String.Format("\t{0} -> struct{1}:n [color={2}];\n", parent, id, color);
 
             return
                 // Creates the structid: structid [label="<key> keyValue|{lessSet|equalSet|greaterSet}|{<idleft> leftChild|<idright> rightChild}"];
-                "\tstruct" + id + " [label=\"{<key> " + root.Key + "|{"
-                + graphSet(root.Less) + "|" + graphSet(root.Equal) + "|" + graphSet(root.Greater)
-                + "}}\"];\n"
+                String.Format("\tstruct{0} [fontname=consola, label=\"{{<key> {1}|{{{2}|{3}|{4}}}}}\"];\n", id, root.Key, graphSet(root.Less), graphSet(root.Equal), graphSet(root.Greater))
 
                 // Links the parents leftChild to nodeid: parent:left -> structid:key;
                 + rootString
@@ -741,9 +743,7 @@ namespace C5.intervaled
                 s.Add(interval.ToString());
             }
 
-            if (s.IsEmpty())
-                return "empty";
-            return String.Join("\n", s.ToArray());
+            return s.IsEmpty() ? String.Empty : String.Join("\n", s.ToArray());
         }
 
         #endregion
