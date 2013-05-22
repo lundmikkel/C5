@@ -226,7 +226,7 @@ namespace C5.intervaled
                 yield break;
 
             // Find first overlapping interval
-            var first = searchHighInLows(section, query);
+            var first = findFirst(section, query);
 
             // If index is out of bound, or interval doesn't overlap, we can just stop our search
             if (first < section.Offset || section.Offset + section.Length - 1 < first || !_list[first].Interval.Overlaps(query))
@@ -250,41 +250,29 @@ namespace C5.intervaled
         /// <summary>
         /// Get the index of the first node with an interval the overlaps the query
         /// </summary>
-        private int searchHighInLows(Section section, IInterval<T> query)
+        private int findFirst(Section section, IInterval<T> query)
         {
             if (query == null || section.Length == 0)
                 return -1;
 
-            int min = section.Offset, max = section.Offset + section.Length - 1;
+            int min = section.Offset - 1, max = section.Offset + section.Length;
 
-            while (min <= max)
+            while (max - min > 1)
             {
-                var middle = min + ((max - min) >> 1);
+                var middle = min + ((max - min) >> 1); // Shift one is the same as dividing by 2
 
-                if (query.Overlaps(_list[middle].Interval))
-                {
-                    // Only if the previous interval to the overlapping interval does not overlap, we have found the right one
-                    if (middle == section.Offset || !query.Overlaps(_list[middle - 1].Interval))
-                        // The right interval is found
-                        return middle;
+                var interval = _list[middle].Interval;
 
-                    // The previous interval overlap as well, move left
-                    max = middle - 1;
-                }
+                var compare = query.Low.CompareTo(interval.High);
+
+                if (compare < 0 || compare == 0 && query.LowIncluded && interval.HighIncluded)
+                    max = middle;
                 else
-                {
-                    // The interval does not overlap, found out whether query is lower or higher
-                    if (query.CompareTo(_list[middle].Interval) < 0)
-                        // The query is lower than the interval, move left
-                        max = middle - 1;
-                    else
-                        // The query is higher than the interval, move right
-                        min = middle + 1;
-                }
+                    min = middle;
             }
 
             // We return min so we know if the query was lower or higher than the list
-            return min;
+            return max;
         }
 
         /// <summary>
@@ -295,35 +283,23 @@ namespace C5.intervaled
             if (query == null || section.Length == 0)
                 return -1;
 
-            int min = section.Offset, max = section.Offset + section.Length - 1;
+            int min = section.Offset - 1, max = section.Offset + section.Length;
 
-            while (min <= max)
+            while (max - min > 1)
             {
-                var middle = (max + min) / 2;
+                var middle = min + ((max - min) >> 1); // Shift one is the same as dividing by 2
 
-                if (query.Overlaps(_list[middle].Interval))
-                {
-                    // Only if the next interval to the overlapping interval does not overlap, we have found the right one
-                    if (middle == (section.Offset + section.Length - 1) || !query.Overlaps(_list[middle + 1].Interval))
-                        // The right interval is found
-                        return middle;
+                var interval = _list[middle].Interval;
 
-                    // The previous interval overlap as well, move right
-                    min = middle + 1;
-                }
+                var compare = interval.Low.CompareTo(query.High);
+
+                if (compare < 0 || compare == 0 && interval.LowIncluded && query.HighIncluded)
+                    min = middle;
                 else
-                {
-                    // The interval does not overlap, found out whether query is lower or higher
-                    if (query.CompareTo(_list[middle].Interval) < 0)
-                        // The query is lower than the interval, move left
-                        max = middle - 1;
-                    else
-                        // The query is higher than the interval, move right
-                        min = middle + 1;
-                }
+                    max = middle;
             }
 
-            return max;
+            return min;
         }
 
         public SCG.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
@@ -341,7 +317,7 @@ namespace C5.intervaled
                 return false;
 
             // Find first overlap
-            var i = searchHighInLows(_section, query);
+            var i = findFirst(_section, query);
 
             // Check if index is in bound and if the interval overlaps the query
             return _section.Offset <= i && i < _section.Offset + _section.Length && _list[i].Interval.Overlaps(query);
