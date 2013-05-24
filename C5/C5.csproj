@@ -75,6 +75,7 @@
     <Compile Include="intervaled\IntervalList.cs" />
     <Compile Include="intervaled\LayeredContainmentList.cs" />
     <Compile Include="intervaled\NestedContainmentList.cs" />
+    <Compile Include="intervaled\NestedContainmentList2.cs" />
     <Compile Include="intervaled\StaticIntervalTree.cs" />
     <Compile Include="linkedlists\HashedLinkedList.cs" />
     <Compile Include="linkedlists\LinkedList.cs" />

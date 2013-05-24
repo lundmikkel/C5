@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using C5.intervaled;
 using NUnit.Framework;
 using System.Linq;
@@ -165,8 +166,9 @@ namespace C5.Tests.intervaled
         protected IIntervaled<int> Intervaled;
         protected abstract IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals);
 
+        public abstract string Name { get; }
 
-        [Test, Combinatorial]
+        [Test, Combinatorial, Ignore]
         public void Constructor_ChangingCollectionSize(
             [ValueSource(typeof(BenchmarkTestCases), "DataSets")] string dataset,
             [ValueSource(typeof(BenchmarkTestCases), "ConstructorCounts")] int count
@@ -186,6 +188,8 @@ namespace C5.Tests.intervaled
             }
 
             sw.Stop();
+
+            writeTest("Constructor", dataset, intervals.Length, sw.ElapsedMilliseconds / repetitions);
             Console.WriteLine("Average construction time for {0} intervals: {1} ms",
                 intervals.Length,
                 sw.ElapsedMilliseconds / repetitions
@@ -217,6 +221,7 @@ namespace C5.Tests.intervaled
 
             sw.Stop();
 
+            writeTest("SearchTime", dataset, Intervaled.Count, (float) sw.ElapsedMilliseconds / repetitions * 1000);
             Console.WriteLine("Average search time for {0} intervals: {1} µs", Intervaled.Count, (float) sw.ElapsedMilliseconds / repetitions * 1000);
         }
 
@@ -240,6 +245,8 @@ namespace C5.Tests.intervaled
                 Intervaled.FindOverlaps(new IntervalBase<int>(low, low + length)).Count();
             }
             sw.Stop();
+
+            writeTest("FindOverlaps", dataset, length, (float) sw.ElapsedMilliseconds / repetitions * 1000);
 
             Console.WriteLine("Average query time for {0} intervals (query length: {1}): {2} µs",
                 Intervaled.Count,
@@ -272,11 +279,23 @@ namespace C5.Tests.intervaled
             }
             sw.Stop();
 
+            writeTest("CountOverlaps", dataset, length, (float) sw.ElapsedMilliseconds / repetitions * 1000);
+
             Console.WriteLine("Average count time for {0} intervals (query length: {1}): {2} µs",
                 Intervaled.Count,
                 length,
                 (float) sw.ElapsedMilliseconds / repetitions * 1000
             );
+        }
+
+        private void writeTest(string methodName, string dataSet, float x, float y)
+        {
+            var filename = String.Format("../../intervaled/data/benchmarker/{0}_{1}_{2}.dat", Name, methodName, dataSet);
+
+            using (var f = File.AppendText(filename))
+            {
+                f.WriteLine(String.Format(new System.Globalization.CultureInfo("en-US"), "{0:n1}\t{1:n3}", x, y));
+            }
         }
     }
 
@@ -286,14 +305,25 @@ namespace C5.Tests.intervaled
         {
             return new LayeredContainmentList<int>(intervals);
         }
+        public override string Name { get { return "Layered"; } }
     }
 
-    class NestedContainmentLisst_ContainmentsOnly : DataSetTester
+    class NestedContainmentList_ContainmentsOnly : DataSetTester
     {
         protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
             return new NestedContainmentList<int>(intervals);
         }
+        public override string Name { get { return "Nested"; } }
+    }
+
+    class NestedContainmentList2_ContainmentsOnly : DataSetTester
+    {
+        protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        {
+            return new NestedContainmentList2<int>(intervals);
+        }
+        public override string Name { get { return "Nested2"; } }
     }
 
     class StaticIntervalTree_ContainmentsOnly : DataSetTester
@@ -302,5 +332,6 @@ namespace C5.Tests.intervaled
         {
             return new StaticIntervalTree<int>(intervals);
         }
+        public override string Name { get { return "Static"; } }
     }
 }
