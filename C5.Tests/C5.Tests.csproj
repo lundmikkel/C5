@@ -53,6 +53,8 @@
     </Compile>
     <Compile Include="InterfacesTest.cs" />
     <Compile Include="intervaled\Benchmarker.cs" />
+    <Compile Include="intervaled\LayeredContainmentList3Tester.cs" />
+    <Compile Include="intervaled\LayeredContainmentList2Tester.cs" />
     <Compile Include="intervaled\NestedContainmentList2Tester.cs" />
     <Compile Include="intervaled\IntervalListTester.cs" />
     <Compile Include="intervaled\LayeredContainmentListTester.cs" />

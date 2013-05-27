@@ -263,9 +263,6 @@ namespace C5.Tests.intervaled
         {
             Intervaled = Factory(BenchmarkTestCases.TestDataSet(dataset, 1000000));
 
-            // Only test for LayeredContainmentList
-            if (!(Intervaled is LayeredContainmentList<int>)) return;
-
             var repetitions = BenchmarkTestCases.QueryRepetitions;
             var span = Intervaled.Span;
             var step = (float) (span.High - span.Low - 20 - length) / repetitions;
@@ -294,7 +291,11 @@ namespace C5.Tests.intervaled
 
             using (var f = File.AppendText(filename))
             {
-                f.WriteLine(String.Format(new System.Globalization.CultureInfo("en-US"), "{0:n1}\t{1:n3}", x, y));
+                f.WriteLine(String.Format(
+                    //new System.Globalization.CultureInfo("en-US"),
+                    "{0:n1}\t{1:n3}",
+                    x, y
+                ));
             }
         }
     }
@@ -306,6 +307,24 @@ namespace C5.Tests.intervaled
             return new LayeredContainmentList<int>(intervals);
         }
         public override string Name { get { return "Layered"; } }
+    }
+
+    class LayeredContainmentList2_ContainmentsOnly : DataSetTester
+    {
+        protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        {
+            return new LayeredContainmentList2<int>(intervals);
+        }
+        public override string Name { get { return "Layered2"; } }
+    }
+
+    class LayeredContainmentList3_ContainmentsOnly : DataSetTester
+    {
+        protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        {
+            return new LayeredContainmentList3<int>(intervals);
+        }
+        public override string Name { get { return "Layered3"; } }
     }
 
     class NestedContainmentList_ContainmentsOnly : DataSetTester
