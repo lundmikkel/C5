@@ -68,6 +68,7 @@
     <Compile Include="hashing\HashTable.cs" />
     <Compile Include="heaps\IntervalHeap.cs" />
     <Compile Include="Interfaces.cs" />
+    <Compile Include="intervaled\LayeredContainmentListWithoutPointers.cs" />
     <Compile Include="intervaled\LayeredContainmentList3.cs" />
     <Compile Include="intervaled\LayeredContainmentList2.cs" />
     <Compile Include="intervaled\IntervalBase.cs" />

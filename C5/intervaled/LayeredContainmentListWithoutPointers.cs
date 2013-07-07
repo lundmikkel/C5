@@ -4,11 +4,10 @@ using System.Linq;
 
 namespace C5.intervaled
 {
-    public class LayeredContainmentList2<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
+    public class LayeredContainmentListWithoutPointers<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
     {
         private readonly int _count;
-        private readonly IInterval<T>[][] _intervalLayers;
-        private readonly int[][] _pointerLayers;
+        private readonly Node[][] _layers;
         private readonly int[] _counts;
         private readonly IInterval<T> _span;
 
@@ -42,7 +41,7 @@ namespace C5.intervaled
 
         #region Constructor
 
-        public LayeredContainmentList2(IEnumerable<IInterval<T>> intervals)
+        public LayeredContainmentListWithoutPointers(IEnumerable<IInterval<T>> intervals)
         {
             // Make intervals to array to allow fast sorting and counting
             var intervalArray = intervals as IInterval<T>[] ?? intervals.ToArray();
@@ -61,28 +60,17 @@ namespace C5.intervaled
                 var layers = createLayers(intervalArray);
 
                 // Create the list that contains the containment layers
-                _intervalLayers = new IInterval<T>[layers.Count][];
-                _pointerLayers = new int[layers.Count][];
+                _layers = new Node[layers.Count][];
                 _counts = new int[layers.Count];
                 // Create each containment layer
                 for (var i = 0; i < _counts.Length - 1; i++)
                 {
-                    var count = layers[i].Count; // Subtract one for the dummy node
-                    _intervalLayers[i] = new IInterval<T>[count];
-                    _pointerLayers[i] = new int[count];
-                    _counts[i] = count - 1; // Subtract one for the dummy node
-
-                    var j = 0;
-                    foreach (var node in layers[i])
-                    {
-                        _intervalLayers[i][j] = node.Interval;
-                        _pointerLayers[i][j] = node.Pointer;
-                        j++;
-                    }
+                    _layers[i] = layers[i].ToArray();
+                    _counts[i] = layers[i].Count - 1; // Subtract one for the dummy node
                 }
 
                 // Save the span once
-                _span = new IntervalBase<T>(_intervalLayers[0][0], _intervalLayers[0][_counts[0] - 1]);
+                _span = new IntervalBase<T>(_layers[0][0].Interval, _layers[0][_counts[0] - 1].Interval);
             }
         }
 
@@ -147,7 +135,7 @@ namespace C5.intervaled
             if (Count == 0)
                 throw new NoSuchItemException();
 
-            return _intervalLayers.First().First();
+            return _layers.First().First().Interval;
         }
 
         #endregion
@@ -170,22 +158,22 @@ namespace C5.intervaled
                 var first = lower;
 
                 // The first interval doesn't overlap we need to search for it
-                if (!_intervalLayers[layer][first].Overlaps(query))
+                if (!_layers[layer][first].Interval.Overlaps(query))
                 {
                     // We know first doesn't overlap so we can increment it before searching
                     first = findFirst(layer, ++first, upper, query);
 
                     // If index is out of bound, or found interval doesn't overlap, then the layer won't contain any overlaps
-                    if (upper <= first || !_intervalLayers[layer][first].Overlaps(query))
+                    if (upper <= first || !_layers[layer][first].Interval.Overlaps(query))
                         return count;
                 }
 
                 // We can use first as lower to speed up the search
                 var last = findLast(layer, first, upper, query);
 
-                lower = _pointerLayers[layer][first];
-                upper = _pointerLayers[layer][last];
                 layer++;
+                lower = 0;
+                upper = _counts[layer];
 
                 count += last - first;
 
@@ -202,13 +190,11 @@ namespace C5.intervaled
         {
             int min = lower - 1, max = upper;
 
-            var intervalLayer = _intervalLayers[layer];
-
             while (max - min > 1)
             {
                 var middle = min + ((max - min) >> 1); // Shift one is the same as dividing by 2
 
-                var interval = intervalLayer[middle];
+                var interval = _layers[layer][middle].Interval;
 
                 var compare = query.Low.CompareTo(interval.High);
 
@@ -224,13 +210,12 @@ namespace C5.intervaled
         private int findLast(int layer, int lower, int upper, IInterval<T> query)
         {
             int min = lower - 1, max = upper;
-            var intervalLayer = _intervalLayers[layer];
 
             while (max - min > 1)
             {
                 var middle = min + ((max - min) >> 1); // Shift one is the same as dividing by 2
 
-                var interval = intervalLayer[middle];
+                var interval = _layers[layer][middle].Interval;
 
                 var compare = interval.Low.CompareTo(query.High);
 
@@ -255,14 +240,14 @@ namespace C5.intervaled
         {
             while (start < end)
             {
-                var node = _intervalLayers[level][start];
+                var node = _layers[level][start];
 
-                yield return node;
+                yield return node.Interval;
 
                 // Check if we are at the last node
-                if (_pointerLayers[level][start] < _pointerLayers[level][start + 1])
+                if (node.Pointer < _layers[level][start + 1].Pointer)
                 {
-                    var child = getEnumerator(level + 1, _pointerLayers[level][start], _pointerLayers[level][start + 1]);
+                    var child = getEnumerator(level + 1, node.Pointer, _layers[level][start + 1].Pointer);
 
                     while (child.MoveNext())
                         yield return child.Current;
@@ -303,18 +288,18 @@ namespace C5.intervaled
             // Make sure first and last don't point at the same interval (theorem 2)
             while (lower < upper)
             {
-                var currentLayer = _intervalLayers[layer];
+                var currentLayer = _layers[layer];
 
                 var first = lower;
 
                 // The first interval doesn't overlap we need to search for it
-                if (!currentLayer[first].Overlaps(query))
+                if (!currentLayer[first].Interval.Overlaps(query))
                 {
                     // We know first doesn't overlap so we can increment it before searching
                     first = findFirst(layer, ++first, upper, query);
 
                     // If index is out of bound, or found interval doesn't overlap, then the list won't contain any overlaps
-                    if (upper <= first || !currentLayer[first].Overlaps(query))
+                    if (upper <= first || !currentLayer[first].Interval.Overlaps(query))
                         yield break;
                 }
 
@@ -322,12 +307,12 @@ namespace C5.intervaled
                 var last = findLast(layer, first, upper, query);
 
                 // Save values for next iteration
-                lower = _pointerLayers[layer][first]; // 0
-                upper = _pointerLayers[layer][last]; // _counts[layer]
                 layer++;
+                lower = 0;
+                upper = _counts[layer];
 
                 while (first < last)
-                    yield return currentLayer[first++];
+                    yield return currentLayer[first++].Interval;
             }
         }
 
@@ -338,16 +323,16 @@ namespace C5.intervaled
                 yield break;
 
             var first = lower;
-            var currentLayer = _intervalLayers[layer];
+            var currentLayer = _layers[layer];
 
             // The first interval doesn't overlap we need to search for it
-            if (!currentLayer[first].Overlaps(query))
+            if (!currentLayer[first].Interval.Overlaps(query))
             {
                 // We know first doesn't overlap so we can increment it before searching
                 first = findFirst(layer, ++first, upper, query);
 
                 // If index is out of bound, or found interval doesn't overlap, then the list won't contain any overlaps
-                if (upper <= first || !currentLayer[first].Overlaps(query))
+                if (upper <= first || !currentLayer[first].Interval.Overlaps(query))
                     yield break;
             }
 
@@ -355,11 +340,11 @@ namespace C5.intervaled
             var last = findLast(layer, first, upper, query);
 
             // Find intervals in sublist
-            foreach (var interval in findOverlapsRecursive(layer + 1, _pointerLayers[layer][first], _pointerLayers[layer][last], query))
+            foreach (var interval in findOverlapsRecursive(layer + 1, 0, _counts[layer + 1], query))
                 yield return interval;
 
             while (first < last)
-                yield return currentLayer[first++];
+                yield return currentLayer[first++].Interval;
         }
 
         public bool OverlapExists(IInterval<T> query)
@@ -372,12 +357,12 @@ namespace C5.intervaled
             var i = findFirst(0, 0, _counts[0], query);
 
             // Check if index is in bound and if the interval overlaps the query
-            return 0 <= i && i < _counts[0] && _intervalLayers[0][i].Overlaps(query);
+            return 0 <= i && i < _counts[0] && _layers[0][i].Interval.Overlaps(query);
         }
 
         public string Graphviz()
         {
-            return String.Format("digraph LayeredContainmentList2 {{\n\trankdir=BT;\n\tnode [shape=record];\n\n{0}\n}}", graphviz());
+            return String.Format("digraph LayeredContainmentListWithoutPointers {{\n\trankdir=BT;\n\tnode [shape=record];\n\n{0}\n}}", graphviz());
         }
 
         private string graphviz()
@@ -390,9 +375,9 @@ namespace C5.intervaled
                 var p = String.Empty;
                 for (var i = 0; i <= _counts[layer]; i++)
                 {
-                    l.Add(String.Format("<n{0}> {0}: {1}", i, _intervalLayers[layer][i]));
+                    l.Add(String.Format("<n{0}> {0}: {1}", i, _layers[layer][i]));
 
-                    p += String.Format("layer{0}:n{1} -> layer{2}:n{3};\n\t", layer, i, layer + 1, _pointerLayers[layer][i]);
+                    p += String.Format("layer{0}:n{1} -> layer{2}:n{3};\n\t", layer, i, layer + 1, _layers[layer][i].Pointer);
                 }
 
                 s += String.Format("\tlayer{0} [fontname=consola, label=\"{1}\"];\n\t{2}\n", layer, String.Join("|", l.ToArray()), p);
