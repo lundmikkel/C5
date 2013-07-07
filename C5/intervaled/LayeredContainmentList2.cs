@@ -9,7 +9,7 @@ namespace C5.intervaled
         private readonly int _count;
         private readonly IInterval<T>[][] _intervalLayers;
         private readonly int[][] _pointerLayers;
-        private readonly int[] _counts;
+        private readonly int _firstLayerCount;
         private readonly IInterval<T> _span;
 
         #region Node nested classes
@@ -63,14 +63,14 @@ namespace C5.intervaled
                 // Create the list that contains the containment layers
                 _intervalLayers = new IInterval<T>[layers.Count][];
                 _pointerLayers = new int[layers.Count][];
-                _counts = new int[layers.Count];
+                _firstLayerCount = layers[0].Count - 1;
+
                 // Create each containment layer
-                for (var i = 0; i < _counts.Length - 1; i++)
+                for (var i = 0; i < layers.Count - 1; i++)
                 {
                     var count = layers[i].Count; // Subtract one for the dummy node
                     _intervalLayers[i] = new IInterval<T>[count];
                     _pointerLayers[i] = new int[count];
-                    _counts[i] = count - 1; // Subtract one for the dummy node
 
                     var j = 0;
                     foreach (var node in layers[i])
@@ -82,7 +82,7 @@ namespace C5.intervaled
                 }
 
                 // Save the span once
-                _span = new IntervalBase<T>(_intervalLayers[0][0], _intervalLayers[0][_counts[0] - 1]);
+                _span = new IntervalBase<T>(_intervalLayers[0][0], _intervalLayers[0][_firstLayerCount - 1]);
             }
         }
 
@@ -158,7 +158,7 @@ namespace C5.intervaled
             if (ReferenceEquals(query, null) || IsEmpty)
                 return 0;
 
-            return countOverlaps(0, 0, _counts[0], query);
+            return countOverlaps(0, 0, _firstLayerCount, query);
         }
 
         private int countOverlaps(int layer, int lower, int upper, IInterval<T> query)
@@ -248,7 +248,7 @@ namespace C5.intervaled
             if (IsEmpty)
                 return (new IInterval<T>[] { }).Cast<IInterval<T>>().GetEnumerator();
 
-            return getEnumerator(0, 0, _counts[0]);
+            return getEnumerator(0, 0, _firstLayerCount);
         }
 
         private IEnumerator<IInterval<T>> getEnumerator(int level, int start, int end)
@@ -298,7 +298,7 @@ namespace C5.intervaled
             if (ReferenceEquals(query, null) || IsEmpty)
                 yield break;
 
-            int layer = 0, lower = 0, upper = _counts[0];
+            int layer = 0, lower = 0, upper = _firstLayerCount;
 
             // Make sure first and last don't point at the same interval (theorem 2)
             while (lower < upper)
@@ -369,10 +369,10 @@ namespace C5.intervaled
                 return false;
 
             // Find first overlap
-            var i = findFirst(0, 0, _counts[0], query);
+            var i = findFirst(0, 0, _firstLayerCount, query);
 
             // Check if index is in bound and if the interval overlaps the query
-            return 0 <= i && i < _counts[0] && _intervalLayers[0][i].Overlaps(query);
+            return 0 <= i && i < _firstLayerCount && _intervalLayers[0][i].Overlaps(query);
         }
 
         public string Graphviz()
@@ -384,21 +384,32 @@ namespace C5.intervaled
         {
             var s = String.Empty;
 
-            for (var layer = 0; layer < _counts.Length - 1; layer++)
+            var layer = 0;
+            int lower = 0, upper = _firstLayerCount;
+
+            while (lower < upper)
             {
                 var l = new ArrayList<string>();
                 var p = String.Empty;
-                for (var i = 0; i <= _counts[layer]; i++)
+                for (var i = 0; i <= upper; i++)
                 {
-                    l.Add(String.Format("<n{0}> {0}: {1}", i, _intervalLayers[layer][i]));
+                    // TODO: Would it be worth replacing with a custom formatter for the null values?
+                    // http://stackoverflow.com/questions/7689040/can-i-format-null-values-in-string-format
+                    var interval = _intervalLayers[layer][i] != null ? _intervalLayers[layer][i].ToString() : "*";
+                    l.Add(String.Format("<n{0}> {0}: {1}", i, interval));
 
                     p += String.Format("layer{0}:n{1} -> layer{2}:n{3};\n\t", layer, i, layer + 1, _pointerLayers[layer][i]);
                 }
 
                 s += String.Format("\tlayer{0} [fontname=consola, label=\"{1}\"];\n\t{2}\n", layer, String.Join("|", l.ToArray()), p);
+
+
+                lower = _pointerLayers[layer][lower];
+                upper = _pointerLayers[layer][upper];
+                layer++;
             }
 
-            s += String.Format("\tlayer{0} [fontname=consola, label=\"<n0> 0: *\"];", _counts.Length - 1);
+            s += String.Format("\tlayer{0} [fontname=consola, label=\"<n0> 0: *\"];", layer);
 
             return s;
         }
