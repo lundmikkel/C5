@@ -7,9 +7,11 @@ namespace C5.intervaled
     public class LayeredContainmentList2<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
     {
         private readonly int _count;
+        private readonly int _firstLayerCount;
+
         private readonly IInterval<T>[][] _intervalLayers;
         private readonly int[][] _pointerLayers;
-        private readonly int _firstLayerCount;
+
         private readonly IInterval<T> _span;
 
         #region Node nested classes
@@ -30,11 +32,6 @@ namespace C5.intervaled
                 : this()
             {
                 Pointer = pointer;
-            }
-
-            public override string ToString()
-            {
-                return Interval != null ? Interval.ToString() : "*";
             }
         }
 
