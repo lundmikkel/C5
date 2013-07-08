@@ -1,77 +1,77 @@
 digraph IntervalBinarySearchTree {
-	node [shape=record];
-	struct0 [label="{<key> 9|{empty|E1
+	node [shape=record, style=rounded];
+	struct0 [fontname=consola, label="{<key> 9|{|A
+E1
 E2
-A
 G
-H|empty}}"];
-	struct1 [label="{<key> 7|{empty|G
-H
-B|G
+H|}}"];
+	struct1 [fontname=consola, label="{<key> 7|{|G
+B
+H|G
 H}}"];
-	struct0 -> struct1;
-	struct2 [label="{<key> 2|{empty|G
+	struct0 -> struct1:n [color=black];
+	struct2 [fontname=consola, label="{<key> 2|{|B
 C
-B|G
-B}}"];
-	struct1 -> struct2;
-	struct3 [label="{<key> 1|{empty|C
 G|G
-C}}"];
-	struct2 -> struct3;
-	struct4 [label="{<key> -2147483648|{empty|empty|G}}"];
-	struct3 -> struct4;
-	leaf0[shape=point];
+B}}"];
+	struct1 -> struct2:n [color=red];
+	struct3 [fontname=consola, label="{<key> 1|{|C
+G|C
+G}}"];
+	struct2 -> struct3:n [color=black];
+	struct4 [fontname=consola, label="{<key> -2147483648|{||G}}"];
+	struct3 -> struct4:n [color=red];
+	leaf0 [shape=point];
 	struct4:left -> leaf0;
-	leaf1[shape=point];
+	leaf1 [shape=point];
 	struct4:right -> leaf1;
-	leaf2[shape=point];
+	leaf2 [shape=point];
 	struct3:right -> leaf2;
-	struct5 [label="{<key> 5|{empty|empty|H}}"];
-	struct2 -> struct5;
-	struct6 [label="{<key> 3|{C|empty|empty}}"];
-	struct5 -> struct6;
-	leaf3[shape=point];
+	struct5 [fontname=consola, label="{<key> 5|{||H}}"];
+	struct2 -> struct5:n [color=black];
+	struct6 [fontname=consola, label="{<key> 3|{C||}}"];
+	struct5 -> struct6:n [color=red];
+	leaf3 [shape=point];
 	struct6:left -> leaf3;
-	leaf4[shape=point];
+	leaf4 [shape=point];
 	struct6:right -> leaf4;
-	leaf5[shape=point];
+	leaf5 [shape=point];
 	struct5:right -> leaf5;
-	struct7 [label="{<key> 8|{empty|E1
+	struct7 [fontname=consola, label="{<key> 8|{|E1
 E2|E1
 E2}}"];
-	struct1 -> struct7;
-	leaf6[shape=point];
+	struct1 -> struct7:n [color=black];
+	leaf6 [shape=point];
 	struct7:left -> leaf6;
-	leaf7[shape=point];
+	leaf7 [shape=point];
 	struct7:right -> leaf7;
-	struct8 [label="{<key> 19|{A|A
-D|empty}}"];
-	struct0 -> struct8;
-	struct9 [label="{<key> 17|{G|G|D}}"];
-	struct8 -> struct9;
-	struct10 [label="{<key> 12|{E1
+	struct8 [fontname=consola, label="{<key> 19|{A|A
+D|}}"];
+	struct0 -> struct8:n [color=black];
+	struct9 [fontname=consola, label="{<key> 17|{G|G|D}}"];
+	struct8 -> struct9:n [color=red];
+	struct10 [fontname=consola, label="{<key> 12|{E1
 E2|E1
-E2|empty}}"];
-	struct9 -> struct10;
-	struct11 [label="{<key> 10|{H|empty|empty}}"];
-	struct10 -> struct11;
-	leaf8[shape=point];
+E2|}}"];
+	struct9 -> struct10:n [color=black];
+	struct11 [fontname=consola, label="{<key> 10|{H||}}"];
+	struct10 -> struct11:n [color=red];
+	leaf8 [shape=point];
 	struct11:left -> leaf8;
-	leaf9[shape=point];
+	leaf9 [shape=point];
 	struct11:right -> leaf9;
-	leaf10[shape=point];
+	leaf10 [shape=point];
 	struct10:right -> leaf10;
-	struct12 [label="{<key> 18|{empty|F|empty}}"];
-	struct9 -> struct12;
-	leaf11[shape=point];
+	struct12 [fontname=consola, label="{<key> 18|{|F|}}"];
+	struct9 -> struct12:n [color=black];
+	leaf11 [shape=point];
 	struct12:left -> leaf11;
-	leaf12[shape=point];
+	leaf12 [shape=point];
 	struct12:right -> leaf12;
-	struct13 [label="{<key> 20|{D|D|empty}}"];
-	struct8 -> struct13;
-	leaf13[shape=point];
+	struct13 [fontname=consola, label="{<key> 20|{D|D|}}"];
+	struct8 -> struct13:n [color=black];
+	leaf13 [shape=point];
 	struct13:left -> leaf13;
-	leaf14[shape=point];
+	leaf14 [shape=point];
 	struct13:right -> leaf14;
 }

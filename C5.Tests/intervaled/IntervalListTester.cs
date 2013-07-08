@@ -9,7 +9,7 @@ using NUnit.Framework;
 
 namespace C5.Tests.intervaled
 {
-    using IntervalOfInt = IntervalBase<int>;
+    /*using IntervalOfInt = IntervalBase<int>;
 
     public class IntervalListEndpointInclusion : IntervaledEndpointInclusion
     {
@@ -86,4 +86,5 @@ namespace C5.Tests.intervaled
             return new IntervalList<int>(intervals);
         }
     }
+    */
 }

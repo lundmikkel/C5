@@ -33,16 +33,18 @@ namespace C5.Tests.intervaled
         {
             get
             {
-                return 200;
+                return Benchmarking ? 200 : 1;
             }
         }
         public static int QueryRepetitions
         {
             get
             {
-                return 1000000;
+                return Benchmarking ? 1000000 : 1;
             }
         }
+
+        public static bool Benchmarking { get { return false; } }
 
         public static object[] DataSets = new object[] { 
             "A", "B", "C", 
@@ -287,15 +289,19 @@ namespace C5.Tests.intervaled
 
         private void writeTest(string methodName, string dataSet, float x, float y)
         {
-            var filename = String.Format("../../intervaled/data/benchmarker/{0}_{1}_{2}.dat", Name, methodName, dataSet);
-
-            using (var f = File.AppendText(filename))
+            if (BenchmarkTestCases.Benchmarking)
             {
-                f.WriteLine(String.Format(
-                    //new System.Globalization.CultureInfo("en-US"),
-                    "{0:n1}\t{1:n3}",
-                    x, y
-                ));
+                var filename = String.Format("../../intervaled/data/benchmarker/{0}_{1}_{2}.dat", Name, methodName,
+                                             dataSet);
+
+                using (var f = File.AppendText(filename))
+                {
+                    f.WriteLine(String.Format(
+                        //new System.Globalization.CultureInfo("en-US"),
+                        "{0:n1}\t{1:n3}",
+                        x, y
+                                    ));
+                }
             }
         }
     }

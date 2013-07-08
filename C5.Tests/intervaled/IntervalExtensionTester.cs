@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using C5.intervaled;
@@ -822,6 +823,58 @@ namespace C5.Tests.intervaled
         {
             Assert.IsFalse(swap ? P.Contains(i) : i.Contains(P));
         }
+
+
+        private IInterval<int>[] BenchmarkIntervals()
+        {
+            var intervals = new ArrayList<IInterval<int>>();
+
+            var size = 10;
+
+            for (int low = 0; low < size; low++)
+            {
+                intervals.Add(new IntervalOfInt(low));
+
+                for (int high = low + 1; high < size; high++)
+                {
+                    for (int lowInc = 0; lowInc < 2; lowInc++)
+                    {
+                        var lowIncluded = Convert.ToBoolean(lowInc);
+                        for (int highInc = 0; highInc < 2; highInc++)
+                        {
+                            var highIncluded = Convert.ToBoolean(highInc);
+
+                            intervals.Add(new IntervalOfInt(low, high, lowIncluded, highIncluded));
+                        }
+                    }
+                }
+            }
+
+            return intervals.ToArray();
+        }
+
+        [Test]
+        public void Benchmark()
+        {
+            var intervals = BenchmarkIntervals();
+            var repetitions = 100000;
+
+            var sw = new Stopwatch();
+            sw.Start();
+
+            for (int i = 0; i < repetitions; i++)
+                foreach (var x in intervals)
+                    foreach (var y in intervals)
+                        x.CompareTo(y);
+
+            sw.Stop();
+
+            Console.WriteLine("Time for {0}: {1} ms",
+                "CompareTo",
+                sw.ElapsedMilliseconds
+            );
+        }
     }
     // ReSharper restore CoVariantArrayConversion
+
 }
