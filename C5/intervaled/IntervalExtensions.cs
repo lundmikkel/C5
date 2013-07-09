@@ -20,6 +20,9 @@ namespace C5.intervaled
             int xLowYHighCompare = x.Low.CompareTo(y.High), yLowXHighCompare = y.Low.CompareTo(x.High);
             return (xLowYHighCompare < 0 || xLowYHighCompare == 0 && x.LowIncluded && y.HighIncluded)
                 && (yLowXHighCompare < 0 || yLowXHighCompare == 0 && y.LowIncluded && x.HighIncluded);
+
+            // The same as (but faster than)
+            return x.CompareLowHigh(y) <= 0 && y.CompareLowHigh(x) <= 0;
         }
 
         /// <summary>
@@ -46,10 +49,11 @@ namespace C5.intervaled
             // Save compare values to avoid comparing twice in case CompareTo() should be expensive
             int lowCompare = x.Low.CompareTo(y.Low), highCompare = y.High.CompareTo(x.High);
             return
-                // Low
                 (lowCompare < 0 || (lowCompare == 0 && x.LowIncluded && !y.LowIncluded))
-                // High
                 && (highCompare < 0 || (highCompare == 0 && !y.HighIncluded && x.HighIncluded));
+
+            // The same as (but faster than)
+            return x.CompareLow(y) < 0 && y.CompareHigh(x) < 0;
         }
 
         /// <summary>
@@ -76,36 +80,84 @@ namespace C5.intervaled
                 // If both include or exclude their low endpoint, we don't care which one is first
                 if (x.LowIncluded == y.LowIncluded)
                 {
-                    return CompareHigh(x, y);
+                    var highCompare = x.High.CompareTo(y.High);
+
+                    // Check endpoint inclusion, if values are equal, but inclusion is different
+                    if (highCompare == 0 && x.HighIncluded != y.HighIncluded)
+                        // Excluded high endpoints come before included
+                        return !x.HighIncluded ? -1 : 1;
+
+                    return highCompare;
                 }
 
                 // x.LowIncluded and y.LowIncluded are different
                 // So if x.LowIncluded is true it comes before y
                 return x.LowIncluded ? -1 : 1;
+
             }
 
             // We can simply compare their low points
             return lowCompare;
+
+            // The same as (but faster than)
+            var compare = x.CompareLow(y);
+            return compare != 0 ? compare : x.CompareHigh(y);
         }
 
+        /// <summary>
+        /// Compare the low endpoints of two intervals. If the low endpoint values are equal,
+        /// an included endpoint precedes an excluded endpoint
+        /// </summary>
+        /// <param name="x">First interval</param>
+        /// <param name="y">Second interval</param>
+        /// <returns>Negative integer if x's low endpoint comes before y's low endpoint, 0 if they are equal, otherwise positive</returns>
+        public static int CompareLow<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            var compare = x.Low.CompareTo(y.Low);
+
+            // Check endpoint inclusion, if values are equal, but inclusion is different
+            if (compare == 0 && x.LowIncluded != y.LowIncluded)
+                // Included low endpoints come before excluded
+                return x.LowIncluded ? -1 : 1;
+
+            return compare;
+        }
+
+        /// <summary>
+        /// Compare the high endpoints of two intervals. If the high endpoint values are equal,
+        /// an excluded endpoint precedes an included endpoint
+        /// </summary>
+        /// <param name="x">First interval</param>
+        /// <param name="y">Second interval</param>
+        /// <returns>Negative integer if x's high endpoint comes before y's high endpoint, 0 if they are equal, otherwise positive</returns>
         public static int CompareHigh<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
-            var highCompare = x.High.CompareTo(y.High);
+            var compare = x.High.CompareTo(y.High);
 
-            // Check if x finishes y - their highs are the same
-            if (highCompare == 0)
-            {
-                // If both include or exclude the high endpoint, we don't care which one is first
-                if (x.HighIncluded == y.HighIncluded)
-                    return 0;
-
-                // x.HighIncluded and y.HighIncluded are different
-                // So if x.HighIncluded is true it comes before y in the sorting order - we don't know anything about their actual relation
+            // Check endpoint inclusion, if values are equal, but inclusion is different
+            if (compare == 0 && x.HighIncluded != y.HighIncluded)
+                // Excluded high endpoints come before included
                 return !x.HighIncluded ? -1 : 1;
-            }
 
-            // We can simply compare their high points - but we swap the order as the highest endpoint has the lowest sorting order
-            return highCompare;
+            return compare;
+        }
+
+        /// <summary>
+        /// Compare the low endpoint of first interval to the high endpoint of the second interval.
+        /// </summary>
+        /// <param name="x">First interval</param>
+        /// <param name="y">Second interval</param>
+        /// <returns></returns>
+        public static int CompareLowHigh<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            var compare = x.Low.CompareTo(y.High);
+
+            // Check endpoint inclusion, if values are equal, but inclusion is different
+            if (compare == 0)
+                // Excluded high endpoints come before included
+                return x.LowIncluded && y.HighIncluded ? 0 : 1;
+
+            return compare;
         }
 
         /// <summary>
@@ -116,6 +168,10 @@ namespace C5.intervaled
         /// <returns>True if Low, High, LowIncluded, HighIncluded for both intervals are equal</returns>
         public static bool Equals<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
+            return x.Low.CompareTo(y.Low) == 0 && x.High.CompareTo(y.High) == 0 && x.LowIncluded == y.LowIncluded &&
+                   x.HighIncluded == y.HighIncluded;
+
+            // The same as (but faster than)
             return CompareTo(x, y) == 0;
         }
 
