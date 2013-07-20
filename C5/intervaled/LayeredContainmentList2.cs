@@ -89,7 +89,7 @@ namespace C5.intervaled
             }
         }
 
-        private ArrayList<ArrayList<Node>> createLayers(IInterval<T>[] intervals)
+        private static ArrayList<ArrayList<Node>> createLayers(IInterval<T>[] intervals)
         {
             // Use a stack to keep track of current containment
             var layer = 0;
@@ -199,7 +199,6 @@ namespace C5.intervaled
         /// <summary>
         /// Will return the index of the first interval that overlaps the query
         /// </summary>
-        /// <param name="query"></param>
         /// <returns></returns>
         private int findFirst(int layer, int lower, int upper, IInterval<T> query)
         {
@@ -284,6 +283,10 @@ namespace C5.intervaled
             return getEnumeratorSorted(0, _firstLayerCount);
         }
 
+        /// <summary>
+        /// Property exposing the method <see cref="GetEnumeratorSorted"/> as IEnumerable&lt;IInterval&lt;T&gt;&gt;.
+        /// Usefull for loops: foreach (var interval in intervaled.Sorted) { }. 
+        /// </summary>
         public IEnumerable<IInterval<T>> Sorted
         {
             get
