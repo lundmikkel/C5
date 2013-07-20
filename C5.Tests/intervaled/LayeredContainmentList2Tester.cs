@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using C5.Tests.intervaled.Generic;
@@ -31,6 +32,13 @@ namespace C5.Tests.intervaled
             {
                 return new LayeredContainmentList2<int>(intervals);
             }
+
+            [Test]
+            public void MaximumOverlap_EmptyCollection_Returns0()
+            {
+
+                Assert.AreEqual(0, ((LayeredContainmentList2<int>) _intervaled).MaximumOverlap);
+            }
         }
 
         [TestFixture]
@@ -56,7 +64,7 @@ namespace C5.Tests.intervaled
         //...--------------------]G
         //           
         //************************************
-        public class LCListIBS : Generic.IBS
+        public class LCListIBS : IBS
         {
             internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
@@ -67,6 +75,42 @@ namespace C5.Tests.intervaled
             public void Print()
             {
                 File.WriteAllText(@"../../intervaled/data/layered_containment_list.gv", ((LayeredContainmentList2<int>) Intervaled).Graphviz());
+            }
+
+            [Test]
+            public void MaximumOverlap_EmptyCollection_Returns5()
+            {
+                var sw = new Stopwatch();
+                sw.Start();
+                Assert.AreEqual(5, ((LayeredContainmentList2<int>) Intervaled).MaximumOverlap);
+                sw.Stop();
+
+                Console.WriteLine("Time: {0}",
+                    (float) sw.ElapsedMilliseconds
+                );
+
+                sw.Restart();
+                Assert.AreEqual(5, ((LayeredContainmentList2<int>) Intervaled).MaximumOverlap);
+                sw.Stop();
+
+                Console.WriteLine("Time (cached): {0}",
+                    (float) sw.ElapsedMilliseconds
+                );
+            }
+        }
+
+        [TestFixture]
+        public class PmoTest
+        {
+            [Test]
+            public void MinimumCase()
+            {
+                var intervaled = new LayeredContainmentList2<int>(new IInterval<int>[] { new IntervalOfInt(0, 2, false, false), new IntervalOfInt(1, 3, false, false) });
+
+                Assert.AreEqual(2, intervaled.MaximumOverlap);
+                var interval = new IntervalOfInt(1, 2, false, false);
+                Assert.AreEqual(interval, intervaled.IntervalOfMaximumOverlap);
+                Assert.AreEqual(2, intervaled.FindOverlaps(interval).Count());
             }
         }
 
@@ -85,6 +129,12 @@ namespace C5.Tests.intervaled
             protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new LayeredContainmentList2<int>(intervals);
+            }
+
+            [Test]
+            public void MaximumOverlap_EmptyCollection_Returns2()
+            {
+                Assert.AreEqual(2, ((LayeredContainmentList2<int>) _intervaled).MaximumOverlap);
             }
         }
 
@@ -207,7 +257,7 @@ namespace C5.Tests.intervaled
         [TestFixture]
         public class LCListExample
         {
-            private IIntervaled<int> _intervaled;
+            private LayeredContainmentList2<int> _intervaled;
 
             private static readonly IInterval<int> A = new Interval("A", 0, 7);
             private static readonly IInterval<int> B = new Interval("B", 1, 8);
@@ -269,13 +319,7 @@ namespace C5.Tests.intervaled
             [Test]
             public void GetEnumerator()
             {
-                CollectionAssert.AreEqual(new[] { A, B, C, D, E, F, G, H, I, J }, _intervaled);
-            }
-
-            [Test]
-            public void Empty()
-            {
-                Assert.Pass();
+                CollectionAssert.AreEqual(new[] { A, B, C, D, E, F, G, H, I, J }, _intervaled.Sorted);
             }
         }
 

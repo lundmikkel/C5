@@ -8,11 +8,15 @@ namespace C5.intervaled
     {
         private readonly int _count;
         private readonly int _firstLayerCount;
+        private readonly int _layerCount;
 
         private readonly IInterval<T>[][] _intervalLayers;
         private readonly int[][] _pointerLayers;
 
         private readonly IInterval<T> _span;
+
+        private int _pointOfMaximumOverlap = -1;
+        private IInterval<T> _intervalOfMaximumOverlap;
 
         #region Node nested classes
 
@@ -77,6 +81,8 @@ namespace C5.intervaled
                         j++;
                     }
                 }
+
+                _layerCount = _intervalLayers.Count() - 1;
 
                 // Save the span once
                 _span = new IntervalBase<T>(_intervalLayers[0][0], _intervalLayers[0][_firstLayerCount - 1]);
@@ -241,7 +247,7 @@ namespace C5.intervaled
         }
 
         /// <summary>
-        /// Fast enumeration of intervals in arbitrary order, not sorted. For sorted enumerator see <see cref="GetEnumeratorSorted"/>.
+        /// Fast enumeration of intervals in arbitrary order, not sorted. For sorted enumerator see <see cref="GetEnumeratorSorted"/> or better <see cref="Sorted"/>.
         /// </summary>
         /// <returns>Enumerator of all intervals in the data structure in arbitrary order</returns>
         public override IEnumerator<IInterval<T>> GetEnumerator()
@@ -253,16 +259,15 @@ namespace C5.intervaled
         }
 
         /// <summary>
-        /// Loop through each layer and yield its intervals
+        /// Loops through each layer and yield its intervals
         /// </summary>
         /// <returns>Enumerator of all intervals in the data structure</returns>
         private IEnumerator<IInterval<T>> getEnumerator()
         {
-            var layers = _intervalLayers.Count() - 1;
-            for (int i = 0; i < layers; i++)
+            for (var i = 0; i < _layerCount; i++)
             {
                 var intervals = _intervalLayers[i].Count() - 1;
-                for (int j = 0; j < intervals; j++)
+                for (var j = 0; j < intervals; j++)
                     yield return _intervalLayers[i][j];
             }
         }
@@ -298,7 +303,7 @@ namespace C5.intervaled
         private IEnumerator<IInterval<T>> getEnumeratorSorted(int start, int end)
         {
             // Create our own stack to avoid stack overflow and to speed up the enumerator
-            var stack = new int[_intervalLayers.Count() * 2 - 2];
+            var stack = new int[_layerCount * 2];
             var i = 0;
             // We stack both values consecutively instead of stacking pairs
             stack[i++] = start;
@@ -406,6 +411,57 @@ namespace C5.intervaled
 
             // Check if index is in bound and if the interval overlaps the query
             return 0 <= i && i < _firstLayerCount && _intervalLayers[0][i].Overlaps(query);
+        }
+
+        public int MaximumOverlap
+        {
+            get
+            {
+                if (_pointOfMaximumOverlap < 0)
+                {
+                    // Init running maximum to the number of layers as that is the minimum number of overlaps
+                    var maximum = _layerCount;
+
+                    // Create queue sorted on high intervals
+                    var comparer = ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareHigh);
+                    var queue = new IntervalHeap<IInterval<T>>(comparer);
+
+                    // Loop through intervals in sorted order
+                    foreach (var interval in Sorted)
+                    {
+                        // Remove all intervals not overlapping the current interval from the queue
+                        while (!queue.IsEmpty && interval.CompareLowHigh(queue.FindMin()) > 0)
+                            queue.DeleteMin();
+
+                        queue.Add(interval);
+
+                        if (queue.Count > maximum)
+                        {
+                            maximum = queue.Count;
+                            // Create a new interval when new maximum is found
+                            // The low is the current intervals low due to the intervals being sorted
+                            // The high is the smallest high in the queue
+                            _intervalOfMaximumOverlap = new IntervalBase<T>(interval, queue.FindMin());
+                        }
+                    }
+
+                    // Cache value for later requests
+                    _pointOfMaximumOverlap = maximum;
+                }
+
+                return _pointOfMaximumOverlap;
+            }
+        }
+
+        public IInterval<T> IntervalOfMaximumOverlap
+        {
+            get
+            {
+                if (_intervalOfMaximumOverlap == null)
+                    throw new InvalidOperationException("An empty collection has no interval of maximum overlap");
+
+                return _intervalOfMaximumOverlap;
+            }
         }
 
         public string Graphviz()
