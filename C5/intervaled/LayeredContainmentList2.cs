@@ -141,7 +141,7 @@ namespace C5.intervaled
 
         public override IInterval<T> Choose()
         {
-            if (Count == 0)
+            if (IsEmpty)
                 throw new NoSuchItemException();
 
             return _intervalLayers.First().First();
@@ -152,7 +152,7 @@ namespace C5.intervaled
         public int CountOverlaps(IInterval<T> query)
         {
             // Break if we won't find any overlaps
-            if (ReferenceEquals(query, null) || IsEmpty)
+            if (query == null || IsEmpty)
                 return 0;
 
             return countOverlaps(0, 0, _firstLayerCount, query);
@@ -185,8 +185,8 @@ namespace C5.intervaled
                 layer++;
 
                 count += last - first;
-
             }
+
             return count;
         }
 
@@ -292,7 +292,7 @@ namespace C5.intervaled
         public IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
         {
             // Break if we won't find any overlaps
-            if (ReferenceEquals(query, null) || IsEmpty)
+            if (query == null || IsEmpty)
                 yield break;
 
             int layer = 0, lower = 0, upper = _firstLayerCount;
@@ -326,37 +326,6 @@ namespace C5.intervaled
                 while (first < last)
                     yield return currentLayer[first++];
             }
-        }
-
-        private IEnumerable<IInterval<T>> findOverlapsRecursive(int layer, int lower, int upper, IInterval<T> query)
-        {
-            // Make sure first and last don't point at the same interval (theorem 2)
-            if (lower >= upper)
-                yield break;
-
-            var first = lower;
-            var currentLayer = _intervalLayers[layer];
-
-            // The first interval doesn't overlap we need to search for it
-            if (!currentLayer[first].Overlaps(query))
-            {
-                // We know first doesn't overlap so we can increment it before searching
-                first = findFirst(layer, ++first, upper, query);
-
-                // If index is out of bound, or found interval doesn't overlap, then the list won't contain any overlaps
-                if (upper <= first || !currentLayer[first].Overlaps(query))
-                    yield break;
-            }
-
-            // We can use first as lower to speed up the search
-            var last = findLast(layer, first, upper, query);
-
-            // Find intervals in sublist
-            foreach (var interval in findOverlapsRecursive(layer + 1, _pointerLayers[layer][first], _pointerLayers[layer][last], query))
-                yield return interval;
-
-            while (first < last)
-                yield return currentLayer[first++];
         }
 
         public bool OverlapExists(IInterval<T> query)
