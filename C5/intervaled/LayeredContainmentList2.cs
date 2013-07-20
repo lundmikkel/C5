@@ -108,7 +108,7 @@ namespace C5.intervaled
                 }
 
                 // Check if interval will be contained in the next layer
-                while (!layers[layer].IsEmpty && layers[layer].Last.Interval.Contains(interval))
+                while (!layers[layer].IsEmpty && layers[layer].Last.Interval.CompareHigh(interval) > 0)
                     layer++;
 
                 layer++;
