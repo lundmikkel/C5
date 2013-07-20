@@ -865,12 +865,12 @@ namespace C5.Tests.intervaled
             for (int i = 0; i < repetitions; i++)
                 foreach (var x in intervals)
                     foreach (var y in intervals)
-                        x.CompareTo(y);
+                        x.Equals(y);
 
             sw.Stop();
 
             Console.WriteLine("Time for {0}: {1} ms",
-                "CompareTo",
+                "Equals",
                 sw.ElapsedMilliseconds
             );
         }

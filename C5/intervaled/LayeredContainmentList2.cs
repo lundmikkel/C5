@@ -240,32 +240,99 @@ namespace C5.intervaled
             return max;
         }
 
+        /// <summary>
+        /// Fast enumeration of intervals in arbitrary order, not sorted. For sorted enumerator see <see cref="GetEnumeratorSorted"/>.
+        /// </summary>
+        /// <returns>Enumerator of all intervals in the data structure in arbitrary order</returns>
         public override IEnumerator<IInterval<T>> GetEnumerator()
         {
             if (IsEmpty)
                 return (new IInterval<T>[] { }).Cast<IInterval<T>>().GetEnumerator();
 
-            return getEnumerator(0, 0, _firstLayerCount);
+            return getEnumerator();
         }
 
-        private IEnumerator<IInterval<T>> getEnumerator(int level, int start, int end)
+        /// <summary>
+        /// Loop through each layer and yield its intervals
+        /// </summary>
+        /// <returns>Enumerator of all intervals in the data structure</returns>
+        private IEnumerator<IInterval<T>> getEnumerator()
         {
-            while (start < end)
+            var layers = _intervalLayers.Count() - 1;
+            for (int i = 0; i < layers; i++)
             {
-                var node = _intervalLayers[level][start];
+                var intervals = _intervalLayers[i].Count() - 1;
+                for (int j = 0; j < intervals; j++)
+                    yield return _intervalLayers[i][j];
+            }
+        }
 
-                yield return node;
+        /// <summary>
+        /// Enumeration of intervals in sorted order according to <see cref="IntervalExtensions.CompareTo{T}"/>. For a faster, but unsorted, enumerator see <see cref="GetEnumerator"/>.
+        /// </summary>
+        /// <returns>Enumerator of all intervals in the data structure in sorted order</returns>
+        public IEnumerator<IInterval<T>> GetEnumeratorSorted()
+        {
+            if (IsEmpty)
+                return (new IInterval<T>[] { }).Cast<IInterval<T>>().GetEnumerator();
 
-                // Check if we are at the last node
-                if (_pointerLayers[level][start] < _pointerLayers[level][start + 1])
+            return getEnumeratorSorted(0, _firstLayerCount);
+        }
+
+        public IEnumerable<IInterval<T>> Sorted
+        {
+            get
+            {
+                var iterator = GetEnumeratorSorted();
+                while (iterator.MoveNext())
+                    yield return iterator.Current;
+            }
+        }
+
+        /// <summary>
+        /// Enumerate intervals in sorted order using the pointers
+        /// </summary>
+        /// <param name="start">The index of the first interval in the first layer</param>
+        /// <param name="end">The index after the last interval in the first layer</param>
+        /// <returns>Enumerator of all intervals in the data structure in sorted order</returns>
+        private IEnumerator<IInterval<T>> getEnumeratorSorted(int start, int end)
+        {
+            // Create our own stack to avoid stack overflow and to speed up the enumerator
+            var stack = new int[_intervalLayers.Count() * 2 - 2];
+            var i = 0;
+            // We stack both values consecutively instead of stacking pairs
+            stack[i++] = start;
+            stack[i++] = end;
+
+            // Continue as long as we still have values on the stack
+            while (i > 0)
+            {
+                // Get start and end from stack
+                end = stack[--i];
+                start = stack[--i];
+
+                // Cache layers for speed
+                var intervalLayer = _intervalLayers[i >> 1];
+                var pointerLayer = _pointerLayers[i >> 1];
+
+                while (start < end)
                 {
-                    var child = getEnumerator(level + 1, _pointerLayers[level][start], _pointerLayers[level][start + 1]);
+                    yield return intervalLayer[start];
 
-                    while (child.MoveNext())
-                        yield return child.Current;
+                    // If this and the next interval point to different intervals in the next layer, we need to swap layer
+                    if (pointerLayer[start] < pointerLayer[start + 1])
+                    {
+                        // Push the current values
+                        stack[i++] = start + 1;
+                        stack[i++] = end;
+                        // Push the values for the next layer
+                        stack[i++] = pointerLayer[start];
+                        stack[i++] = pointerLayer[start + 1];
+                        break;
+                    }
+
+                    start++;
                 }
-
-                start++;
             }
         }
 

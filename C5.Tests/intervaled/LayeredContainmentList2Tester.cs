@@ -608,6 +608,53 @@ namespace C5.Tests.intervaled
         */
 
         [TestFixture]
+        public class enumeratorTester
+        {
+            private IInterval<int>[] _intervals;
+
+            [SetUp]
+            public void SetUp()
+            {
+                _intervals = BenchmarkTestCases.DataSetC(10);
+                var comparer = ComparerFactory<IInterval<int>>.CreateComparer(IntervalExtensions.CompareTo);
+                Sorting.IntroSort(_intervals, 0, _intervals.Count(), comparer);
+            }
+
+            [Test]
+            public void Sorted()
+            {
+                _intervals.Shuffle();
+                var intervaled = new LayeredContainmentList2<int>(_intervals);
+
+                var lastInterval = intervaled.Choose();
+                int count = 0;
+                foreach (var interval in intervaled.Sorted)
+                {
+                    Assert.True(lastInterval.CompareTo(interval) <= 0);
+                    lastInterval = interval;
+
+                    count++;
+                }
+
+                Assert.AreEqual(intervaled.Count, count);
+            }
+
+            [Test]
+            public void EnumeratesAll()
+            {
+                var intervaled = new LayeredContainmentList2<int>(_intervals);
+                CollectionAssert.AreEqual(_intervals, intervaled.Sorted);
+            }
+
+            [Test]
+            public void EnumeratesAllUnsorted()
+            {
+                var intervaled = new LayeredContainmentList2<int>(_intervals);
+                CollectionAssert.AreEquivalent(_intervals, intervaled);
+            }
+        }
+
+        [TestFixture]
         public class StabbingQuery
         {
             private LayeredContainmentList2<int> _intervaled;

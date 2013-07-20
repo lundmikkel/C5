@@ -8,6 +8,111 @@ using System.Linq;
 
 namespace C5.Tests.intervaled
 {
+    [TestFixture]
+    public class searchBenchmarker
+    {
+        private IInterval<int>[][] _intervalLayers;
+        private int repetitions = 1000000;
+
+        public searchBenchmarker()
+        {
+            _intervalLayers = new IInterval<int>[1][];
+            _intervalLayers[0] = BenchmarkTestCases.DataSetA(1000000);
+        }
+
+        [Test]
+        public void Test()
+        {
+            var sw = new Stopwatch();
+            sw.Start();
+
+            for (int i = 0; i < 100; i++)
+            {
+                foreach (var interval in _intervalLayers[0])
+                {
+                    findFirst(0, 0, 1000000, interval);
+                }
+            }
+
+            sw.Stop();
+
+            Console.WriteLine("Time: {0}",
+                (float) sw.ElapsedMilliseconds / repetitions * 1000
+            );
+        }
+
+        private int findFirst(int layer, int lower, int upper, IInterval<int> query)
+        {
+            int min = lower - 1, max = upper;
+
+            while (max - min > 1)
+            {
+                var middle = min + ((max - min) >> 1); // Shift one is the same as dividing by 2
+
+                var interval = _intervalLayers[layer][middle];
+
+                var compare = query.Low.CompareTo(interval.High);
+
+                if (compare < 0 || compare == 0 && query.LowIncluded && interval.HighIncluded)
+                    max = middle;
+                else
+                    min = middle;
+            }
+
+            return max;
+        }
+
+        private int findFirst2(int layer, int lower, int upper, IInterval<int> query)
+        {
+            int min = lower - 1, max = upper;
+
+            var intervalLayer = _intervalLayers[layer];
+
+            while (max - min > 1)
+            {
+                var middle = min + ((max - min) >> 1); // Shift one is the same as dividing by 2
+
+                if (query.CompareLowHigh(intervalLayer[middle]) > 0)
+                    min = middle;
+                else
+                    max = middle;
+            }
+
+            return max;
+        }
+    }
+
+    [TestFixture]
+    public class enumeratorBenchmarker
+    {
+        private IIntervaled<int> intervals;
+
+        [SetUp]
+        public void SetUp()
+        {
+            intervals = new LayeredContainmentList2<int>(BenchmarkTestCases.DataSetC(1000000));
+        }
+
+        [Test]
+        public void Test()
+        {
+            var sw = new Stopwatch();
+            sw.Start();
+
+            for (int i = 0; i < 100; i++)
+            {
+                foreach (var interval in intervals)
+                {
+                    interval.Equals(interval);
+                }
+            }
+
+            sw.Stop();
+
+            Console.WriteLine("Time: {0}", (float) sw.ElapsedMilliseconds / 1000);
+        }
+    }
+
     public static class Utils
     {
         static readonly Random Random = new Random(0);
