@@ -13,7 +13,7 @@ namespace C5.intervaled
         private readonly IInterval<T>[][] _intervalLayers;
         private readonly int[][] _pointerLayers;
 
-        private readonly IInterval<T> _span;
+        private IInterval<T> _span;
 
         private int _pointOfMaximumOverlap = -1;
         private IInterval<T> _intervalOfMaximumOverlap;
@@ -37,94 +37,86 @@ namespace C5.intervaled
             {
                 Pointer = pointer;
             }
+
+            public override string ToString()
+            {
+                return Interval.ToString();
+            }
         }
 
         #endregion
 
         #region Constructor
 
-        public LayeredContainmentList2(IEnumerable<IInterval<T>> intervals)
+        public LayeredContainmentList2(IEnumerable<IInterval<T>> intervalEnumerable)
         {
             // Make intervals to array to allow fast sorting and counting
-            var intervalArray = intervals as IInterval<T>[] ?? intervals.ToArray();
+            var intervals = intervalEnumerable as IInterval<T>[] ?? intervalEnumerable.ToArray();
 
-            // Only do the work if we have something to work with
-            if (!intervalArray.IsEmpty())
+            // Stop if we have no intervals
+            if (intervals.IsEmpty()) return;
+
+            _count = intervals.Length;
+
+            var nodeLayers = generateLayers(ref intervals);
+
+            _layerCount = nodeLayers.Count();
+            _firstLayerCount = nodeLayers.First.Count;
+
+            // Create the list that contains the containment layers
+            _intervalLayers = new IInterval<T>[_layerCount][];
+            _pointerLayers = new int[_layerCount][];
+
+            // Create each containment layer
+            var lastCount = 0;
+            for (var i = _layerCount - 1; i >= 0; i--)
             {
-                // Count intervals so we can use it later on
-                _count = intervalArray.Length;
+                var count = nodeLayers[i].Count;
+                _intervalLayers[i] = new IInterval<T>[count];
+                _pointerLayers[i] = new int[count + 1];
 
-                // Sort intervals
-                var comparer = ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareTo);
-                Sorting.IntroSort(intervalArray, 0, _count, comparer);
-
-                // Put intervals in the arrays
-                var layers = createLayers(intervalArray);
-
-                // Create the list that contains the containment layers
-                _intervalLayers = new IInterval<T>[layers.Count][];
-                _pointerLayers = new int[layers.Count][];
-                _firstLayerCount = layers[0].Count - 1;
-
-                // Create each containment layer
-                for (var i = 0; i < layers.Count - 1; i++)
+                for (var j = 0; j < count; j++)
                 {
-                    var count = layers[i].Count; // Subtract one for the dummy node
-                    _intervalLayers[i] = new IInterval<T>[count];
-                    _pointerLayers[i] = new int[count];
-
-                    var j = 0;
-                    foreach (var node in layers[i])
-                    {
-                        _intervalLayers[i][j] = node.Interval;
-                        _pointerLayers[i][j] = node.Pointer;
-                        j++;
-                    }
+                    var node = nodeLayers[i][j];
+                    _intervalLayers[i][j] = node.Interval;
+                    _pointerLayers[i][j] = node.Pointer;
                 }
 
-                _layerCount = _intervalLayers.Count() - 1;
-
-                // Save the span once
-                _span = new IntervalBase<T>(_intervalLayers[0][0], _intervalLayers[0][_firstLayerCount - 1]);
+                // Add sentinel pointer
+                _pointerLayers[i][count] = lastCount;
+                lastCount = count;
             }
         }
 
-        private static ArrayList<ArrayList<Node>> createLayers(IInterval<T>[] intervals)
+        private static ArrayList<ArrayList<Node>> generateLayers(ref IInterval<T>[] intervals)
         {
-            // Use a stack to keep track of current containment
+            // Used for tracking current layer
             var layer = 0;
-            var layers = new ArrayList<ArrayList<Node>> { new ArrayList<Node>() };
+            var layers = new ArrayList<ArrayList<Node>> { new ArrayList<Node>(), new ArrayList<Node>() };
+
+            // Sort intervals
+            var comparer = ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareTo);
+            Sorting.IntroSort(intervals, 0, intervals.Count(), comparer);
 
             foreach (var interval in intervals)
             {
-                // Track containment
-                while (layer > 0)
-                {
-                    // If the interval is contained in the top of the stack, leave it...
-                    if (layers[layer - 1].Last.Interval.Contains(interval))
-                        break;
-
+                while (layer > 0 && layers[layer - 1].Last.Interval.CompareHigh(interval) <= 0)
                     layer--;
-                }
 
                 // Check if interval will be contained in the next layer
-                while (!layers[layer].IsEmpty && layers[layer].Last.Interval.CompareHigh(interval) > 0)
+                while (!layers[layer].IsEmpty && interval.CompareHigh(layers[layer].Last.Interval) < 0)
                     layer++;
 
-                layer++;
-
-                while (layers.Count < layer + 1)
+                // Add extra layer if needed
+                if (layers.Count == layer + 1)
                     layers.Add(new ArrayList<Node>());
 
-                layers[layer - 1].Add(new Node(interval, layers[layer].Count));
+                // Add interval and pointer to list
+                layers[layer].Add(new Node(interval, layers[layer + 1].Count));
             }
 
-            var lastCount = 0;
-            for (var i = layers.Count - 1; i >= 0; i--)
-            {
-                layers[i].Add(new Node(lastCount));
-                lastCount = layers[i].Count - 1;
-            }
+            // Remove empty layer
+            layers.Remove();
 
             return layers;
         }
@@ -265,8 +257,8 @@ namespace C5.intervaled
         {
             for (var i = 0; i < _layerCount; i++)
             {
-                var intervals = _intervalLayers[i].Count() - 1;
-                for (var j = 0; j < intervals; j++)
+                var intervalCount = _intervalLayers[i].Count();
+                for (var j = 0; j < intervalCount; j++)
                     yield return _intervalLayers[i][j];
             }
         }
@@ -350,6 +342,10 @@ namespace C5.intervaled
             {
                 if (IsEmpty)
                     throw new InvalidOperationException("An empty collection has no span");
+
+                // Cache value for later requests
+                if (_span == null)
+                    _span = new IntervalBase<T>(_intervalLayers.First().First(), _intervalLayers.First()[_firstLayerCount - 1]);
 
                 return _span;
             }
@@ -483,15 +479,16 @@ namespace C5.intervaled
             {
                 var l = new ArrayList<string>();
                 var p = String.Empty;
-                for (var i = 0; i <= upper; i++)
+                for (var i = 0; i < upper; i++)
                 {
-                    // TODO: Would it be worth replacing with a custom formatter for the null values?
-                    // http://stackoverflow.com/questions/7689040/can-i-format-null-values-in-string-format
-                    var interval = _intervalLayers[layer][i] != null ? _intervalLayers[layer][i].ToString() : "*";
-                    l.Add(String.Format("<n{0}> {0}: {1}", i, interval));
+                    l.Add(String.Format("<n{0}> {0}: {1}", i, _intervalLayers[layer][i]));
 
                     p += String.Format("layer{0}:n{1} -> layer{2}:n{3};\n\t", layer, i, layer + 1, _pointerLayers[layer][i]);
                 }
+
+                // Sentinel node
+                l.Add(String.Format("<n{0}> {0}: *", upper));
+                p += String.Format("layer{0}:n{1} -> layer{2}:n{3};\n\t", layer, upper, layer + 1, _pointerLayers[layer][upper - 1]);
 
                 s += String.Format("\tlayer{0} [fontname=consola, label=\"{1}\"];\n\t{2}\n", layer, String.Join("|", l.ToArray()), p);
 
