@@ -444,6 +444,13 @@ namespace C5.Tests.intervaled
                     Assert.AreEqual(4, _intervaled.CountOverlaps(new IntervalOfInt(5, 8, true, true)));
                     Assert.AreEqual(9, _intervaled.CountOverlaps(new IntervalOfInt(13, 13, true, true)));
                 }
+
+                [Test]
+                public void MaximumOverlap_EmptyCollection_Returns9()
+                {
+
+                    Assert.AreEqual(9, ((LayeredContainmentList2<int>) _intervaled).MaximumOverlap);
+                }
             }
 
 

@@ -14,7 +14,8 @@ namespace C5.Tests.intervaled
         private IInterval<int>[][] _intervalLayers;
         private int repetitions = 1000000;
 
-        public searchBenchmarker()
+        [SetUp]
+        public void SetUp()
         {
             _intervalLayers = new IInterval<int>[1][];
             _intervalLayers[0] = BenchmarkTestCases.DataSetA(1000000);
@@ -107,6 +108,89 @@ namespace C5.Tests.intervaled
                 }
             }
 
+            sw.Stop();
+
+            Console.WriteLine("Time: {0}", (float) sw.ElapsedMilliseconds / 1000);
+        }
+    }
+
+    [TestFixture]
+    public class arraylistBenchmarker
+    {
+        [Test]
+        public void Test()
+        {
+            /*
+            var array = new int[1000000];
+            for (int j = 0; j < 1000000; j++)
+            {
+                array[j] = j;
+            }
+            /*/
+            var array = new ArrayList<int>(1000000);
+            for (int j = 0; j < 1000000; j++)
+            {
+                array.Add(j);
+            }
+            //*/
+
+            var sw = new Stopwatch();
+            sw.Start();
+            var x = 0;
+            for (int i = 0; i < 100; i++)
+            {
+
+                for (int j = 0; j < 1000000; j++)
+                {
+                    x = array[j];
+                }
+            }
+
+            sw.Stop();
+
+            Console.WriteLine("Time: {0}", (float) sw.ElapsedMilliseconds / 1000, x);
+        }
+
+        [Test]
+        public void Regular()
+        {
+            var array = new int[1000000];
+
+            var sw = new Stopwatch();
+            sw.Start();
+            for (int i = 0; i < 100; i++)
+            {
+                for (int j = 0; j < 1000000; j++)
+                {
+                    array[j] = j;
+                }
+            }
+            sw.Stop();
+
+            Console.WriteLine("Time: {0}", (float) sw.ElapsedMilliseconds / 1000);
+        }
+
+        [Test]
+        public void Unwinding()
+        {
+            var array = new int[1000004];
+
+            var sw = new Stopwatch();
+            sw.Start();
+            for (int i = 0; i < 100; i++)
+            {
+                for (int j = 0; j < 1000000; j += 8)
+                {
+                    array[j] = j;
+                    array[j + 1] = j + 1;
+                    array[j + 2] = j + 2;
+                    array[j + 3] = j + 3;
+                    array[j + 4] = j + 4;
+                    array[j + 5] = j + 5;
+                    array[j + 6] = j + 6;
+                    array[j + 7] = j + 7;
+                }
+            }
             sw.Stop();
 
             Console.WriteLine("Time: {0}", (float) sw.ElapsedMilliseconds / 1000);
@@ -267,7 +351,6 @@ namespace C5.Tests.intervaled
         }
     }
 
-
     abstract class DataSetTester
     {
         protected IIntervaled<int> Intervaled;
@@ -411,7 +494,7 @@ namespace C5.Tests.intervaled
         }
     }
 
-    class LayeredContainmentList_ContainmentsOnly : DataSetTester
+    class LayeredContainmentList_Benchmarker : DataSetTester
     {
         protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
@@ -420,7 +503,7 @@ namespace C5.Tests.intervaled
         public override string Name { get { return "Layered"; } }
     }
 
-    class LayeredContainmentList2_ContainmentsOnly : DataSetTester
+    class LayeredContainmentList2_Benchmarker : DataSetTester
     {
         protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
@@ -429,7 +512,7 @@ namespace C5.Tests.intervaled
         public override string Name { get { return "Layered2"; } }
     }
 
-    class LayeredContainmentList3_ContainmentsOnly : DataSetTester
+    class LayeredContainmentList3_Benchmarker : DataSetTester
     {
         protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
@@ -438,7 +521,7 @@ namespace C5.Tests.intervaled
         public override string Name { get { return "Layered3"; } }
     }
 
-    class NestedContainmentList_ContainmentsOnly : DataSetTester
+    class NestedContainmentList_Benchmarker : DataSetTester
     {
         protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
@@ -447,7 +530,7 @@ namespace C5.Tests.intervaled
         public override string Name { get { return "Nested"; } }
     }
 
-    class NestedContainmentList2_ContainmentsOnly : DataSetTester
+    class NestedContainmentList2_Benchmarker : DataSetTester
     {
         protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
@@ -456,7 +539,7 @@ namespace C5.Tests.intervaled
         public override string Name { get { return "Nested2"; } }
     }
 
-    class StaticIntervalTree_ContainmentsOnly : DataSetTester
+    class StaticIntervalTree_Benchmarker : DataSetTester
     {
         protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
