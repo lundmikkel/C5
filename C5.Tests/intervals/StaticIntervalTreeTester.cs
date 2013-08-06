@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using C5.Tests.intervaled.Generic;
-using C5.intervaled;
+using C5.Tests.intervals.Generic;
+using C5.intervals;
 using NUnit.Framework;
 
-namespace C5.Tests.intervaled
+namespace C5.Tests.intervals
 {
     using IntervalOfInt = IntervalBase<int>;
 
@@ -135,7 +135,7 @@ namespace C5.Tests.intervaled
     }
 
     [TestFixture]
-    public class BensTest : Generic.BensTest
+    public class BensTest : intervals.Generic.BensTest
     {
         protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
         {

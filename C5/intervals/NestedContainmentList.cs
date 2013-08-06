@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections;
-using SCG = System.Collections.Generic;
 using System.Linq;
 
-namespace C5.intervaled
+namespace C5.intervals
 {
     public class NestedContainmentList<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
     {
@@ -93,7 +92,7 @@ namespace C5.intervaled
         /// Create a Nested Containment List with a enumerable of intervals
         /// </summary>
         /// <param name="intervals">A collection of intervals in arbitrary order</param>
-        public NestedContainmentList(SCG.IEnumerable<IInterval<T>> intervals)
+        public NestedContainmentList(System.Collections.Generic.IEnumerable<IInterval<T>> intervals)
         {
             var intervalsArray = intervals as IInterval<T>[] ?? intervals.ToArray();
 
@@ -128,7 +127,7 @@ namespace C5.intervaled
 
         // TODO: Test the order is still the same as when sorted with IntervalComparer. This should be that case!
 
-        private SCG.IEnumerator<IInterval<T>> getEnumerator(Section section)
+        private System.Collections.Generic.IEnumerator<IInterval<T>> getEnumerator(Section section)
         {
             // Just for good measures
             if (_list == null || section.Length == 0)
@@ -169,7 +168,7 @@ namespace C5.intervaled
         /// </summary>
         /// <returns>Enumerator</returns>
         // TODO: Test the order is still the same as when sorted with IntervalComparer. This should be that case!
-        public override SCG.IEnumerator<IInterval<T>> GetEnumerator()
+        public override System.Collections.Generic.IEnumerator<IInterval<T>> GetEnumerator()
         {
             return getEnumerator(_section);
         }
@@ -212,7 +211,7 @@ namespace C5.intervaled
             }
         }
 
-        public SCG.IEnumerable<IInterval<T>> FindOverlaps(T query)
+        public System.Collections.Generic.IEnumerable<IInterval<T>> FindOverlaps(T query)
         {
             if (ReferenceEquals(query, null))
                 return Enumerable.Empty<IInterval<T>>();
@@ -220,7 +219,7 @@ namespace C5.intervaled
             return findOverlap(_section, new IntervalBase<T>(query));
         }
 
-        private SCG.IEnumerable<IInterval<T>> findOverlap(Section section, IInterval<T> query)
+        private System.Collections.Generic.IEnumerable<IInterval<T>> findOverlap(Section section, IInterval<T> query)
         {
             if (_list == null || section.Length == 0)
                 yield break;
@@ -302,7 +301,7 @@ namespace C5.intervaled
             return min;
         }
 
-        public SCG.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
+        public System.Collections.Generic.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
         {
             if (query == null)
                 return Enumerable.Empty<IInterval<T>>();

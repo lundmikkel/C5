@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using C5.Tests.intervaled.Generic;
-using C5.Tests.intervaled.Generic.Static;
-using C5.intervaled;
+using C5.Tests.intervals.Generic;
+using C5.Tests.intervals.Generic.Static;
+using C5.intervals;
 using NUnit.Framework;
 
-namespace C5.Tests.intervaled
+namespace C5.Tests.intervals
 {
     using SequencedIntervalsOfInt = TreeBag<IInterval<int>>;
     using IntervalOfInt = IntervalBase<int>;
 
-    namespace NestedContainmentList2
+    namespace NestedContainmentList
     {
         [TestFixture]
         public class EndpointInclusion : IntervaledEndpointInclusion
         {
             internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new NestedContainmentList2<int>(intervals);
+                return new NestedContainmentList<int>(intervals);
             }
         }
 
@@ -26,7 +26,7 @@ namespace C5.Tests.intervaled
         {
             internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new NestedContainmentList2<int>(intervals);
+                return new NestedContainmentList<int>(intervals);
             }
         }
 
@@ -35,34 +35,34 @@ namespace C5.Tests.intervaled
         {
             internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new NestedContainmentList2<int>(intervals);
+                return new NestedContainmentList<int>(intervals);
             }
         }
 
         [TestFixture]
-        public class IBS : Generic.IBS
+        public class IBS : intervals.Generic.IBS
         {
             internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new NestedContainmentList2<int>(intervals);
+                return new NestedContainmentList<int>(intervals);
             }
         }
 
         [TestFixture]
-        public class Sample100 : Generic.Sample100
+        public class Sample100 : intervals.Generic.Sample100
         {
             protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new NestedContainmentList2<int>(intervals);
+                return new NestedContainmentList<int>(intervals);
             }
         }
 
         [TestFixture]
-        public class BensTest : Generic.BensTest
+        public class BensTest : intervals.Generic.BensTest
         {
             protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new NestedContainmentList2<int>(intervals);
+                return new NestedContainmentList<int>(intervals);
             }
         }
 
@@ -71,34 +71,34 @@ namespace C5.Tests.intervaled
         {
             protected override IStaticIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new NestedContainmentList2<int>(intervals);
+                return new NestedContainmentList<int>(intervals);
             }
         }
 
         [TestFixture]
-        public class NestedContainmentList2Perfomance : Performance23333
+        public class NestedContainmentListPerfomance : Performance23333
         {
             protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new NestedContainmentList2<int>(intervals);
+                return new NestedContainmentList<int>(intervals);
             }
         }
 
         [TestFixture]
-        public class NestedContainmentList2100000Perfomance : Performance100000
+        public class NestedContainmentList100000Perfomance : Performance100000
         {
             protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new NestedContainmentList2<int>(intervals);
+                return new NestedContainmentList<int>(intervals);
             }
         }
 
         [TestFixture]
-        public class NestedContainmentList2_LargeTest : LargeTest_100000
+        public class NestedContainmentList_LargeTest : LargeTest_100000
         {
             protected override IStaticIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new NestedContainmentList2<int>(intervals);
+                return new NestedContainmentList<int>(intervals);
             }
         }
 
@@ -124,7 +124,7 @@ namespace C5.Tests.intervaled
             [SetUp]
             public void Init()
             {
-                _intervaled = new NestedContainmentList2<int>(
+                _intervaled = new NestedContainmentList<int>(
                     new[]
                         {
                             new IntervalOfInt( 0, 20, true, true),
@@ -180,7 +180,7 @@ namespace C5.Tests.intervaled
                 [SetUp]
                 public void Init()
                 {
-                    _intervaled = new NestedContainmentList2<int>(new ArrayList<IInterval<int>>
+                    _intervaled = new NestedContainmentList<int>(new ArrayList<IInterval<int>>
                     {
                         new IntervalOfInt(23, 28, true, true), // 8
                         new IntervalOfInt(17, 20, true, true), // 7
@@ -240,7 +240,7 @@ namespace C5.Tests.intervaled
                 [SetUp]
                 public void Init()
                 {
-                    _intervaled = new NestedContainmentList2<int>(new ArrayList<IInterval<int>>
+                    _intervaled = new NestedContainmentList<int>(new ArrayList<IInterval<int>>
                     {
                         new IntervalOfInt(13, 14, true, true),
                         new IntervalOfInt(12, 15, true, true),
@@ -298,7 +298,7 @@ namespace C5.Tests.intervaled
                 [SetUp]
                 public void Init()
                 {
-                    _intervaled = new NestedContainmentList2<int>(new ArrayList<IInterval<int>>
+                    _intervaled = new NestedContainmentList<int>(new ArrayList<IInterval<int>>
                     {
                         new IntervalOfInt( 9, 19, true, true),
                         new IntervalOfInt( 2,  7, true, true),
@@ -329,7 +329,7 @@ namespace C5.Tests.intervaled
             [TestFixture]
             public class BinarySearchHighInLows
             {
-                private NestedContainmentList2<int> _intervaled;
+                private NestedContainmentList<int> _intervaled;
 
                 // ReSharper disable InconsistentNaming
                 private static readonly IInterval<int> A = new IntervalOfInt(1, 4, true, true);
@@ -346,7 +346,7 @@ namespace C5.Tests.intervaled
                 [SetUp]
                 public void Init()
                 {
-                    _intervaled = new NestedContainmentList2<int>(new[] {A, B, C, D, E, F, G, H, I});
+                    _intervaled = new NestedContainmentList<int>(new[] {A, B, C, D, E, F, G, H, I});
                 }
 
                 [TestCaseSource(typeof(BinarySearchHighInLows), "StabCases")]
@@ -392,7 +392,7 @@ namespace C5.Tests.intervaled
             [TestFixture]
             public class BinarySearchLowInHighs
             {
-                private NestedContainmentList2<int> _intervaled;
+                private NestedContainmentList<int> _intervaled;
 
                 // ReSharper disable InconsistentNaming
                 private static readonly IInterval<int> A = new IntervalOfInt(1, 4, true, true);
@@ -409,7 +409,7 @@ namespace C5.Tests.intervaled
                 [SetUp]
                 public void Init()
                 {
-                    _intervaled = new NestedContainmentList2<int>(new[] { A, B, C, D, E, F, G, H, I });
+                    _intervaled = new NestedContainmentList<int>(new[] { A, B, C, D, E, F, G, H, I });
                 }
 
                 [TestCaseSource(typeof(BinarySearchLowInHighs), "StabCases")]
@@ -457,7 +457,7 @@ namespace C5.Tests.intervaled
         [TestFixture]
         public class StabbingQuery
         {
-            private NestedContainmentList2<int> _intervaled;
+            private NestedContainmentList<int> _intervaled;
 
             // ReSharper disable InconsistentNaming
             private static readonly IInterval<int> A = new IntervalOfInt(2, 7, true, true);
@@ -472,7 +472,7 @@ namespace C5.Tests.intervaled
             [SetUp]
             public void Init()
             {
-                _intervaled = new NestedContainmentList2<int>(new[] { A, B, C, D, E, F, G });
+                _intervaled = new NestedContainmentList<int>(new[] { A, B, C, D, E, F, G });
             }
 
             [Test]

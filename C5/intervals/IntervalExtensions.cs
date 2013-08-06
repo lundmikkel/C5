@@ -1,7 +1,6 @@
 ﻿using System;
-using SCG = System.Collections.Generic;
 
-namespace C5.intervaled
+namespace C5.intervals
 {
     /// <summary>
     /// Extends IIntervals with convenient methods for overlapping, containment, comparing, equality and hashcode, and string formatting.

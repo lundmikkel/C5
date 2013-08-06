@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace C5.intervaled
+namespace C5.intervals
 {
-    public class LayeredContainmentListWithoutPointers<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
+    public class LayeredContainmentList<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
     {
         private readonly int _count;
         private readonly Node[][] _layers;
@@ -41,7 +41,7 @@ namespace C5.intervaled
 
         #region Constructor
 
-        public LayeredContainmentListWithoutPointers(IEnumerable<IInterval<T>> intervals)
+        public LayeredContainmentList(IEnumerable<IInterval<T>> intervals)
         {
             // Make intervals to array to allow fast sorting and counting
             var intervalArray = intervals as IInterval<T>[] ?? intervals.ToArray();
@@ -171,9 +171,9 @@ namespace C5.intervaled
                 // We can use first as lower to speed up the search
                 var last = findLast(layer, first, upper, query);
 
+                lower = _layers[layer][first].Pointer;
+                upper = _layers[layer][last].Pointer;
                 layer++;
-                lower = 0;
-                upper = _counts[layer];
 
                 count += last - first;
 
@@ -308,8 +308,8 @@ namespace C5.intervaled
 
                 // Save values for next iteration
                 layer++;
-                lower = 0;
-                upper = _counts[layer];
+                lower = currentLayer[first].Pointer; // 0
+                upper = currentLayer[last].Pointer; // _counts[layer]
 
                 while (first < last)
                     yield return currentLayer[first++].Interval;
@@ -340,7 +340,7 @@ namespace C5.intervaled
             var last = findLast(layer, first, upper, query);
 
             // Find intervals in sublist
-            foreach (var interval in findOverlapsRecursive(layer + 1, 0, _counts[layer + 1], query))
+            foreach (var interval in findOverlapsRecursive(layer + 1, currentLayer[first].Pointer, currentLayer[last].Pointer, query))
                 yield return interval;
 
             while (first < last)
@@ -362,7 +362,7 @@ namespace C5.intervaled
 
         public string Graphviz()
         {
-            return String.Format("digraph LayeredContainmentListWithoutPointers {{\n\trankdir=BT;\n\tnode [shape=record];\n\n{0}\n}}", graphviz());
+            return String.Format("digraph LayeredContainmentList {{\n\trankdir=BT;\n\tnode [shape=record];\n\n{0}\n}}", graphviz());
         }
 
         private string graphviz()

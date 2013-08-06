@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace C5.intervaled
+namespace C5.intervals
 {
     /// <summary>
     /// Basic interval useful for return or query values.

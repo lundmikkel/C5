@@ -1,26 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using C5.intervaled;
+using C5.intervals;
 using NUnit.Framework;
 using NUnit.Framework.Constraints;
 
-namespace C5.Tests.intervaled
+namespace C5.Tests.intervals
 {
-    using IntervalOfInt = IntervalBase<int>;
-
     [TestFixture]
     public class IntervalEquals
     {
         [Test]
         public void Intervals()
         {
-            IInterval<int> interval1 = new IntervalOfInt(1, 2, true, true);
-            IInterval<int> interval2 = new IntervalOfInt(1, 2, true, true);
-            IInterval<int> interval3 = new IntervalOfInt(1, 2, true, false);
-            IInterval<int> interval4 = new IntervalOfInt(1, 3, true, true);
+            IInterval<int> interval1 = new IntervalBase<int>(1, 2, true, true);
+            IInterval<int> interval2 = new IntervalBase<int>(1, 2, true, true);
+            IInterval<int> interval3 = new IntervalBase<int>(1, 2, true, false);
+            IInterval<int> interval4 = new IntervalBase<int>(1, 3, true, true);
 
             Assert.AreEqual(interval1, interval2);
             Assert.AreNotEqual(interval1, interval3);
@@ -37,16 +32,16 @@ namespace C5.Tests.intervaled
     public class IntervalIBeforeJ
     {
         private static readonly IInterval<int>[] I = new[] {
-                new IntervalOfInt(0, 5, false, false), // ()
-                new IntervalOfInt(0, 5, false, true), // (]
-                new IntervalOfInt(0, 5, true, false), // [)
-                new IntervalOfInt(0, 5, true, true) // []
+                new IntervalBase<int>(0, 5, false, false), // ()
+                new IntervalBase<int>(0, 5, false, true), // (]
+                new IntervalBase<int>(0, 5, true, false), // [)
+                new IntervalBase<int>(0, 5, true, true) // []
             };
         private static readonly IInterval<int>[] J = new[] {
-                new IntervalOfInt(10, 15, false, false), // ()
-                new IntervalOfInt(10, 15, false, true), // (]
-                new IntervalOfInt(10, 15, true, false), // [)
-                new IntervalOfInt(10, 15, true, true) // []
+                new IntervalBase<int>(10, 15, false, false), // ()
+                new IntervalBase<int>(10, 15, false, true), // (]
+                new IntervalBase<int>(10, 15, true, false), // [)
+                new IntervalBase<int>(10, 15, true, true) // []
             };
 
         [Test, Combinatorial, Category("IntervalComparer<T>.Overlaps")]
@@ -80,16 +75,16 @@ namespace C5.Tests.intervaled
     public class IntervalXEqualY
     {
         private static readonly IInterval<int>[] I = new[] {
-                new IntervalOfInt(0, 5, false, false), // ()
-                new IntervalOfInt(0, 5, false, true), // (]
-                new IntervalOfInt(0, 5, true, false), // [)
-                new IntervalOfInt(0, 5, true, true) // []
+                new IntervalBase<int>(0, 5, false, false), // ()
+                new IntervalBase<int>(0, 5, false, true), // (]
+                new IntervalBase<int>(0, 5, true, false), // [)
+                new IntervalBase<int>(0, 5, true, true) // []
             };
         private static readonly IInterval<int>[] J = new[] {
-                new IntervalOfInt(0, 5, false, false), // ()
-                new IntervalOfInt(0, 5, false, true), // (]
-                new IntervalOfInt(0, 5, true, false), // [)
-                new IntervalOfInt(0, 5, true, true) // []
+                new IntervalBase<int>(0, 5, false, false), // ()
+                new IntervalBase<int>(0, 5, false, true), // (]
+                new IntervalBase<int>(0, 5, true, false), // [)
+                new IntervalBase<int>(0, 5, true, true) // []
             };
 
         [Test, Combinatorial, Category("IntervalComparer<T>.Overlaps")]
@@ -193,16 +188,16 @@ namespace C5.Tests.intervaled
     public class IntervalXMeetsY
     {
         private static readonly IInterval<int>[] I = new[] {
-                new IntervalOfInt(0, 5, false, false), // ()
-                new IntervalOfInt(0, 5, false, true), // (]
-                new IntervalOfInt(0, 5, true, false), // [)
-                new IntervalOfInt(0, 5, true, true) // []
+                new IntervalBase<int>(0, 5, false, false), // ()
+                new IntervalBase<int>(0, 5, false, true), // (]
+                new IntervalBase<int>(0, 5, true, false), // [)
+                new IntervalBase<int>(0, 5, true, true) // []
             };
         private static readonly IInterval<int>[] J = new[] {
-                new IntervalOfInt(5, 10, false, false), // ()
-                new IntervalOfInt(5, 10, false, true), // (]
-                new IntervalOfInt(5, 10, true, false), // [)
-                new IntervalOfInt(5, 10, true, true) // []
+                new IntervalBase<int>(5, 10, false, false), // ()
+                new IntervalBase<int>(5, 10, false, true), // (]
+                new IntervalBase<int>(5, 10, true, false), // [)
+                new IntervalBase<int>(5, 10, true, true) // []
             };
 
         [TestCaseSource("OverlapCases"), Category("IntervalComparer<T>.Overlaps")]
@@ -274,16 +269,16 @@ namespace C5.Tests.intervaled
     public class IntervalXOverlapsY
     {
         private static readonly IInterval<int>[] I = new[] {
-                new IntervalOfInt(0, 10, false, false), // ()
-                new IntervalOfInt(0, 10, false, true), // (]
-                new IntervalOfInt(0, 10, true, false), // [)
-                new IntervalOfInt(0, 10, true, true) // []
+                new IntervalBase<int>(0, 10, false, false), // ()
+                new IntervalBase<int>(0, 10, false, true), // (]
+                new IntervalBase<int>(0, 10, true, false), // [)
+                new IntervalBase<int>(0, 10, true, true) // []
             };
         private static readonly IInterval<int>[] J = new[] {
-                new IntervalOfInt(5, 15, false, false), // ()
-                new IntervalOfInt(5, 15, false, true), // (]
-                new IntervalOfInt(5, 15, true, false), // [)
-                new IntervalOfInt(5, 15, true, true) // []
+                new IntervalBase<int>(5, 15, false, false), // ()
+                new IntervalBase<int>(5, 15, false, true), // (]
+                new IntervalBase<int>(5, 15, true, false), // [)
+                new IntervalBase<int>(5, 15, true, true) // []
             };
 
         [Test, Combinatorial, Category("IntervalComparer<T>.Overlaps")]
@@ -317,16 +312,16 @@ namespace C5.Tests.intervaled
     public class IntervalXDuringY
     {
         private static readonly IInterval<int>[] I = new[] {
-                new IntervalOfInt(5, 10, false, false), // ()
-                new IntervalOfInt(5, 10, false, true), // (]
-                new IntervalOfInt(5, 10, true, false), // [)
-                new IntervalOfInt(5, 10, true, true) // []
+                new IntervalBase<int>(5, 10, false, false), // ()
+                new IntervalBase<int>(5, 10, false, true), // (]
+                new IntervalBase<int>(5, 10, true, false), // [)
+                new IntervalBase<int>(5, 10, true, true) // []
             };
         private static readonly IInterval<int>[] J = new[] {
-                new IntervalOfInt(0, 15, false, false), // ()
-                new IntervalOfInt(0, 15, false, true), // (]
-                new IntervalOfInt(0, 15, true, false), // [)
-                new IntervalOfInt(0, 15, true, true) // []
+                new IntervalBase<int>(0, 15, false, false), // ()
+                new IntervalBase<int>(0, 15, false, true), // (]
+                new IntervalBase<int>(0, 15, true, false), // [)
+                new IntervalBase<int>(0, 15, true, true) // []
             };
 
         [Test, Combinatorial, Category("IntervalComparer<T>.Overlaps")]
@@ -363,16 +358,16 @@ namespace C5.Tests.intervaled
     public class IntervalXStartsY
     {
         private static readonly IInterval<int>[] I = new[] {
-                new IntervalOfInt(0, 5, false, false), // ()
-                new IntervalOfInt(0, 5, false, true), // (]
-                new IntervalOfInt(0, 5, true, false), // [)
-                new IntervalOfInt(0, 5, true, true) // []
+                new IntervalBase<int>(0, 5, false, false), // ()
+                new IntervalBase<int>(0, 5, false, true), // (]
+                new IntervalBase<int>(0, 5, true, false), // [)
+                new IntervalBase<int>(0, 5, true, true) // []
             };
         private static readonly IInterval<int>[] J = new[] {
-                new IntervalOfInt(0, 10,false, false), // ()
-                new IntervalOfInt(0, 10,false, true), // (]
-                new IntervalOfInt(0, 10,true, false), // [)
-                new IntervalOfInt(0, 10,true, true) // []
+                new IntervalBase<int>(0, 10,false, false), // ()
+                new IntervalBase<int>(0, 10,false, true), // (]
+                new IntervalBase<int>(0, 10,true, false), // [)
+                new IntervalBase<int>(0, 10,true, true) // []
             };
 
         [Test, Combinatorial, Category("IntervalComparer<T>.Overlaps")]
@@ -465,16 +460,16 @@ namespace C5.Tests.intervaled
     public class IntervalXFinishesY
     {
         private static readonly IInterval<int>[] I = new[] {
-                new IntervalOfInt(5, 10, false, false), // ()
-                new IntervalOfInt(5, 10, false, true), // (]
-                new IntervalOfInt(5, 10, true, false), // [)
-                new IntervalOfInt(5, 10, true, true) // []
+                new IntervalBase<int>(5, 10, false, false), // ()
+                new IntervalBase<int>(5, 10, false, true), // (]
+                new IntervalBase<int>(5, 10, true, false), // [)
+                new IntervalBase<int>(5, 10, true, true) // []
             };
         private static readonly IInterval<int>[] J = new[] {
-                new IntervalOfInt(0, 10, false, false), // ()
-                new IntervalOfInt(0, 10, false, true), // (]
-                new IntervalOfInt(0, 10, true, false), // [)
-                new IntervalOfInt(0, 10, true, true) // []
+                new IntervalBase<int>(0, 10, false, false), // ()
+                new IntervalBase<int>(0, 10, false, true), // (]
+                new IntervalBase<int>(0, 10, true, false), // [)
+                new IntervalBase<int>(0, 10, true, true) // []
             };
 
         [Test, Combinatorial, Category("IntervalComparer<T>.Overlaps")]
@@ -533,12 +528,12 @@ namespace C5.Tests.intervaled
     [TestFixture]
     public class IntervalPBeforeX
     {
-        private static readonly IInterval<int> P = new IntervalOfInt(0);
+        private static readonly IInterval<int> P = new IntervalBase<int>(0);
         private static readonly IInterval<int>[] I = new[] {
-                new IntervalOfInt(5, 10, false, false), // ()
-                new IntervalOfInt(5, 10, false, true), // (]
-                new IntervalOfInt(5, 10, true, false), // [)
-                new IntervalOfInt(5, 10, true, true) // []
+                new IntervalBase<int>(5, 10, false, false), // ()
+                new IntervalBase<int>(5, 10, false, true), // (]
+                new IntervalBase<int>(5, 10, true, false), // [)
+                new IntervalBase<int>(5, 10, true, true) // []
             };
 
         //FindOverlaps
@@ -604,12 +599,12 @@ namespace C5.Tests.intervaled
     [TestFixture]
     public class IntervalPStartsX
     {
-        private static readonly IInterval<int> P = new IntervalOfInt(0);
+        private static readonly IInterval<int> P = new IntervalBase<int>(0);
         private static readonly IInterval<int>[] I = new[] {
-                new IntervalOfInt(0, 5, false, false), // ()
-                new IntervalOfInt(0, 5, false, true), // (]
-                new IntervalOfInt(0, 5, true, false), // [)
-                new IntervalOfInt(0, 5, true, true) // []
+                new IntervalBase<int>(0, 5, false, false), // ()
+                new IntervalBase<int>(0, 5, false, true), // (]
+                new IntervalBase<int>(0, 5, true, false), // [)
+                new IntervalBase<int>(0, 5, true, true) // []
             };
 
         [Test]
@@ -667,12 +662,12 @@ namespace C5.Tests.intervaled
     [TestFixture]
     public class IntervalPOverlapsX
     {
-        private static readonly IInterval<int> P = new IntervalOfInt(5);
+        private static readonly IInterval<int> P = new IntervalBase<int>(5);
         private static readonly IInterval<int>[] I = new[] {
-                new IntervalOfInt(0, 10, false, false), // ()
-                new IntervalOfInt(0, 10, false, true), // (]
-                new IntervalOfInt(0, 10, true, false), // [)
-                new IntervalOfInt(0, 10, true, true) // []
+                new IntervalBase<int>(0, 10, false, false), // ()
+                new IntervalBase<int>(0, 10, false, true), // (]
+                new IntervalBase<int>(0, 10, true, false), // [)
+                new IntervalBase<int>(0, 10, true, true) // []
             };
 
         [Test]
@@ -730,12 +725,12 @@ namespace C5.Tests.intervaled
     [TestFixture]
     public class IntervalPFinishesX
     {
-        private static readonly IInterval<int> P = new IntervalOfInt(5);
+        private static readonly IInterval<int> P = new IntervalBase<int>(5);
         private static readonly IInterval<int>[] I = new[] {
-                new IntervalOfInt(0, 5, false, false), // ()
-                new IntervalOfInt(0, 5, false, true), // (]
-                new IntervalOfInt(0, 5, true, false), // [)
-                new IntervalOfInt(0, 5, true, true), // []
+                new IntervalBase<int>(0, 5, false, false), // ()
+                new IntervalBase<int>(0, 5, false, true), // (]
+                new IntervalBase<int>(0, 5, true, false), // [)
+                new IntervalBase<int>(0, 5, true, true), // []
             };
 
         [TestCaseSource("OverlapCases"), Category("IntervalComparer<T>.Overlaps")]
@@ -795,12 +790,12 @@ namespace C5.Tests.intervaled
     [TestFixture]
     public class IntervalPAfterX
     {
-        private static readonly IInterval<int> P = new IntervalOfInt(10);
+        private static readonly IInterval<int> P = new IntervalBase<int>(10);
         private static readonly IInterval<int>[] I = new[] {
-                new IntervalOfInt(0, 5, false, false), // ()
-                new IntervalOfInt(0, 5, false, true), // (]
-                new IntervalOfInt(0, 5, true, false), // [)
-                new IntervalOfInt(0, 5, true, true) // []
+                new IntervalBase<int>(0, 5, false, false), // ()
+                new IntervalBase<int>(0, 5, false, true), // (]
+                new IntervalBase<int>(0, 5, true, false), // [)
+                new IntervalBase<int>(0, 5, true, true) // []
             };
 
         [Test, Combinatorial, Category("IntervalComparer<T>.Overlaps")]
@@ -833,7 +828,7 @@ namespace C5.Tests.intervaled
 
             for (int low = 0; low < size; low++)
             {
-                intervals.Add(new IntervalOfInt(low));
+                intervals.Add(new IntervalBase<int>(low));
 
                 for (int high = low + 1; high < size; high++)
                 {
@@ -844,7 +839,7 @@ namespace C5.Tests.intervaled
                         {
                             var highIncluded = Convert.ToBoolean(highInc);
 
-                            intervals.Add(new IntervalOfInt(low, high, lowIncluded, highIncluded));
+                            intervals.Add(new IntervalBase<int>(low, high, lowIncluded, highIncluded));
                         }
                     }
                 }

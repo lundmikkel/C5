@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections;
-using SCG = System.Collections.Generic;
 using System.Linq;
 
-namespace C5.intervaled
+namespace C5.intervals
 {
     public class NestedContainmentList2<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
     {
@@ -40,7 +39,7 @@ namespace C5.intervaled
         /// </summary>
         /// <param name="intervals">Sorted intervals</param>
         /// <returns>A list of nodes</returns>
-        private static Node[] createList(SCG.IEnumerable<IInterval<T>> intervals)
+        private static Node[] createList(System.Collections.Generic.IEnumerable<IInterval<T>> intervals)
         {
             // List to hold the nodes
             IList<Node> list = new ArrayList<Node>();
@@ -85,7 +84,7 @@ namespace C5.intervaled
         /// Create a Nested Containment List with a enumerable of intervals
         /// </summary>
         /// <param name="intervals">A collection of intervals in arbitrary order</param>
-        public NestedContainmentList2(SCG.IEnumerable<IInterval<T>> intervals)
+        public NestedContainmentList2(System.Collections.Generic.IEnumerable<IInterval<T>> intervals)
         {
             var intervalsArray = intervals as IInterval<T>[] ?? intervals.ToArray();
 
@@ -119,12 +118,12 @@ namespace C5.intervaled
         /// </summary>
         /// <returns>Enumerator</returns>
         // TODO: Test the order is still the same as when sorted with IntervalComparer. This should be that case!
-        public override SCG.IEnumerator<IInterval<T>> GetEnumerator()
+        public override System.Collections.Generic.IEnumerator<IInterval<T>> GetEnumerator()
         {
             return getEnumerator(_list);
         }
 
-        private SCG.IEnumerator<IInterval<T>> getEnumerator(SCG.IEnumerable<Node> list)
+        private System.Collections.Generic.IEnumerator<IInterval<T>> getEnumerator(System.Collections.Generic.IEnumerable<Node> list)
         {
             // Just for good measures
             if (list == null)
@@ -210,7 +209,7 @@ namespace C5.intervaled
             }
         }
 
-        public SCG.IEnumerable<IInterval<T>> FindOverlaps(T query)
+        public System.Collections.Generic.IEnumerable<IInterval<T>> FindOverlaps(T query)
         {
             if (query == null)
                 throw new NullReferenceException("Query can't be null");
@@ -219,7 +218,7 @@ namespace C5.intervaled
         }
 
         // TODO: Test speed difference between version that takes overlap-loop and upper and low bound loop
-        private static SCG.IEnumerable<IInterval<T>> overlap(Node[] list, IInterval<T> query)
+        private static System.Collections.Generic.IEnumerable<IInterval<T>> overlap(Node[] list, IInterval<T> query)
         {
             if (list == null)
                 yield break;
@@ -304,7 +303,7 @@ namespace C5.intervaled
             return min;
         }
 
-        public SCG.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
+        public System.Collections.Generic.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
         {
             if (query == null)
                 return Enumerable.Empty<IInterval<T>>();

@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using C5.intervaled;
+using C5.intervals;
 using NUnit.Framework;
 using System.Linq;
 
-namespace C5.Tests.intervaled
+namespace C5.Tests.intervals
 {
     [TestFixture]
     public class searchBenchmarker

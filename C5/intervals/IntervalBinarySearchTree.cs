@@ -1,8 +1,7 @@
 ﻿using System;
-using SCG = System.Collections.Generic;
 using System.Linq;
 
-namespace C5.intervaled
+namespace C5.intervals
 {
     // TODO: Document reference equality duplicates
     public class IntervalBinarySearchTree<T> : CollectionValueBase<IInterval<T>>, IDynamicIntervaled<T> where T : IComparable<T>
@@ -160,9 +159,9 @@ namespace C5.intervaled
 
         public sealed class IntervalSet : HashSet<IInterval<T>>
         {
-            private static SCG.IEqualityComparer<IInterval<T>> _comparer = ComparerFactory<IInterval<T>>.CreateEqualityComparer(ReferenceEquals, IntervalExtensions.GetHashCode);
+            private static System.Collections.Generic.IEqualityComparer<IInterval<T>> _comparer = ComparerFactory<IInterval<T>>.CreateEqualityComparer(ReferenceEquals, IntervalExtensions.GetHashCode);
 
-            public IntervalSet(SCG.IEnumerable<IInterval<T>> intervals)
+            public IntervalSet(System.Collections.Generic.IEnumerable<IInterval<T>> intervals)
                 : base(_comparer)
             {
                 AddAll(intervals);
@@ -198,7 +197,7 @@ namespace C5.intervaled
 
         #region Constructors
 
-        public IntervalBinarySearchTree(SCG.IEnumerable<IInterval<T>> intervals)
+        public IntervalBinarySearchTree(System.Collections.Generic.IEnumerable<IInterval<T>> intervals)
         {
             foreach (var interval in intervals)
                 Add(interval);
@@ -676,7 +675,7 @@ namespace C5.intervaled
 
         #region IEnumerable
 
-        public override SCG.IEnumerator<IInterval<T>> GetEnumerator()
+        public override System.Collections.Generic.IEnumerator<IInterval<T>> GetEnumerator()
         {
             var set = new IntervalSet();
 
@@ -799,7 +798,7 @@ namespace C5.intervaled
             return !root.Equal.IsEmpty ? root.Equal.Choose() : root.Less.Choose();
         }
 
-        public SCG.IEnumerable<IInterval<T>> FindOverlaps(T query)
+        public System.Collections.Generic.IEnumerable<IInterval<T>> FindOverlaps(T query)
         {
             if (ReferenceEquals(query, null))
                 return Enumerable.Empty<IInterval<T>>();
@@ -812,7 +811,7 @@ namespace C5.intervaled
             return set;
         }
 
-        private SCG.IEnumerable<IInterval<T>> findOverlap(Node root, T query)
+        private System.Collections.Generic.IEnumerable<IInterval<T>> findOverlap(Node root, T query)
         {
             if (root == null)
                 yield break;
@@ -841,7 +840,7 @@ namespace C5.intervaled
             }
         }
 
-        public SCG.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
+        public System.Collections.Generic.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
         {
             if (ReferenceEquals(query, null))
                 yield break;
@@ -871,7 +870,7 @@ namespace C5.intervaled
         /// <summary>
         /// Create an enumerable, enumerating all intersecting intervals on the path to the split node. Returns the split node in splitNode.
         /// </summary>
-        private SCG.IEnumerable<IInterval<T>> findSplitNode(Node root, IInterval<T> query, Action<Node> splitNode)
+        private System.Collections.Generic.IEnumerable<IInterval<T>> findSplitNode(Node root, IInterval<T> query, Action<Node> splitNode)
         {
             if (root == null) yield break;
 
@@ -906,7 +905,7 @@ namespace C5.intervaled
             }
         }
 
-        private SCG.IEnumerable<IInterval<T>> findLeft(Node root, IInterval<T> query)
+        private System.Collections.Generic.IEnumerable<IInterval<T>> findLeft(Node root, IInterval<T> query)
         {
             // If root is null we have reached the end
             if (root == null) yield break;
@@ -950,13 +949,13 @@ namespace C5.intervaled
                         yield return interval;
 
                 // If we find the matching node, we can add everything in the left subtree
-                SCG.IEnumerator<IInterval<T>> child = getEnumerator(root.Right);
+                System.Collections.Generic.IEnumerator<IInterval<T>> child = getEnumerator(root.Right);
                 while (child.MoveNext())
                     yield return child.Current;
             }
         }
 
-        private SCG.IEnumerable<IInterval<T>> findRight(Node root, IInterval<T> query)
+        private System.Collections.Generic.IEnumerable<IInterval<T>> findRight(Node root, IInterval<T> query)
         {
             // If root is null we have reached the end
             if (root == null) yield break;
@@ -1010,7 +1009,7 @@ namespace C5.intervaled
         }
 
 
-        private SCG.IEnumerator<IInterval<T>> getEnumerator(Node node)
+        private System.Collections.Generic.IEnumerator<IInterval<T>> getEnumerator(Node node)
         {
             // Just return if tree is empty
             if (node == null) yield break;
