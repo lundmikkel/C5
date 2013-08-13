@@ -7,8 +7,9 @@ namespace C5.intervals
     /// </summary>
     public static class IntervalExtensions
     {
+        // TODO: Rename to Intersects to avoid confusion with IntervalRelation.Overlaps. Remember IIntervaled has FindOverlaps! Avoid too many different names
         /// <summary>
-        /// Compare two intervals to see if they overlap
+        /// Compare two intervals to see if they overlap.
         /// </summary>
         /// <param name="x">First interval</param>
         /// <param name="y">Second interval</param>
@@ -35,6 +36,7 @@ namespace C5.intervals
             return Overlaps(x, new IntervalBase<T>(p));
         }
 
+        // TODO: Same meaning as in IntervalRelation.Contains, but is a strict containment. Could be renamed something with subset?
         /// <summary>
         /// Check if one interval contains another interval.
         /// x contains y if x.Low is lower than y.Low and y.High is lower than x.High.
