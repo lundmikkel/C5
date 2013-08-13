@@ -1,21 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using C5.Tests.intervaled.Generic;
-using C5.intervaled;
+using C5.Tests.intervals.Generic;
+using C5.intervals;
 using NUnit.Framework;
 
-namespace C5.Tests.intervaled
+namespace C5.Tests.intervals
 {
     //using SequencedIntervalsOfInt = TreeBag<IInterval<int>>;
-    using IntervalOfInt = IntervalBase<int>;
 
     namespace IntervalBinarySearchTree
     {
 
         [TestFixture]
-        public class IntervalBinarySearchTreeIBS : Generic.IBS
+        public class IntervalBinarySearchTreeIBS : IBS
         {
             internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
@@ -25,13 +23,13 @@ namespace C5.Tests.intervaled
             [Test]
             public void Print()
             {
-                File.WriteAllText(@"../../intervaled/data/interval_binary_search_tree.gv", ((IntervalBinarySearchTree<int>)Intervaled).Graphviz());
+                File.WriteAllText(@"../../intervaled/data/interval_binary_search_tree.gv", ((IntervalBinarySearchTree<int>) Intervaled).Graphviz());
             }
 
             [Test]
             public void MaximumOverlap_IBS_Returns5()
             {
-                Assert.AreEqual(5, ((IntervalBinarySearchTree<int>)Intervaled).MaximumOverlap);
+                Assert.AreEqual(5, ((IntervalBinarySearchTree<int>) Intervaled).MaximumOverlap);
             }
         }
 
@@ -55,7 +53,7 @@ namespace C5.Tests.intervaled
             [Test]
             public void MaximumOverlap_EmptyCollection_Returns0()
             {
-                Assert.AreEqual(0, ((IntervalBinarySearchTree<int>)_intervaled).MaximumOverlap);
+                Assert.AreEqual(0, ((IntervalBinarySearchTree<int>) _intervaled).MaximumOverlap);
             }
         }
 
@@ -70,12 +68,12 @@ namespace C5.Tests.intervaled
             [Test]
             public void MaximumOverlap_EmptyCollection_Returns0()
             {
-                Assert.AreEqual(0, ((IntervalBinarySearchTree<int>)_intervaled).MaximumOverlap);
+                Assert.AreEqual(0, ((IntervalBinarySearchTree<int>) _intervaled).MaximumOverlap);
             }
         }
 
         [TestFixture]
-        public class Sample100 : Generic.Sample100
+        public class Sample100 : intervals.Generic.Sample100
         {
             protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
@@ -84,7 +82,7 @@ namespace C5.Tests.intervaled
         }
 
         [TestFixture, Ignore]
-        public class IBSPerformance : Generic.Performance23333
+        public class IBSPerformance : Performance23333
         {
             protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
@@ -93,7 +91,7 @@ namespace C5.Tests.intervaled
         }
 
         [TestFixture]
-        public class BensTest : Generic.BensTest
+        public class BensTest : intervals.Generic.BensTest
         {
             protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
@@ -103,7 +101,7 @@ namespace C5.Tests.intervaled
             [Test]
             public void MaximumOverlap_BensCollection_Returns2()
             {
-                Assert.AreEqual(2, ((IntervalBinarySearchTree<int>)_intervaled).MaximumOverlap);
+                Assert.AreEqual(2, ((IntervalBinarySearchTree<int>) _intervaled).MaximumOverlap);
             }
         }
 
@@ -239,14 +237,14 @@ namespace C5.Tests.intervaled
             [Test]
             public void Overlap_Range_ReturnsSpecifiedIntervals()
             {
-                range(new IntervalOfInt(0, 2, true, true), new[] { B, C, G });
+                range(new IntervalBase<int>(0, 2, true, true), new[] { B, C, G });
             }
 
             [Test]
             public void Span_IBS_ReturnSpan()
             {
                 var span = _intervales.Span;
-                var expected = new IntervalOfInt(int.MinValue, 20, false, true);
+                var expected = new IntervalBase<int>(int.MinValue, 20, false, true);
                 Assert.That(expected.Equals(span));
             }
 
@@ -277,10 +275,10 @@ namespace C5.Tests.intervaled
             [Test]
             public void MaximumOverlap_NonOverlappingIntervals_ReturnOne()
             {
-                _intervaled.Add(new IntervalOfInt(1, 2));
-                _intervaled.Add(new IntervalOfInt(2, 3));
-                _intervaled.Add(new IntervalOfInt(3, 4));
-                _intervaled.Add(new IntervalOfInt(4, 5));
+                _intervaled.Add(new IntervalBase<int>(1, 2));
+                _intervaled.Add(new IntervalBase<int>(2, 3));
+                _intervaled.Add(new IntervalBase<int>(3, 4));
+                _intervaled.Add(new IntervalBase<int>(4, 5));
 
                 Assert.AreEqual(1, _intervaled.MaximumOverlap);
             }
@@ -288,8 +286,8 @@ namespace C5.Tests.intervaled
             [Test]
             public void MaximumOverlap_MaximumOverlapBetweenDescreteValues_ReturnTwo()
             {
-                _intervaled.Add(new IntervalOfInt(1, 3, false, false));
-                _intervaled.Add(new IntervalOfInt(2, 4, false, false));
+                _intervaled.Add(new IntervalBase<int>(1, 3, false, false));
+                _intervaled.Add(new IntervalBase<int>(2, 4, false, false));
 
                 Assert.AreEqual(2, _intervaled.MaximumOverlap);
             }

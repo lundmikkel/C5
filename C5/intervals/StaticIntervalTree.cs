@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections;
-using SCG = System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace C5.intervaled
+namespace C5.intervals
 {
     /// <summary>
     /// Extension methods used to find the median endpoint
@@ -155,7 +154,7 @@ namespace C5.intervaled
         /// Create a static interval tree from a collection of intervals.
         /// </summary>
         /// <param name="intervals">Interval collection</param>
-        public StaticIntervalTree(SCG.IEnumerable<IInterval<T>> intervals)
+        public StaticIntervalTree(System.Collections.Generic.IEnumerable<IInterval<T>> intervals)
         {
             var intervalArray = intervals as IInterval<T>[] ?? intervals.ToArray();
 
@@ -248,7 +247,7 @@ namespace C5.intervaled
             return GetEnumerator();
         }
 
-        private SCG.IEnumerator<IInterval<T>> getEnumerator(Node node)
+        private System.Collections.Generic.IEnumerator<IInterval<T>> getEnumerator(Node node)
         {
             // Just return if tree is empty
             if (node == null) yield break;
@@ -256,7 +255,7 @@ namespace C5.intervaled
             // Recursively retrieve intervals in left subtree
             if (node.Left != null)
             {
-                SCG.IEnumerator<IInterval<T>> child = getEnumerator(node.Left);
+                System.Collections.Generic.IEnumerator<IInterval<T>> child = getEnumerator(node.Left);
 
                 while (child.MoveNext())
                 {
@@ -275,7 +274,7 @@ namespace C5.intervaled
             // Recursively retrieve intervals in right subtree
             if (node.Right != null)
             {
-                SCG.IEnumerator<IInterval<T>> child = getEnumerator(node.Right);
+                System.Collections.Generic.IEnumerator<IInterval<T>> child = getEnumerator(node.Right);
 
                 while (child.MoveNext())
                 {
@@ -351,7 +350,7 @@ namespace C5.intervaled
 
         #region IShowable
 
-        public override SCG.IEnumerator<IInterval<T>> GetEnumerator()
+        public override System.Collections.Generic.IEnumerator<IInterval<T>> GetEnumerator()
         {
             return getEnumerator(_root);
         }
@@ -399,7 +398,7 @@ namespace C5.intervaled
 
         #region IIntervaled
 
-        public SCG.IEnumerable<IInterval<T>> FindOverlaps(T query)
+        public System.Collections.Generic.IEnumerable<IInterval<T>> FindOverlaps(T query)
         {
             if (ReferenceEquals(query, null))
                 return Enumerable.Empty<IInterval<T>>();
@@ -407,7 +406,7 @@ namespace C5.intervaled
             return findOverlap(_root, query);
         }
 
-        private static SCG.IEnumerable<IInterval<T>> findOverlap(Node root, T query)
+        private static System.Collections.Generic.IEnumerable<IInterval<T>> findOverlap(Node root, T query)
         {
             // Don't search empty leaves
             if (root == null) yield break;
@@ -463,7 +462,7 @@ namespace C5.intervaled
             }
         }
 
-        public SCG.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
+        public System.Collections.Generic.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
         {
             if (ReferenceEquals(query, null))
                 yield break;
@@ -497,7 +496,7 @@ namespace C5.intervaled
         /// <summary>
         /// Create an enumerable, enumerating all intersecting intervals on the path to the split node. Returns the split node in splitNode.
         /// </summary>
-        private SCG.IEnumerable<IInterval<T>> findSplitNode(Node root, IInterval<T> query, Action<Node> splitNode)
+        private System.Collections.Generic.IEnumerable<IInterval<T>> findSplitNode(Node root, IInterval<T> query, Action<Node> splitNode)
         {
             if (root == null) yield break;
 
@@ -547,7 +546,7 @@ namespace C5.intervaled
             }
         }
 
-        private SCG.IEnumerable<IInterval<T>> findLeft(Node root, IInterval<T> query)
+        private System.Collections.Generic.IEnumerable<IInterval<T>> findLeft(Node root, IInterval<T> query)
         {
             // If root is null we have reached the end
             if (root == null) yield break;
@@ -583,7 +582,7 @@ namespace C5.intervaled
 
                 // Recursively add all intervals in right subtree as they must be
                 // contained by [root.Key:splitNode]
-                SCG.IEnumerator<IInterval<T>> child = getEnumerator(root.Right);
+                System.Collections.Generic.IEnumerator<IInterval<T>> child = getEnumerator(root.Right);
                 while (child.MoveNext())
                 {
                     yield return child.Current;
@@ -606,7 +605,7 @@ namespace C5.intervaled
                 }
 
                 // If we find the matching node, we can add everything in the left subtree
-                SCG.IEnumerator<IInterval<T>> child = getEnumerator(root.Right);
+                System.Collections.Generic.IEnumerator<IInterval<T>> child = getEnumerator(root.Right);
                 while (child.MoveNext())
                 {
                     yield return child.Current;
@@ -614,7 +613,7 @@ namespace C5.intervaled
             }
         }
 
-        private SCG.IEnumerable<IInterval<T>> findRight(Node root, IInterval<T> query)
+        private System.Collections.Generic.IEnumerable<IInterval<T>> findRight(Node root, IInterval<T> query)
         {
             // If root is null we have reached the end
             if (root == null) yield break;
@@ -650,7 +649,7 @@ namespace C5.intervaled
 
                 // Recursively add all intervals in right subtree as they must be
                 // contained by [root.Key:splitNode]
-                SCG.IEnumerator<IInterval<T>> child = getEnumerator(root.Left);
+                System.Collections.Generic.IEnumerator<IInterval<T>> child = getEnumerator(root.Left);
                 while (child.MoveNext())
                 {
                     yield return child.Current;
@@ -673,7 +672,7 @@ namespace C5.intervaled
                 }
 
                 // If we find the matching node, we can add everything in the left subtree
-                SCG.IEnumerator<IInterval<T>> child = getEnumerator(root.Left);
+                System.Collections.Generic.IEnumerator<IInterval<T>> child = getEnumerator(root.Left);
                 while (child.MoveNext())
                 {
                     yield return child.Current;

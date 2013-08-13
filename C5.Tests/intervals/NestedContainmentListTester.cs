@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using C5.Tests.intervaled.Generic;
-using C5.Tests.intervaled.Generic.Static;
-using C5.intervaled;
+using C5.Tests.intervals.Generic;
+using C5.Tests.intervals.Generic.Static;
+using C5.intervals;
 using NUnit.Framework;
 
-namespace C5.Tests.intervaled
+namespace C5.Tests.intervals
 {
     using SequencedIntervalsOfInt = TreeBag<IInterval<int>>;
     using IntervalOfInt = IntervalBase<int>;
@@ -40,7 +40,7 @@ namespace C5.Tests.intervaled
         }
 
         [TestFixture]
-        public class IBS : Generic.IBS
+        public class IBS : intervals.Generic.IBS
         {
             internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
@@ -49,7 +49,7 @@ namespace C5.Tests.intervaled
         }
 
         [TestFixture]
-        public class Sample100 : Generic.Sample100
+        public class Sample100 : intervals.Generic.Sample100
         {
             protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
@@ -58,7 +58,7 @@ namespace C5.Tests.intervaled
         }
 
         [TestFixture]
-        public class BensTest : Generic.BensTest
+        public class BensTest : intervals.Generic.BensTest
         {
             protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
             {

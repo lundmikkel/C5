@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using C5.Tests.intervaled.Generic;
-using C5.intervaled;
 using NUnit.Framework;
 
-namespace C5.Tests.intervaled
+namespace C5.Tests.intervals
 {
-    using IntervalOfInt = IntervalBase<int>;
+    /*using IntervalOfInt = IntervalBase<int>;
 
     public class IntervalListEndpointInclusion : IntervaledEndpointInclusion
     {
@@ -86,4 +84,5 @@ namespace C5.Tests.intervaled
             return new IntervalList<int>(intervals);
         }
     }
+    */
 }

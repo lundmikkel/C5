@@ -2,16 +2,12 @@
 using System.Collections;
 using System.Diagnostics;
 using System.IO;
-using C5.intervaled;
-using SCG = System.Collections.Generic;
+using C5.intervals;
 using System.Linq;
 using NUnit.Framework;
 
-namespace C5.Tests.intervaled
+namespace C5.Tests.intervals
 {
-
-    using IntervalOfInt = IntervalBase<int>;
-
     namespace Generic
     {
         // TODO: make one test with testcases
@@ -20,7 +16,7 @@ namespace C5.Tests.intervaled
         {
             private IIntervaled<int> _intervaled;
 
-            internal abstract IIntervaled<int> Factory(SCG.IEnumerable<IInterval<int>> intervals);
+            internal abstract IIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [SetUp]
             public void Init()
@@ -28,10 +24,10 @@ namespace C5.Tests.intervaled
                 // Create Intervaled
                 _intervaled = Factory(new[]
                 {
-                    new IntervalOfInt(5, 15, true, true),
-                    new IntervalOfInt(5, 15, true, false),
-                    new IntervalOfInt(5, 15, false, true),
-                    new IntervalOfInt(5, 15, false, false)
+                    new IntervalBase<int>(5, 15, true, true),
+                    new IntervalBase<int>(5, 15, true, false),
+                    new IntervalBase<int>(5, 15, false, true),
+                    new IntervalBase<int>(5, 15, false, false)
                 });
             }
 
@@ -46,8 +42,8 @@ namespace C5.Tests.intervaled
             {
                 CollectionAssert.AreEquivalent(
                     new ArrayList{
-                        new IntervalOfInt(5, 15, true, true),
-                        new IntervalOfInt(5, 15, true, false),
+                        new IntervalBase<int>(5, 15, true, true),
+                        new IntervalBase<int>(5, 15, true, false),
                     },
                     _intervaled.FindOverlaps(5)
                 );
@@ -58,10 +54,10 @@ namespace C5.Tests.intervaled
             {
                 CollectionAssert.AreEquivalent(
                     new ArrayList{
-                        new IntervalOfInt(5, 15, false, true),
-                        new IntervalOfInt(5, 15, true, false),
-                        new IntervalOfInt(5, 15, false, false),
-                        new IntervalOfInt(5, 15, true, true),
+                        new IntervalBase<int>(5, 15, false, true),
+                        new IntervalBase<int>(5, 15, true, false),
+                        new IntervalBase<int>(5, 15, false, false),
+                        new IntervalBase<int>(5, 15, true, true),
                     },
                     _intervaled.FindOverlaps(10)
                 );
@@ -72,8 +68,8 @@ namespace C5.Tests.intervaled
             {
                 CollectionAssert.AreEquivalent(
                     new ArrayList{
-                        new IntervalOfInt(5, 15, false, true),
-                        new IntervalOfInt(5, 15, true, true),
+                        new IntervalBase<int>(5, 15, false, true),
+                        new IntervalBase<int>(5, 15, true, true),
                     },
                     _intervaled.FindOverlaps(15)
                 );
@@ -90,7 +86,7 @@ namespace C5.Tests.intervaled
         {
             protected IIntervaled<int> _intervaled;
 
-            internal abstract IIntervaled<int> Factory(SCG.IEnumerable<IInterval<int>> intervals);
+            internal abstract IIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [SetUp]
             public void Init()
@@ -115,7 +111,7 @@ namespace C5.Tests.intervaled
         {
             protected IIntervaled<int> _intervaled;
 
-            internal abstract IIntervaled<int> Factory(SCG.IEnumerable<IInterval<int>> intervals);
+            internal abstract IIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [SetUp]
             public void Init()
@@ -141,13 +137,13 @@ namespace C5.Tests.intervaled
             [Test]
             public void Overlap_InfiniteQuery_ReturnsEmpty()
             {
-                CollectionAssert.IsEmpty(_intervaled.FindOverlaps(new IntervalOfInt(int.MinValue, int.MaxValue, false, false)));
+                CollectionAssert.IsEmpty(_intervaled.FindOverlaps(new IntervalBase<int>(int.MinValue, int.MaxValue, false, false)));
             }
 
             [Test]
             public void Overlap_RandomQuery_ReturnsEmpty()
             {
-                CollectionAssert.IsEmpty(_intervaled.FindOverlaps(new IntervalOfInt(0, 5)));
+                CollectionAssert.IsEmpty(_intervaled.FindOverlaps(new IntervalBase<int>(0, 5)));
             }
 
             // TODO: Test with bad interval? Like (8:8)
@@ -155,13 +151,13 @@ namespace C5.Tests.intervaled
             [Test]
             public void OverlapExists_InfiniteQuery_ReturnsFalse()
             {
-                Assert.IsFalse(_intervaled.OverlapExists(new IntervalOfInt(int.MinValue, int.MaxValue, false, false)));
+                Assert.IsFalse(_intervaled.OverlapExists(new IntervalBase<int>(int.MinValue, int.MaxValue, false, false)));
             }
 
             [Test]
             public void OverlapExists_RandomQuery_ReturnsFalse()
             {
-                Assert.IsFalse(_intervaled.OverlapExists(new IntervalOfInt(0, 5)));
+                Assert.IsFalse(_intervaled.OverlapExists(new IntervalBase<int>(0, 5)));
             }
         }
 
@@ -235,7 +231,7 @@ namespace C5.Tests.intervaled
             private static readonly IInterval<int> H = new Interval("H", 5, 10, false, false);
 
 
-            internal abstract IIntervaled<int> Factory(SCG.IEnumerable<IInterval<int>> intervals);
+            internal abstract IIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [SetUp]
             public void Init()
@@ -243,13 +239,13 @@ namespace C5.Tests.intervaled
                 Intervaled = Factory(new[] { A, B, C, D, E1, E2, F, G, H });
             }
 
-            private void range(IInterval<int> query, SCG.IEnumerable<IInterval<int>> expected)
+            private void range(IInterval<int> query, System.Collections.Generic.IEnumerable<IInterval<int>> expected)
             {
                 CollectionAssert.AreEquivalent(expected, Intervaled.FindOverlaps(query));
             }
 
             [TestCaseSource(typeof(IBS), "StabCases")]
-            public void Overlap_StabbingAtKeyPoints_ReturnsSpecifiedIntervals_TestCase(int query, SCG.IEnumerable<IInterval<int>> expected)
+            public void Overlap_StabbingAtKeyPoints_ReturnsSpecifiedIntervals_TestCase(int query, System.Collections.Generic.IEnumerable<IInterval<int>> expected)
             {
                 CollectionAssert.AreEquivalent(expected, Intervaled.FindOverlaps(query));
             }
@@ -277,14 +273,14 @@ namespace C5.Tests.intervaled
             [Test]
             public void Overlap_Range_ReturnsSpecifiedIntervals()
             {
-                range(new IntervalOfInt(0, 2, true, true), new[] { B, C, G });
+                range(new IntervalBase<int>(0, 2, true, true), new[] { B, C, G });
             }
 
             [Test]
             public void Span_IBS_ReturnSpan()
             {
                 var span = Intervaled.Span;
-                var expected = new IntervalOfInt(int.MinValue, 20, false, true);
+                var expected = new IntervalBase<int>(int.MinValue, 20, false, true);
                 Assert.That(expected.Equals(span));
             }
         }
@@ -296,7 +292,7 @@ namespace C5.Tests.intervaled
             protected IIntervaled<int> Intervaled;
             private IInterval<int>[] _intervals;
 
-            protected abstract IIntervaled<int> Factory(SCG.IEnumerable<IInterval<int>> intervals);
+            protected abstract IIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [SetUp]
             public void Init()
@@ -311,19 +307,19 @@ namespace C5.Tests.intervaled
                     var low = Convert.ToInt32(interval[1]);
                     var high = Convert.ToInt32(interval[2]);
 
-                    _intervals[i] = new IntervalOfInt(low, high, true, true);
+                    _intervals[i] = new IntervalBase<int>(low, high, true, true);
                 }
 
                 Intervaled = Factory(_intervals);
 
             }
 
-            private void stabbing(int query, SCG.IEnumerable<IInterval<int>> expected)
+            private void stabbing(int query, System.Collections.Generic.IEnumerable<IInterval<int>> expected)
             {
                 CollectionAssert.AreEquivalent(expected, Intervaled.FindOverlaps(query));
             }
 
-            private void range(IInterval<int> query, SCG.IEnumerable<IInterval<int>> expected)
+            private void range(IInterval<int> query, System.Collections.Generic.IEnumerable<IInterval<int>> expected)
             {
                 CollectionAssert.AreEquivalent(expected, Intervaled.FindOverlaps(query));
             }
@@ -353,31 +349,31 @@ namespace C5.Tests.intervaled
             [Test]
             public void Range()
             {
-                range(new IntervalOfInt(74, 80, true, false), new ArrayList<IInterval<int>>{
+                range(new IntervalBase<int>(74, 80, true, false), new ArrayList<IInterval<int>>{
                     _intervals[37],
                     _intervals[38],
                     _intervals[39],
                     _intervals[40],
                 });
 
-                range(new IntervalOfInt(97), new ArrayList<IInterval<int>>{
+                range(new IntervalBase<int>(97), new ArrayList<IInterval<int>>{
                     _intervals[49],
                 });
 
-                range(new IntervalOfInt(74, 80, true, true), new ArrayList<IInterval<int>>{
+                range(new IntervalBase<int>(74, 80, true, true), new ArrayList<IInterval<int>>{
                     _intervals[37],
                     _intervals[38],
                     _intervals[39],
                     _intervals[40],
                     _intervals[41],
                 });
-                range(new IntervalOfInt(74, 80, false, true), new ArrayList<IInterval<int>>{
+                range(new IntervalBase<int>(74, 80, false, true), new ArrayList<IInterval<int>>{
                     _intervals[38],
                     _intervals[39],
                     _intervals[40],
                     _intervals[41],
                 });
-                range(new IntervalOfInt(74, 80, false, false), new ArrayList<IInterval<int>>{
+                range(new IntervalBase<int>(74, 80, false, false), new ArrayList<IInterval<int>>{
                     _intervals[38],
                     _intervals[39],
                     _intervals[40],
@@ -395,7 +391,7 @@ namespace C5.Tests.intervaled
 
                 array = new ArrayList<IInterval<int>>();
                 _intervals.Take(50).ToList().ForEach(I => array.Add(I));
-                range(new IntervalOfInt(0, 97), array);
+                range(new IntervalBase<int>(0, 97), array);
             }
         }
 
@@ -439,14 +435,14 @@ namespace C5.Tests.intervaled
             protected IIntervaled<int> _intervaled;
 
             // ReSharper disable InconsistentNaming
-            private static readonly IInterval<int> A = new IntervalOfInt(5, 9, true, true);
-            private static readonly IInterval<int> B = new IntervalOfInt(11, 15, true, true);
-            private static readonly IInterval<int> C = new IntervalOfInt(15, 20, true, true);
-            private static readonly IInterval<int> D = new IntervalOfInt(20, 24, true, true);
-            private static readonly IInterval<int> E = new IntervalOfInt(26, 30, true, true);
+            private static readonly IInterval<int> A = new IntervalBase<int>(5, 9, true, true);
+            private static readonly IInterval<int> B = new IntervalBase<int>(11, 15, true, true);
+            private static readonly IInterval<int> C = new IntervalBase<int>(15, 20, true, true);
+            private static readonly IInterval<int> D = new IntervalBase<int>(20, 24, true, true);
+            private static readonly IInterval<int> E = new IntervalBase<int>(26, 30, true, true);
             // ReSharper restore InconsistentNaming
 
-            protected abstract IIntervaled<int> Factory(SCG.IEnumerable<IInterval<int>> intervals);
+            protected abstract IIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [SetUp]
             public void Init()
@@ -455,7 +451,7 @@ namespace C5.Tests.intervaled
             }
 
             [TestCaseSource(typeof(BensTest), "StabCases")]
-            public void Overlap_StabbingAtKeyRanges_ReturnsSpecifiedIntervals_TestCase(IntervalOfInt range, SCG.IEnumerable<IInterval<int>> expected)
+            public void Overlap_StabbingAtKeyRanges_ReturnsSpecifiedIntervals_TestCase(IntervalBase<int> range, System.Collections.Generic.IEnumerable<IInterval<int>> expected)
             {
                 CollectionAssert.AreEquivalent(expected, _intervaled.FindOverlaps(range));
             }
@@ -463,25 +459,25 @@ namespace C5.Tests.intervaled
             public static object[] StabCases()
             {
                 return new object[] {
-                    new object[] { new IntervalOfInt(  0,  35, true, true), new[] { A, B, C, D, E }},
-                    new object[] { new IntervalOfInt(  5,  30, true, true), new[] { A, B, C, D, E }},
-                    new object[] { new IntervalOfInt(  9,  26, true, true), new[] { A, B, C, D, E }},
-                    new object[] { new IntervalOfInt( 20,  30, true, true), new[] { C, D, E }},
-                    new object[] { new IntervalOfInt( 24,  26, true, true), new[] { D, E }},
-                    new object[] { new IntervalOfInt( 26,  26, true, true), new[] { E }},
-                    new object[] { new IntervalOfInt( 27,  29, true, true), new[] { E }},
-                    new object[] { new IntervalOfInt( 26,  30, true, true), new[] { E }},
-                    new object[] { new IntervalOfInt( 26,  35, true, true), new[] { E }},
-                    new object[] { new IntervalOfInt( 30,  35, true, true), new[] { E }},
-                    new object[] { new IntervalOfInt( 31,  35, true, true), Enumerable.Empty<IntervalOfInt>()},
-                    new object[] { new IntervalOfInt(  0,   4, true, true), Enumerable.Empty<IntervalOfInt>()},
-                    new object[] { new IntervalOfInt(  0,   5, true, true), new[] { A }},
-                    new object[] { new IntervalOfInt(  0,  10, true, true), new[] { A }},
-                    new object[] { new IntervalOfInt(  5,   9, true, true), new[] { A }},
-                    new object[] { new IntervalOfInt(  6,   8, true, true), new[] { A }},
-                    new object[] { new IntervalOfInt( 10,  10, true, true), Enumerable.Empty<IntervalOfInt>()},
-                    new object[] { new IntervalOfInt( 10,  11, true, true), new[] { B }},
-                    new object[] { new IntervalOfInt(  5,  15, true, false), new[] { A, B }}
+                    new object[] { new IntervalBase<int>(  0,  35, true, true), new[] { A, B, C, D, E }},
+                    new object[] { new IntervalBase<int>(  5,  30, true, true), new[] { A, B, C, D, E }},
+                    new object[] { new IntervalBase<int>(  9,  26, true, true), new[] { A, B, C, D, E }},
+                    new object[] { new IntervalBase<int>( 20,  30, true, true), new[] { C, D, E }},
+                    new object[] { new IntervalBase<int>( 24,  26, true, true), new[] { D, E }},
+                    new object[] { new IntervalBase<int>( 26,  26, true, true), new[] { E }},
+                    new object[] { new IntervalBase<int>( 27,  29, true, true), new[] { E }},
+                    new object[] { new IntervalBase<int>( 26,  30, true, true), new[] { E }},
+                    new object[] { new IntervalBase<int>( 26,  35, true, true), new[] { E }},
+                    new object[] { new IntervalBase<int>( 30,  35, true, true), new[] { E }},
+                    new object[] { new IntervalBase<int>( 31,  35, true, true), Enumerable.Empty<IntervalBase<int>>()},
+                    new object[] { new IntervalBase<int>(  0,   4, true, true), Enumerable.Empty<IntervalBase<int>>()},
+                    new object[] { new IntervalBase<int>(  0,   5, true, true), new[] { A }},
+                    new object[] { new IntervalBase<int>(  0,  10, true, true), new[] { A }},
+                    new object[] { new IntervalBase<int>(  5,   9, true, true), new[] { A }},
+                    new object[] { new IntervalBase<int>(  6,   8, true, true), new[] { A }},
+                    new object[] { new IntervalBase<int>( 10,  10, true, true), Enumerable.Empty<IntervalBase<int>>()},
+                    new object[] { new IntervalBase<int>( 10,  11, true, true), new[] { B }},
+                    new object[] { new IntervalBase<int>(  5,  15, true, false), new[] { A, B }}
                 };
             }
         }
@@ -490,7 +486,7 @@ namespace C5.Tests.intervaled
         {
             protected IIntervaled<int> Intervaled;
 
-            protected abstract IIntervaled<int> Factory(SCG.IEnumerable<IInterval<int>> intervals);
+            protected abstract IIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [SetUp]
             public void Init()
@@ -503,7 +499,7 @@ namespace C5.Tests.intervaled
                     var low = Convert.ToInt32(interval[1]);
                     var high = Convert.ToInt32(interval[2]);
 
-                    intervalList.Add(low < high ? new IntervalOfInt(low, high) : new IntervalOfInt(low));
+                    intervalList.Add(low < high ? new IntervalBase<int>(low, high) : new IntervalBase<int>(low));
                 }
 
                 var sw = Stopwatch.StartNew();
@@ -536,7 +532,7 @@ namespace C5.Tests.intervaled
         {
             protected IIntervaled<int> Intervaled;
 
-            protected abstract IIntervaled<int> Factory(SCG.IEnumerable<IInterval<int>> intervals);
+            protected abstract IIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [SetUp]
             public void Init()
@@ -550,7 +546,7 @@ namespace C5.Tests.intervaled
                     var high = Convert.ToInt32(interval[2]);
 
 
-                    intervalList.Add(new IntervalOfInt(low, high, true, true));
+                    intervalList.Add(new IntervalBase<int>(low, high, true, true));
                     //intervalList.Add(low < high ? new IntervalOfInt(low, high) : new IntervalOfInt(low));
                 }
 
@@ -587,7 +583,7 @@ namespace C5.Tests.intervaled
         {
             protected IStaticIntervaled<int> Intervaled;
 
-            protected abstract IStaticIntervaled<int> Factory(SCG.IEnumerable<IInterval<int>> intervals);
+            protected abstract IStaticIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [TestFixtureSetUp]
             public void SetUp()
@@ -600,14 +596,14 @@ namespace C5.Tests.intervaled
                     var low = Convert.ToInt32(interval[1]);
                     var high = Convert.ToInt32(interval[2]);
 
-                    intervalList.Add(low < high ? new IntervalOfInt(low, high) : new IntervalOfInt(low));
+                    intervalList.Add(low < high ? new IntervalBase<int>(low, high) : new IntervalBase<int>(low));
                 }
 
                 Intervaled = Factory(intervalList);
             }
 
             [TestCaseSource(typeof(LargeTest_100000), "CountCases"), Category("Large tests")]
-            public void FindOverlaps(int expected, IntervalOfInt query)
+            public void FindOverlaps(int expected, IntervalBase<int> query)
             {
                 var sw = Stopwatch.StartNew();
 
@@ -624,7 +620,7 @@ namespace C5.Tests.intervaled
             }
 
             [TestCaseSource(typeof(LargeTest_100000), "CountCases"), Category("Large tests")]
-            public void CountOverlaps(int expected, IntervalOfInt query)
+            public void CountOverlaps(int expected, IntervalBase<int> query)
             {
                 var actual = Intervaled.CountOverlaps(query);
                 Assert.AreEqual(expected, actual);
@@ -643,13 +639,13 @@ namespace C5.Tests.intervaled
             public static object[] CountCases()
             {
                 return new object[] {
-                    new object[] { 61, new IntervalOfInt(98696, 98796)},
-                    new object[] { 147, new IntervalOfInt(4633, 4675)},
-                    new object[] { 10000, new IntervalOfInt(22514, 33893)},
-                    new object[] { 20001, new IntervalOfInt(374460, 525081)},
-                    new object[] { 30000, new IntervalOfInt(101517, 1658000)},
-                    new object[] { 40000, new IntervalOfInt(-1234, 21538)},
-                    new object[] { 50000, new IntervalOfInt(100, 32408)}
+                    new object[] { 61, new IntervalBase<int>(98696, 98796)},
+                    new object[] { 147, new IntervalBase<int>(4633, 4675)},
+                    new object[] { 10000, new IntervalBase<int>(22514, 33893)},
+                    new object[] { 20001, new IntervalBase<int>(374460, 525081)},
+                    new object[] { 30000, new IntervalBase<int>(101517, 1658000)},
+                    new object[] { 40000, new IntervalBase<int>(-1234, 21538)},
+                    new object[] { 50000, new IntervalBase<int>(100, 32408)}
                 };
             }
         }
@@ -661,7 +657,7 @@ namespace C5.Tests.intervaled
             {
                 private IStaticIntervaled<int> _intervaled;
 
-                protected abstract IStaticIntervaled<int> Factory(SCG.IEnumerable<IInterval<int>> intervals);
+                protected abstract IStaticIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
                 [SetUp]
                 public void Init()
@@ -672,13 +668,13 @@ namespace C5.Tests.intervaled
                 [Test]
                 public void OverlapCount_InfiniteQuery_ReturnsZero()
                 {
-                    Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalOfInt(int.MinValue, int.MaxValue, false, false)));
+                    Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalBase<int>(int.MinValue, int.MaxValue, false, false)));
                 }
 
                 [Test]
                 public void OverlapCount_RandomQuery_ReturnsZero()
                 {
-                    Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalOfInt(0, 5)));
+                    Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalBase<int>(0, 5)));
                 }
             }
         }

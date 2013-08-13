@@ -52,14 +52,18 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="InterfacesTest.cs" />
-    <Compile Include="intervaled\Benchmarker.cs" />
-    <Compile Include="intervaled\IntervalListTester.cs" />
-    <Compile Include="intervaled\LayeredContainmentListTester.cs" />
-    <Compile Include="intervaled\GenericIIntervaledTester.cs" />
-    <Compile Include="intervaled\IntervalBinarySearchTreeTester.cs" />
-    <Compile Include="intervaled\IntervalExtensionTester.cs" />
-    <Compile Include="intervaled\NestedContainmentListTester.cs" />
-    <Compile Include="intervaled\StaticIntervalTreeTester.cs" />
+    <Compile Include="intervals\Benchmarker.cs" />
+    <Compile Include="intervals\IntervalRelationsTester.cs" />
+    <Compile Include="intervals\LayeredContainmentList3Tester.cs" />
+    <Compile Include="intervals\LayeredContainmentList2Tester.cs" />
+    <Compile Include="intervals\NestedContainmentList2Tester.cs" />
+    <Compile Include="intervals\IntervalListTester.cs" />
+    <Compile Include="intervals\LayeredContainmentListTester.cs" />
+    <Compile Include="intervals\GenericIIntervaledTester.cs" />
+    <Compile Include="intervals\IntervalBinarySearchTreeTester.cs" />
+    <Compile Include="intervals\IntervalExtensionTester.cs" />
+    <Compile Include="intervals\NestedContainmentListTester.cs" />
+    <Compile Include="intervals\StaticIntervalTreeTester.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Records.cs" />
     <Compile Include="Sorting.cs">
@@ -128,8 +132,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="C5.snk" />
-    <None Include="intervaled\data\performance_23333.csv" />
-    <None Include="intervaled\data\sample100.csv" />
+    <None Include="intervals\data\performance_23333.csv" />
+    <None Include="intervals\data\sample100.csv" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
