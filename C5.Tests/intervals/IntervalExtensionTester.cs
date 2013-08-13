@@ -23,6 +23,16 @@ namespace C5.Tests.intervals
         }
     }
 
+    [TestFixture]
+    public class Intersection
+    {
+        [Test]
+        public void Test()
+        {
+            Console.WriteLine((new IntervalBase<int>(2, 7)).IntersectionWith(new IntervalBase<int>(1, 3)));
+        }
+    }
+
     // ReSharper disable CoVariantArrayConversion
     /// <summary>
     /// I before J

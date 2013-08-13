@@ -159,6 +159,18 @@ namespace C5.intervals
             return compare;
         }
 
+        public static int CompareHighLow<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            var compare = x.High.CompareTo(y.Low);
+
+            // Check endpoint inclusion, if values are equal, but inclusion is different
+            if (compare == 0)
+                // Excluded high endpoints come before included
+                return x.HighIncluded && y.LowIncluded ? 0 : -1;
+
+            return compare;
+        }
+
         /// <summary>
         /// Check if two intervals are equal, i.e. have the same low and high endpoint including endpoint inclusion
         /// </summary>
@@ -172,6 +184,18 @@ namespace C5.intervals
 
             // The same as (but faster than)
             return CompareTo(x, y) == 0;
+        }
+
+        public static IInterval<T> IntersectionWith<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            var low = x.CompareLow(y) > 0 ? x : y;
+            var high = x.CompareHigh(y) < 0 ? x : y;
+
+            // TODO: Returnér null, da intersection ikke findes
+            if (low.CompareLowHigh(high) > 0)
+                throw new ArgumentException("The intervals must overlap to find the intersection.");
+
+            return new IntervalBase<T>(low, high);
         }
 
         /// <summary>
