@@ -6,6 +6,7 @@
 *.userprefs
 *.user
 *.DotSettings
+*.gv
 .DS_store
 *ReSharper*
 packages/*
