@@ -2043,60 +2043,73 @@ namespace C5
 
 
     /// <summary>
-    /// An interval with a low (left) and high (right) point with or without included endpoints.
+    /// An interval with included or excluded low and high endpoints.
     /// </summary>
-    /// <typeparam name="T">The generic value for an interval's endpoint values</typeparam>
+    /// <remarks>None of the values should be changed once the interval is stored in an interval collection, as it most certainly will break the data structure.</remarks>
+    /// <typeparam name="T">The generic type of the interval's endpoint values.</typeparam>
     public interface IInterval<T> where T : IComparable<T>
     {
+        // @design: shortest and most generic terms for endpoints
         /// <summary>
-        /// The low endpoint for the interval. Also known as left, start, first, or lower endpoint.
+        /// Get the low endpoint for the interval.
         /// </summary>
+        /// <value>The low endpoint value.</value>
+        /// <remarks>Also known as left, start, first, or lower endpoint.</remarks>
         T Low { get; }
+
         /// <summary>
-        /// The high endpoint for the interval. Also known as right, end, last, or higher endpoint.
+        /// Get the high endpoint for the interval.
         /// </summary>
+        /// <value>The high endpoint value.</value>
+        /// <remarks>Also known as right, end, stop, last, or higher endpoint.</remarks>
         T High { get; }
 
         /// <summary>
-        /// If true the low endpoint is included in the interval. If false a stabbing query on the low endpoint will not include the interval.
+        /// Get the low endpoint's inclusion.
         /// </summary>
+        /// <value>True if the low endpoint is included in the interval, otherwise false.</value>
+        /// <remarks>A stabbing query using the low endpoint value will not include the interval, if the value is false.</remarks>
         bool LowIncluded { get; }
 
         /// <summary>
-        /// If true the high endpoint is included in the interval. If false a stabbing query on the high endpoint will not include the interval.
+        /// Get the high endpoint's inclusion.
         /// </summary>
+        /// <value>True if the high endpoint is included in the interval, otherwise false.</value>
+        /// <remarks>A stabbing query using the high endpoint value will not include the interval, if the value is false.</remarks>
         bool HighIncluded { get; }
     }
 
     /// <summary>
-    /// A collection that allows fast quering on collections of intervals.
-    /// Beware that none of the data structures support updates on the intervals' values. If you wish to change the endpoints or their inclusion, the interval should be removed from the data structure first, changed and then added agian. Changing it otherwise
+    /// A collection that allows fast overlap queries on collections of intervals.
     /// </summary>
-    /// <typeparam name="T">The generic value for an interval's endpoint values</typeparam>
+    /// <remarks>The data structures do not support updates on its intervals' values. If you wish to change an interval's endpoints or their inclusion, the interval should be removed from the data structure first, changed and then added agian.</remarks>
+    /// <typeparam name="T">The generic type for an interval's endpoint values.</typeparam>
     public interface IIntervaled<T> : ICollectionValue<IInterval<T>> where T : IComparable<T>
     {
         /// <summary>
-        /// The smallest interval that spans all intervals in the collection.
-        /// The lowest endpoint in the collection makes up the low endpoint of the span, and the highest the high endpoint. The span's endpoints are closed and open in accordance with the lowest and highest endpoint in the collection.
-        /// <code>coll.FindOverlaps(coll.Span())</code> will by definition return all intervals in the collection.
+        /// The smallest interval that spans all intervals in the collection. The interval's low is the lowest low endpoint in the collection and the high is the highest high endpoint.
+        /// <c>coll.FindOverlaps(coll.Span())</c> will by definition return all intervals in the collection.
         /// </summary>
-        /// <returns>The smallest spanning interval</returns>
-        /// <exception cref="InvalidOperationException">Thrown if called on an empty collection, as it can't have a span</exception>
+        /// <remarks>Not defined for an empty collection.</remarks>
+        /// <returns>The smallest spanning interval.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if called on an empty collection.</exception>
         IInterval<T> Span { get; }
 
-        // @design: made to spare the user of making a point interval ([q:q]) and allow for more effective implementations of the interface
+        // @design: made to spare the user of making a point interval [q:q] and allow for more effective implementations of the interface for some data structures
         /// <summary>
         /// Create an enumerable, enumerating all intervals that overlap the query point.
         /// </summary>
-        /// <param name="query">The query point</param>
-        /// <returns>All intervals that overlap the query point</returns>
+        /// <param name="query">The query point.</param>
+        /// <returns>All intervals that overlap the query point.</returns>
+        /// <seealso cref="FindOverlaps(IInterval{T})"/>
         SCG.IEnumerable<IInterval<T>> FindOverlaps(T query);
 
         /// <summary>
         /// Create an enumerable, enumerating all intervals in the collection that overlap the query interval.
         /// </summary>
-        /// <param name="query">The query interval</param>
-        /// <returns>All intervals that overlap the query interval</returns>
+        /// <param name="query">The query interval.</param>
+        /// <returns>All intervals that overlap the query interval.</returns>
+        /// <seealso cref="FindOverlaps(T)"/>
         SCG.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query);
 
         /*

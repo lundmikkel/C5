@@ -3,8 +3,9 @@
 namespace C5.intervals
 {
     /// <summary>
-    /// Basic interval useful for return or query values.
+    /// Basic interval class with immutable endpoints. Useful for return or query values or as base class for own implementation of <see cref="IInterval{T}"/>.
     /// </summary>
+    /// <seealso cref="IInterval{T}"/>
     public class IntervalBase<T> : IInterval<T> where T : IComparable<T>
     {
         // Use read-only fields to avoid breaking data structures, if values were changed
@@ -29,31 +30,14 @@ namespace C5.intervals
         }
 
         /// <summary>
-        /// Left-closed, right-open interval
-        /// </summary>
-        /// <param name="low">Low, included endpoint</param>
-        /// <param name="high">High, non-included endpoint</param>
-        /// <exception cref="ArgumentException">Thrown if interval is an empty point set</exception>
-        public IntervalBase(T low, T high)
-        {
-            if (low.CompareTo(high) >= 0)
-                throw new ArgumentException("Low must be smaller than high!");
-
-            _low = low;
-            _high = high;
-            _lowIncluded = true;
-            _highIncluded = false;
-        }
-
-        /// <summary>
-        /// Make a full interval
+        /// Create an interval. Default to time interval, which has low included and high excluded.
         /// </summary>
         /// <param name="low">Low endpoint</param>
         /// <param name="high">High endpoint</param>
         /// <param name="lowIncluded">True if low endpoint is included</param>
         /// <param name="highIncluded">True if high endpoint is included</param>
         /// <exception cref="ArgumentException">Thrown if interval is an empty point set</exception>
-        public IntervalBase(T low, T high, bool lowIncluded, bool highIncluded)
+        public IntervalBase(T low, T high, bool lowIncluded = true, bool highIncluded = false)
         {
             if (high.CompareTo(low) < 0 || (low.CompareTo(high) == 0 && !lowIncluded && !highIncluded))
                 throw new ArgumentException("Low must be smaller than high. If low and high are equal, both lowIncluded and highIncluded should be true!");
@@ -64,6 +48,10 @@ namespace C5.intervals
             _highIncluded = highIncluded;
         }
 
+        /// <summary>
+        /// Copy the interval data from an <see cref="IInterval&lt;T&gt;"/> to a new interval. 
+        /// </summary>
+        /// <param name="i"><see cref="IInterval&lt;T&gt;"/> to copy the information from</param>
         public IntervalBase(IInterval<T> i)
         {
             _low = i.Low;
@@ -72,6 +60,11 @@ namespace C5.intervals
             _highIncluded = i.HighIncluded;
         }
 
+        /// <summary>
+        /// Create an interval using the low value from one interval, and the high from another interval.
+        /// </summary>
+        /// <param name="low">The interval from which the low endpoint should be used</param>
+        /// <param name="high">The interval from which the high endpoint should be used</param>
         public IntervalBase(IInterval<T> low, IInterval<T> high)
         {
             if (low.CompareLowHigh(high) > 0)
@@ -98,6 +91,7 @@ namespace C5.intervals
             return IntervalExtensions.GetHashCode(this);
         }
 
+        // TODO: Is thi needed?!
         public override string ToString()
         {
             return IntervalExtensions.ToString(this);
