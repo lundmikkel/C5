@@ -297,7 +297,7 @@ namespace C5.Tests.intervals
             [SetUp]
             public void Init()
             {
-                var intervals = File.ReadAllLines(@"../../intervaled/data/sample100.csv").Select(line => line.Split(','));
+                var intervals = File.ReadAllLines(@"../../intervals/data/sample100.csv").Select(line => line.Split(','));
 
                 _intervals = new IInterval<int>[intervals.Count()];
 
@@ -491,7 +491,7 @@ namespace C5.Tests.intervals
             [SetUp]
             public void Init()
             {
-                var intervals = File.ReadAllLines(@"../../intervaled/data/performance_23333.csv").Select(line => line.Split(','));
+                var intervals = File.ReadAllLines(@"../../intervals/data/performance_23333.csv").Select(line => line.Split(','));
                 var intervalList = new ArrayList<IInterval<int>>();
 
                 foreach (var interval in intervals)
@@ -537,7 +537,7 @@ namespace C5.Tests.intervals
             [SetUp]
             public void Init()
             {
-                var intervals = File.ReadAllLines(@"../../intervaled/data/performance_100000.csv").Select(line => line.Split(','));
+                var intervals = File.ReadAllLines(@"../../intervals/data/performance_100000.csv").Select(line => line.Split(','));
                 var intervalList = new ArrayList<IInterval<int>>();
 
                 foreach (var interval in intervals)
@@ -588,7 +588,7 @@ namespace C5.Tests.intervals
             [TestFixtureSetUp]
             public void SetUp()
             {
-                var intervals = File.ReadAllLines(@"../../intervaled/data/performance_100000.csv").Select(line => line.Split(','));
+                var intervals = File.ReadAllLines(@"../../intervals/data/performance_100000.csv").Select(line => line.Split(','));
                 var intervalList = new ArrayList<IInterval<int>>();
 
                 foreach (var interval in intervals)

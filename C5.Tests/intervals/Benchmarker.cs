@@ -479,7 +479,7 @@ namespace C5.Tests.intervals
         {
             if (BenchmarkTestCases.Benchmarking)
             {
-                var filename = String.Format("../../intervaled/data/benchmarker/{0}_{1}_{2}.dat", Name, methodName,
+                var filename = String.Format("../../intervals/data/benchmarker/{0}_{1}_{2}.dat", Name, methodName,
                                              dataSet);
 
                 using (var f = File.AppendText(filename))

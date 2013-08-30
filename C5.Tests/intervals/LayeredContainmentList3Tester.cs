@@ -63,7 +63,7 @@ namespace C5.Tests.intervals
             [Test]
             public void Print()
             {
-                File.WriteAllText(@"../../intervaled/data/layered_containment_list.gv", ((LayeredContainmentList3<int>) Intervaled).Graphviz());
+                File.WriteAllText(@"../../intervals/data/layered_containment_list.gv", ((LayeredContainmentList3<int>) Intervaled).Graphviz());
             }
         }
 
@@ -146,7 +146,7 @@ namespace C5.Tests.intervals
             [Test, Ignore]
             public void Print()
             {
-                File.WriteAllText(@"../../intervaled/data/lclist100000.gv", ((LayeredContainmentList3<int>) Intervaled).Graphviz());
+                File.WriteAllText(@"../../intervals/data/lclist100000.gv", ((LayeredContainmentList3<int>) Intervaled).Graphviz());
             }
         }
 

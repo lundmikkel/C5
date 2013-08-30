@@ -23,7 +23,7 @@ namespace C5.Tests.intervals
             [Test]
             public void Print()
             {
-                File.WriteAllText(@"../../intervaled/data/interval_binary_search_tree.gv", ((IntervalBinarySearchTree<int>) Intervaled).Graphviz());
+                File.WriteAllText(@"../../intervals/data/interval_binary_search_tree.gv", ((IntervalBinarySearchTree<int>) Intervaled).Graphviz());
             }
 
             [Test]
@@ -200,7 +200,7 @@ namespace C5.Tests.intervals
             [Test]
             public void Print()
             {
-                File.WriteAllText(@"../../intervaled/data/ibs9_graph.gv", _intervales.Graphviz());
+                File.WriteAllText(@"../../intervals/data/ibs9_graph.gv", _intervales.Graphviz());
             }
 
             private void range(IInterval<int> query, IEnumerable<IInterval<int>> expected)
