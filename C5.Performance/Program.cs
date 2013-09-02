@@ -9,8 +9,6 @@ namespace C5.Performance
         public static void Main(string[] args)
         {
             var ibs = new IntervalBinarySearchTree<int>(BenchmarkTestCases.DataSetB(10000));
-            Console.WriteLine(ibs.Span);
-            Console.ReadLine();
-        }
+         }
     }
 }
