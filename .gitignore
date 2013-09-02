@@ -8,9 +8,11 @@
 *.DotSettings
 *.gv
 .DS_store
+
 *ReSharper*
 packages/*
 Help/*
+
 C5/bin/*
 C5/obj/*
 C5.Tests/bin/*
@@ -22,7 +24,8 @@ C5.Performance/obj/*
 test-results/*
 
 # Performance Files
-*.Performance*
+*.psess
+*.vspx
 
 # Include
 !/.nuget/*
