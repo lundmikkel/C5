@@ -140,15 +140,27 @@ namespace C5.intervals
 
             public void UpdateMaximumOverlap()
             {
-                Sum = (Left != null ? Left.Sum : 0) + Delta + DeltaAfter + (Right != null ? Right.Sum : 0);
+                // Set Max to Left's Max
+                Max = Left != null ? Left.Max : 0;
 
-                Max = (new[]
-                    {
-                        (Left != null ? Left.Max : 0),
-                        (Left != null ? Left.Sum : 0) + Delta,
-                        (Left != null ? Left.Sum : 0) + Delta + DeltaAfter,
-                        (Left != null ? Left.Sum : 0) + Delta + DeltaAfter + (Right != null ? Right.Max : 0)
-                    }).Max();
+                // Start building up the other possible Max sums
+                var value = (Left != null ? Left.Sum : 0) + Delta;
+                // And check if they are higher the previously found max
+                if (value > Max)
+                    Max = value;
+
+                // Add DeltaAfter and check for new max
+                value += DeltaAfter;
+                if (value > Max)
+                    Max = value;
+
+                // Save the sum value using the previous calculations
+                Sum = value + (Right != null ? Right.Sum : 0);
+
+                // Add Right's max and check for new max
+                value += Right != null ? Right.Max : 0;
+                if (value > Max)
+                    Max = value;
             }
 
             public override string ToString()
