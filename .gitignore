@@ -26,7 +26,7 @@ test-results/*
 # Performance Files
 *.psess
 *.vspx
+*.vsp
 
 # Include
 !/.nuget/*
-*.vsp
