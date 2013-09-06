@@ -83,7 +83,7 @@ namespace C5.Tests.intervals
 
     public class StaticIntervalTreeEndpointInclusion : IntervaledEndpointInclusion
     {
-        internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
             return new StaticIntervalTree<int>(intervals);
         }
@@ -91,7 +91,7 @@ namespace C5.Tests.intervals
 
     public class StaticIntervalTreeNullCollection : IntervaledNullCollection
     {
-        internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
             return new StaticIntervalTree<int>(intervals);
         }
@@ -99,7 +99,7 @@ namespace C5.Tests.intervals
 
     public class StaticIntervalTreeEmptyCollection : IntervaledEmptyCollection
     {
-        internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
             return new StaticIntervalTree<int>(intervals);
         }
@@ -107,7 +107,7 @@ namespace C5.Tests.intervals
 
     public class StaticIntervalTreeIBS : IBS
     {
-        internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
             return new StaticIntervalTree<int>(intervals);
         }
@@ -115,13 +115,13 @@ namespace C5.Tests.intervals
         [Test]
         public void Print()
         {
-            File.WriteAllText(@"../../intervals/data/static_interval_tree.gv", ((StaticIntervalTree<int>) Intervaled).Graphviz());
+            File.WriteAllText(@"../../intervals/data/static_interval_tree.gv", ((StaticIntervalTree<int>) IntervalCollection).Graphviz());
         }
     }
 
     public class StaticIntervalSample100 : Sample100
     {
-        protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
             return new StaticIntervalTree<int>(intervals);
         }
@@ -130,14 +130,14 @@ namespace C5.Tests.intervals
         [Test]
         public void Print()
         {
-            File.WriteAllText(@"../../intervals/data/sit100.gv", ((StaticIntervalTree<int>) Intervaled).Graphviz());
+            File.WriteAllText(@"../../intervals/data/sit100.gv", ((StaticIntervalTree<int>) IntervalCollection).Graphviz());
         }
     }
 
     [TestFixture]
     public class BensTest : intervals.Generic.BensTest
     {
-        protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
             return new NestedContainmentList<int>(intervals);
         }
@@ -146,7 +146,7 @@ namespace C5.Tests.intervals
     [TestFixture]
     public class StaticIntervalPerfomance : Performance23333
     {
-        protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
             return new StaticIntervalTree<int>(intervals);
         }
@@ -155,7 +155,7 @@ namespace C5.Tests.intervals
     [TestFixture]
     public class StaticIntervalTree_LargeTest : LargeTest_100000
     {
-        protected override IStaticIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IStaticIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
             return new StaticIntervalTree<int>(intervals);
         }

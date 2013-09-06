@@ -4,7 +4,7 @@ using System.Linq;
 namespace C5.intervals
 {
     // TODO: Document reference equality duplicates
-    public class IntervalBinarySearchTree<T> : CollectionValueBase<IInterval<T>>, IDynamicIntervaled<T> where T : IComparable<T>
+    public class IntervalBinarySearchTree<T> : CollectionValueBase<IInterval<T>>, IDynamicIntervalCollection<T> where T : IComparable<T>
     {
         private const bool RED = true;
         private const bool BLACK = false;

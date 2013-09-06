@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace C5.intervals
 {
-    class IntervalList<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
+    class IntervalList<T> : CollectionValueBase<IInterval<T>>, IStaticIntervalCollection<T> where T : IComparable<T>
     {
         private readonly IEnumerable<IInterval<T>> _intervals;
 

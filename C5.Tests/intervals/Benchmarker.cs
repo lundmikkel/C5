@@ -86,7 +86,7 @@ namespace C5.Tests.intervals
     [TestFixture]
     public class enumeratorBenchmarker
     {
-        private IIntervaled<int> intervals;
+        private IIntervalCollection<int> intervals;
 
         [SetUp]
         public void SetUp()
@@ -353,8 +353,8 @@ namespace C5.Tests.intervals
 
     abstract class DataSetTester
     {
-        protected IIntervaled<int> Intervaled;
-        protected abstract IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals);
+        protected IIntervalCollection<int> IntervalCollection;
+        protected abstract IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals);
 
         public abstract string Name { get; }
 
@@ -373,7 +373,7 @@ namespace C5.Tests.intervals
             {
                 intervals.Shuffle();
                 sw.Start();
-                Intervaled = Factory(intervals);
+                IntervalCollection = Factory(intervals);
                 sw.Stop();
             }
 
@@ -392,12 +392,12 @@ namespace C5.Tests.intervals
             [ValueSource(typeof(BenchmarkTestCases), "DoubleCounts")] int count
         )
         {
-            Intervaled = Factory(BenchmarkTestCases.TestDataSet(dataset, count));
+            IntervalCollection = Factory(BenchmarkTestCases.TestDataSet(dataset, count));
 
             const int length = 20;
 
             var repetitions = BenchmarkTestCases.QueryRepetitions;
-            var span = Intervaled.Span;
+            var span = IntervalCollection.Span;
             var step = (float) (span.High - span.Low - length) / repetitions;
 
             var sw = new Stopwatch();
@@ -406,13 +406,13 @@ namespace C5.Tests.intervals
             for (var i = 0; i < repetitions; i++)
             {
                 var low = (int) (step * i);
-                Intervaled.FindOverlaps(new IntervalBase<int>(low, low + length)).Count();
+                IntervalCollection.FindOverlaps(new IntervalBase<int>(low, low + length)).Count();
             }
 
             sw.Stop();
 
-            writeTest("SearchTime", dataset, Intervaled.Count, (float) sw.ElapsedMilliseconds / repetitions * 1000);
-            Console.WriteLine("Average search time for {0} intervals: {1} µs", Intervaled.Count, (float) sw.ElapsedMilliseconds / repetitions * 1000);
+            writeTest("SearchTime", dataset, IntervalCollection.Count, (float) sw.ElapsedMilliseconds / repetitions * 1000);
+            Console.WriteLine("Average search time for {0} intervals: {1} µs", IntervalCollection.Count, (float) sw.ElapsedMilliseconds / repetitions * 1000);
         }
 
         [Test, Combinatorial]
@@ -421,10 +421,10 @@ namespace C5.Tests.intervals
             [ValueSource(typeof(BenchmarkTestCases), "QueryLengths")] int length
         )
         {
-            Intervaled = Factory(BenchmarkTestCases.TestDataSet(dataset, 1000000));
+            IntervalCollection = Factory(BenchmarkTestCases.TestDataSet(dataset, 1000000));
 
             var repetitions = BenchmarkTestCases.QueryRepetitions;
-            var span = Intervaled.Span;
+            var span = IntervalCollection.Span;
             var step = (float) (span.High - span.Low - 20 - length) / repetitions;
             var sw = new Stopwatch();
             sw.Start();
@@ -432,14 +432,14 @@ namespace C5.Tests.intervals
             for (var i = 0; i < repetitions; i++)
             {
                 var low = (int) (step * i);
-                Intervaled.FindOverlaps(new IntervalBase<int>(low, low + length)).Count();
+                IntervalCollection.FindOverlaps(new IntervalBase<int>(low, low + length)).Count();
             }
             sw.Stop();
 
             writeTest("FindOverlaps", dataset, length, (float) sw.ElapsedMilliseconds / repetitions * 1000);
 
             Console.WriteLine("Average query time for {0} intervals (query length: {1}): {2} µs",
-                Intervaled.Count,
+                IntervalCollection.Count,
                 length,
                 (float) sw.ElapsedMilliseconds / repetitions * 1000
             );
@@ -451,10 +451,10 @@ namespace C5.Tests.intervals
             [ValueSource(typeof(BenchmarkTestCases), "QueryLengths")] int length
         )
         {
-            Intervaled = Factory(BenchmarkTestCases.TestDataSet(dataset, 1000000));
+            IntervalCollection = Factory(BenchmarkTestCases.TestDataSet(dataset, 1000000));
 
             var repetitions = BenchmarkTestCases.QueryRepetitions;
-            var span = Intervaled.Span;
+            var span = IntervalCollection.Span;
             var step = (float) (span.High - span.Low - 20 - length) / repetitions;
             var sw = new Stopwatch();
             sw.Start();
@@ -462,14 +462,14 @@ namespace C5.Tests.intervals
             for (var i = 0; i < repetitions; i++)
             {
                 var low = (int) (step * i);
-                Intervaled.CountOverlaps(new IntervalBase<int>(low, low + length));
+                IntervalCollection.CountOverlaps(new IntervalBase<int>(low, low + length));
             }
             sw.Stop();
 
             writeTest("CountOverlaps", dataset, length, (float) sw.ElapsedMilliseconds / repetitions * 1000);
 
             Console.WriteLine("Average count time for {0} intervals (query length: {1}): {2} µs",
-                Intervaled.Count,
+                IntervalCollection.Count,
                 length,
                 (float) sw.ElapsedMilliseconds / repetitions * 1000
             );
@@ -496,7 +496,7 @@ namespace C5.Tests.intervals
 
     class LayeredContainmentList_Benchmarker : DataSetTester
     {
-        protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
             return new LayeredContainmentList<int>(intervals);
         }
@@ -505,7 +505,7 @@ namespace C5.Tests.intervals
 
     class LayeredContainmentList2_Benchmarker : DataSetTester
     {
-        protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
             return new LayeredContainmentList2<int>(intervals);
         }
@@ -514,7 +514,7 @@ namespace C5.Tests.intervals
 
     class LayeredContainmentList3_Benchmarker : DataSetTester
     {
-        protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
             return new LayeredContainmentList3<int>(intervals);
         }
@@ -523,7 +523,7 @@ namespace C5.Tests.intervals
 
     class NestedContainmentList_Benchmarker : DataSetTester
     {
-        protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
             return new NestedContainmentList<int>(intervals);
         }
@@ -532,7 +532,7 @@ namespace C5.Tests.intervals
 
     class NestedContainmentList2_Benchmarker : DataSetTester
     {
-        protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
             return new NestedContainmentList2<int>(intervals);
         }
@@ -541,7 +541,7 @@ namespace C5.Tests.intervals
 
     class StaticIntervalTree_Benchmarker : DataSetTester
     {
-        protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
             return new StaticIntervalTree<int>(intervals);
         }

@@ -38,7 +38,7 @@ namespace C5.intervals
         }
     }
 
-    public class StaticIntervalTree<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
+    public class StaticIntervalTree<T> : CollectionValueBase<IInterval<T>>, IStaticIntervalCollection<T> where T : IComparable<T>
     {
         private readonly Node _root;
         private readonly int _count;

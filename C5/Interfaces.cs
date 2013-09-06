@@ -2084,7 +2084,7 @@ namespace C5
     /// </summary>
     /// <remarks>The data structures do not support updates on its intervals' values. If you wish to change an interval's endpoints or their inclusion, the interval should be removed from the data structure first, changed and then added agian.</remarks>
     /// <typeparam name="T">The generic type for an interval's endpoint values.</typeparam>
-    public interface IIntervaled<T> : ICollectionValue<IInterval<T>> where T : IComparable<T>
+    public interface IIntervalCollection<T> : ICollectionValue<IInterval<T>> where T : IComparable<T>
     {
         /// <summary>
         /// The smallest interval that spans all intervals in the collection. The interval's low is the lowest low endpoint in the collection and the high is the highest high endpoint.
@@ -2161,7 +2161,7 @@ namespace C5
     /// The static collections are faster than the dynamic collections, but don't allow changes to the collection.
     /// </summary>
     /// <typeparam name="T">The generic value for an interval's endpoint values</typeparam>
-    public interface IStaticIntervaled<T> : IIntervaled<T> where T : IComparable<T>
+    public interface IStaticIntervalCollection<T> : IIntervalCollection<T> where T : IComparable<T>
     {
     }
 
@@ -2170,7 +2170,7 @@ namespace C5
     /// The dynamic collections are slower than the static collections, but allow changes to the collection.
     /// </summary>
     /// <typeparam name="T">The generic value for an interval's endpoint values</typeparam>
-    public interface IDynamicIntervaled<T> : IIntervaled<T>, SCG.ICollection<IInterval<T>> where T : IComparable<T>
+    public interface IDynamicIntervalCollection<T> : IIntervalCollection<T>, SCG.ICollection<IInterval<T>> where T : IComparable<T>
     {
         void Add(IInterval<T> interval);
 
