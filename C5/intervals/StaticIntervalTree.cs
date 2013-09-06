@@ -495,6 +495,26 @@ namespace C5.intervals
                 yield return interval;
         }
 
+        public IInterval<T> FindAnyOverlap(IInterval<T> query)
+        {
+            if (query == null)
+                return null;
+
+            var enumerator = FindOverlaps(query).GetEnumerator();
+
+            return enumerator.MoveNext() ? enumerator.Current : null;
+        }
+
+        public IInterval<T> FindAnyOverlap(T query)
+        {
+            if (ReferenceEquals(query, null))
+                return null;
+
+            var enumerator = FindOverlaps(query).GetEnumerator();
+
+            return enumerator.MoveNext() ? enumerator.Current : null;
+        }
+
         public bool OverlapExists(IInterval<T> query)
         {
             if (query == null)

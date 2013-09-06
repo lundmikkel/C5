@@ -409,6 +409,24 @@ namespace C5.intervals
             }
         }
 
+        public IInterval<T> FindAnyOverlap(IInterval<T> query)
+        {
+            // No overlap if query is null, collection is empty, or query doesn't overlap collection
+            if (query == null || IsEmpty || !query.Overlaps(Span))
+                return null;
+
+            // Find first overlap
+            var i = findFirst(0, 0, _firstLayerCount, query);
+
+            // Check if index is in bound and if the interval overlaps the query
+            return 0 <= i && i < _firstLayerCount && _intervalLayers[0][i].Overlaps(query) ? _intervalLayers[0][i] : null;
+        }
+
+        public IInterval<T> FindAnyOverlap(T query)
+        {
+            return FindAnyOverlap(new IntervalBase<T>(query));
+        }
+
         public bool OverlapExists(IInterval<T> query)
         {
             // No overlap if query is null, collection is empty, or query doesn't overlap collection

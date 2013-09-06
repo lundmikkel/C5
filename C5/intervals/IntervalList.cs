@@ -68,6 +68,16 @@ namespace C5.intervals
             return _intervals.Where(interval => interval.Overlaps(query));
         }
 
+        public IInterval<T> FindAnyOverlap(IInterval<T> query)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IInterval<T> FindAnyOverlap(T query)
+        {
+            throw new NotImplementedException();
+        }
+
         public bool OverlapExists(IInterval<T> query)
         {
             return _intervals.Any(interval => interval.Overlaps(query));

@@ -309,6 +309,24 @@ namespace C5.intervals
             return findOverlap(_section, query);
         }
 
+        public IInterval<T> FindAnyOverlap(IInterval<T> query)
+        {
+            // Check if query overlaps the collection at all
+            if (query == null || _list == null || !query.Overlaps(Span))
+                return null;
+
+            // Find first overlap
+            var i = findFirst(_section, query);
+
+            // Check if index is in bound and if the interval overlaps the query
+            return _section.Offset <= i && i < _section.Offset + _section.Length && _list[i].Interval.Overlaps(query) ? _list[i].Interval : null;
+        }
+
+        public IInterval<T> FindAnyOverlap(T query)
+        {
+            return FindAnyOverlap(new IntervalBase<T>(query));
+        }
+
         public bool OverlapExists(IInterval<T> query)
         {
             // Check if query overlaps the collection at all

@@ -877,6 +877,26 @@ namespace C5.intervals
                 yield return interval;
         }
 
+        public IInterval<T> FindAnyOverlap(IInterval<T> query)
+        {
+            if (query == null)
+                return null;
+
+            var enumerator = FindOverlaps(query).GetEnumerator();
+
+            return enumerator.MoveNext() ? enumerator.Current : null;
+        }
+
+        public IInterval<T> FindAnyOverlap(T query)
+        {
+            if (ReferenceEquals(query, null))
+                return null;
+
+            var enumerator = FindOverlaps(query).GetEnumerator();
+
+            return enumerator.MoveNext() ? enumerator.Current : null;
+        }
+
         /// <summary>
         /// Create an enumerable, enumerating all intersecting intervals on the path to the split node. Returns the split node in splitNode.
         /// </summary>
