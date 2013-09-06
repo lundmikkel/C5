@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace C5.intervals
@@ -39,7 +40,7 @@ namespace C5.intervals
         /// </summary>
         /// <param name="intervals">Sorted intervals</param>
         /// <returns>A list of nodes</returns>
-        private static Node[] createList(System.Collections.Generic.IEnumerable<IInterval<T>> intervals)
+        private static Node[] createList(IEnumerable<IInterval<T>> intervals)
         {
             // List to hold the nodes
             IList<Node> list = new ArrayList<Node>();
@@ -84,7 +85,7 @@ namespace C5.intervals
         /// Create a Nested Containment List with a enumerable of intervals
         /// </summary>
         /// <param name="intervals">A collection of intervals in arbitrary order</param>
-        public NestedContainmentList2(System.Collections.Generic.IEnumerable<IInterval<T>> intervals)
+        public NestedContainmentList2(IEnumerable<IInterval<T>> intervals)
         {
             var intervalsArray = intervals as IInterval<T>[] ?? intervals.ToArray();
 
@@ -118,12 +119,12 @@ namespace C5.intervals
         /// </summary>
         /// <returns>Enumerator</returns>
         // TODO: Test the order is still the same as when sorted with IntervalComparer. This should be that case!
-        public override System.Collections.Generic.IEnumerator<IInterval<T>> GetEnumerator()
+        public override IEnumerator<IInterval<T>> GetEnumerator()
         {
             return getEnumerator(_list);
         }
 
-        private System.Collections.Generic.IEnumerator<IInterval<T>> getEnumerator(System.Collections.Generic.IEnumerable<Node> list)
+        private IEnumerator<IInterval<T>> getEnumerator(IEnumerable<Node> list)
         {
             // Just for good measures
             if (list == null)
@@ -178,7 +179,7 @@ namespace C5.intervals
             }
         }
 
-        public System.Collections.Generic.IEnumerable<IInterval<T>> FindOverlaps(T query)
+        public IEnumerable<IInterval<T>> FindOverlaps(T query)
         {
             if (ReferenceEquals(query, null))
                 throw new NullReferenceException("Query can't be null");
@@ -187,7 +188,7 @@ namespace C5.intervals
         }
 
         // TODO: Test speed difference between version that takes overlap-loop and upper and low bound loop
-        private static System.Collections.Generic.IEnumerable<IInterval<T>> overlap(Node[] list, IInterval<T> query)
+        private static IEnumerable<IInterval<T>> overlap(Node[] list, IInterval<T> query)
         {
             if (list == null)
                 yield break;
@@ -272,7 +273,7 @@ namespace C5.intervals
             return min;
         }
 
-        public System.Collections.Generic.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
+        public IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
         {
             if (query == null)
                 return Enumerable.Empty<IInterval<T>>();
