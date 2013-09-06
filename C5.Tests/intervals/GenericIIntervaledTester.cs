@@ -581,9 +581,9 @@ namespace C5.Tests.intervals
 
         public abstract class LargeTest_100000
         {
-            protected IStaticIntervalCollection<int> IntervalCollection;
+            protected IIntervalCollection<int> IntervalCollection;
 
-            protected abstract IStaticIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            protected abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [TestFixtureSetUp]
             public void SetUp()
@@ -655,9 +655,9 @@ namespace C5.Tests.intervals
 
             public abstract class StaticIntervaledEmptyCollection
             {
-                private IStaticIntervalCollection<int> _intervalCollection;
+                private IIntervalCollection<int> _intervalCollection;
 
-                protected abstract IStaticIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+                protected abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
                 [SetUp]
                 public void Init()

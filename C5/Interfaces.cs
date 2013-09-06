@@ -2154,26 +2154,20 @@ namespace C5
         /// </summary>
         int MaximumOverlap { get; }
         */
-    }
 
-    /// <summary>
-    /// A collection that allows fast quering on static collections of intervals.
-    /// The static collections are faster than the dynamic collections, but don't allow changes to the collection.
-    /// </summary>
-    /// <typeparam name="T">The generic value for an interval's endpoint values</typeparam>
-    public interface IStaticIntervalCollection<T> : IIntervalCollection<T> where T : IComparable<T>
-    {
-    }
-
-    /// <summary>
-    /// A collection that allows fast quering on dynamic collections of intervals.
-    /// The dynamic collections are slower than the static collections, but allow changes to the collection.
-    /// </summary>
-    /// <typeparam name="T">The generic value for an interval's endpoint values</typeparam>
-    public interface IDynamicIntervalCollection<T> : IIntervalCollection<T>, SCG.ICollection<IInterval<T>> where T : IComparable<T>
-    {
+        /// <summary>
+        /// Add an interval to the collection.
+        /// </summary>
+        /// <remarks>Different implementations may handle duplicates differently</remarks>
+        /// <param name="interval">The new interval</param>
         void Add(IInterval<T> interval);
 
-        bool Remove(IInterval<T> interval);
+        /// <summary>
+        /// Remove an interval from the collection.
+        /// </summary>
+        /// <remarks>Different implementations may remove duplicates differently</remarks>
+        /// <param name="interval">The interval to remove</param>
+        /// <returns></returns>
+        void Remove(IInterval<T> interval);
     }
 }

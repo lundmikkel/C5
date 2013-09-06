@@ -138,7 +138,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class LCListStaticEmptyCollection : StaticIntervaledEmptyCollection
         {
-            protected override IStaticIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new LayeredContainmentList2<int>(intervals);
             }
@@ -156,7 +156,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class LayeredContainmentList2_LargeTest : LargeTest_100000
         {
-            protected override IStaticIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new LayeredContainmentList2<int>(intervals);
             }
@@ -176,7 +176,7 @@ namespace C5.Tests.intervals
                 var query = new IntervalBase<int>(9231, 24228);
 
                 Console.WriteLine(IntervalCollection.FindOverlaps(query).Count());
-                Console.WriteLine(((IStaticIntervalCollection<int>) IntervalCollection).CountOverlaps(query));
+                Console.WriteLine(((IIntervalCollection<int>) IntervalCollection).CountOverlaps(query));
 
                 var comparer = ComparerFactory<IInterval<int>>.CreateEqualityComparer(IntervalExtensions.Equals, IntervalExtensions.GetHashCode);
 
@@ -215,7 +215,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class LCListContainmentInSameLayer
         {
-            private IStaticIntervalCollection<int> _intervalCollection;
+            private IIntervalCollection<int> _intervalCollection;
 
             private static readonly IInterval<int> A = new IntervalBase<int>(0, 10);
             private static readonly IInterval<int> B = new IntervalBase<int>(1, 8);
@@ -328,7 +328,7 @@ namespace C5.Tests.intervals
             [TestFixture]
             public class LCListNoContainments
             {
-                private IStaticIntervalCollection<int> _intervalCollection;
+                private IIntervalCollection<int> _intervalCollection;
 
                 /**
                  * 0    5   10   15   20   25   30
@@ -388,7 +388,7 @@ namespace C5.Tests.intervals
             [TestFixture]
             public class LCListOnlyContainments
             {
-                private IStaticIntervalCollection<int> _intervalCollection;
+                private IIntervalCollection<int> _intervalCollection;
 
                 /**
                  * 0    5   10   15   20   25   30
@@ -466,7 +466,7 @@ namespace C5.Tests.intervals
             [TestFixture]
             public class LCListMixedContainments
             {
-                private IStaticIntervalCollection<int> _intervalCollection;
+                private IIntervalCollection<int> _intervalCollection;
 
                 [SetUp]
                 public void Init()

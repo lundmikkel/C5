@@ -69,7 +69,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class StaticEmptyCollection : StaticIntervaledEmptyCollection
         {
-            protected override IStaticIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new NestedContainmentList<int>(intervals);
             }
@@ -96,7 +96,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class NestedContainmentList_LargeTest : LargeTest_100000
         {
-            protected override IStaticIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new NestedContainmentList<int>(intervals);
             }
@@ -119,7 +119,7 @@ namespace C5.Tests.intervals
         [TestFixture, Description("Test nested containment to make sure that it doesn't matter which interval the nested intervals are contained in, as lond as they are contained in the interval.")]
         public class OrderImportanceForNesting
         {
-            private IStaticIntervalCollection<int> _intervalCollection;
+            private IIntervalCollection<int> _intervalCollection;
 
             [SetUp]
             public void Init()
@@ -162,7 +162,7 @@ namespace C5.Tests.intervals
             [TestFixture]
             public class NoContainments
             {
-                private IStaticIntervalCollection<int> _intervalCollection;
+                private IIntervalCollection<int> _intervalCollection;
 
                 /**
                  * 0    5   10   15   20   25   30
@@ -222,7 +222,7 @@ namespace C5.Tests.intervals
             [TestFixture]
             public class OnlyContainments
             {
-                private IStaticIntervalCollection<int> _intervalCollection;
+                private IIntervalCollection<int> _intervalCollection;
 
                 /**
                  * 0    5   10   15   20   25   30
@@ -293,7 +293,7 @@ namespace C5.Tests.intervals
             [TestFixture]
             public class MixedContainments
             {
-                private IStaticIntervalCollection<int> _intervalCollection;
+                private IIntervalCollection<int> _intervalCollection;
 
                 [SetUp]
                 public void Init()

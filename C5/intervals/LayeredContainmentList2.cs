@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace C5.intervals
 {
-    public class LayeredContainmentList2<T> : CollectionValueBase<IInterval<T>>, IStaticIntervalCollection<T> where T : IComparable<T>
+    public class LayeredContainmentList2<T> : CollectionValueBase<IInterval<T>>, IIntervalCollection<T> where T : IComparable<T>
     {
         private readonly int _count;
         private readonly int _firstLayerCount;
@@ -154,6 +154,16 @@ namespace C5.intervals
                 return 0;
 
             return countOverlaps(0, 0, _firstLayerCount, query);
+        }
+
+        public void Add(IInterval<T> interval)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Remove(IInterval<T> interval)
+        {
+            throw new NotImplementedException();
         }
 
         private int countOverlaps(int layer, int lower, int upper, IInterval<T> query)

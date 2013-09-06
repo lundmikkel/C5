@@ -4,7 +4,7 @@ using System.Linq;
 namespace C5.intervals
 {
     // TODO: Document reference equality duplicates
-    public class IntervalBinarySearchTree<T> : CollectionValueBase<IInterval<T>>, IDynamicIntervalCollection<T> where T : IComparable<T>
+    public class IntervalBinarySearchTree<T> : CollectionValueBase<IInterval<T>>, IIntervalCollection<T> where T : IComparable<T>
     {
         private const bool RED = true;
         private const bool BLACK = false;
@@ -632,7 +632,7 @@ namespace C5.intervals
             return rotate(root);
         }
 
-        public bool Remove(IInterval<T> interval)
+        public void Remove(IInterval<T> interval)
         {
             // Delete the interval from the sets
             _root = removeByLow(_root, null, interval);
@@ -650,8 +650,6 @@ namespace C5.intervals
                 // Delete endpoint
                 remove(interval.High);
             }
-
-            return true;
         }
 
         #endregion

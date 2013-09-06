@@ -155,7 +155,7 @@ namespace C5.Tests.intervals
     [TestFixture]
     public class StaticIntervalTree_LargeTest : LargeTest_100000
     {
-        protected override IStaticIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
         {
             return new StaticIntervalTree<int>(intervals);
         }

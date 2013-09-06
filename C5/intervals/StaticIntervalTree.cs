@@ -38,7 +38,7 @@ namespace C5.intervals
         }
     }
 
-    public class StaticIntervalTree<T> : CollectionValueBase<IInterval<T>>, IStaticIntervalCollection<T> where T : IComparable<T>
+    public class StaticIntervalTree<T> : CollectionValueBase<IInterval<T>>, IIntervalCollection<T> where T : IComparable<T>
     {
         private readonly Node _root;
         private readonly int _count;
@@ -240,6 +240,16 @@ namespace C5.intervals
         public int CountOverlaps(IInterval<T> query)
         {
             return FindOverlaps(query).Count();
+        }
+
+        public void Add(IInterval<T> interval)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Remove(IInterval<T> interval)
+        {
+            throw new NotImplementedException();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

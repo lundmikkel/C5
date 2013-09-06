@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace C5.intervals
 {
-    public class NestedContainmentList<T> : CollectionValueBase<IInterval<T>>, IStaticIntervalCollection<T> where T : IComparable<T>
+    public class NestedContainmentList<T> : CollectionValueBase<IInterval<T>>, IIntervalCollection<T> where T : IComparable<T>
     {
         private readonly Node[] _list;
         private readonly IInterval<T> _span;
@@ -327,6 +327,15 @@ namespace C5.intervals
             return FindOverlaps(query).Count();
         }
 
+        public void Add(IInterval<T> interval)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Remove(IInterval<T> interval)
+        {
+            throw new NotImplementedException();
+        }
 
         #endregion
     }
