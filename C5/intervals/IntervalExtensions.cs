@@ -22,7 +22,7 @@ namespace C5.intervals
                 && (yLowXHighCompare < 0 || yLowXHighCompare == 0 && y.LowIncluded && x.HighIncluded);
 
             // The same as (but faster than)
-            return x.CompareLowHigh(y) <= 0 && y.CompareLowHigh(x) <= 0;
+            // return x.CompareLowHigh(y) <= 0 && y.CompareLowHigh(x) <= 0;
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace C5.intervals
                 && (highCompare < 0 || (highCompare == 0 && !y.HighIncluded && x.HighIncluded));
 
             // The same as (but faster than)
-            return x.CompareLow(y) < 0 && y.CompareHigh(x) < 0;
+            // return x.CompareLow(y) < 0 && y.CompareHigh(x) < 0;
         }
 
         /// <summary>
@@ -101,8 +101,8 @@ namespace C5.intervals
             return lowCompare;
 
             // The same as (but faster than)
-            var compare = x.CompareLow(y);
-            return compare != 0 ? compare : x.CompareHigh(y);
+            // var compare = x.CompareLow(y);
+            // return compare != 0 ? compare : x.CompareHigh(y);
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace C5.intervals
                    x.HighIncluded == y.HighIncluded;
 
             // The same as (but faster than)
-            return CompareTo(x, y) == 0;
+            // return CompareTo(x, y) == 0;
         }
 
         public static IInterval<T> IntersectionWith<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>

@@ -52,6 +52,8 @@ namespace C5.intervals
         /// A sorted list of IInterval&lt;T&gt; sorted with IntervalComparer&lt;T&gt;
         /// </summary>
         /// <param name="intervals">Sorted intervals</param>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
         /// <returns>A list of nodes</returns>
         private int createList(IInterval<T>[] intervals, Section source, Section target)
         {
@@ -152,17 +154,6 @@ namespace C5.intervals
 
         #endregion
 
-        #region Formatting
-
-        public string ToString(string format, IFormatProvider formatProvider)
-        {
-            // TODO: Correct implementation?
-            return _list.ToString();
-        }
-
-        #region IShowable
-
-
         /// <summary>
         /// Create an enumerator, enumerating the intervals in sorted order - sorted on low endpoint with shortest intervals first
         /// </summary>
@@ -172,15 +163,6 @@ namespace C5.intervals
         {
             return getEnumerator(_section);
         }
-
-        public bool Show(System.Text.StringBuilder stringbuilder, ref int rest, IFormatProvider formatProvider)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
-        #endregion
 
         #region ICollectionValue
 

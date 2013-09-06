@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace C5.intervals
@@ -171,9 +172,9 @@ namespace C5.intervals
 
         public sealed class IntervalSet : HashSet<IInterval<T>>
         {
-            private static System.Collections.Generic.IEqualityComparer<IInterval<T>> _comparer = ComparerFactory<IInterval<T>>.CreateEqualityComparer(ReferenceEquals, IntervalExtensions.GetHashCode);
+            private static IEqualityComparer<IInterval<T>> _comparer = ComparerFactory<IInterval<T>>.CreateEqualityComparer(ReferenceEquals, IntervalExtensions.GetHashCode);
 
-            public IntervalSet(System.Collections.Generic.IEnumerable<IInterval<T>> intervals)
+            public IntervalSet(IEnumerable<IInterval<T>> intervals)
                 : base(_comparer)
             {
                 AddAll(intervals);
@@ -209,7 +210,7 @@ namespace C5.intervals
 
         #region Constructors
 
-        public IntervalBinarySearchTree(System.Collections.Generic.IEnumerable<IInterval<T>> intervals)
+        public IntervalBinarySearchTree(IEnumerable<IInterval<T>> intervals)
         {
             foreach (var interval in intervals)
                 Add(interval);
@@ -551,6 +552,7 @@ namespace C5.intervals
         {
             if (x.Left == null)
                 return x;
+
             return min(x.Left);
         }
 
@@ -685,7 +687,7 @@ namespace C5.intervals
 
         #region IEnumerable
 
-        public override System.Collections.Generic.IEnumerator<IInterval<T>> GetEnumerator()
+        public override IEnumerator<IInterval<T>> GetEnumerator()
         {
             var set = new IntervalSet();
 
@@ -808,7 +810,7 @@ namespace C5.intervals
             return !root.Equal.IsEmpty ? root.Equal.Choose() : root.Less.Choose();
         }
 
-        public System.Collections.Generic.IEnumerable<IInterval<T>> FindOverlaps(T query)
+        public IEnumerable<IInterval<T>> FindOverlaps(T query)
         {
             if (ReferenceEquals(query, null))
                 return Enumerable.Empty<IInterval<T>>();
@@ -821,7 +823,7 @@ namespace C5.intervals
             return set;
         }
 
-        private System.Collections.Generic.IEnumerable<IInterval<T>> findOverlap(Node root, T query)
+        private IEnumerable<IInterval<T>> findOverlap(Node root, T query)
         {
             if (root == null)
                 yield break;
@@ -850,7 +852,7 @@ namespace C5.intervals
             }
         }
 
-        public System.Collections.Generic.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
+        public IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
         {
             if (ReferenceEquals(query, null))
                 yield break;
@@ -900,7 +902,7 @@ namespace C5.intervals
         /// <summary>
         /// Create an enumerable, enumerating all intersecting intervals on the path to the split node. Returns the split node in splitNode.
         /// </summary>
-        private System.Collections.Generic.IEnumerable<IInterval<T>> findSplitNode(Node root, IInterval<T> query, Action<Node> splitNode)
+        private IEnumerable<IInterval<T>> findSplitNode(Node root, IInterval<T> query, Action<Node> splitNode)
         {
             if (root == null) yield break;
 
@@ -935,7 +937,7 @@ namespace C5.intervals
             }
         }
 
-        private System.Collections.Generic.IEnumerable<IInterval<T>> findLeft(Node root, IInterval<T> query)
+        private IEnumerable<IInterval<T>> findLeft(Node root, IInterval<T> query)
         {
             // If root is null we have reached the end
             if (root == null) yield break;
@@ -979,13 +981,13 @@ namespace C5.intervals
                         yield return interval;
 
                 // If we find the matching node, we can add everything in the left subtree
-                System.Collections.Generic.IEnumerator<IInterval<T>> child = getEnumerator(root.Right);
+                IEnumerator<IInterval<T>> child = getEnumerator(root.Right);
                 while (child.MoveNext())
                     yield return child.Current;
             }
         }
 
-        private System.Collections.Generic.IEnumerable<IInterval<T>> findRight(Node root, IInterval<T> query)
+        private IEnumerable<IInterval<T>> findRight(Node root, IInterval<T> query)
         {
             // If root is null we have reached the end
             if (root == null) yield break;
@@ -1039,7 +1041,7 @@ namespace C5.intervals
         }
 
 
-        private System.Collections.Generic.IEnumerator<IInterval<T>> getEnumerator(Node node)
+        private IEnumerator<IInterval<T>> getEnumerator(Node node)
         {
             // Just return if tree is empty
             if (node == null) yield break;

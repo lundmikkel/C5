@@ -146,40 +146,9 @@ namespace C5.intervals
 
         #endregion
 
-        #region Formatting
-
-        public string ToString(string format, IFormatProvider formatProvider)
-        {
-            return _list.ToString();
-        }
-
-        #region IShowable
-
-        public bool Show(System.Text.StringBuilder stringbuilder, ref int rest, IFormatProvider formatProvider)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
-        #endregion
 
         #region ICollectionValue
 
-        #region Events
-
-        // The structure is static and has therefore no meaningful events
-        public EventTypeEnum ListenableEvents { get { return EventTypeEnum.None; } }
-        public EventTypeEnum ActiveEvents { get { return EventTypeEnum.None; } }
-
-        public event CollectionChangedHandler<IInterval<T>> CollectionChanged;
-        public event CollectionClearedHandler<IInterval<T>> CollectionCleared;
-        public event ItemsAddedHandler<IInterval<T>> ItemsAdded;
-        public event ItemInsertedHandler<IInterval<T>> ItemInserted;
-        public event ItemsRemovedHandler<IInterval<T>> ItemsRemoved;
-        public event ItemRemovedAtHandler<IInterval<T>> ItemRemovedAt;
-
-        #endregion
 
         public override bool IsEmpty { get { return Count == 0; } }
         public override int Count { get { return _count; } }
@@ -211,7 +180,7 @@ namespace C5.intervals
 
         public System.Collections.Generic.IEnumerable<IInterval<T>> FindOverlaps(T query)
         {
-            if (query == null)
+            if (ReferenceEquals(query, null))
                 throw new NullReferenceException("Query can't be null");
 
             return overlap(_list, new IntervalBase<T>(query));

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
-using System.Text;
 
 namespace C5.intervals
 {
@@ -298,11 +297,6 @@ namespace C5.intervals
 
         #region Formatting
 
-        public string ToString(string format, IFormatProvider formatProvider)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// Print the tree structure in Graphviz format
         /// </summary>
@@ -358,39 +352,15 @@ namespace C5.intervals
             return String.Join(", ", s.ToArray());
         }
 
-        #region IShowable
-
         public override System.Collections.Generic.IEnumerator<IInterval<T>> GetEnumerator()
         {
             return getEnumerator(_root);
         }
 
 
-        public bool Show(StringBuilder stringbuilder, ref int rest, IFormatProvider formatProvider)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
         #endregion
 
         #region ICollectionValue
-
-        #region Events
-
-        // The structure is static and has therefore no meaningful events
-        public EventTypeEnum ListenableEvents { get { return EventTypeEnum.None; } }
-        public EventTypeEnum ActiveEvents { get { return EventTypeEnum.None; } }
-
-        public event CollectionChangedHandler<IInterval<T>> CollectionChanged;
-        public event CollectionClearedHandler<IInterval<T>> CollectionCleared;
-        public event ItemsAddedHandler<IInterval<T>> ItemsAdded;
-        public event ItemInsertedHandler<IInterval<T>> ItemInserted;
-        public event ItemsRemovedHandler<IInterval<T>> ItemsRemoved;
-        public event ItemRemovedAtHandler<IInterval<T>> ItemRemovedAt;
-
-        #endregion
 
         public override bool IsEmpty { get { return _root == null; } }
         public override int Count { get { return _count; } }
