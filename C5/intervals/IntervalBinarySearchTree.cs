@@ -812,43 +812,48 @@ namespace C5.intervals
 
         public IEnumerable<IInterval<T>> FindOverlaps(T query)
         {
-            if (ReferenceEquals(query, null))
-                return Enumerable.Empty<IInterval<T>>();
-
-            var set = new IntervalSet();
-
-            foreach (var interval in findOverlap(_root, query))
-                set.Add(interval);
-
-            return set;
+            // TODO: Add checks for span overlap, null query, etc.
+            return findOverlap(_root, query);
         }
 
-        private IEnumerable<IInterval<T>> findOverlap(Node root, T query)
+        private static IEnumerable<IInterval<T>> findOverlap(Node root, T query)
         {
-            if (root == null)
-                yield break;
-
-            var compareTo = query.CompareTo(root.Key);
-            if (compareTo < 0)
+            // Search the tree until we reach the bottom of the tree    
+            while (root != null)
             {
-                foreach (var interval in root.Less)
-                    yield return interval;
+                // Store compare value as we need it twice
+                var compareTo = query.CompareTo(root.Key);
 
-                foreach (var interval in findOverlap(root.Left, query))
-                    yield return interval;
-            }
-            else if (compareTo > 0)
-            {
-                foreach (var interval in root.Greater)
-                    yield return interval;
+                // Query is to the left of the current node
+                if (compareTo < 0)
+                {
+                    // Return all intervals in Less
+                    foreach (var interval in root.Less)
+                        yield return interval;
 
-                foreach (var interval in findOverlap(root.Right, query))
-                    yield return interval;
-            }
-            else
-            {
-                foreach (var interval in root.Equal)
-                    yield return interval;
+                    // Move left
+                    root = root.Left;
+                }
+                // Query is to the right of the current node
+                else if (0 < compareTo)
+                {
+                    // Return all intervals in Greater
+                    foreach (var interval in root.Greater)
+                        yield return interval;
+
+                    // Move right
+                    root = root.Right;
+                }
+                // Node with query value found
+                else
+                {
+                    // Return all intervals in Equal
+                    foreach (var interval in root.Equal)
+                        yield return interval;
+
+                    // Stop as the search is done
+                    yield break;
+                }
             }
         }
 
