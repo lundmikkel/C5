@@ -324,12 +324,12 @@ namespace C5.intervals
 
         public void Add(IInterval<T> interval)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public void Remove(IInterval<T> interval)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         #endregion
