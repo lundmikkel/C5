@@ -11,6 +11,10 @@
 //// Only parent pointers traversal is implemented in the code below.
 //// To disable uncomment the following line
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+
 #define TREE_WITH_PARENT_POINTERS
 
 ////---------------------------------------
@@ -24,51 +28,43 @@
 
 #define TREE_WITH_CONCAT_AND_SPLIT_OPERATIONS
 
-namespace SelfBalancedTree
+namespace C5.intervals
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Globalization;
-
     /// <summary>
     /// Dictionary class.
     /// </summary>
     /// <typeparam name="T">The type of the data stored in the nodes</typeparam>
-    public class AVLTree<T>
+    public class AvlTree<T>
     {
         #region Fields
 
-        private Node<T> Root;
-        private IComparer<T> comparer;
+        private Node<T> _root;
+        private readonly IComparer<T> _comparer;
 
         #endregion
 
         #region Ctor
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AVLTree&lt;T&gt;"/> class.
+        /// Initializes a new instance of the <see cref="AvlTree{T}"/> class.
         /// </summary>
-        public AVLTree()
+        public AvlTree()
         {
-            this.comparer = GetComparer();
+            _comparer = getComparer();
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AVLTree&lt;T&gt;"/> class.
+        /// Initializes a new instance of the <see cref="AvlTree{T}"/> class.
         /// </summary>
         /// <param name="elems">The elements to be added to the tree.</param>
-        public AVLTree(IEnumerable<T> elems, IComparer<T> comparer)
+        /// <param name="comparer"></param>
+        public AvlTree(IEnumerable<T> elems, IComparer<T> comparer)
         {
-            this.comparer = comparer;
+            _comparer = comparer;
 
             if (elems != null)
-            {
                 foreach (var elem in elems)
-                {
-                    this.Add(elem);
-                }
-            }
+                    Add(elem);
         }
 
         #endregion
@@ -87,10 +83,14 @@ namespace SelfBalancedTree
 
         #region Enums
 
+        /// <summary></summary>
         public enum SplitOperationMode
         {
+            /// <summary></summary>
             IncludeSplitValueToLeftSubtree,
+            /// <summary></summary>
             IncludeSplitValueToRightSubtree,
+            /// <summary></summary>
             DoNotIncludeSplitValue
         }
 
@@ -108,16 +108,14 @@ namespace SelfBalancedTree
         {
             get
             {
-                if (this.Root == null)
-                {
+                if (_root == null)
                     yield break;
-                }
 
-                var p = FindMin(this.Root);
+                var p = findMin(_root);
                 while (p != null)
                 {
                     yield return p.Data;
-                    p = Successor(p);
+                    p = successor(p);
                 }
             }
         }
@@ -130,16 +128,14 @@ namespace SelfBalancedTree
         {
             get
             {
-                if (this.Root == null)
-                {
+                if (_root == null)
                     yield break;
-                }
 
-                var p = FindMax(this.Root);
+                var p = findMax(_root);
                 while (p != null)
                 {
                     yield return p.Data;
-                    p = Predecesor(p);
+                    p = predecesor(p);
                 }
             }
         }
@@ -154,13 +150,13 @@ namespace SelfBalancedTree
         /// Adds the specified value argument. 
         /// Complexity: O(log(N))
         /// </summary>
-        /// <param name="arg">The arg.</param>
-        public bool Add(T arg)
+        /// <param name="data">The data</param>
+        public bool Add(T data)
         {
-            bool wasAdded = false;
-            bool wasSuccessful = false;
+            var wasAdded = false;
+            var wasSuccessful = false;
 
-            this.Root = this.Add(this.Root, arg, ref wasAdded, ref wasSuccessful);
+            _root = add(_root, data, ref wasAdded, ref wasSuccessful);
 
             return wasSuccessful;
         }
@@ -169,16 +165,14 @@ namespace SelfBalancedTree
         /// Deletes the specified value argument. 
         /// Complexity: O(log(N))
         /// </summary>
-        /// <param name="arg">The arg.</param>
-        public bool Delete(T arg)
+        /// <param name="data">The data.</param>
+        public bool Delete(T data)
         {
-            bool wasSuccessful = false;
+            var wasSuccessful = false;
+            var wasDeleted = false;
 
-            if (this.Root != null)
-            {
-                bool wasDeleted = false;
-                this.Root = this.Delete(this.Root, arg, ref wasDeleted, ref wasSuccessful);
-            }
+            if (_root != null)
+                _root = delete(_root, data, ref wasDeleted, ref wasSuccessful);
 
             return wasSuccessful;
         }
@@ -191,9 +185,9 @@ namespace SelfBalancedTree
         /// <returns>a boolean indicating success or failure</returns>
         public bool GetMin(out T value)
         {
-            if (this.Root != null)
+            if (_root != null)
             {
-                var min = FindMin(this.Root);
+                var min = findMin(_root);
                 if (min != null)
                 {
                     value = min.Data;
@@ -213,9 +207,9 @@ namespace SelfBalancedTree
         /// <returns>a boolean indicating success or failure</returns>
         public bool GetMax(out T value)
         {
-            if (this.Root != null)
+            if (_root != null)
             {
-                var max = FindMax(this.Root);
+                var max = findMax(_root);
                 if (max != null)
                 {
                     value = max.Data;
@@ -231,13 +225,13 @@ namespace SelfBalancedTree
         /// Determines whether the tree contains the specified argument value. 
         /// Complexity: O(log(N))
         /// </summary>
-        /// <param name="arg">The arg to test against.</param>
+        /// <param name="arg">The data to test against.</param>
         /// <returns>
-        ///   <c>true</c> if tree contains the specified arg; otherwise, <c>false</c>.
+        ///   <c>true</c> if tree contains the specified data; otherwise, <c>false</c>.
         /// </returns>
         public bool Contains(T arg)
         {
-            return this.Search(this.Root, arg) != null;
+            return search(_root, arg) != null;
         }
 
         /// <summary>
@@ -246,10 +240,10 @@ namespace SelfBalancedTree
         /// </summary>
         public bool DeleteMin()
         {
-            if (this.Root != null)
+            if (_root != null)
             {
                 bool wasDeleted = false, wasSuccessful = false;
-                this.Root = this.DeleteMin(this.Root, ref wasDeleted, ref wasSuccessful);
+                _root = deleteMin(_root, ref wasDeleted, ref wasSuccessful);
 
                 return wasSuccessful;
             }
@@ -263,10 +257,10 @@ namespace SelfBalancedTree
         /// </summary>
         public bool DeleteMax()
         {
-            if (this.Root != null)
+            if (_root != null)
             {
                 bool wasDeleted = false, wasSuccessful = false;
-                this.Root = this.DeleteMax(this.Root, ref wasDeleted, ref wasSuccessful);
+                _root = deleteMax(_root, ref wasDeleted, ref wasSuccessful);
 
                 return wasSuccessful;
             }
@@ -289,20 +283,13 @@ namespace SelfBalancedTree
         ///     Performing find/delete in one operation gives O(height(node1)) speed.
         ///     Furthermore, if storing min value for each subtree, one obtains the theoretical O(height(node1) - height(node2)). 
         /// </remarks>
-        public AVLTree<T> Concat(AVLTree<T> other)
+        public AvlTree<T> Concat(AvlTree<T> other)
         {
             if (other == null)
-            {
                 return this;
-            }
 
-            var root = Concat(this.Root, other.Root);
-            if (root != null)
-            {
-                return new AVLTree<T>() { Root = root };
-            }
-
-            return null;
+            var root = concat(_root, other._root);
+            return root != null ? new AvlTree<T> { _root = root } : null;
         }
 
         /// <summary>
@@ -315,19 +302,19 @@ namespace SelfBalancedTree
         /// <param name="splitLeftTree">[out] The left avl tree. Upon return, all values of this subtree are less than the value argument.</param>
         /// <param name="splitRightTree">[out] The right avl tree. Upon return, all values of this subtree are greater than the value argument.</param>
         /// <returns>a boolean indicating success or failure</returns>
-        public bool Split(T value, SplitOperationMode mode, out AVLTree<T> splitLeftTree, out AVLTree<T> splitRightTree)
+        public bool Split(T value, SplitOperationMode mode, out AvlTree<T> splitLeftTree, out AvlTree<T> splitRightTree)
         {
             splitLeftTree = null;
             splitRightTree = null;
 
             Node<T> splitLeftRoot = null, splitRightRoot = null;
-            bool wasFound = false;
+            var wasFound = false;
 
-            this.Split(this.Root, value, ref splitLeftRoot, ref splitRightRoot, mode, ref wasFound);
+            split(_root, value, ref splitLeftRoot, ref splitRightRoot, mode, ref wasFound);
             if (wasFound)
             {
-                splitLeftTree = new AVLTree<T>() { Root = splitLeftRoot };
-                splitRightTree = new AVLTree<T>() { Root = splitRightRoot };
+                splitLeftTree = new AvlTree<T> { _root = splitLeftRoot };
+                splitRightTree = new AvlTree<T> { _root = splitRightRoot };
             }
 
             return wasFound;
@@ -342,7 +329,7 @@ namespace SelfBalancedTree
         /// <returns>the avl tree height</returns>
         public int GetHeightLogN()
         {
-            return this.GetHeightLogN(this.Root);
+            return getHeightLogN(_root);
         }
 
         /// <summary>
@@ -351,16 +338,13 @@ namespace SelfBalancedTree
         /// </summary>
         public void Clear()
         {
-            this.Root = null;
+            _root = null;
         }
 
         internal int GetCount()
         {
-            int count = 0;
-            this.Visit((node, level) =>
-            {
-                count++;
-            });
+            var count = 0;
+            visit((node, level) => { count++; });
             return count;
         }
 
@@ -368,16 +352,12 @@ namespace SelfBalancedTree
 
         #region Private Methods
 
-        private static IComparer<T> GetComparer()
+        private static IComparer<T> getComparer()
         {
-            if (typeof(IComparable<T>).IsAssignableFrom(typeof(T)) || typeof(System.IComparable).IsAssignableFrom(typeof(T)))
-            {
+            if (typeof(IComparable<T>).IsAssignableFrom(typeof(T)) || typeof(IComparable).IsAssignableFrom(typeof(T)))
                 return Comparer<T>.Default;
-            }
-            else
-            {
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "The type {0} cannot be compared. It must implement IComparable<T> or IComparable interface", typeof(T).FullName));
-            }
+
+            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "The type {0} cannot be compared. It must implement IComparable<T> or IComparable interface", typeof(T).FullName));
         }
 
         /// <summary>
@@ -385,22 +365,16 @@ namespace SelfBalancedTree
         /// </summary>
         /// <param name="node">The node.</param>
         /// <returns>The height of the tree. Runs in O(log(n)) where n is the number of nodes in the tree </returns>
-        private int GetHeightLogN(Node<T> node)
+        private static int getHeightLogN(Node<T> node)
         {
             if (node == null)
-            {
                 return 0;
-            }
-            else
-            {
-                int leftHeight = this.GetHeightLogN(node.Left);
-                if (node.Balance == 1)
-                {
-                    leftHeight++;
-                }
 
-                return 1 + leftHeight;
-            }
+            var leftHeight = getHeightLogN(node.Left);
+            if (node.Balance == 1)
+                leftHeight++;
+
+            return 1 + leftHeight;
         }
 
         /// <summary>
@@ -408,15 +382,16 @@ namespace SelfBalancedTree
         /// </summary>
         /// <param name="elem">The elem.</param>
         /// <param name="data">The data.</param>
+        /// <param name="wasAdded"></param>
+        /// <param name="wasSuccessful"></param>
         /// <returns></returns>
-        private Node<T> Add(Node<T> elem, T data, ref bool wasAdded, ref bool wasSuccessful)
+        private Node<T> add(Node<T> elem, T data, ref bool wasAdded, ref bool wasSuccessful)
         {
             if (elem == null)
             {
-                elem = new Node<T> { Data = data, Left = null, Right = null, Balance = 0 };
+                elem = new Node<T> {Data = data, Left = null, Right = null, Balance = 0, Height = 1};
 
 #if TREE_WITH_CONCAT_AND_SPLIT_OPERATIONS
-                elem.Height = 1;
 #endif
 
                 wasAdded = true;
@@ -424,11 +399,11 @@ namespace SelfBalancedTree
             }
             else
             {
-                int resultCompare = this.comparer.Compare(data, elem.Data);
+                var resultCompare = _comparer.Compare(data, elem.Data);
 
                 if (resultCompare < 0)
                 {
-                    var newLeft = Add(elem.Left, data, ref wasAdded, ref wasSuccessful);
+                    var newLeft = add(elem.Left, data, ref wasAdded, ref wasSuccessful);
                     if (elem.Left != newLeft)
                     {
                         elem.Left = newLeft;
@@ -442,18 +417,16 @@ namespace SelfBalancedTree
                         --elem.Balance;
 
                         if (elem.Balance == 0)
-                        {
                             wasAdded = false;
-                        }
                         else if (elem.Balance == -2)
                         {
-                            int leftBalance = newLeft.Balance;
+                            var leftBalance = newLeft.Balance;
                             if (leftBalance == 1)
                             {
-                                int elemLeftRightBalance = newLeft.Right.Balance;
+                                var elemLeftRightBalance = newLeft.Right.Balance;
 
-                                elem.Left = RotateLeft(newLeft);
-                                elem = RotateRight(elem);
+                                elem.Left = rotateLeft(newLeft);
+                                elem = rotateRight(elem);
 
                                 elem.Balance = 0;
                                 elem.Left.Balance = elemLeftRightBalance == 1 ? -1 : 0;
@@ -461,7 +434,7 @@ namespace SelfBalancedTree
                             }
                             else if (leftBalance == -1)
                             {
-                                elem = RotateRight(elem);
+                                elem = rotateRight(elem);
                                 elem.Balance = 0;
                                 elem.Right.Balance = 0;
                             }
@@ -472,7 +445,7 @@ namespace SelfBalancedTree
                 }
                 else if (resultCompare > 0)
                 {
-                    var newRight = this.Add(elem.Right, data, ref wasAdded, ref wasSuccessful);
+                    var newRight = add(elem.Right, data, ref wasAdded, ref wasSuccessful);
                     if (elem.Right != newRight)
                     {
                         elem.Right = newRight;
@@ -485,18 +458,16 @@ namespace SelfBalancedTree
                     {
                         ++elem.Balance;
                         if (elem.Balance == 0)
-                        {
                             wasAdded = false;
-                        }
                         else if (elem.Balance == 2)
                         {
-                            int rightBalance = newRight.Balance;
+                            var rightBalance = newRight.Balance;
                             if (rightBalance == -1)
                             {
-                                int elemRightLeftBalance = newRight.Left.Balance;
+                                var elemRightLeftBalance = newRight.Left.Balance;
 
-                                elem.Right = RotateRight(newRight);
-                                elem = RotateLeft(elem);
+                                elem.Right = rotateRight(newRight);
+                                elem = rotateLeft(elem);
 
                                 elem.Balance = 0;
                                 elem.Left.Balance = elemRightLeftBalance == 1 ? -1 : 0;
@@ -504,7 +475,7 @@ namespace SelfBalancedTree
                             }
                             else if (rightBalance == 1)
                             {
-                                elem = RotateLeft(elem);
+                                elem = rotateLeft(elem);
 
                                 elem.Balance = 0;
                                 elem.Left.Balance = 0;
@@ -526,54 +497,49 @@ namespace SelfBalancedTree
         }
 
         /// <summary>
-        /// Deletes the specified arg. value from the tree.
+        /// Deletes the specified data. value from the tree.
         /// </summary>
         /// <param name="node">The node.</param>
-        /// <param name="arg">The arg.</param>
+        /// <param name="arg">The data.</param>
+        /// <param name="wasDeleted"></param>
+        /// <param name="wasSuccessful"></param>
         /// <returns></returns>
-        private Node<T> Delete(Node<T> node, T arg, ref bool wasDeleted, ref bool wasSuccessful)
+        private Node<T> delete(Node<T> node, T arg, ref bool wasDeleted, ref bool wasSuccessful)
         {
-            int cmp = this.comparer.Compare(arg, node.Data);
-            Node<T> newChild = null;
+            var compare = _comparer.Compare(arg, node.Data);
+            Node<T> newChild;
 
-            if (cmp < 0)
+            if (compare < 0)
             {
                 if (node.Left != null)
                 {
-                    newChild = this.Delete(node.Left, arg, ref wasDeleted, ref wasSuccessful);
+                    newChild = delete(node.Left, arg, ref wasDeleted, ref wasSuccessful);
                     if (node.Left != newChild)
-                    {
                         node.Left = newChild;
-                    }
 
                     if (wasDeleted)
-                    {
                         node.Balance++;
-                    }
                 }
             }
-            else if (cmp == 0)
+            else if (compare == 0)
             {
                 wasDeleted = true;
                 if (node.Left != null && node.Right != null)
                 {
-                    var min = FindMin(node.Right);
-                    T data = node.Data;
+                    var min = findMin(node.Right);
+                    var data = node.Data;
                     node.Data = min.Data;
                     min.Data = data;
 
                     wasDeleted = false;
 
-                    newChild = this.Delete(node.Right, data, ref wasDeleted, ref wasSuccessful);
+                    newChild = delete(node.Right, data, ref wasDeleted, ref wasSuccessful);
+                    
                     if (node.Right != newChild)
-                    {
                         node.Right = newChild;
-                    }
 
                     if (wasDeleted)
-                    {
                         node.Balance--;
-                    }
                 }
                 else if (node.Left == null)
                 {
@@ -581,9 +547,7 @@ namespace SelfBalancedTree
 
 #if TREE_WITH_PARENT_POINTERS
                     if (node.Right != null)
-                    {
                         node.Right.Parent = node.Parent;
-                    }
 #endif
                     return node.Right;
                 }
@@ -593,9 +557,7 @@ namespace SelfBalancedTree
 
 #if TREE_WITH_PARENT_POINTERS
                     if (node.Left != null)
-                    {
                         node.Left.Parent = node.Parent;
-                    }
 #endif
                     return node.Left;
                 }
@@ -604,86 +566,89 @@ namespace SelfBalancedTree
             {
                 if (node.Right != null)
                 {
-                    newChild = this.Delete(node.Right, arg, ref wasDeleted, ref wasSuccessful);
+                    newChild = delete(node.Right, arg, ref wasDeleted, ref wasSuccessful);
                     if (node.Right != newChild)
-                    {
                         node.Right = newChild;
-                    }
 
                     if (wasDeleted)
-                    {
                         node.Balance--;
-                    }
                 }
             }
 
             if (wasDeleted)
             {
-                if (node.Balance == 1 || node.Balance == -1)
+                switch (node.Balance)
                 {
-                    wasDeleted = false;
-                }
-                else if (node.Balance == -2)
-                {
-                    var nodeLeft = node.Left;
-                    int leftBalance = nodeLeft.Balance;
-
-                    if (leftBalance == 1)
-                    {
-                        int leftRightBalance = nodeLeft.Right.Balance;
-
-                        node.Left = RotateLeft(nodeLeft);
-                        node = RotateRight(node);
-
-                        node.Balance = 0;
-                        node.Left.Balance = (leftRightBalance == 1) ? -1 : 0;
-                        node.Right.Balance = (leftRightBalance == -1) ? 1 : 0;
-                    }
-                    else if (leftBalance == -1)
-                    {
-                        node = RotateRight(node);
-                        node.Balance = 0;
-                        node.Right.Balance = 0;
-                    }
-                    else if (leftBalance == 0)
-                    {
-                        node = RotateRight(node);
-                        node.Balance = 1;
-                        node.Right.Balance = -1;
-
+                    case -1:
+                    case 1:
                         wasDeleted = false;
-                    }
-                }
-                else if (node.Balance == 2)
-                {
-                    var nodeRight = node.Right;
-                    int rightBalance = nodeRight.Balance;
+                        break;
 
-                    if (rightBalance == -1)
-                    {
-                        int rightLeftBalance = nodeRight.Left.Balance;
+                    case -2:
+                        {
+                            var nodeLeft = node.Left;
 
-                        node.Right = RotateRight(nodeRight);
-                        node = RotateLeft(node);
+                            switch (nodeLeft.Balance)
+                            {
+                                case -1:
+                                    node = rotateRight(node);
+                                    node.Balance = 0;
+                                    node.Right.Balance = 0;
+                                    break;
 
-                        node.Balance = 0;
-                        node.Left.Balance = (rightLeftBalance == 1) ? -1 : 0;
-                        node.Right.Balance = (rightLeftBalance == -1) ? 1 : 0;
-                    }
-                    else if (rightBalance == 1)
-                    {
-                        node = RotateLeft(node);
-                        node.Balance = 0;
-                        node.Left.Balance = 0;
-                    }
-                    else if (rightBalance == 0)
-                    {
-                        node = RotateLeft(node);
-                        node.Balance = -1;
-                        node.Left.Balance = 1;
+                                case 0:
+                                    node = rotateRight(node);
+                                    node.Balance = 1;
+                                    node.Right.Balance = -1;
+                                    wasDeleted = false;
+                                    break;
 
-                        wasDeleted = false;
-                    }
+                                case 1:
+                                    var leftRightBalance = nodeLeft.Right.Balance;
+
+                                    node.Left = rotateLeft(nodeLeft);
+                                    node = rotateRight(node);
+
+                                    node.Balance = 0;
+                                    node.Left.Balance = (leftRightBalance == 1) ? -1 : 0;
+                                    node.Right.Balance = (leftRightBalance == -1) ? 1 : 0;
+                                    break;
+                            }
+                        }
+                        break;
+
+                    case 2:
+                        {
+                            var nodeRight = node.Right;
+                    
+                            switch (nodeRight.Balance)
+                            {
+                                case 1:
+                                    node = rotateLeft(node);
+                                    node.Balance = 0;
+                                    node.Left.Balance = 0;
+                                    break;
+
+                                case 0:
+                                    node = rotateLeft(node);
+                                    node.Balance = -1;
+                                    node.Left.Balance = 1;
+                                    wasDeleted = false;
+                                    break;
+
+                                case -1:
+                                    var rightLeftBalance = nodeRight.Left.Balance;
+
+                                    node.Right = rotateRight(nodeRight);
+                                    node = rotateLeft(node);
+
+                                    node.Balance = 0;
+                                    node.Left.Balance = (rightLeftBalance == 1) ? -1 : 0;
+                                    node.Right.Balance = (rightLeftBalance == -1) ? 1 : 0;
+                                    break;
+                            }
+                        }
+                        break;
                 }
 
 #if TREE_WITH_CONCAT_AND_SPLIT_OPERATIONS
@@ -701,12 +666,10 @@ namespace SelfBalancedTree
         /// </summary>
         /// <param name="node">The node.</param>
         /// <returns></returns>
-        private static Node<T> FindMin(Node<T> node)
+        private static Node<T> findMin(Node<T> node)
         {
             while (node != null && node.Left != null)
-            {
                 node = node.Left;
-            }
 
             return node;
         }
@@ -716,12 +679,10 @@ namespace SelfBalancedTree
         /// </summary>
         /// <param name="node">The node.</param>
         /// <returns></returns>
-        private static Node<T> FindMax(Node<T> node)
+        private static Node<T> findMax(Node<T> node)
         {
             while (node != null && node.Right != null)
-            {
                 node = node.Right;
-            }
 
             return node;
         }
@@ -732,27 +693,19 @@ namespace SelfBalancedTree
         /// <param name="subtree">The subtree.</param>
         /// <param name="data">The data to search for.</param>
         /// <returns>null if not found, otherwise the node instance with the specified value</returns>
-        private Node<T> Search(Node<T> subtree, T data)
+        private Node<T> search(Node<T> subtree, T data)
         {
             if (subtree != null)
             {
-                if (this.comparer.Compare(data, subtree.Data) < 0)
-                {
-                    return this.Search(subtree.Left, data);
-                }
-                else if (this.comparer.Compare(data, subtree.Data) > 0)
-                {
-                    return this.Search(subtree.Right, data);
-                }
-                else
-                {
-                    return subtree;
-                }
+                var compare = _comparer.Compare(data, subtree.Data);
+                if (compare < 0)
+                    return search(subtree.Left, data);
+                if (0 < compare)
+                    return search(subtree.Right, data);
+                return subtree;
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         /// <summary>
@@ -760,11 +713,11 @@ namespace SelfBalancedTree
         /// Precondition: (node != null)
         /// </summary>
         /// <param name="node">The node.</param>
+        /// <param name="wasDeleted"></param>
+        /// <param name="wasSuccessful"></param>
         /// <returns></returns>
-        private Node<T> DeleteMin(Node<T> node, ref bool wasDeleted, ref bool wasSuccessful)
+        private static Node<T> deleteMin(Node<T> node, ref bool wasDeleted, ref bool wasSuccessful)
         {
-            Debug.Assert(node != null);
-
             if (node.Left == null)
             {
                 wasDeleted = true;
@@ -772,82 +725,81 @@ namespace SelfBalancedTree
 
 #if TREE_WITH_PARENT_POINTERS
                 if (node.Right != null)
-                {
                     node.Right.Parent = node.Parent;
-                }
 #endif
                 return node.Right;
             }
 
-            node.Left = this.DeleteMin(node.Left, ref wasDeleted, ref wasSuccessful);
+            node.Left = deleteMin(node.Left, ref wasDeleted, ref wasSuccessful);
             if (wasDeleted)
-            {
                 node.Balance++;
-            }
 
             if (wasDeleted)
             {
-                if (node.Balance == 1 || node.Balance == -1)
+                switch (node.Balance)
                 {
-                    wasDeleted = false;
-                }
-                else if (node.Balance == -2)
-                {
-                    int leftBalance = node.Left.Balance;
-                    if (leftBalance == 1)
-                    {
-                        int leftRightBalance = node.Left.Right.Balance;
-
-                        node.Left = RotateLeft(node.Left);
-                        node = RotateRight(node);
-
-                        node.Balance = 0;
-                        node.Left.Balance = (leftRightBalance == 1) ? -1 : 0;
-                        node.Right.Balance = (leftRightBalance == -1) ? 1 : 0;
-                    }
-                    else if (leftBalance == -1)
-                    {
-                        node = RotateRight(node);
-                        node.Balance = 0;
-                        node.Right.Balance = 0;
-                    }
-                    else if (leftBalance == 0)
-                    {
-                        node = RotateRight(node);
-                        node.Balance = 1;
-                        node.Right.Balance = -1;
-
+                    case -1:
+                    case 1:
                         wasDeleted = false;
-                    }
-                }
-                else if (node.Balance == 2)
-                {
-                    int rightBalance = node.Right.Balance;
-                    if (rightBalance == -1)
-                    {
-                        int rightLeftBalance = node.Right.Left.Balance;
+                        break;
 
-                        node.Right = RotateRight(node.Right);
-                        node = RotateLeft(node);
+                    case -2:
+                        switch (node.Left.Balance)
+                        {
+                            case -1:
+                                node = rotateRight(node);
+                                node.Balance = 0;
+                                node.Right.Balance = 0;
+                                break;
 
-                        node.Balance = 0;
-                        node.Left.Balance = (rightLeftBalance == 1) ? -1 : 0;
-                        node.Right.Balance = (rightLeftBalance == -1) ? 1 : 0;
-                    }
-                    else if (rightBalance == 1)
-                    {
-                        node = RotateLeft(node);
-                        node.Balance = 0;
-                        node.Left.Balance = 0;
-                    }
-                    else if (rightBalance == 0)
-                    {
-                        node = RotateLeft(node);
-                        node.Balance = -1;
-                        node.Left.Balance = 1;
+                            case 0:
+                                node = rotateRight(node);
+                                node.Balance = 1;
+                                node.Right.Balance = -1;
+                                wasDeleted = false;
+                                break;
 
-                        wasDeleted = false;
-                    }
+                            case 1:
+                                var leftRightBalance = node.Left.Right.Balance;
+
+                                node.Left = rotateLeft(node.Left);
+                                node = rotateRight(node);
+
+                                node.Balance = 0;
+                                node.Left.Balance = (leftRightBalance == 1) ? -1 : 0;
+                                node.Right.Balance = (leftRightBalance == -1) ? 1 : 0;
+                                break;
+                        }
+                        break;
+
+                    case 2:
+                        switch (node.Right.Balance)
+                        {
+                            case 1:
+                                node = rotateLeft(node);
+                                node.Balance = 0;
+                                node.Left.Balance = 0;
+                                break;
+
+                            case 0:
+                                node = rotateLeft(node);
+                                node.Balance = -1;
+                                node.Left.Balance = 1;
+                                wasDeleted = false;
+                                break;
+
+                            case -1:
+                                var rightLeftBalance = node.Right.Left.Balance;
+
+                                node.Right = rotateRight(node.Right);
+                                node = rotateLeft(node);
+
+                                node.Balance = 0;
+                                node.Left.Balance = (rightLeftBalance == 1) ? -1 : 0;
+                                node.Right.Balance = (rightLeftBalance == -1) ? 1 : 0;
+                                break;
+                        }
+                        break;
                 }
 
 #if TREE_WITH_CONCAT_AND_SPLIT_OPERATIONS
@@ -865,11 +817,11 @@ namespace SelfBalancedTree
         /// Precondition: (node != null)
         /// </summary>
         /// <param name="node">The node.</param>
+        /// <param name="wasDeleted"></param>
+        /// <param name="wasSuccessful"></param>
         /// <returns></returns>
-        private Node<T> DeleteMax(Node<T> node, ref bool wasDeleted, ref bool wasSuccessful)
+        private static Node<T> deleteMax(Node<T> node, ref bool wasDeleted, ref bool wasSuccessful)
         {
-            Debug.Assert(node != null);
-
             if (node.Right == null)
             {
                 wasDeleted = true;
@@ -884,75 +836,75 @@ namespace SelfBalancedTree
                 return node.Left;
             }
 
-            node.Right = this.DeleteMax(node.Right, ref wasDeleted, ref wasSuccessful);
+            node.Right = deleteMax(node.Right, ref wasDeleted, ref wasSuccessful);
             if (wasDeleted)
-            {
                 node.Balance--;
-            }
 
             if (wasDeleted)
             {
-                if (node.Balance == 1 || node.Balance == -1)
+                switch (node.Balance)
                 {
-                    wasDeleted = false;
-                }
-                else if (node.Balance == -2)
-                {
-                    int leftBalance = node.Left.Balance;
-                    if (leftBalance == 1)
-                    {
-                        int leftRightBalance = node.Left.Right.Balance;
-
-                        node.Left = RotateLeft(node.Left);
-                        node = RotateRight(node);
-
-                        node.Balance = 0;
-                        node.Left.Balance = (leftRightBalance == 1) ? -1 : 0;
-                        node.Right.Balance = (leftRightBalance == -1) ? 1 : 0;
-                    }
-                    else if (leftBalance == -1)
-                    {
-                        node = RotateRight(node);
-                        node.Balance = 0;
-                        node.Right.Balance = 0;
-                    }
-                    else if (leftBalance == 0)
-                    {
-                        node = RotateRight(node);
-                        node.Balance = 1;
-                        node.Right.Balance = -1;
-
+                    case -1:
+                    case 1:
                         wasDeleted = false;
-                    }
-                }
-                else if (node.Balance == 2)
-                {
-                    int rightBalance = node.Right.Balance;
-                    if (rightBalance == -1)
-                    {
-                        int rightLeftBalance = node.Right.Left.Balance;
+                        break;
 
-                        node.Right = RotateRight(node.Right);
-                        node = RotateLeft(node);
+                    case -2:
+                        switch (node.Left.Balance)
+                        {
+                            case -1:
+                                node = rotateRight(node);
+                                node.Balance = 0;
+                                node.Right.Balance = 0;
+                                break;
+                            case 0:
+                                node = rotateRight(node);
+                                node.Balance = 1;
+                                node.Right.Balance = -1;
+                                wasDeleted = false;
+                                break;
+                            case 1:
+                                var leftRightBalance = node.Left.Right.Balance;
 
-                        node.Balance = 0;
-                        node.Left.Balance = (rightLeftBalance == 1) ? -1 : 0;
-                        node.Right.Balance = (rightLeftBalance == -1) ? 1 : 0;
-                    }
-                    else if (rightBalance == 1)
-                    {
-                        node = RotateLeft(node);
-                        node.Balance = 0;
-                        node.Left.Balance = 0;
-                    }
-                    else if (rightBalance == 0)
-                    {
-                        node = RotateLeft(node);
-                        node.Balance = -1;
-                        node.Left.Balance = 1;
+                                node.Left = rotateLeft(node.Left);
+                                node = rotateRight(node);
 
-                        wasDeleted = false;
-                    }
+                                node.Balance = 0;
+                                node.Left.Balance = (leftRightBalance == 1) ? -1 : 0;
+                                node.Right.Balance = (leftRightBalance == -1) ? 1 : 0;
+                                break;
+                        }
+                        break;
+
+                    case 2:
+                        {
+                            var rightBalance = node.Right.Balance;
+                            switch (rightBalance)
+                            {
+                                case 1:
+                                    node = rotateLeft(node);
+                                    node.Balance = 0;
+                                    node.Left.Balance = 0;
+                                    break;
+                                case 0:
+                                    node = rotateLeft(node);
+                                    node.Balance = -1;
+                                    node.Left.Balance = 1;
+                                    wasDeleted = false;
+                                    break;
+                                case -1:
+                                    var rightLeftBalance = node.Right.Left.Balance;
+
+                                    node.Right = rotateRight(node.Right);
+                                    node = rotateLeft(node);
+
+                                    node.Balance = 0;
+                                    node.Left.Balance = (rightLeftBalance == 1) ? -1 : 0;
+                                    node.Right.Balance = (rightLeftBalance == -1) ? 1 : 0;
+                                    break;
+                            }
+                        }
+                        break;
                 }
 
 #if TREE_WITH_CONCAT_AND_SPLIT_OPERATIONS
@@ -971,44 +923,32 @@ namespace SelfBalancedTree
         /// Returns the predecessor of the specified node.
         /// </summary>
         /// <returns></returns>
-        private static Node<T> Predecesor(Node<T> node)
+        private static Node<T> predecesor(Node<T> node)
         {
             if (node.Left != null)
-            {
-                return FindMax(node.Left);
-            }
-            else
-            {
-                var p = node;
-                while (p.Parent != null && p.Parent.Left == p)
-                {
-                    p = p.Parent;
-                }
+                return findMax(node.Left);
 
-                return p.Parent;
-            }
+            var p = node;
+            while (p.Parent != null && p.Parent.Left == p)
+                p = p.Parent;
+
+            return p.Parent;
         }
 
         /// <summary>
         /// Returns the successor of the specified node.
         /// </summary>
         /// <returns></returns>
-        private static Node<T> Successor(Node<T> node)
+        private static Node<T> successor(Node<T> node)
         {
             if (node.Right != null)
-            {
-                return FindMin(node.Right);
-            }
-            else
-            {
-                var p = node;
-                while (p.Parent != null && p.Parent.Right == p)
-                {
-                    p = p.Parent;
-                }
+                return findMin(node.Right);
+            
+            var p = node;
+            while (p.Parent != null && p.Parent.Right == p)
+                p = p.Parent;
 
-                return p.Parent;
-            }
+            return p.Parent;
         }
 
 #endif
@@ -1017,12 +957,10 @@ namespace SelfBalancedTree
         /// Visits the tree using the specified visitor.
         /// </summary>
         /// <param name="visitor">The visitor.</param>
-        private void Visit(VisitNodeHandler<Node<T>> visitor)
+        private void visit(VisitNodeHandler<Node<T>> visitor)
         {
-            if (this.Root != null)
-            {
-                this.Root.Visit(visitor, 0);
-            }
+            if (_root != null)
+                _root.Visit(visitor, 0);
         }
 
         /// <summary>
@@ -1030,10 +968,8 @@ namespace SelfBalancedTree
         /// Precondition: (node != null && node.Right != null)
         /// </summary>
         /// <returns></returns>
-        private static Node<T> RotateLeft(Node<T> node)
+        private static Node<T> rotateLeft(Node<T> node)
         {
-            Debug.Assert(node != null && node.Right != null);
-
             var right = node.Right;
             var nodeLeft = node.Left;
             var rightLeft = right.Left;
@@ -1085,10 +1021,8 @@ namespace SelfBalancedTree
         /// Precondition: (node != null && node.Left != null)
         /// </summary>
         /// <returns></returns>
-        private static Node<T> RotateRight(Node<T> node)
+        private static Node<T> rotateRight(Node<T> node)
         {
-            Debug.Assert(node != null && node.Left != null);
-
             var left = node.Left;
             var leftRight = left.Right;
             node.Left = leftRight;
@@ -1146,66 +1080,62 @@ namespace SelfBalancedTree
         ///     Runs in O(height(node1)) if height(node1) == height(node2).
         /// Can be sped up.
         /// </remarks>
-        private Node<T> Concat(Node<T> node1, Node<T> node2)
+        private Node<T> concat(Node<T> node1, Node<T> node2)
         {
             if (node1 == null)
-            {
                 return node2;
-            }
-            else if (node2 == null)
+            if (node2 == null)
+                return node1;
+            bool wasAdded = false, wasDeleted = false, wasSuccessful = false;
+
+            int height1 = node1.Height;
+            int height2 = node2.Height;
+
+            if (height1 == height2)
             {
+                var result = new Node<T>
+                    {
+                        Data = default(T),
+                        Left = node1,
+                        Right = node2,
+                        Balance = 0,
+                        Height = 1 + height1
+                    };
+
+#if TREE_WITH_PARENT_POINTERS
+                node1.Parent = result;
+                node2.Parent = result;
+#endif
+                result = delete(result, default(T), ref wasDeleted, ref wasSuccessful);
+                return result;
+            }
+            else if (height1 > height2)
+            {
+                var min = findMin(node2);
+                node2 = deleteMin(node2, ref wasDeleted, ref wasSuccessful);
+
+                if (node2 != null)
+                {
+                    node1 = ConcatImpl(node1, node2, min.Data, ref wasAdded);
+                }
+                else
+                {
+                    node1 = add(node1, min.Data, ref wasAdded, ref wasSuccessful);
+                }
+
                 return node1;
             }
             else
             {
-                bool wasAdded = false, wasDeleted = false, wasSuccessful = false;
+                var max = findMax(node1);
+                node1 = deleteMax(node1, ref wasDeleted, ref wasSuccessful);
 
-                int height1 = node1.Height;
-                int height2 = node2.Height;
-
-                if (height1 == height2)
-                {
-                    var result = new Node<T>() { Data = default(T), Left = node1, Right = node2, Balance = 0, Height = 1 + height1 };
-
-#if TREE_WITH_PARENT_POINTERS
-                    node1.Parent = result;
-                    node2.Parent = result;
-#endif
-                    result = this.Delete(result, default(T), ref wasDeleted, ref wasSuccessful);
-                    return result;
-                }
-                else if (height1 > height2)
-                {
-                    var min = FindMin(node2);
-                    node2 = this.DeleteMin(node2, ref wasDeleted, ref wasSuccessful);
-
-                    if (node2 != null)
-                    {
-                        node1 = this.ConcatImpl(node1, node2, min.Data, ref wasAdded);
-                    }
-                    else
-                    {
-                        node1 = this.Add(node1, min.Data, ref wasAdded, ref wasSuccessful);
-                    }
-
-                    return node1;
-                }
+                if (node1 != null)
+                    node2 = ConcatImpl(node2, node1, max.Data, ref wasAdded);
                 else
-                {
-                    var max = FindMax(node1);
-                    node1 = this.DeleteMax(node1, ref wasDeleted, ref wasSuccessful);
+                    node2 = add(node2, max.Data, ref wasAdded, ref wasSuccessful);
 
-                    if (node1 != null)
-                    {
-                        node2 = this.ConcatImpl(node2, node1, max.Data, ref wasAdded);
-                    }
-                    else
-                    {
-                        node2 = this.Add(node2, max.Data, ref wasAdded, ref wasSuccessful);
-                    }
-
-                    return node2;
-                }
+                return node2;
             }
         }
 
@@ -1233,14 +1163,14 @@ namespace SelfBalancedTree
             }
             else
             {
-                int compareResult = this.comparer.Compare(elem.Data, newData);
+                int compareResult = _comparer.Compare(elem.Data, newData);
                 if (compareResult < 0)
                 {
                     if (heightDifference == 0 || (heightDifference == 1 && elem.Balance == -1))
                     {
                         int balance = elem2add.Height - elem.Height;
 
-                        elem = new Node<T>() { Data = newData, Left = elem, Right = elem2add, Balance = balance };
+                        elem = new Node<T> { Data = newData, Left = elem, Right = elem2add, Balance = balance };
                         wasAdded = true;
 
 #if TREE_WITH_PARENT_POINTERS
@@ -1250,7 +1180,7 @@ namespace SelfBalancedTree
                     }
                     else
                     {
-                        elem.Right = this.ConcatImpl(elem.Right, elem2add, newData, ref wasAdded);
+                        elem.Right = ConcatImpl(elem.Right, elem2add, newData, ref wasAdded);
 
                         if (wasAdded)
                         {
@@ -1270,8 +1200,8 @@ namespace SelfBalancedTree
                             {
                                 int elemRightLeftBalance = elem.Right.Left.Balance;
 
-                                elem.Right = RotateRight(elem.Right);
-                                elem = RotateLeft(elem);
+                                elem.Right = rotateRight(elem.Right);
+                                elem = rotateLeft(elem);
 
                                 elem.Balance = 0;
                                 elem.Left.Balance = elemRightLeftBalance == 1 ? -1 : 0;
@@ -1281,7 +1211,7 @@ namespace SelfBalancedTree
                             }
                             else if (elem.Right.Balance == 1)
                             {
-                                elem = RotateLeft(elem);
+                                elem = rotateLeft(elem);
 
                                 elem.Balance = 0;
                                 elem.Left.Balance = 0;
@@ -1293,7 +1223,7 @@ namespace SelfBalancedTree
                                 ////special case for concat .. before adding the tree with smaller height to the tree with the bigger height, we find the correct insertion spot in the larger height tree.
                                 ////because we balance the new subtree to be added which is normally done part of adding procedure, this situation isn't present in the adding procedure so we are catering for it here..
 
-                                elem = RotateLeft(elem);
+                                elem = rotateLeft(elem);
 
                                 elem.Balance = -1;
                                 elem.Left.Balance = 1;
@@ -1309,7 +1239,7 @@ namespace SelfBalancedTree
                     {
                         int balance = elem.Height - elem2add.Height;
 
-                        elem = new Node<T>() { Data = newData, Left = elem2add, Right = elem, Balance = balance };
+                        elem = new Node<T> { Data = newData, Left = elem2add, Right = elem, Balance = balance };
                         wasAdded = true;
 
 #if TREE_WITH_PARENT_POINTERS
@@ -1319,7 +1249,7 @@ namespace SelfBalancedTree
                     }
                     else
                     {
-                        elem.Left = this.ConcatImpl(elem.Left, elem2add, newData, ref wasAdded);
+                        elem.Left = ConcatImpl(elem.Left, elem2add, newData, ref wasAdded);
 
                         if (wasAdded)
                         {
@@ -1339,8 +1269,8 @@ namespace SelfBalancedTree
                             {
                                 int elemLeftRightBalance = elem.Left.Right.Balance;
 
-                                elem.Left = RotateLeft(elem.Left);
-                                elem = RotateRight(elem);
+                                elem.Left = rotateLeft(elem.Left);
+                                elem = rotateRight(elem);
 
                                 elem.Balance = 0;
                                 elem.Left.Balance = elemLeftRightBalance == 1 ? -1 : 0;
@@ -1350,7 +1280,7 @@ namespace SelfBalancedTree
                             }
                             else if (elem.Left.Balance == -1)
                             {
-                                elem = RotateRight(elem);
+                                elem = rotateRight(elem);
                                 elem.Balance = 0;
                                 elem.Right.Balance = 0;
 
@@ -1361,7 +1291,7 @@ namespace SelfBalancedTree
                                 ////special case for concat .. before adding the tree with smaller height to the tree with the bigger height, we find the correct insertion spot in the larger height tree.
                                 ////because we balance the new subtree to be added which is normally done part of adding procedure, this situation isn't present in the adding procedure so we are catering for it here..
 
-                                elem = RotateRight(elem);
+                                elem = rotateRight(elem);
 
                                 elem.Balance = 1;
                                 elem.Right.Balance = -1;
@@ -1392,33 +1322,22 @@ namespace SelfBalancedTree
             if (node1 == null)
             {
                 if (node2 != null)
-                {
-                    node2 = this.Add(node2, value, ref wasAdded, ref wasSuccessful);
-                }
+                    node2 = add(node2, value, ref wasAdded, ref wasSuccessful);
                 else
-                {
-                    node2 = new Node<T> { Data = value, Balance = 0, Left = null, Right = null, Height = 1 };
-                }
+                    node2 = new Node<T> {Data = value, Balance = 0, Left = null, Right = null, Height = 1};
 
                 return node2;
             }
             else if (node2 == null)
             {
-                if (node1 != null)
-                {
-                    node1 = this.Add(node1, value, ref wasAdded, ref wasSuccessful);
-                }
-                else
-                {
-                    node1 = new Node<T> { Data = value, Balance = 0, Left = null, Right = null, Height = 1 };
-                }
+                node1 = add(node1, value, ref wasAdded, ref wasSuccessful);
 
                 return node1;
             }
             else
             {
-                int height1 = node1.Height;
-                int height2 = node2.Height;
+                var height1 = node1.Height;
+                var height2 = node2.Height;
 
                 if (height1 == height2)
                 {
@@ -1435,12 +1354,12 @@ namespace SelfBalancedTree
                 else if (height1 > height2)
                 {
                     // walk on node1's rightmost edge until you find the right place to insert the subtree with the smaller height (i.e. node2)
-                    return this.ConcatImpl(node1, node2, value, ref wasAdded);
+                    return ConcatImpl(node1, node2, value, ref wasAdded);
                 }
                 else
                 {
                     // walk on node2's leftmost edge until you find the right place to insert the subtree with the smaller height (i.e. node1)
-                    return this.ConcatImpl(node2, node1, value, ref wasAdded);
+                    return ConcatImpl(node2, node1, value, ref wasAdded);
                 }
             }
         }
@@ -1448,25 +1367,21 @@ namespace SelfBalancedTree
         /// <summary>
         /// Splits this AVL tree instance into 2 AVL subtrees by the specified value.
         /// </summary>
-        /// <param name="value">The value to use when splitting this instance.</param>
-        /// <param name="mode">The mode specifying what to do with the value used for splitting. Options are not to include this value in either of the two resulting trees, include it in the left or include it in the right tree respectively</param>
+        /// <param name="elem"></param>
+        /// <param name="data"></param>
         /// <param name="splitLeftTree">The split left avl tree. All values of this subtree are less than the value argument.</param>
         /// <param name="splitRightTree">The split right avl tree. All values of this subtree are greater than the value argument.</param>
+        /// <param name="mode">The mode specifying what to do with the value used for splitting. Options are not to include this value in either of the two resulting trees, include it in the left or include it in the right tree respectively</param>
+        /// <param name="wasFound"></param>
         /// <returns></returns>
-        private Node<T> Split(
-                    Node<T> elem,
-                    T data,
-                    ref Node<T> splitLeftTree,
-                    ref Node<T> splitRightTree,
-                    SplitOperationMode mode,
-                    ref bool wasFound)
+        private void split(Node<T> elem, T data, ref Node<T> splitLeftTree, ref Node<T> splitRightTree, SplitOperationMode mode, ref bool wasFound)
         {
             bool wasAdded = false, wasSuccessful = false;
 
-            int compareResult = this.comparer.Compare(data, elem.Data);
+            int compareResult = _comparer.Compare(data, elem.Data);
             if (compareResult < 0)
             {
-                this.Split(elem.Left, data, ref splitLeftTree, ref splitRightTree, mode, ref wasFound);
+                split(elem.Left, data, ref splitLeftTree, ref splitRightTree, mode, ref wasFound);
                 if (wasFound)
                 {
 #if TREE_WITH_PARENT_POINTERS
@@ -1475,12 +1390,12 @@ namespace SelfBalancedTree
                         elem.Right.Parent = null;
                     }
 #endif
-                    splitRightTree = this.ConcatAtJunctionPoint(splitRightTree, elem.Right, elem.Data);
+                    splitRightTree = ConcatAtJunctionPoint(splitRightTree, elem.Right, elem.Data);
                 }
             }
             else if (compareResult > 0)
             {
-                this.Split(elem.Right, data, ref splitLeftTree, ref splitRightTree, mode, ref wasFound);
+                split(elem.Right, data, ref splitLeftTree, ref splitRightTree, mode, ref wasFound);
                 if (wasFound)
                 {
 #if TREE_WITH_PARENT_POINTERS
@@ -1489,7 +1404,7 @@ namespace SelfBalancedTree
                         elem.Left.Parent = null;
                     }
 #endif
-                    splitLeftTree = this.ConcatAtJunctionPoint(elem.Left, splitLeftTree, elem.Data);
+                    splitLeftTree = ConcatAtJunctionPoint(elem.Left, splitLeftTree, elem.Data);
                 }
             }
             else
@@ -1513,15 +1428,13 @@ namespace SelfBalancedTree
                 switch (mode)
                 {
                     case SplitOperationMode.IncludeSplitValueToLeftSubtree:
-                        splitLeftTree = this.Add(splitLeftTree, elem.Data, ref wasAdded, ref wasSuccessful);
+                        splitLeftTree = add(splitLeftTree, elem.Data, ref wasAdded, ref wasSuccessful);
                         break;
                     case SplitOperationMode.IncludeSplitValueToRightSubtree:
-                        splitRightTree = this.Add(splitRightTree, elem.Data, ref wasAdded, ref wasSuccessful);
+                        splitRightTree = add(splitRightTree, elem.Data, ref wasAdded, ref wasSuccessful);
                         break;
                 }
             }
-
-            return elem;
         }
 
 #endif
@@ -1565,21 +1478,15 @@ namespace SelfBalancedTree
             public void Visit(VisitNodeHandler<Node<TElem>> visitor, int level)
             {
                 if (visitor == null)
-                {
                     return;
-                }
 
-                if (this.Left != null)
-                {
-                    this.Left.Visit(visitor, level + 1);
-                }
+                if (Left != null)
+                    Left.Visit(visitor, level + 1);
 
                 visitor(this, level);
 
-                if (this.Right != null)
-                {
-                    this.Right.Visit(visitor, level + 1);
-                }
+                if (Right != null)
+                    Right.Visit(visitor, level + 1);
             }
 
             #endregion
