@@ -1,4 +1,5 @@
-﻿using C5.intervals;
+﻿using System;
+using C5.intervals;
 using C5.Tests.intervals;
 
 namespace C5.Performance
@@ -7,9 +8,9 @@ namespace C5.Performance
     {
         public static void Main(string[] args)
         {
-            for (var i = 0; i < 100; i++) {
-                var ibs = new IntervalBinarySearchTree<int>(BenchmarkTestCases.DataSetB(30000));
-            }
+            var intervals = BenchmarkTestCases.DataSetB((int) Math.Pow(2, 13));
+            intervals.Shuffle();
+            new IntervalBinarySearchTree<int>(intervals);
         }
     }
 }
