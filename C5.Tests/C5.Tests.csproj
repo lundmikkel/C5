@@ -57,7 +57,6 @@
     <Compile Include="intervals\LayeredContainmentList3Tester.cs" />
     <Compile Include="intervals\LayeredContainmentList2Tester.cs" />
     <Compile Include="intervals\NestedContainmentList2Tester.cs" />
-    <Compile Include="intervals\IntervalListTester.cs" />
     <Compile Include="intervals\LayeredContainmentListTester.cs" />
     <Compile Include="intervals\GenericIIntervaledTester.cs" />
     <Compile Include="intervals\IntervalBinarySearchTreeTester.cs" />

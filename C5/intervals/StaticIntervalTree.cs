@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
-using System.Text;
 
 namespace C5.intervals
 {
@@ -38,7 +37,7 @@ namespace C5.intervals
         }
     }
 
-    public class StaticIntervalTree<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
+    public class StaticIntervalTree<T> : CollectionValueBase<IInterval<T>>, IIntervalCollection<T> where T : IComparable<T>
     {
         private readonly Node _root;
         private readonly int _count;
@@ -242,6 +241,16 @@ namespace C5.intervals
             return FindOverlaps(query).Count();
         }
 
+        public void Add(IInterval<T> interval)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void Remove(IInterval<T> interval)
+        {
+            throw new NotSupportedException();
+        }
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -287,11 +296,6 @@ namespace C5.intervals
         #endregion
 
         #region Formatting
-
-        public string ToString(string format, IFormatProvider formatProvider)
-        {
-            throw new NotImplementedException();
-        }
 
         /// <summary>
         /// Print the tree structure in Graphviz format
@@ -348,39 +352,15 @@ namespace C5.intervals
             return String.Join(", ", s.ToArray());
         }
 
-        #region IShowable
-
         public override System.Collections.Generic.IEnumerator<IInterval<T>> GetEnumerator()
         {
             return getEnumerator(_root);
         }
 
 
-        public bool Show(StringBuilder stringbuilder, ref int rest, IFormatProvider formatProvider)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
         #endregion
 
         #region ICollectionValue
-
-        #region Events
-
-        // The structure is static and has therefore no meaningful events
-        public EventTypeEnum ListenableEvents { get { return EventTypeEnum.None; } }
-        public EventTypeEnum ActiveEvents { get { return EventTypeEnum.None; } }
-
-        public event CollectionChangedHandler<IInterval<T>> CollectionChanged;
-        public event CollectionClearedHandler<IInterval<T>> CollectionCleared;
-        public event ItemsAddedHandler<IInterval<T>> ItemsAdded;
-        public event ItemInsertedHandler<IInterval<T>> ItemInserted;
-        public event ItemsRemovedHandler<IInterval<T>> ItemsRemoved;
-        public event ItemRemovedAtHandler<IInterval<T>> ItemRemovedAt;
-
-        #endregion
 
         public override bool IsEmpty { get { return _root == null; } }
         public override int Count { get { return _count; } }
@@ -483,6 +463,26 @@ namespace C5.intervals
             // Find all intersecting intervals in right subtree
             foreach (var interval in findRight(splitNode.Right, query))
                 yield return interval;
+        }
+
+        public IInterval<T> FindAnyOverlap(IInterval<T> query)
+        {
+            if (query == null)
+                return null;
+
+            var enumerator = FindOverlaps(query).GetEnumerator();
+
+            return enumerator.MoveNext() ? enumerator.Current : null;
+        }
+
+        public IInterval<T> FindAnyOverlap(T query)
+        {
+            if (ReferenceEquals(query, null))
+                return null;
+
+            var enumerator = FindOverlaps(query).GetEnumerator();
+
+            return enumerator.MoveNext() ? enumerator.Current : null;
         }
 
         public bool OverlapExists(IInterval<T> query)

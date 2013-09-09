@@ -14,15 +14,15 @@ namespace C5.Tests.intervals
         // The class tests that the stabbing query catches included endpoints and doesn't catches excluded endpoints
         public abstract class IntervaledEndpointInclusion
         {
-            private IIntervaled<int> _intervaled;
+            private IIntervalCollection<int> _intervalCollection;
 
-            internal abstract IIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            internal abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [SetUp]
             public void Init()
             {
                 // Create Intervaled
-                _intervaled = Factory(new[]
+                _intervalCollection = Factory(new[]
                 {
                     new IntervalBase<int>(5, 15, true, true),
                     new IntervalBase<int>(5, 15, true, false),
@@ -34,7 +34,7 @@ namespace C5.Tests.intervals
             [Test]
             public void Overlap_StabbingBefore_EmptyResult()
             {
-                CollectionAssert.IsEmpty(_intervaled.FindOverlaps(4));
+                CollectionAssert.IsEmpty(_intervalCollection.FindOverlaps(4));
             }
 
             [Test]
@@ -45,7 +45,7 @@ namespace C5.Tests.intervals
                         new IntervalBase<int>(5, 15, true, true),
                         new IntervalBase<int>(5, 15, true, false),
                     },
-                    _intervaled.FindOverlaps(5)
+                    _intervalCollection.FindOverlaps(5)
                 );
             }
 
@@ -59,7 +59,7 @@ namespace C5.Tests.intervals
                         new IntervalBase<int>(5, 15, false, false),
                         new IntervalBase<int>(5, 15, true, true),
                     },
-                    _intervaled.FindOverlaps(10)
+                    _intervalCollection.FindOverlaps(10)
                 );
             }
 
@@ -71,79 +71,79 @@ namespace C5.Tests.intervals
                         new IntervalBase<int>(5, 15, false, true),
                         new IntervalBase<int>(5, 15, true, true),
                     },
-                    _intervaled.FindOverlaps(15)
+                    _intervalCollection.FindOverlaps(15)
                 );
             }
 
             [Test]
             public void Overlap_StabbingAfter_EmptyResult()
             {
-                CollectionAssert.IsEmpty(_intervaled.FindOverlaps(16));
+                CollectionAssert.IsEmpty(_intervalCollection.FindOverlaps(16));
             }
         }
 
         public abstract class IntervaledNullCollection
         {
-            protected IIntervaled<int> _intervaled;
+            protected IIntervalCollection<int> _intervalCollection;
 
-            internal abstract IIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            internal abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [SetUp]
             public void Init()
             {
-                _intervaled = Factory(Enumerable.Empty<IInterval<int>>());
+                _intervalCollection = Factory(Enumerable.Empty<IInterval<int>>());
             }
 
             [Test]
             public void Overlap_NullQuery_ThrowsException()
             {
-                CollectionAssert.IsEmpty(_intervaled.FindOverlaps(null));
+                CollectionAssert.IsEmpty(_intervalCollection.FindOverlaps(null));
             }
 
             [Test]
             public void OverlapExists_NullQuery_ThrowsException()
             {
-                Assert.IsFalse(_intervaled.OverlapExists(null));
+                Assert.IsFalse(_intervalCollection.OverlapExists(null));
             }
         }
 
         public abstract class IntervaledEmptyCollection
         {
-            protected IIntervaled<int> _intervaled;
+            protected IIntervalCollection<int> _intervalCollection;
 
-            internal abstract IIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            internal abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [SetUp]
             public void Init()
             {
                 // Create Intervaled
-                _intervaled = Factory(Enumerable.Empty<IInterval<int>>());
+                _intervalCollection = Factory(Enumerable.Empty<IInterval<int>>());
             }
 
             [Test]
             public void Span_InvalidSpan_ThrowsException()
             {
-                Assert.Throws<InvalidOperationException>(() => { var span = _intervaled.Span; });
+                Assert.Throws<InvalidOperationException>(() => { var span = _intervalCollection.Span; });
             }
 
             [Test]
             public void Overlap_StabMin0Max_ReturnsEmpty()
             {
-                CollectionAssert.IsEmpty(_intervaled.FindOverlaps(int.MinValue));
-                CollectionAssert.IsEmpty(_intervaled.FindOverlaps(0));
-                CollectionAssert.IsEmpty(_intervaled.FindOverlaps(int.MaxValue));
+                CollectionAssert.IsEmpty(_intervalCollection.FindOverlaps(int.MinValue));
+                CollectionAssert.IsEmpty(_intervalCollection.FindOverlaps(0));
+                CollectionAssert.IsEmpty(_intervalCollection.FindOverlaps(int.MaxValue));
             }
 
             [Test]
             public void Overlap_InfiniteQuery_ReturnsEmpty()
             {
-                CollectionAssert.IsEmpty(_intervaled.FindOverlaps(new IntervalBase<int>(int.MinValue, int.MaxValue, false, false)));
+                CollectionAssert.IsEmpty(_intervalCollection.FindOverlaps(new IntervalBase<int>(int.MinValue, int.MaxValue, false, false)));
             }
 
             [Test]
             public void Overlap_RandomQuery_ReturnsEmpty()
             {
-                CollectionAssert.IsEmpty(_intervaled.FindOverlaps(new IntervalBase<int>(0, 5)));
+                CollectionAssert.IsEmpty(_intervalCollection.FindOverlaps(new IntervalBase<int>(0, 5)));
             }
 
             // TODO: Test with bad interval? Like (8:8)
@@ -151,13 +151,13 @@ namespace C5.Tests.intervals
             [Test]
             public void OverlapExists_InfiniteQuery_ReturnsFalse()
             {
-                Assert.IsFalse(_intervaled.OverlapExists(new IntervalBase<int>(int.MinValue, int.MaxValue, false, false)));
+                Assert.IsFalse(_intervalCollection.OverlapExists(new IntervalBase<int>(int.MinValue, int.MaxValue, false, false)));
             }
 
             [Test]
             public void OverlapExists_RandomQuery_ReturnsFalse()
             {
-                Assert.IsFalse(_intervaled.OverlapExists(new IntervalBase<int>(0, 5)));
+                Assert.IsFalse(_intervalCollection.OverlapExists(new IntervalBase<int>(0, 5)));
             }
         }
 
@@ -218,7 +218,7 @@ namespace C5.Tests.intervals
             }
 
 
-            protected IIntervaled<int> Intervaled;
+            protected IIntervalCollection<int> IntervalCollection;
 
             private static readonly IInterval<int> A = new Interval("A", 9, 19, true, true);
             private static readonly IInterval<int> B = new Interval("B", 2, 7, true, true);
@@ -231,23 +231,23 @@ namespace C5.Tests.intervals
             private static readonly IInterval<int> H = new Interval("H", 5, 10, false, false);
 
 
-            internal abstract IIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            internal abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [SetUp]
             public void Init()
             {
-                Intervaled = Factory(new[] { A, B, C, D, E1, E2, F, G, H });
+                IntervalCollection = Factory(new[] { A, B, C, D, E1, E2, F, G, H });
             }
 
             private void range(IInterval<int> query, System.Collections.Generic.IEnumerable<IInterval<int>> expected)
             {
-                CollectionAssert.AreEquivalent(expected, Intervaled.FindOverlaps(query));
+                CollectionAssert.AreEquivalent(expected, IntervalCollection.FindOverlaps(query));
             }
 
             [TestCaseSource(typeof(IBS), "StabCases")]
             public void Overlap_StabbingAtKeyPoints_ReturnsSpecifiedIntervals_TestCase(int query, System.Collections.Generic.IEnumerable<IInterval<int>> expected)
             {
-                CollectionAssert.AreEquivalent(expected, Intervaled.FindOverlaps(query));
+                CollectionAssert.AreEquivalent(expected, IntervalCollection.FindOverlaps(query));
             }
 
             public static object[] StabCases = new object[] {
@@ -279,7 +279,7 @@ namespace C5.Tests.intervals
             [Test]
             public void Span_IBS_ReturnSpan()
             {
-                var span = Intervaled.Span;
+                var span = IntervalCollection.Span;
                 var expected = new IntervalBase<int>(int.MinValue, 20, false, true);
                 Assert.That(expected.Equals(span));
             }
@@ -289,10 +289,10 @@ namespace C5.Tests.intervals
         [TestFixture]
         public abstract class Sample100
         {
-            protected IIntervaled<int> Intervaled;
+            protected IIntervalCollection<int> IntervalCollection;
             private IInterval<int>[] _intervals;
 
-            protected abstract IIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            protected abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [SetUp]
             public void Init()
@@ -310,18 +310,18 @@ namespace C5.Tests.intervals
                     _intervals[i] = new IntervalBase<int>(low, high, true, true);
                 }
 
-                Intervaled = Factory(_intervals);
+                IntervalCollection = Factory(_intervals);
 
             }
 
             private void stabbing(int query, System.Collections.Generic.IEnumerable<IInterval<int>> expected)
             {
-                CollectionAssert.AreEquivalent(expected, Intervaled.FindOverlaps(query));
+                CollectionAssert.AreEquivalent(expected, IntervalCollection.FindOverlaps(query));
             }
 
             private void range(IInterval<int> query, System.Collections.Generic.IEnumerable<IInterval<int>> expected)
             {
-                CollectionAssert.AreEquivalent(expected, Intervaled.FindOverlaps(query));
+                CollectionAssert.AreEquivalent(expected, IntervalCollection.FindOverlaps(query));
             }
 
             //TODO: Make all StabbingX one method
@@ -387,7 +387,7 @@ namespace C5.Tests.intervals
 
                 array = new ArrayList<IInterval<int>>();
                 _intervals.ToList().ForEach(I => array.Add(I));
-                range(Intervaled.Span, array);
+                range(IntervalCollection.Span, array);
 
                 array = new ArrayList<IInterval<int>>();
                 _intervals.Take(50).ToList().ForEach(I => array.Add(I));
@@ -432,7 +432,7 @@ namespace C5.Tests.intervals
             // | 0    5    10   15   20   25   30   35|
             // ****************************************
 
-            protected IIntervaled<int> _intervaled;
+            protected IIntervalCollection<int> _intervalCollection;
 
             // ReSharper disable InconsistentNaming
             private static readonly IInterval<int> A = new IntervalBase<int>(5, 9, true, true);
@@ -442,18 +442,18 @@ namespace C5.Tests.intervals
             private static readonly IInterval<int> E = new IntervalBase<int>(26, 30, true, true);
             // ReSharper restore InconsistentNaming
 
-            protected abstract IIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            protected abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [SetUp]
             public void Init()
             {
-                _intervaled = Factory(new[] { A, B, C, D, E });
+                _intervalCollection = Factory(new[] { A, B, C, D, E });
             }
 
             [TestCaseSource(typeof(BensTest), "StabCases")]
             public void Overlap_StabbingAtKeyRanges_ReturnsSpecifiedIntervals_TestCase(IntervalBase<int> range, System.Collections.Generic.IEnumerable<IInterval<int>> expected)
             {
-                CollectionAssert.AreEquivalent(expected, _intervaled.FindOverlaps(range));
+                CollectionAssert.AreEquivalent(expected, _intervalCollection.FindOverlaps(range));
             }
 
             public static object[] StabCases()
@@ -484,9 +484,9 @@ namespace C5.Tests.intervals
 
         public abstract class Performance23333
         {
-            protected IIntervaled<int> Intervaled;
+            protected IIntervalCollection<int> IntervalCollection;
 
-            protected abstract IIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            protected abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [SetUp]
             public void Init()
@@ -506,7 +506,7 @@ namespace C5.Tests.intervals
                 const int count = 1;
                 for (var i = 0; i < count; i++)
                 {
-                    Intervaled = Factory(intervalList);
+                    IntervalCollection = Factory(intervalList);
                 }
                 sw.Stop();
                 Console.WriteLine("Creation time: " + (sw.ElapsedMilliseconds / count));
@@ -515,13 +515,13 @@ namespace C5.Tests.intervals
             [Test, Category("Simple performance")]
             public void Range()
             {
-                Assert.That(Intervaled.FindOverlaps(new IntervalBase<int>(1357516800, 1358121599)).Count() == 42);
+                Assert.That(IntervalCollection.FindOverlaps(new IntervalBase<int>(1357516800, 1358121599)).Count() == 42);
 
                 var sw = Stopwatch.StartNew();
                 const int count = 1;
                 for (var i = 0; i < count; i++)
                 {
-                    Intervaled.FindOverlaps(new IntervalBase<int>(1357516800, 1358121599)).Count();
+                    IntervalCollection.FindOverlaps(new IntervalBase<int>(1357516800, 1358121599)).Count();
                 }
                 sw.Stop();
                 Console.WriteLine("Time: " + ((float) sw.ElapsedMilliseconds / count));
@@ -530,9 +530,9 @@ namespace C5.Tests.intervals
 
         public abstract class Performance100000
         {
-            protected IIntervaled<int> Intervaled;
+            protected IIntervalCollection<int> IntervalCollection;
 
-            protected abstract IIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            protected abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [SetUp]
             public void Init()
@@ -554,7 +554,7 @@ namespace C5.Tests.intervals
                 const int count = 1;// 000;
                 for (var i = 0; i < count; i++)
                 {
-                    Intervaled = Factory(intervalList);
+                    IntervalCollection = Factory(intervalList);
                 }
                 sw.Stop();
                 Console.WriteLine("Creation time: " + (sw.ElapsedMilliseconds / count));
@@ -563,15 +563,15 @@ namespace C5.Tests.intervals
             [Test, Category("Simple performance")]
             public void Range()
             {
-                Console.WriteLine(Intervaled.FindOverlaps(new IntervalBase<int>(9231, 24228, true, true)).Count());
+                Console.WriteLine(IntervalCollection.FindOverlaps(new IntervalBase<int>(9231, 24228, true, true)).Count());
 
-                Assert.That(Intervaled.FindOverlaps(new IntervalBase<int>(9231, 24228)).Count() == 20931);
+                Assert.That(IntervalCollection.FindOverlaps(new IntervalBase<int>(9231, 24228)).Count() == 20931);
 
                 var sw = Stopwatch.StartNew();
                 const int count = 1;// 000;
                 for (var i = 0; i < count; i++)
                 {
-                    Intervaled.FindOverlaps(new IntervalBase<int>(9231, 24228)).Count();
+                    IntervalCollection.FindOverlaps(new IntervalBase<int>(9231, 24228)).Count();
                 }
                 sw.Stop();
                 Console.WriteLine("Time: " + ((float) sw.ElapsedMilliseconds / count));
@@ -581,9 +581,9 @@ namespace C5.Tests.intervals
 
         public abstract class LargeTest_100000
         {
-            protected IStaticIntervaled<int> Intervaled;
+            protected IIntervalCollection<int> IntervalCollection;
 
-            protected abstract IStaticIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            protected abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
             [TestFixtureSetUp]
             public void SetUp()
@@ -599,7 +599,7 @@ namespace C5.Tests.intervals
                     intervalList.Add(low < high ? new IntervalBase<int>(low, high) : new IntervalBase<int>(low));
                 }
 
-                Intervaled = Factory(intervalList);
+                IntervalCollection = Factory(intervalList);
             }
 
             [TestCaseSource(typeof(LargeTest_100000), "CountCases"), Category("Large tests")]
@@ -610,26 +610,26 @@ namespace C5.Tests.intervals
                 const int count = 1;
 
                 for (var i = 0; i < count; i++)
-                    Intervaled.FindOverlaps(query).Count();
+                    IntervalCollection.FindOverlaps(query).Count();
 
                 sw.Stop();
                 Console.WriteLine("Query time: " + ((float) sw.ElapsedMilliseconds / count));
 
-                var actual = Intervaled.FindOverlaps(query).Count();
+                var actual = IntervalCollection.FindOverlaps(query).Count();
                 Assert.AreEqual(expected, actual);
             }
 
             [TestCaseSource(typeof(LargeTest_100000), "CountCases"), Category("Large tests")]
             public void CountOverlaps(int expected, IntervalBase<int> query)
             {
-                var actual = Intervaled.CountOverlaps(query);
+                var actual = IntervalCollection.CountOverlaps(query);
                 Assert.AreEqual(expected, actual);
                 var sw = Stopwatch.StartNew();
 
                 const int count = 1;
 
                 for (var i = 0; i < count; i++)
-                    Intervaled.CountOverlaps(query);
+                    IntervalCollection.CountOverlaps(query);
 
                 sw.Stop();
                 Console.WriteLine("Query time: " + ((float) sw.ElapsedMilliseconds / count));
@@ -655,26 +655,26 @@ namespace C5.Tests.intervals
 
             public abstract class StaticIntervaledEmptyCollection
             {
-                private IStaticIntervaled<int> _intervaled;
+                private IIntervalCollection<int> _intervalCollection;
 
-                protected abstract IStaticIntervaled<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+                protected abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
 
                 [SetUp]
                 public void Init()
                 {
-                    _intervaled = Factory(Enumerable.Empty<IInterval<int>>());
+                    _intervalCollection = Factory(Enumerable.Empty<IInterval<int>>());
                 }
 
                 [Test]
                 public void OverlapCount_InfiniteQuery_ReturnsZero()
                 {
-                    Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalBase<int>(int.MinValue, int.MaxValue, false, false)));
+                    Assert.AreEqual(0, _intervalCollection.CountOverlaps(new IntervalBase<int>(int.MinValue, int.MaxValue, false, false)));
                 }
 
                 [Test]
                 public void OverlapCount_RandomQuery_ReturnsZero()
                 {
-                    Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalBase<int>(0, 5)));
+                    Assert.AreEqual(0, _intervalCollection.CountOverlaps(new IntervalBase<int>(0, 5)));
                 }
             }
         }

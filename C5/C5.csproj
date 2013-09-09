@@ -74,6 +74,7 @@
     <Compile Include="hashing\HashTable.cs" />
     <Compile Include="heaps\IntervalHeap.cs" />
     <Compile Include="Interfaces.cs" />
+    <Compile Include="intervals\AvlTree.cs" />
     <Compile Include="intervals\IntervalRelations.cs" />
     <Compile Include="intervals\LayeredContainmentListWithoutPointers.cs" />
     <Compile Include="intervals\LayeredContainmentList3.cs" />
@@ -82,7 +83,6 @@
     <Compile Include="intervals\IntervalBinarySearchTree.cs" />
     <Compile Include="intervals\IntervaledHelper.cs" />
     <Compile Include="intervals\IntervalExtensions.cs" />
-    <Compile Include="intervals\IntervalList.cs" />
     <Compile Include="intervals\LayeredContainmentList.cs" />
     <Compile Include="intervals\NestedContainmentList.cs" />
     <Compile Include="intervals\NestedContainmentList2.cs" />

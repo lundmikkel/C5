@@ -15,7 +15,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class EndpointInclusion : IntervaledEndpointInclusion
         {
-            internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new NestedContainmentList<int>(intervals);
             }
@@ -24,7 +24,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class NullCollection : IntervaledNullCollection
         {
-            internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new NestedContainmentList<int>(intervals);
             }
@@ -33,7 +33,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class EmptyCollection : IntervaledEmptyCollection
         {
-            internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new NestedContainmentList<int>(intervals);
             }
@@ -42,7 +42,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class IBS : intervals.Generic.IBS
         {
-            internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new NestedContainmentList<int>(intervals);
             }
@@ -51,7 +51,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class Sample100 : intervals.Generic.Sample100
         {
-            protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new NestedContainmentList<int>(intervals);
             }
@@ -60,7 +60,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class BensTest : intervals.Generic.BensTest
         {
-            protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new NestedContainmentList<int>(intervals);
             }
@@ -69,7 +69,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class StaticEmptyCollection : StaticIntervaledEmptyCollection
         {
-            protected override IStaticIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new NestedContainmentList<int>(intervals);
             }
@@ -78,7 +78,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class NestedContainmentListPerfomance : Performance23333
         {
-            protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new NestedContainmentList<int>(intervals);
             }
@@ -87,7 +87,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class NestedContainmentList100000Perfomance : Performance100000
         {
-            protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new NestedContainmentList<int>(intervals);
             }
@@ -96,7 +96,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class NestedContainmentList_LargeTest : LargeTest_100000
         {
-            protected override IStaticIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new NestedContainmentList<int>(intervals);
             }
@@ -119,12 +119,12 @@ namespace C5.Tests.intervals
         [TestFixture, Description("Test nested containment to make sure that it doesn't matter which interval the nested intervals are contained in, as lond as they are contained in the interval.")]
         public class OrderImportanceForNesting
         {
-            private IStaticIntervaled<int> _intervaled;
+            private IIntervalCollection<int> _intervalCollection;
 
             [SetUp]
             public void Init()
             {
-                _intervaled = new NestedContainmentList<int>(
+                _intervalCollection = new NestedContainmentList<int>(
                     new[]
                         {
                             new IntervalOfInt( 0, 20, true, true),
@@ -144,13 +144,13 @@ namespace C5.Tests.intervals
                             new IntervalOfInt( 5, 25, true, true),
                             new IntervalOfInt(20, 30, true, true),
                     },
-                    _intervaled.FindOverlaps(new IntervalOfInt(18, 30, true, true)));
+                    _intervalCollection.FindOverlaps(new IntervalOfInt(18, 30, true, true)));
             }
 
             [Test, Ignore("NCList doesn't work. So this test is failing as it should be. We just leave it out while testing SIT")]
             public void OverlapCount()
             {
-                Assert.AreEqual(3, _intervaled.CountOverlaps(new IntervalOfInt(18, 30, true, true)));
+                Assert.AreEqual(3, _intervalCollection.CountOverlaps(new IntervalOfInt(18, 30, true, true)));
             }
         }
 
@@ -162,7 +162,7 @@ namespace C5.Tests.intervals
             [TestFixture]
             public class NoContainments
             {
-                private IStaticIntervaled<int> _intervaled;
+                private IIntervalCollection<int> _intervalCollection;
 
                 /**
                  * 0    5   10   15   20   25   30
@@ -180,7 +180,7 @@ namespace C5.Tests.intervals
                 [SetUp]
                 public void Init()
                 {
-                    _intervaled = new NestedContainmentList<int>(new ArrayList<IInterval<int>>
+                    _intervalCollection = new NestedContainmentList<int>(new ArrayList<IInterval<int>>
                     {
                         new IntervalOfInt(23, 28, true, true), // 8
                         new IntervalOfInt(17, 20, true, true), // 7
@@ -197,32 +197,32 @@ namespace C5.Tests.intervals
                 [Test]
                 public void CountNone()
                 {
-                    Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalOfInt(9, 9, true, true)));
-                    Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalOfInt(29, 30, true, true)));
-                    Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalOfInt(int.MinValue, -2, true, true)));
+                    Assert.AreEqual(0, _intervalCollection.CountOverlaps(new IntervalOfInt(9, 9, true, true)));
+                    Assert.AreEqual(0, _intervalCollection.CountOverlaps(new IntervalOfInt(29, 30, true, true)));
+                    Assert.AreEqual(0, _intervalCollection.CountOverlaps(new IntervalOfInt(int.MinValue, -2, true, true)));
                 }
 
                 [Test]
                 public void CountSingle()
                 {
-                    Assert.AreEqual(1, _intervaled.CountOverlaps(new IntervalOfInt(0, 0, true, true)));
-                    Assert.AreEqual(2, _intervaled.CountOverlaps(new IntervalOfInt(6, 9, true, true)));
-                    Assert.AreEqual(1, _intervaled.CountOverlaps(new IntervalOfInt(21, 30, true, true)));
+                    Assert.AreEqual(1, _intervalCollection.CountOverlaps(new IntervalOfInt(0, 0, true, true)));
+                    Assert.AreEqual(2, _intervalCollection.CountOverlaps(new IntervalOfInt(6, 9, true, true)));
+                    Assert.AreEqual(1, _intervalCollection.CountOverlaps(new IntervalOfInt(21, 30, true, true)));
                 }
 
                 [Test]
                 public void CountGroup()
                 {
-                    Assert.AreEqual(3, _intervaled.CountOverlaps(new IntervalOfInt(0, 6, true, true)));
-                    Assert.AreEqual(5, _intervaled.CountOverlaps(new IntervalOfInt(12, 19, true, true)));
-                    Assert.AreEqual(3, _intervaled.CountOverlaps(new IntervalOfInt(18, 19, true, true)));
+                    Assert.AreEqual(3, _intervalCollection.CountOverlaps(new IntervalOfInt(0, 6, true, true)));
+                    Assert.AreEqual(5, _intervalCollection.CountOverlaps(new IntervalOfInt(12, 19, true, true)));
+                    Assert.AreEqual(3, _intervalCollection.CountOverlaps(new IntervalOfInt(18, 19, true, true)));
                 }
             }
 
             [TestFixture]
             public class OnlyContainments
             {
-                private IStaticIntervaled<int> _intervaled;
+                private IIntervalCollection<int> _intervalCollection;
 
                 /**
                  * 0    5   10   15   20   25   30
@@ -240,7 +240,7 @@ namespace C5.Tests.intervals
                 [SetUp]
                 public void Init()
                 {
-                    _intervaled = new NestedContainmentList<int>(new ArrayList<IInterval<int>>
+                    _intervalCollection = new NestedContainmentList<int>(new ArrayList<IInterval<int>>
                     {
                         new IntervalOfInt(13, 14, true, true),
                         new IntervalOfInt(12, 15, true, true),
@@ -257,23 +257,23 @@ namespace C5.Tests.intervals
                 [Test]
                 public void CountNone()
                 {
-                    Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalOfInt(31, int.MaxValue, true, true)));
-                    Assert.AreEqual(0, _intervaled.CountOverlaps(new IntervalOfInt(int.MinValue, -2, true, true)));
+                    Assert.AreEqual(0, _intervalCollection.CountOverlaps(new IntervalOfInt(31, int.MaxValue, true, true)));
+                    Assert.AreEqual(0, _intervalCollection.CountOverlaps(new IntervalOfInt(int.MinValue, -2, true, true)));
                 }
 
                 [Test]
                 public void CountSingle()
                 {
-                    Assert.AreEqual(1, _intervaled.CountOverlaps(new IntervalOfInt(0, 0, true, true)));
-                    Assert.AreEqual(1, _intervaled.CountOverlaps(new IntervalOfInt(30, 35, true, true)));
+                    Assert.AreEqual(1, _intervalCollection.CountOverlaps(new IntervalOfInt(0, 0, true, true)));
+                    Assert.AreEqual(1, _intervalCollection.CountOverlaps(new IntervalOfInt(30, 35, true, true)));
                 }
 
                 [Test]
                 public void CountGroup()
                 {
-                    Assert.AreEqual(2, _intervaled.CountOverlaps(new IntervalOfInt(23, 25, true, true)));
-                    Assert.AreEqual(4, _intervaled.CountOverlaps(new IntervalOfInt(5, 8, true, true)));
-                    Assert.AreEqual(9, _intervaled.CountOverlaps(new IntervalOfInt(13, 13, true, true)));
+                    Assert.AreEqual(2, _intervalCollection.CountOverlaps(new IntervalOfInt(23, 25, true, true)));
+                    Assert.AreEqual(4, _intervalCollection.CountOverlaps(new IntervalOfInt(5, 8, true, true)));
+                    Assert.AreEqual(9, _intervalCollection.CountOverlaps(new IntervalOfInt(13, 13, true, true)));
                 }
             }
 
@@ -293,12 +293,12 @@ namespace C5.Tests.intervals
             [TestFixture]
             public class MixedContainments
             {
-                private IStaticIntervaled<int> _intervaled;
+                private IIntervalCollection<int> _intervalCollection;
 
                 [SetUp]
                 public void Init()
                 {
-                    _intervaled = new NestedContainmentList<int>(new ArrayList<IInterval<int>>
+                    _intervalCollection = new NestedContainmentList<int>(new ArrayList<IInterval<int>>
                     {
                         new IntervalOfInt( 9, 19, true, true),
                         new IntervalOfInt( 2,  7, true, true),
@@ -314,11 +314,11 @@ namespace C5.Tests.intervals
                 [Test]
                 public void Count()
                 {
-                    Assert.AreEqual(4, _intervaled.CountOverlaps(new IntervalOfInt(8, 10, true, true)));
-                    Assert.AreEqual(3, _intervaled.CountOverlaps(new IntervalOfInt(2, 3, true, true)));
-                    Assert.AreEqual(4, _intervaled.CountOverlaps(new IntervalOfInt(17, 19, true, true)));
-                    Assert.AreEqual(2, _intervaled.CountOverlaps(new IntervalOfInt(14, 15, true, true)));
-                    Assert.AreEqual(1, _intervaled.CountOverlaps(new IntervalOfInt(-5, -4, true, true)));
+                    Assert.AreEqual(4, _intervalCollection.CountOverlaps(new IntervalOfInt(8, 10, true, true)));
+                    Assert.AreEqual(3, _intervalCollection.CountOverlaps(new IntervalOfInt(2, 3, true, true)));
+                    Assert.AreEqual(4, _intervalCollection.CountOverlaps(new IntervalOfInt(17, 19, true, true)));
+                    Assert.AreEqual(2, _intervalCollection.CountOverlaps(new IntervalOfInt(14, 15, true, true)));
+                    Assert.AreEqual(1, _intervalCollection.CountOverlaps(new IntervalOfInt(-5, -4, true, true)));
                 }
             }
         }

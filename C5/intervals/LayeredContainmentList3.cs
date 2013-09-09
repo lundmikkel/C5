@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace C5.intervals
 {
-    public class LayeredContainmentList3<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
+    public class LayeredContainmentList3<T> : CollectionValueBase<IInterval<T>>, IIntervalCollection<T> where T : IComparable<T>
     {
         private readonly int _count;
         private readonly Node[] _intervals;
@@ -154,6 +154,16 @@ namespace C5.intervals
                 return 0;
 
             return countOverlaps(0, _firstLayerCount, query);
+        }
+
+        public void Add(IInterval<T> interval)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void Remove(IInterval<T> interval)
+        {
+            throw new NotSupportedException();
         }
 
         private int countOverlaps(int lower, int upper, IInterval<T> query)
@@ -317,6 +327,24 @@ namespace C5.intervals
                 while (first < last)
                     yield return _intervals[first++].Interval;
             }
+        }
+
+        public IInterval<T> FindAnyOverlap(IInterval<T> query)
+        {
+            // No overlap if query is null, collection is empty, or query doesn't overlap collection
+            if (query == null || IsEmpty || !query.Overlaps(Span))
+                return null;
+
+            // Find first overlap
+            var i = findFirst(0, _firstLayerCount, query);
+
+            // Check if index is in bound and if the interval overlaps the query
+            return 0 <= i && i < _firstLayerCount && _intervals[i].Interval.Overlaps(query) ? _intervals[i].Interval : null;
+        }
+
+        public IInterval<T> FindAnyOverlap(T query)
+        {
+            return FindAnyOverlap(new IntervalBase<T>(query));
         }
 
         private IEnumerable<IInterval<T>> findOverlapsRecursive(int layer, int lower, int upper, IInterval<T> query)

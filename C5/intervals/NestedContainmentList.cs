@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace C5.intervals
 {
-    public class NestedContainmentList<T> : CollectionValueBase<IInterval<T>>, IStaticIntervaled<T> where T : IComparable<T>
+    public class NestedContainmentList<T> : CollectionValueBase<IInterval<T>>, IIntervalCollection<T> where T : IComparable<T>
     {
         private readonly Node[] _list;
         private readonly IInterval<T> _span;
@@ -52,6 +52,8 @@ namespace C5.intervals
         /// A sorted list of IInterval&lt;T&gt; sorted with IntervalComparer&lt;T&gt;
         /// </summary>
         /// <param name="intervals">Sorted intervals</param>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
         /// <returns>A list of nodes</returns>
         private int createList(IInterval<T>[] intervals, Section source, Section target)
         {
@@ -152,17 +154,6 @@ namespace C5.intervals
 
         #endregion
 
-        #region Formatting
-
-        public string ToString(string format, IFormatProvider formatProvider)
-        {
-            // TODO: Correct implementation?
-            return _list.ToString();
-        }
-
-        #region IShowable
-
-
         /// <summary>
         /// Create an enumerator, enumerating the intervals in sorted order - sorted on low endpoint with shortest intervals first
         /// </summary>
@@ -172,15 +163,6 @@ namespace C5.intervals
         {
             return getEnumerator(_section);
         }
-
-        public bool Show(System.Text.StringBuilder stringbuilder, ref int rest, IFormatProvider formatProvider)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
-        #endregion
 
         #region ICollectionValue
 
@@ -309,6 +291,24 @@ namespace C5.intervals
             return findOverlap(_section, query);
         }
 
+        public IInterval<T> FindAnyOverlap(IInterval<T> query)
+        {
+            // Check if query overlaps the collection at all
+            if (query == null || _list == null || !query.Overlaps(Span))
+                return null;
+
+            // Find first overlap
+            var i = findFirst(_section, query);
+
+            // Check if index is in bound and if the interval overlaps the query
+            return _section.Offset <= i && i < _section.Offset + _section.Length && _list[i].Interval.Overlaps(query) ? _list[i].Interval : null;
+        }
+
+        public IInterval<T> FindAnyOverlap(T query)
+        {
+            return FindAnyOverlap(new IntervalBase<T>(query));
+        }
+
         public bool OverlapExists(IInterval<T> query)
         {
             // Check if query overlaps the collection at all
@@ -327,6 +327,15 @@ namespace C5.intervals
             return FindOverlaps(query).Count();
         }
 
+        public void Add(IInterval<T> interval)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void Remove(IInterval<T> interval)
+        {
+            throw new NotSupportedException();
+        }
 
         #endregion
     }

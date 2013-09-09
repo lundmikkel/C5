@@ -1,4 +1,5 @@
-﻿using C5.intervals;
+﻿using System;
+using C5.intervals;
 using C5.Tests.intervals;
 
 namespace C5.Performance
@@ -7,8 +8,9 @@ namespace C5.Performance
     {
         public static void Main(string[] args)
         {
-            var ibs = new IBSProfiling();
-            ibs.MultipleProfilingRuns();
+            var intervals = BenchmarkTestCases.DataSetB((int) Math.Pow(2, 13));
+            intervals.Shuffle();
+            new IntervalBinarySearchTree<int>(intervals);
         }
     }
 }

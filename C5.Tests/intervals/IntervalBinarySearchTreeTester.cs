@@ -15,7 +15,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class IntervalBinarySearchTreeIBS : IBS
         {
-            internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new IntervalBinarySearchTree<int>(intervals);
             }
@@ -23,20 +23,20 @@ namespace C5.Tests.intervals
             [Test]
             public void Print()
             {
-                File.WriteAllText(@"../../intervals/data/interval_binary_search_tree.gv", ((IntervalBinarySearchTree<int>) Intervaled).Graphviz());
+                File.WriteAllText(@"../../intervals/data/interval_binary_search_tree.gv", ((IntervalBinarySearchTree<int>) IntervalCollection).Graphviz());
             }
 
             [Test]
             public void MaximumOverlap_IBS_Returns5()
             {
-                Assert.AreEqual(5, ((IntervalBinarySearchTree<int>) Intervaled).MaximumOverlap);
+                Assert.AreEqual(5, ((IntervalBinarySearchTree<int>) IntervalCollection).MaximumOverlap);
             }
         }
 
         [TestFixture]
         public class EndpointInclusion : IntervaledEndpointInclusion
         {
-            internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new IntervalBinarySearchTree<int>(intervals);
             }
@@ -45,7 +45,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class NullCollection : IntervaledNullCollection
         {
-            internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new IntervalBinarySearchTree<int>(intervals);
             }
@@ -53,14 +53,14 @@ namespace C5.Tests.intervals
             [Test]
             public void MaximumOverlap_EmptyCollection_Returns0()
             {
-                Assert.AreEqual(0, ((IntervalBinarySearchTree<int>) _intervaled).MaximumOverlap);
+                Assert.AreEqual(0, ((IntervalBinarySearchTree<int>) _intervalCollection).MaximumOverlap);
             }
         }
 
         [TestFixture]
         public class EmptyCollection : IntervaledEmptyCollection
         {
-            internal override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new IntervalBinarySearchTree<int>(intervals);
             }
@@ -68,14 +68,14 @@ namespace C5.Tests.intervals
             [Test]
             public void MaximumOverlap_EmptyCollection_Returns0()
             {
-                Assert.AreEqual(0, ((IntervalBinarySearchTree<int>) _intervaled).MaximumOverlap);
+                Assert.AreEqual(0, ((IntervalBinarySearchTree<int>) _intervalCollection).MaximumOverlap);
             }
         }
 
         [TestFixture]
         public class Sample100 : intervals.Generic.Sample100
         {
-            protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new IntervalBinarySearchTree<int>(intervals);
             }
@@ -84,7 +84,7 @@ namespace C5.Tests.intervals
         [TestFixture, Ignore]
         public class IBSPerformance : Performance23333
         {
-            protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new IntervalBinarySearchTree<int>(intervals);
             }
@@ -93,7 +93,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class BensTest : intervals.Generic.BensTest
         {
-            protected override IIntervaled<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 return new IntervalBinarySearchTree<int>(intervals);
             }
@@ -101,7 +101,7 @@ namespace C5.Tests.intervals
             [Test]
             public void MaximumOverlap_BensCollection_Returns2()
             {
-                Assert.AreEqual(2, ((IntervalBinarySearchTree<int>) _intervaled).MaximumOverlap);
+                Assert.AreEqual(2, ((IntervalBinarySearchTree<int>) _intervalCollection).MaximumOverlap);
             }
         }
 

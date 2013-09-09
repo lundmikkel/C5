@@ -2084,7 +2084,7 @@ namespace C5
     /// </summary>
     /// <remarks>The data structures do not support updates on its intervals' values. If you wish to change an interval's endpoints or their inclusion, the interval should be removed from the data structure first, changed and then added agian.</remarks>
     /// <typeparam name="T">The generic type for an interval's endpoint values.</typeparam>
-    public interface IIntervaled<T> : ICollectionValue<IInterval<T>> where T : IComparable<T>
+    public interface IIntervalCollection<T> : ICollectionValue<IInterval<T>> where T : IComparable<T>
     {
         /// <summary>
         /// The smallest interval that spans all intervals in the collection. The interval's low is the lowest low endpoint in the collection and the high is the highest high endpoint.
@@ -2095,6 +2095,7 @@ namespace C5
         /// <exception cref="InvalidOperationException">Thrown if called on an empty collection.</exception>
         IInterval<T> Span { get; }
 
+        // TODO: Check seealso in documentation. Does it actually reference the other overloaded method? Add it to FindAnyOverlap as well
         // @design: made to spare the user of making a point interval [q:q] and allow for more effective implementations of the interface for some data structures
         /// <summary>
         /// Create an enumerable, enumerating all intervals that overlap the query point.
@@ -2112,23 +2113,22 @@ namespace C5
         /// <seealso cref="FindOverlaps(T)"/>
         SCG.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query);
 
-        /*
+
         /// <summary>
-        /// <para>Find any interval overlapping the query interval. Returns null if no intervals overlap.</para>
-        /// <para>There is no garanty of which interval will be returned, but implementations must assure that the interval returned is the fastest to retrieve.</para>
+        /// Find any interval overlapping the query interval.
         /// </summary>
+        /// <remarks>There is no garanty of which interval will be returned, but implementations must assure that the interval returned is the fastest to retrieve.</remarks>
         /// <param name="query">The query interval</param>
         /// <returns>An interval that overlaps the query interval, if one exists. If not, null is returned.</returns>
         IInterval<T> FindAnyOverlap(IInterval<T> query);
 
         /// <summary>
-        /// <para>Find any interval overlapping the query point. Returns null if no intervals overlap.</para>
-        /// <para>There is no garanty of which interval will be returned, but implementations must assure that the interval returned is the fastest to retrieve.</para>
+        /// Find any interval overlapping the query interval.
         /// </summary>
-        /// <param name="query">The query point</param>
-        /// <returns>An interval that overlaps the query point, if one exists. If not, null is returned.</returns>
+        /// <remarks>There is no garanty of which interval will be returned, but implementations must assure that the interval returned is the fastest to retrieve.</remarks>
+        /// <param name="query">The query interval</param>
+        /// <returns>An interval that overlaps the query interval, if one exists. If not, null is returned.</returns>
         IInterval<T> FindAnyOverlap(T query);
-        */
 
         // @design: only implemented with interval that it is most unlikely to query a single point. If that would be needed it would still be possible to query a point with a closed single-point interval ([q:q])
         /// <summary>
@@ -2154,26 +2154,20 @@ namespace C5
         /// </summary>
         int MaximumOverlap { get; }
         */
-    }
 
-    /// <summary>
-    /// A collection that allows fast quering on static collections of intervals.
-    /// The static collections are faster than the dynamic collections, but don't allow changes to the collection.
-    /// </summary>
-    /// <typeparam name="T">The generic value for an interval's endpoint values</typeparam>
-    public interface IStaticIntervaled<T> : IIntervaled<T> where T : IComparable<T>
-    {
-    }
-
-    /// <summary>
-    /// A collection that allows fast quering on dynamic collections of intervals.
-    /// The dynamic collections are slower than the static collections, but allow changes to the collection.
-    /// </summary>
-    /// <typeparam name="T">The generic value for an interval's endpoint values</typeparam>
-    public interface IDynamicIntervaled<T> : IIntervaled<T>, SCG.ICollection<IInterval<T>> where T : IComparable<T>
-    {
+        /// <summary>
+        /// Add an interval to the collection.
+        /// </summary>
+        /// <remarks>Different implementations may handle duplicates differently</remarks>
+        /// <param name="interval">The new interval</param>
         void Add(IInterval<T> interval);
 
-        bool Remove(IInterval<T> interval);
+        /// <summary>
+        /// Remove an interval from the collection.
+        /// </summary>
+        /// <remarks>Different implementations may remove duplicates differently</remarks>
+        /// <param name="interval">The interval to remove</param>
+        /// <returns></returns>
+        void Remove(IInterval<T> interval);
     }
 }
