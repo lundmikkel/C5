@@ -7,9 +7,8 @@ namespace C5.Performance
     {
         public static void Main(string[] args)
         {
-            for (var i = 0; i < 100; i++) {
-                var ibs = new IntervalBinarySearchTree<int>(BenchmarkTestCases.DataSetB(30000));
-            }
+            var ibs = new IBSProfiling();
+            ibs.MultipleProfilingRuns();
         }
     }
 }
