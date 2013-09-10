@@ -86,7 +86,7 @@ namespace C5.Tests.intervals
     [TestFixture]
     public class enumeratorBenchmarker
     {
-        private IIntervalCollection<int> intervals;
+        private LayeredContainmentList2<int> intervals;
 
         [SetUp]
         public void SetUp()
@@ -102,7 +102,7 @@ namespace C5.Tests.intervals
 
             for (int i = 0; i < 100; i++)
             {
-                foreach (var interval in intervals)
+                foreach (var interval in intervals.Sorted)
                 {
                     interval.Equals(interval);
                 }
