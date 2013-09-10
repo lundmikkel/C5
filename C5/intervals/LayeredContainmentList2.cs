@@ -363,8 +363,8 @@ namespace C5.intervals
 
         public IEnumerable<IInterval<T>> FindOverlaps(T query)
         {
-            // Break if we won't find any overlaps
-            if (ReferenceEquals(query, null) || IsEmpty)
+            // Check for null to avoid creating empty interval
+            if (ReferenceEquals(query, null))
                 return Enumerable.Empty<IInterval<T>>();
 
             return FindOverlaps(new IntervalBase<T>(query));
@@ -381,6 +381,7 @@ namespace C5.intervals
             // Make sure first and last don't point at the same interval (theorem 2)
             while (lower < upper)
             {
+                // Cache layer to speed up iteration
                 var currentLayer = _intervalLayers[layer];
 
                 var first = lower;
@@ -396,7 +397,7 @@ namespace C5.intervals
                         yield break;
                 }
 
-                // We can use first as lower to speed up the search
+                // We can use first as lower to minimize search area
                 var last = findLast(layer, first, upper, query);
 
                 // Save values for next iteration
@@ -406,6 +407,39 @@ namespace C5.intervals
 
                 while (first < last)
                     yield return currentLayer[first++];
+            }
+        }
+
+        public IEnumerable<IInterval<T>> FindOverlapsSorted(IInterval<T> query, int layer, int lower, int upper, int highestVisitedLayer)
+        {
+            // No overlap if query is null, collection is empty, or query doesn't overlap collection
+            if (query == null || IsEmpty || !query.Overlaps(Span))
+                yield break;
+
+            if (layer > highestVisitedLayer)
+            {
+                lower = findFirst(layer, lower, upper, query);
+                highestVisitedLayer++;
+            }
+
+            var intervalLayer = _intervalLayers[layer];
+
+            // Iterate through all overlaps
+            while (lower < upper && intervalLayer[lower].Overlaps(query))
+            {
+                yield return intervalLayer[lower];
+
+                // If this and the next interval point to different intervals in the next layer, we need to swap layer
+                if (_pointerLayers[layer][lower] < _pointerLayers[layer][lower + 1])
+                {
+                    foreach (
+                        var interval in
+                            FindOverlapsSorted(query, layer + 1, _pointerLayers[layer][lower],
+                                               _pointerLayers[layer][lower + 1], highestVisitedLayer))
+                        yield return interval;
+                }
+
+                lower++;
             }
         }
 
