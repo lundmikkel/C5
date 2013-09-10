@@ -104,9 +104,6 @@ namespace C5.intervals
 
                 Sorting.IntroSort(intervalsArray, 0, _count, ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareTo));
 
-                // TODO: Figure out how Orcomp does it
-                //MaximumOverlap = IntervaledHelper<T>.MaximumOverlap(intervalsArray);
-
                 var totalSection = new Section(0, intervalsArray.Count());
                 _list = new Node[totalSection.Length];
 

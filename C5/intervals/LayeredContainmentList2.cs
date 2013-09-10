@@ -15,7 +15,7 @@ namespace C5.intervals
 
         private IInterval<T> _span;
 
-        private int _pointOfMaximumOverlap = -1;
+        private int _MaximumNumberOfOverlaps = -1;
         private IInterval<T> _intervalOfMaximumOverlap;
 
         #region Node nested classes
@@ -444,10 +444,10 @@ namespace C5.intervals
         {
             get
             {
-                if (_pointOfMaximumOverlap < 0)
+                if (_MaximumNumberOfOverlaps < 0)
                 {
                     // Init running maximum to the number of layers as that is the minimum number of overlaps
-                    var maximum = _layerCount;
+                    var max = _layerCount;
 
                     // Create queue sorted on high intervals
                     var comparer = ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareHigh);
@@ -462,9 +462,9 @@ namespace C5.intervals
 
                         queue.Add(interval);
 
-                        if (queue.Count > maximum)
+                        if (queue.Count > max)
                         {
-                            maximum = queue.Count;
+                            max = queue.Count;
                             // Create a new interval when new maximum is found
                             // The low is the current intervals low due to the intervals being sorted
                             // The high is the smallest high in the queue
@@ -473,10 +473,10 @@ namespace C5.intervals
                     }
 
                     // Cache value for later requests
-                    _pointOfMaximumOverlap = maximum;
+                    _MaximumNumberOfOverlaps = max;
                 }
 
-                return _pointOfMaximumOverlap;
+                return _MaximumNumberOfOverlaps;
             }
         }
 
