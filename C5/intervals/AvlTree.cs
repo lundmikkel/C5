@@ -193,7 +193,7 @@ namespace C5.intervals
         /// </summary>
         /// <param name="node">The node.</param>
         /// <param name="data">The data.</param>
-        /// <param name="wasAdded"></param>
+        /// <param name="wasAdded">States if a new node was added. If true we need to check the tree balance and the way back, to see if we need to do a rotation</param>
         /// <param name="wasSuccessful"></param>
         /// <returns></returns>
         private Node<T> add(Node<T> node, T data, ref bool wasAdded, ref bool wasSuccessful)
