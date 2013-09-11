@@ -33,6 +33,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NPerf.Core">
+      <HintPath>NPerf\bin\Debug\NPerf.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="NPerf.Framework">
+      <HintPath>NPerf\bin\Debug\NPerf.Framework.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -42,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DictionaryTester.cs" />
     <Compile Include="IBSProfiling.cs" />
     <Compile Include="ProfilingBase.cs" />
     <Compile Include="Program.cs" />
