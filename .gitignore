@@ -13,14 +13,9 @@
 packages/*
 Help/*
 
-C5/bin/*
-C5/obj/*
-C5.Tests/bin/*
-C5.Tests/obj/*
-C5.UserGuideExamples/bin/*
-C5.UserGuideExamples/obj/*
-C5.Performance/bin/*
-C5.Performance/obj/*
+**/bin/*
+**/obj/*
+
 test-results/*
 
 # Performance Files
