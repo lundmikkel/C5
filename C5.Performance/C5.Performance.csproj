@@ -52,6 +52,8 @@
     <Compile Include="JITCheater.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SearchScalability.cs" />
+    <Compile Include="SimpleBenchmark.cs" />
     <Compile Include="Timer.cs" />
   </ItemGroup>
   <ItemGroup>
