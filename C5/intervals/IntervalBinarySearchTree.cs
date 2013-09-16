@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using QuickGraph;
+using QuickGraph.Graphviz;
+using QuickGraph.Graphviz.Dot;
 
 namespace C5.intervals
 {
@@ -133,6 +136,12 @@ namespace C5.intervals
 
             public bool Color { get; set; }
 
+            public int Balance
+            {
+                get { return -1; }
+                set { throw new NotImplementedException(); }
+            }
+
             public Node(T key)
             {
                 Key = key;
@@ -183,6 +192,16 @@ namespace C5.intervals
             public IntervalSet()
                 : base(_comparer)
             {
+            }
+
+            public override string ToString()
+            {
+                var s = new ArrayList<string>();
+
+                foreach (var interval in this)
+                    s.Add(interval.ToString());
+
+                return s.IsEmpty() ? String.Empty : String.Join(", ", s.ToArray());
             }
 
             public static IntervalSet operator -(IntervalSet s1, IntervalSet s2)
@@ -702,6 +721,92 @@ namespace C5.intervals
 
         #region GraphViz
 
+        private IEnumerable<Node> nodeEnumerator(Node root)
+        {
+            if (root == null)
+                yield break;
+
+            foreach (var node in nodeEnumerator(root.Left))
+                yield return node;
+
+            yield return root;
+
+            foreach (var node in nodeEnumerator(root.Right))
+                yield return node;
+        }
+
+        private class Vertex
+        {
+            Node Node { get; set; }
+            bool IsLeaf { get; set; }
+
+            public Vertex(Node node)
+            {
+                IsLeaf = node == null;
+                Node = node;
+            }
+        }
+
+        public string QuickGraph()
+        {
+            var graph = new AdjacencyGraph<Node, Edge<Node>>();
+
+            if (_root != null)
+            {
+                var node = new Node(default(T));
+                graph.AddVertex(node);
+                graph.AddEdge(new Edge<Node>(node, _root));
+            }
+
+            foreach (var node in nodeEnumerator(_root))
+            {
+                graph.AddVertex(node);
+
+                if (node.Left != null)
+                {
+                    graph.AddVertex(node.Left);
+                    graph.AddEdge(new Edge<Node>(node, node.Left));
+                }
+
+                if (node.Right != null)
+                {
+                    graph.AddVertex(node.Right);
+                    graph.AddEdge(new Edge<Node>(node, node.Right));
+                }
+            }
+
+            var gw = new GraphvizAlgorithm<Node, Edge<Node>>(graph);
+
+            gw.FormatVertex += delegate(object sender, FormatVertexEventArgs<Node> e)
+            {
+                e.VertexFormatter.Shape = GraphvizVertexShape.Record;
+                e.VertexFormatter.Style = GraphvizVertexStyle.Rounded;
+                e.VertexFormatter.Font = new GraphvizFont("consola", 12);
+
+                // Generate main cell
+                var cell = new GraphvizRecordCell();
+                // Add Key in top cell
+                cell.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Key.ToString() });
+                // Add Less, Equal and Greater set in bottom cell
+                var bottom = new GraphvizRecordCell();
+                bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Less.ToString() });
+                bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Equal.ToString() });
+                bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Greater.ToString() });
+                cell.Cells.Add(bottom);
+                // Add cell to record
+                e.VertexFormatter.Record.Cells.Add(cell);
+            };
+            gw.FormatEdge += delegate(object sender, FormatEdgeEventArgs<Node, Edge<Node>> e)
+                {
+                    e.EdgeFormatter.Label = new GraphvizEdgeLabel { Value = e.Edge.Target.Balance.ToString() };
+                };
+
+
+            var graphviz = gw.Generate();
+
+            return graphviz.Replace("GraphvizColor", "color");
+        }
+
         /// <summary>
         /// Print the tree structure in Graphviz format
         /// </summary>
@@ -733,7 +838,7 @@ namespace C5.intervals
 
             return
                 // Creates the structid: structid [label="<key> keyValue|{lessSet|equalSet|greaterSet}|{<idleft> leftChild|<idright> rightChild}"];
-                String.Format("\tstruct{0} [fontname=consola, label=\"{{<key> {1}|{{{2}|{3}|{4}}}}}\"];\n", id, root.Key, graphSet(root.Less), graphSet(root.Equal), graphSet(root.Greater))
+                String.Format("\tstruct{0} [fontname=consola, label=\"{{<key> {1}|{{{2}|{3}|{4}}}}}\"];\n", id, root.Key, root.Less, root.Equal, root.Greater)
 
                 // Links the parents leftChild to nodeid: parent:left -> structid:key;
                 + rootString
@@ -743,18 +848,6 @@ namespace C5.intervals
 
                 // Calls graphviz() recursively on rightChild
                 + graphviz(root.Right, "struct" + id, "right");
-        }
-
-        private string graphSet(IntervalSet set)
-        {
-            var s = new ArrayList<string>();
-
-            foreach (var interval in set)
-            {
-                s.Add(interval.ToString());
-            }
-
-            return s.IsEmpty() ? String.Empty : String.Join("\n", s.ToArray());
         }
 
         #endregion
