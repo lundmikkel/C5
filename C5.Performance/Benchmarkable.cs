@@ -1,13 +1,15 @@
 ﻿using System;
 
-namespace C5.Performance {
+namespace C5.Performance
+{
     public abstract class Benchmarkable
     {
         internal int size;
 
         protected abstract String BenchMarkName();
 
-        public void StartBenchmark(int maxCollectionSize = 50000, int minCollectionSize = 100) {
+        public void StartBenchmark(int maxCollectionSize = 50000, int minCollectionSize = 100)
+        {
             SystemInfo();
             for (size = minCollectionSize; size < maxCollectionSize; size *= 2)
             {
@@ -24,7 +26,8 @@ namespace C5.Performance {
 
         protected abstract String Info();
 
-        protected void SystemInfo() {
+        protected void SystemInfo()
+        {
             Console.WriteLine("# OS          {0}",
               Environment.OSVersion.VersionString);
             Console.WriteLine("# .NET vers.  {0}",
@@ -39,23 +42,27 @@ namespace C5.Performance {
               DateTime.Now);
         }
 
-        protected double Benchmark(String msg, String info, Func<int, double> f, Action setup = null, int repeats = 10, double maxExecutionTimeInSeconds = 0.25) {
+        protected double Benchmark(String msg, String info, Func<int, double> f, Action setup = null, int repeats = 10, double maxExecutionTimeInSeconds = 0.25)
+        {
             var count = 1;
             var totalCount = count;
             double dummy = 0.0, runningTimeInSeconds = 0.0, elapsedTime, elapsedSquaredTime;
-            do {
+            do
+            {
                 // Step up the count by a factor
                 count *= 10;
                 elapsedTime = elapsedSquaredTime = 0.0;
-                for (var j = 0; j < repeats; j++) {
+                for (var j = 0; j < repeats; j++)
+                {
                     var t = new Timer();
-                    for (var i = 0; i < count; i++) {
-                        // Pause timer during setup before profiling
-                        t.Pause();
+                    for (var i = 0; i < count; i++)
+                    {
                         if (setup != null)
                             setup();
+
                         t.Play();
                         dummy += f(i);
+                        t.Pause();
                     }
                     runningTimeInSeconds = t.Check();
                     // Convert runningTime to nanoseconds and divide by the number of count
