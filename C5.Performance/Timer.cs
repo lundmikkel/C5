@@ -1,14 +1,33 @@
 ﻿// Peter Sestoft
-namespace C5.Performance {
-    public class Timer {
-        private readonly System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-        public Timer() { Play(); }
+namespace C5.Performance
+{
+    public class Timer
+    {
+        private readonly System.Diagnostics.Stopwatch _stopwatch = new System.Diagnostics.Stopwatch();
+
+        public Timer(bool startTimer = false)
+        {
+            if (startTimer)
+                Play();
+        }
+
         /// <summary>
         /// Return the time passed in seconds.
         /// </summary>
         /// <returns></returns>
-        public double Check() { return stopwatch.ElapsedMilliseconds / 1000.0; }
-        public void Pause() { stopwatch.Stop(); }
-        public void Play() { stopwatch.Start(); }
+        public double Check()
+        {
+            return _stopwatch.ElapsedMilliseconds / 1000.0;
+        }
+
+        public void Pause()
+        {
+            _stopwatch.Stop();
+        }
+
+        public void Play()
+        {
+            _stopwatch.Start();
+        }
     }
 }
