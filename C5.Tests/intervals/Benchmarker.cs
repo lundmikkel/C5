@@ -315,6 +315,16 @@ namespace C5.Tests.intervals
             return intervals;
         }
 
+        /*public static IInterval<int>[] DataSetA(int count, int length, int gap)
+        {
+            var intervals = new IInterval<int>[count];
+
+            for (var i = 0; i < count; i++)
+                intervals[i] = new IntervalBase<int>(i * 2 + gap, i * 2 + length);
+
+            return intervals;
+        }*/
+
         public static IInterval<int>[] DataSetB(int count)
         {
             var intervals = new IInterval<int>[count];
