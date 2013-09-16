@@ -3,7 +3,20 @@
 namespace C5.Performance {
     public abstract class Benchmarkable
     {
-        public abstract void StartBenchmark(int minCollectionSize = 100, int maxCollectionSize = 50000);
+        internal int size;
+
+        protected abstract String BenchMarkName();
+
+        public void StartBenchmark(int maxCollectionSize = 50000, int minCollectionSize = 100) {
+            SystemInfo();
+            for (size = minCollectionSize; size < maxCollectionSize; size *= 2)
+            {
+                CollectionSetup();
+                Benchmark(BenchMarkName(), Info(), Call, Setup);
+            }
+        }
+
+        protected abstract void CollectionSetup();
 
         protected abstract void Setup();
 
@@ -29,7 +42,7 @@ namespace C5.Performance {
         protected double Benchmark(String msg, String info, Func<int, double> f, Action setup = null, int repeats = 10, double maxExecutionTimeInSeconds = 0.25) {
             var count = 1;
             var totalCount = count;
-            double dummy = 0.0, runningTimeInSeconds = 0.0, elapsedTime = 0.0, elapsedSquaredTime = 0.0;
+            double dummy = 0.0, runningTimeInSeconds = 0.0, elapsedTime, elapsedSquaredTime;
             do {
                 // Step up the count by a factor
                 count *= 10;
@@ -55,7 +68,7 @@ namespace C5.Performance {
             double meanTime = elapsedTime / repeats, standardDeviation = Math.Sqrt(elapsedSquaredTime / repeats - meanTime * meanTime);
             const int maxMsgLength = 17;
             var trimmedName = msg.Substring(0, Math.Min(msg.Length, maxMsgLength));
-            Console.WriteLine("{0,-18} {1} size {2,15:F1}ns {3,9:F1}+/- {4,10:D} runs", trimmedName, info, meanTime, standardDeviation, totalCount);
+            Console.WriteLine("{0,-18} {1} {2,15:F1}ns {3,9:F1}+/- {4,10:D} count", trimmedName, info, meanTime, standardDeviation, count);
             return dummy;
         }
     }

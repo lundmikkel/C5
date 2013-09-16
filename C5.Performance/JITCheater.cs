@@ -3,21 +3,20 @@ using System.Linq;
 using C5.intervals;
 using C5.Tests.intervals;
 
-namespace C5.Performance {
-    class JITCheater : Benchmarkable
+namespace C5.Performance
+{
+    internal class JITCheater : Benchmarkable
     {
-        private const String BenchmarkName = "OverlapSearch";
-        private IInterval<int>[] _intervals; 
-        private int _size;
+        private IInterval<int>[] _intervals;
 
-        public override void StartBenchmark(int minCollectionSize = 100, int maxCollectionSize = 50000)
+        protected override string BenchMarkName()
         {
-            SystemInfo();
-            for (_size = minCollectionSize; _size <= maxCollectionSize; _size *= 2)
-            {
-                _intervals = C5.Tests.intervals.BenchmarkTestCases.DataSetA(_size);
-                Benchmark(BenchmarkName, Info(), Call, Setup);
-            }
+            return "OverlapSearch";
+        }
+
+        protected override void CollectionSetup()
+        {
+            _intervals = BenchmarkTestCases.DataSetA(size);
         }
 
         protected override void Setup()
@@ -25,13 +24,14 @@ namespace C5.Performance {
             _intervals.Shuffle();
         }
 
-        protected override double Call(int i) {
+        protected override double Call(int i)
+        {
             return _intervals.Count(interval => interval.Overlaps(new IntervalBase<int>(i)));
         }
 
         protected override String Info()
         {
-            return String.Format("{0,8:D}", _size);
+            return String.Format("{0,8:D}", size);
         }
     }
 }
