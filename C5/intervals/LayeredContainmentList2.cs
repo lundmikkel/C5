@@ -416,6 +416,7 @@ namespace C5.intervals
             if (query == null || IsEmpty || !query.Overlaps(Span))
                 return Enumerable.Empty<IInterval<T>>();
 
+            return findOverlapsSortedIterative(query, 0, _firstLayerCount);
             return findOverlapsSortedRecursive(query, 0, 0, _firstLayerCount, -1);
         }
 
@@ -443,6 +444,58 @@ namespace C5.intervals
                 }
 
                 start++;
+            }
+        }
+
+        private IEnumerable<IInterval<T>> findOverlapsSortedIterative(IInterval<T> query, int start, int end)
+        {
+            // Create our own stack to avoid stack overflow and to speed up the enumerator
+            var stack = new int[_layerCount << 1];
+            var i = 0;
+            // Keeps track of when we need to search for first overlap
+            var highestVisitedLayer = -1;
+
+            // We stack both values consecutively instead of stacking pairs
+            stack[i++] = start;
+            stack[i++] = end;
+
+            // Continue as long as we still have values on the stack
+            while (i > 0)
+            {
+                // Get start and end from stack
+                end = stack[--i];
+                start = stack[--i];
+                var layer = i >> 1;
+
+                // Cache layers for speed
+                var intervalLayer = _intervalLayers[i >> 1];
+                var pointerLayer = _pointerLayers[i >> 1];
+
+                if (layer > highestVisitedLayer)
+                {
+                    start = findFirst(layer, start, end, query);
+                    highestVisitedLayer++;
+                }
+
+                // Iterate through all overlaps
+                while (start < end && intervalLayer[start].CompareLowHigh(query) <= 0)
+                {
+                    yield return intervalLayer[start];
+
+                    // If this and the next interval point to different intervals in the next layer, we need to swap layer
+                    if (pointerLayer[start] < pointerLayer[start + 1])
+                    {
+                        // Push the current values
+                        stack[i++] = start + 1;
+                        stack[i++] = end;
+                        // Push the values for the next layer
+                        stack[i++] = pointerLayer[start];
+                        stack[i++] = pointerLayer[start + 1];
+                        break;
+                    }
+
+                    start++;
+                }
             }
         }
 
