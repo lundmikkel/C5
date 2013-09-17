@@ -703,6 +703,39 @@ namespace C5.Tests.intervals
         }
 
         [TestFixture]
+        public class findOverlapsSortedTester
+        {
+            private IInterval<int>[] _intervals;
+
+            [SetUp]
+            public void SetUp()
+            {
+                _intervals = BenchmarkTestCases.DataSetC(100);
+            }
+
+            [Test]
+            public void Sorted()
+            {
+                var intervaled = new LayeredContainmentList2<int>(_intervals);
+
+
+                foreach (var query in _intervals)
+                {
+                    var results = intervaled.FindOverlapsSorted(query);
+
+                    var lastInterval = results.First();
+                    foreach (var interval in results)
+                    {
+                        Assert.True(lastInterval.CompareTo(interval) <= 0);
+                        lastInterval = interval;
+                    }
+
+                    CollectionAssert.AreEquivalent(intervaled.FindOverlaps(query), results);
+                }
+            }
+        }
+
+        [TestFixture]
         public class StabbingQuery
         {
             private LayeredContainmentList2<int> _intervaled;

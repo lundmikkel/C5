@@ -308,7 +308,7 @@ namespace C5.intervals
         private IEnumerator<IInterval<T>> getEnumeratorSorted(int start, int end)
         {
             // Create our own stack to avoid stack overflow and to speed up the enumerator
-            var stack = new int[_layerCount * 2];
+            var stack = new int[_layerCount << 1];
             var i = 0;
             // We stack both values consecutively instead of stacking pairs
             stack[i++] = start;
@@ -401,8 +401,8 @@ namespace C5.intervals
                 var last = findLast(layer, first, upper, query);
 
                 // Save values for next iteration
-                lower = _pointerLayers[layer][first]; // 0
-                upper = _pointerLayers[layer][last]; // _counts[layer]
+                lower = _pointerLayers[layer][first];
+                upper = _pointerLayers[layer][last];
                 layer++;
 
                 while (first < last)
@@ -410,36 +410,39 @@ namespace C5.intervals
             }
         }
 
-        public IEnumerable<IInterval<T>> FindOverlapsSorted(IInterval<T> query, int layer, int lower, int upper, int highestVisitedLayer)
+        public IEnumerable<IInterval<T>> FindOverlapsSorted(IInterval<T> query)
         {
             // No overlap if query is null, collection is empty, or query doesn't overlap collection
             if (query == null || IsEmpty || !query.Overlaps(Span))
-                yield break;
+                return Enumerable.Empty<IInterval<T>>();
 
+            return findOverlapsSortedRecursive(query, 0, 0, _firstLayerCount, -1);
+        }
+
+        private IEnumerable<IInterval<T>> findOverlapsSortedRecursive(IInterval<T> query, int layer, int start, int end, int highestVisitedLayer)
+        {
             if (layer > highestVisitedLayer)
             {
-                lower = findFirst(layer, lower, upper, query);
+                start = findFirst(layer, start, end, query);
                 highestVisitedLayer++;
             }
 
             var intervalLayer = _intervalLayers[layer];
+            var pointerLayer = _pointerLayers[layer];
 
             // Iterate through all overlaps
-            while (lower < upper && intervalLayer[lower].Overlaps(query))
+            while (start < end && intervalLayer[start].CompareLowHigh(query) <= 0)
             {
-                yield return intervalLayer[lower];
+                yield return intervalLayer[start];
 
                 // If this and the next interval point to different intervals in the next layer, we need to swap layer
-                if (_pointerLayers[layer][lower] < _pointerLayers[layer][lower + 1])
+                if (pointerLayer[start] < pointerLayer[start + 1])
                 {
-                    foreach (
-                        var interval in
-                            FindOverlapsSorted(query, layer + 1, _pointerLayers[layer][lower],
-                                               _pointerLayers[layer][lower + 1], highestVisitedLayer))
+                    foreach (var interval in findOverlapsSortedRecursive(query, layer + 1, pointerLayer[start], pointerLayer[start + 1], highestVisitedLayer))
                         yield return interval;
                 }
 
-                lower++;
+                start++;
             }
         }
 
