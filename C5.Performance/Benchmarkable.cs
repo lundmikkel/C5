@@ -72,10 +72,11 @@ namespace C5.Performance
                 }
                 totalCount += count;
             } while (runningTimeInSeconds < maxExecutionTimeInSeconds && count < Int32.MaxValue / 10);
-            double meanTime = elapsedTime / repeats, standardDeviation = Math.Sqrt(elapsedSquaredTime / repeats - meanTime * meanTime);
+            double meanTime = elapsedTime / repeats;
+            double standardDeviation = Math.Sqrt(elapsedSquaredTime / repeats - meanTime * meanTime) / meanTime * 100;
             const int maxMsgLength = 17;
             var trimmedName = msg.Substring(0, Math.Min(msg.Length, maxMsgLength));
-            Console.WriteLine("{0,-18} {1} {2,15:F1}ns {3,9:F1}+/- {4,10:D} count", trimmedName, info, meanTime, standardDeviation, count);
+            Console.WriteLine("{0,-18} {1} {2,15:F1}ns {3,9:F1}%+/- {4,10:D} count", trimmedName, info, meanTime, standardDeviation, count);
             return dummy;
         }
     }
