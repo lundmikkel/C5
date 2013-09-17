@@ -156,7 +156,7 @@ namespace C5.intervals
             return countOverlaps(0, 0, _firstLayerCount, query);
         }
 
-        public void Add(IInterval<T> interval)
+        public bool Add(IInterval<T> interval)
         {
             throw new NotSupportedException();
         }

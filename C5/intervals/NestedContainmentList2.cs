@@ -323,7 +323,7 @@ namespace C5.intervals
             return FindOverlaps(query).Count();
         }
 
-        public void Add(IInterval<T> interval)
+        public bool Add(IInterval<T> interval)
         {
             throw new NotSupportedException();
         }

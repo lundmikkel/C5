@@ -343,7 +343,7 @@ namespace C5.intervals
             return root;
         }
 
-        public void Add(IInterval<T> interval)
+        public bool Add(IInterval<T> interval)
         {
             // TODO: Add event!
 
@@ -351,6 +351,8 @@ namespace C5.intervals
             _root = addHigh(_root, null, interval);
 
             _root.Color = BLACK;
+
+            return true;
         }
 
         #endregion

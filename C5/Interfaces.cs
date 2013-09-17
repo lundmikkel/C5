@@ -2160,7 +2160,8 @@ namespace C5
         /// </summary>
         /// <remarks>Different implementations may handle duplicates differently</remarks>
         /// <param name="interval">The new interval</param>
-        void Add(IInterval<T> interval);
+        /// <returns>True if the interval was added.</returns>
+        bool Add(IInterval<T> interval);
 
         /// <summary>
         /// Remove an interval from the collection.
