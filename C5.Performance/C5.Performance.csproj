@@ -79,12 +79,14 @@
   <ItemGroup>
     <Compile Include="Benchmark.cs" />
     <Compile Include="Benchmarkable.cs" />
+    <Compile Include="IbsAddBenchmarker.cs" />
     <Compile Include="JITCheater.cs" />
     <Compile Include="LCListEnumeratorSorted.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SearchScalability.cs" />
     <Compile Include="SimpleBenchmark.cs" />
+    <Compile Include="IbsAvlAddBenchmarker.cs" />
     <Compile Include="Timer.cs" />
   </ItemGroup>
   <ItemGroup>
