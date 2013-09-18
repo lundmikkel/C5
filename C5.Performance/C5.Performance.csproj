@@ -77,6 +77,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Benchmark.cs" />
     <Compile Include="Benchmarkable.cs" />
     <Compile Include="JITCheater.cs" />
     <Compile Include="LCListEnumeratorSorted.cs" />

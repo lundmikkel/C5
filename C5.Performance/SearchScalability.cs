@@ -14,9 +14,9 @@ namespace C5.Performance
 
         protected override void CollectionSetup()
         {
-            intArray = SearchAndSort.FillIntArray(size); // sorted [0,1,...]
-            items = SearchAndSort.FillIntArray(size);
-            n = size;
+            intArray = SearchAndSort.FillIntArray(CollectionSize); // sorted [0,1,...]
+            items = SearchAndSort.FillIntArray(CollectionSize);
+            n = CollectionSize;
             SearchAndSort.Shuffle(items);
         }
 
@@ -26,11 +26,6 @@ namespace C5.Performance
         {
             var successItem = items[i%n];
             return SearchAndSort.BinarySearch(successItem, intArray);
-        }
-
-        protected override string Info()
-        {
-            return String.Format("{0,8:D}", size);
         }
 
         public class SearchAndSort

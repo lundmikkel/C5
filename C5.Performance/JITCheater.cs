@@ -16,7 +16,7 @@ namespace C5.Performance
 
         protected override void CollectionSetup()
         {
-            _intervals = BenchmarkTestCases.DataSetA(size);
+            _intervals = BenchmarkTestCases.DataSetA(CollectionSize);
         }
 
         protected override void Setup()
@@ -27,11 +27,6 @@ namespace C5.Performance
         protected override double Call(int i)
         {
             return _intervals.Count(interval => interval.Overlaps(new IntervalBase<int>(i)));
-        }
-
-        protected override String Info()
-        {
-            return String.Format("{0,8:D}", size);
         }
     }
 }
