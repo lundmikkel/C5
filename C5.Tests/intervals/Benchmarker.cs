@@ -557,4 +557,22 @@ namespace C5.Tests.intervals
         }
         public override string Name { get { return "Static"; } }
     }
+
+    class IntervalBinarySearchTree_Benchmarker : DataSetTester
+    {
+        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        {
+            return new IntervalBinarySearchTree<int>(intervals);
+        }
+        public override string Name { get { return "IBS"; } }
+    }
+
+    class IntervalBinarySearchTreeAVL_Benchmarker : DataSetTester
+    {
+        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        {
+            return new IntervalBinarySearchTreeAVL<int>(intervals);
+        }
+        public override string Name { get { return "IBSAVL"; } }
+    }
 }
