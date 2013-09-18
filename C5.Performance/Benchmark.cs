@@ -3,9 +3,9 @@
 namespace C5.Performance {
     public class Benchmark
     {
-        public Benchmark(string benchmarkName)
+        public Benchmark()
         {
-            BenchmarkName = benchmarkName;
+            BenchmarkName = "No Name Benchmark";
             MeanTimes = new List<double>();
             CollectionSizes = new List<double>();
             StandardDeviations = new List<double>();

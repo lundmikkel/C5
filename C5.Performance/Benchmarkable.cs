@@ -8,26 +8,18 @@ namespace C5.Performance
         internal int CollectionSize;
         // Normally this is Int32.MaxValue / 10 - change 10 to a higher value to have the tests execute fewer times
         private const int MaxCount = Int32.MaxValue/100000;
-
+        private readonly Benchmark _benchmark = new Benchmark();
         protected abstract String BenchMarkName();
 
-        public Benchmark GetBenchmark(int maxCollectionSize = 50000, int minCollectionSize = 100)
+        public Benchmark GetBenchmark(int maxCollectionSize = 5000, int minCollectionSize = 100)
         {
-            var results = new List<double[]>();
-            var benchmark = new Benchmark(BenchMarkName());
+            _benchmark.BenchmarkName = BenchMarkName();
             for (CollectionSize = minCollectionSize; CollectionSize < maxCollectionSize; CollectionSize *= 2)
             {
                 CollectionSetup();
-                results.Add(Benchmark(BenchMarkName(), Call, Setup));
-                benchmark.IncreaseNumberOfBenchmarks();
+                Benchmark(BenchMarkName(), Call, Setup);
             }
-            foreach (var result in results)
-            {
-                benchmark.MeanTimes.Add(result[0]);
-                benchmark.CollectionSizes.Add(result[1]);
-                benchmark.StandardDeviations.Add(result[2]);
-            }
-            return benchmark;
+            return _benchmark;
         }
 
         protected abstract void CollectionSetup();
@@ -52,7 +44,7 @@ namespace C5.Performance
               DateTime.Now);
         }
 
-        protected double[] Benchmark(String benchmarkName, Func<int, double> f, Action setup = null, int repeats = 10, double maxExecutionTimeInSeconds = 0.25)
+        protected double Benchmark(String benchmarkName, Func<int, double> f, Action setup = null, int repeats = 10, double maxExecutionTimeInSeconds = 0.25)
         {
             var count = 1;
             double dummy = 0.0, runningTimeInSeconds = 0.0, elapsedTime, elapsedSquaredTime;
@@ -82,7 +74,13 @@ namespace C5.Performance
             } while (runningTimeInSeconds < maxExecutionTimeInSeconds && count < MaxCount);
             var meanTime = elapsedTime / repeats;
             var standardDeviation = Math.Sqrt(elapsedSquaredTime / repeats - meanTime * meanTime) / meanTime * 100;
-            return new[]{meanTime,CollectionSize,standardDeviation};
+            Console.Out.WriteLine("Running benchmark with collection size "+CollectionSize);
+
+            _benchmark.IncreaseNumberOfBenchmarks();
+            _benchmark.MeanTimes.Add(meanTime);
+            _benchmark.CollectionSizes.Add(CollectionSize);
+            _benchmark.StandardDeviations.Add(standardDeviation);
+            return dummy;
         }
     }
 }

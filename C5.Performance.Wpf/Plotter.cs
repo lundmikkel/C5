@@ -26,9 +26,6 @@ namespace C5.Performance.Wpf
         private void SetUpModel(Benchmark benchmark)
         {
             PlotModel.Title = "Interval Plotter";
-            // Remove the padding on the left side of the plot
-            PlotModel.Padding = new OxyThickness(-10, 0, 0, 0);
-
             PlotModel.LegendTitle = "Legend";
             PlotModel.LegendPosition = LegendPosition.BottomRight;
             PlotModel.LegendBackground = OxyColors.White;
