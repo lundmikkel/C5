@@ -1,0 +1,10 @@
+﻿<Window x:Class="C5.Performance.Wpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:oxy="http://oxyplot.codeplex.com"
+        xmlns:wpf="clr-namespace:C5.Performance.Wpf"
+        Title="C5 Interval Plotter" Width="800" Height="600">
+    <Grid>
+        <oxy:Plot Model="{Binding (wpf:Plotter.PlotModel)}" Margin="0" Grid.Row="1" />
+    </Grid>
+</Window>
