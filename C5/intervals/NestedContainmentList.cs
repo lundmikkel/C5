@@ -190,6 +190,11 @@ namespace C5.intervals
             }
         }
 
+        public int MaximumOverlap
+        {
+            get { throw new NotSupportedException(); }
+        }
+
         public System.Collections.Generic.IEnumerable<IInterval<T>> FindOverlaps(T query)
         {
             if (ReferenceEquals(query, null))
@@ -329,7 +334,7 @@ namespace C5.intervals
             throw new NotSupportedException();
         }
 
-        public void Remove(IInterval<T> interval)
+        public bool Remove(IInterval<T> interval)
         {
             throw new NotSupportedException();
         }

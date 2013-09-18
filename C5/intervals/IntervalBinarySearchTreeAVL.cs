@@ -250,16 +250,6 @@ namespace C5.intervals
                 res.RemoveAll(s2);
                 return res;
             }
-
-            public static IntervalSet operator +(IntervalSet s1, IntervalSet s2)
-            {
-                if (s1 == null || s2 == null)
-                    throw new ArgumentNullException("Set+Set");
-
-                var res = new IntervalSet(s1);
-                res.AddAll(s2);
-                return res;
-            }
         }
 
         #endregion
@@ -295,8 +285,6 @@ namespace C5.intervals
         //public event ItemRemovedAtHandler<T> ItemRemovedAt;
 
         #endregion
-
-        #region ICollection, IExtensible
 
         #region Add
 
@@ -463,7 +451,7 @@ namespace C5.intervals
 
         #region Remove
 
-        public void Remove(IInterval<T> interval)
+        public bool Remove(IInterval<T> interval)
         {
             // TODO: Implement count
 
@@ -638,6 +626,9 @@ namespace C5.intervals
 
         #region Clear
 
+        /// <summary>
+        /// Remove all intervals from this collection.
+        /// </summary>  
         public void Clear()
         {
             // Return if tree is empty
@@ -663,23 +654,28 @@ namespace C5.intervals
 
         #endregion
 
-        public bool Contains(IInterval<T> item)
-        {
-            throw new NotImplementedException();
-        }
-
+        #region ICollectionValue
 
         public override bool IsEmpty { get { return _root == null; } }
 
-        public override int Count
-        {
-            get { return _count; }
-        }
-
-        public bool IsReadOnly { get { return false; } }
+        public override int Count { get { return _count; } }
 
         public override Speed CountSpeed { get { return Speed.Constant; } }
-        public bool AllowsDuplicates { get { return true; } }
+
+        public override IInterval<T> Choose()
+        {
+            if (_root == null)
+                throw new NoSuchItemException();
+
+            // At least one of Less, Equal, or Greater will contain at least one interval
+            if (!_root.Less.IsEmpty)
+                return _root.Less.Choose();
+
+            if (!_root.Equal.IsEmpty)
+                return _root.Equal.Choose();
+
+            return _root.Greater.Choose();
+        }
 
         #endregion
 
@@ -688,6 +684,8 @@ namespace C5.intervals
 
         public override IEnumerator<IInterval<T>> GetEnumerator()
         {
+            // TODO: Make enumerator lazy, by adding each interval and yield it if it wasn't already yielded
+
             var set = new IntervalSet();
 
             var enumerator = getEnumerator(_root);
@@ -713,18 +711,6 @@ namespace C5.intervals
 
             foreach (var node in nodeEnumerator(root.Right))
                 yield return node;
-        }
-
-        private class Vertex
-        {
-            Node Node { get; set; }
-            bool IsLeaf { get; set; }
-
-            public Vertex(Node node)
-            {
-                IsLeaf = node == null;
-                Node = node;
-            }
         }
 
         public string QuickGraph()
@@ -830,18 +816,6 @@ namespace C5.intervals
 
                 // Calls graphviz() recursively on rightChild
                 + graphviz(root.Right, "struct" + id, "right");
-        }
-
-        #endregion
-
-        #region ICollectionValue
-
-        public override IInterval<T> Choose()
-        {
-            if (_root == null)
-                throw new NoSuchItemException();
-
-            return (_root.Less + _root.Equal + _root.Greater).Choose();
         }
 
         #endregion
@@ -1011,9 +985,12 @@ namespace C5.intervals
             // Otherwise add overlapping nodes in split node
             else
             {
-                foreach (var interval in root.Less + root.Equal + root.Greater)
-                    if (query.Overlaps(interval))
-                        yield return interval;
+                foreach (var interval in root.Less.Where(interval => query.Overlaps(interval)))
+                    yield return interval;
+                foreach (var interval in root.Equal.Where(interval => query.Overlaps(interval)))
+                    yield return interval;
+                foreach (var interval in root.Greater.Where(interval => query.Overlaps(interval)))
+                    yield return interval;
             }
         }
 
@@ -1037,7 +1014,11 @@ namespace C5.intervals
             //
             else if (compareTo < 0)
             {
-                foreach (var interval in root.Less + root.Equal + root.Greater)
+                foreach (var interval in root.Less)
+                    yield return interval;
+                foreach (var interval in root.Equal)
+                    yield return interval;
+                foreach (var interval in root.Greater)
                     yield return interval;
 
                 // Recursively add all intervals in right subtree as they must be
@@ -1090,7 +1071,11 @@ namespace C5.intervals
             {
                 // As our query interval contains the interval [root.Key:splitNode]
                 // all intervals in root can be returned without any checks
-                foreach (var interval in root.Less + root.Equal + root.Greater)
+                foreach (var interval in root.Less)
+                    yield return interval;
+                foreach (var interval in root.Equal)
+                    yield return interval;
+                foreach (var interval in root.Greater)
                     yield return interval;
 
                 // Recursively add all intervals in right subtree as they must be
@@ -1121,28 +1106,32 @@ namespace C5.intervals
         }
 
 
-        private IEnumerator<IInterval<T>> getEnumerator(Node node)
+        private IEnumerator<IInterval<T>> getEnumerator(Node root)
         {
             // Just return if tree is empty
-            if (node == null) yield break;
+            if (root == null) yield break;
 
             // Recursively retrieve intervals in left subtree
-            if (node.Left != null)
+            if (root.Left != null)
             {
-                var child = getEnumerator(node.Left);
+                var child = getEnumerator(root.Left);
 
                 while (child.MoveNext())
                     yield return child.Current;
             }
 
             // Go through all intervals in the node
-            foreach (var interval in node.Less + node.Equal + node.Greater)
+            foreach (var interval in root.Less)
+                yield return interval;
+            foreach (var interval in root.Equal)
+                yield return interval;
+            foreach (var interval in root.Greater)
                 yield return interval;
 
             // Recursively retrieve intervals in right subtree
-            if (node.Right != null)
+            if (root.Right != null)
             {
-                var child = getEnumerator(node.Right);
+                var child = getEnumerator(root.Right);
 
                 while (child.MoveNext())
                     yield return child.Current;

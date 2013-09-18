@@ -154,7 +154,7 @@ namespace C5.intervals
             throw new NotSupportedException();
         }
 
-        public void Remove(IInterval<T> interval)
+        public bool Remove(IInterval<T> interval)
         {
             throw new NotSupportedException();
         }
@@ -276,6 +276,11 @@ namespace C5.intervals
 
                 return _span;
             }
+        }
+
+        public int MaximumOverlap
+        {
+            get { throw new NotSupportedException(); }
         }
 
         public IEnumerable<IInterval<T>> FindOverlaps(T query)

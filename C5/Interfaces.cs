@@ -2095,6 +2095,13 @@ namespace C5
         /// <exception cref="InvalidOperationException">Thrown if called on an empty collection.</exception>
         IInterval<T> Span { get; }
 
+        /// <summary>
+        /// The maximum number of intervals overlapping at a single point in the collection.
+        /// <remarks>The point of maximum overlap may not be representable with an endpoint value, as it could be between two descrete values.</remarks>
+        /// </summary>
+        int MaximumOverlap { get; }
+
+
         // TODO: Check seealso in documentation. Does it actually reference the other overloaded method? Add it to FindAnyOverlap as well
         // @design: made to spare the user of making a point interval [q:q] and allow for more effective implementations of the interface for some data structures
         /// <summary>
@@ -2147,28 +2154,21 @@ namespace C5
         /// <returns>The number of intervals that overlap the query</returns>
         int CountOverlaps(IInterval<T> query);
 
-        /*
-        /// <summary>
-        /// The maximum number of overlapping intervals at a single point in the collection.
-        /// The actual point may not be representable with the generic type, as it could be between two descrete values.
-        /// </summary>
-        int MaximumOverlap { get; }
-        */
 
         /// <summary>
         /// Add an interval to the collection.
         /// </summary>
-        /// <remarks>Different implementations may handle duplicates differently</remarks>
-        /// <param name="interval">The new interval</param>
+        /// <remarks>Different implementations may handle duplicates differently.</remarks>
+        /// <param name="interval">The interval to add.</param>
         /// <returns>True if the interval was added.</returns>
         bool Add(IInterval<T> interval);
 
         /// <summary>
         /// Remove an interval from the collection.
         /// </summary>
-        /// <remarks>Different implementations may remove duplicates differently</remarks>
-        /// <param name="interval">The interval to remove</param>
-        /// <returns></returns>
-        void Remove(IInterval<T> interval);
+        /// <remarks>Different implementations may remove duplicates differently.</remarks>
+        /// <param name="interval">The interval to remove.</param>
+        /// <returns>True if the interval was removed.</returns>
+        bool Remove(IInterval<T> interval);
     }
 }
