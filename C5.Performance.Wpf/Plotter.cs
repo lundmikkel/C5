@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Pdf;
@@ -11,12 +9,11 @@ namespace C5.Performance.Wpf
     public class Plotter
     {
         public PlotModel PlotModel { get; set; }
-        private readonly List<Point[]> _benchmarks = new List<Point[]>();
 
-        public Plotter(Benchmark benchmarks)
+        public Plotter(Benchmark benchmark)
         {
             PlotModel = new PlotModel();
-            SetUpModel(benchmarks);
+            SetUpModel(benchmark);
             ExportPdf();
         }
 
@@ -26,7 +23,7 @@ namespace C5.Performance.Wpf
         }
 
 
-        private void SetUpModel(Benchmark benchmarks)
+        private void SetUpModel(Benchmark benchmark)
         {
             PlotModel.Title = "Interval Plotter";
             // Remove the padding on the left side of the plot
@@ -54,15 +51,11 @@ namespace C5.Performance.Wpf
             PlotModel.Axes.Add(sizeAxis);
             PlotModel.Axes.Add(valueAxis);
 
-            AddBenchmarks(benchmarks);
+            AddBenchmarks(benchmark);
         }
 
         private void AddBenchmarks(Benchmark benchmark)
         {
-            var testData1 = new[] {new Point(0, 1), new Point(4, 5), new Point(100, 6)};
-            var testData2 = new[] {new Point(1, 15), new Point(4, 25), new Point(100, 8)};
-            var testData3 = new[] {new Point(2, 30), new Point(4, 45), new Point(100, 9)};
-            _benchmarks.Add(testData1);
             var lineSerie = new LineSeries {
                 StrokeThickness = 2,
                 MarkerSize = 3,
@@ -72,7 +65,7 @@ namespace C5.Performance.Wpf
                 Title = benchmark.BenchmarkName,
                 Smooth = false,
             };
-            for (var i = 0; i < benchmark.NumberOfBenchmarks-1; i++)
+            for (var i = 0; i < benchmark.NumberOfBenchmarks; i++)
             {
                 lineSerie.Points.Add(new DataPoint(benchmark.CollectionSizes[i],benchmark.MeanTimes[i]));
             }

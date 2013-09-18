@@ -6,10 +6,12 @@ namespace C5.Performance
     public abstract class Benchmarkable
     {
         internal int CollectionSize;
+        // Normally this is Int32.MaxValue / 10 - change 10 to a higher value to have the tests execute fewer times
+        private const int MaxCount = Int32.MaxValue/100000;
 
         protected abstract String BenchMarkName();
 
-        public Benchmark GetBenchmark(int maxCollectionSize = 5000, int minCollectionSize = 100)
+        public Benchmark GetBenchmark(int maxCollectionSize = 50000, int minCollectionSize = 100)
         {
             var results = new List<double[]>();
             var benchmark = new Benchmark(BenchMarkName());
@@ -19,9 +21,12 @@ namespace C5.Performance
                 results.Add(Benchmark(BenchMarkName(), Call, Setup));
                 benchmark.IncreaseNumberOfBenchmarks();
             }
-            benchmark.MeanTimes = results[0];
-            benchmark.CollectionSizes = results[1];
-            benchmark.StandardDeviations = results[2];
+            foreach (var result in results)
+            {
+                benchmark.MeanTimes.Add(result[0]);
+                benchmark.CollectionSizes.Add(result[1]);
+                benchmark.StandardDeviations.Add(result[2]);
+            }
             return benchmark;
         }
 
@@ -74,7 +79,7 @@ namespace C5.Performance
                     elapsedTime += time;
                     elapsedSquaredTime += time * time;
                 }
-            } while (runningTimeInSeconds < maxExecutionTimeInSeconds && count < Int32.MaxValue / 100000);
+            } while (runningTimeInSeconds < maxExecutionTimeInSeconds && count < MaxCount);
             var meanTime = elapsedTime / repeats;
             var standardDeviation = Math.Sqrt(elapsedSquaredTime / repeats - meanTime * meanTime) / meanTime * 100;
             return new[]{meanTime,CollectionSize,standardDeviation};
