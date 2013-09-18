@@ -465,6 +465,8 @@ namespace C5.intervals
 
         public void Remove(IInterval<T> interval)
         {
+            // TODO: Implement count
+
             throw new NotImplementedException();
         }
 
@@ -634,12 +636,32 @@ namespace C5.intervals
 
         #endregion
 
+        #region Clear
+
         public void Clear()
+        {
+            // Return if tree is empty
+            if (_root == null)
+                return;
+
+            // Save old count and reset all values
+            var oldCount = _count;
+            clear();
+
+            // Raise events
+            if ((ActiveEvents & EventTypeEnum.Cleared) != 0)
+                raiseCollectionCleared(true, oldCount);
+            if ((ActiveEvents & EventTypeEnum.Changed) != 0)
+                raiseCollectionChanged();
+        }
+
+        private void clear()
         {
             _root = null;
             _count = 0;
-            // TODO: Add what ever is missing
         }
+
+        #endregion
 
         public bool Contains(IInterval<T> item)
         {
@@ -649,7 +671,6 @@ namespace C5.intervals
 
         public override bool IsEmpty { get { return _root == null; } }
 
-        // TODO: Implement
         public override int Count
         {
             get { return _count; }
