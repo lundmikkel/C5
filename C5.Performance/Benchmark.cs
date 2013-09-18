@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 
-namespace C5.Performance {
+namespace C5.Performance
+{
     public class Benchmark
     {
         public Benchmark()

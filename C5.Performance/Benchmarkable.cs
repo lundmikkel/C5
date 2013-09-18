@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace C5.Performance
 {
     public abstract class Benchmarkable
     {
-        internal int CollectionSize;
         // Normally this is Int32.MaxValue / 10 - change 10 to a higher value to have the tests execute fewer times
         private const int MaxCount = Int32.MaxValue/100000;
         private readonly Benchmark _benchmark = new Benchmark();
+        internal int CollectionSize;
         protected abstract String BenchMarkName();
 
         public Benchmark GetBenchmark(int maxCollectionSize = 5000, int minCollectionSize = 100)
@@ -31,20 +30,21 @@ namespace C5.Performance
         protected void SystemInfo()
         {
             Console.WriteLine("# OS          {0}",
-              Environment.OSVersion.VersionString);
+                Environment.OSVersion.VersionString);
             Console.WriteLine("# .NET vers.  {0}",
-              Environment.Version);
+                Environment.Version);
             Console.WriteLine("# 64-bit OS   {0}",
-              Environment.Is64BitOperatingSystem);
+                Environment.Is64BitOperatingSystem);
             Console.WriteLine("# 64-bit proc {0}",
-              Environment.Is64BitProcess);
+                Environment.Is64BitProcess);
             Console.WriteLine("# CPU         {0}",
-              Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER"));
+                Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER"));
             Console.WriteLine("# Date        {0:s}",
-              DateTime.Now);
+                DateTime.Now);
         }
 
-        protected double Benchmark(String benchmarkName, Func<int, double> f, Action setup = null, int repeats = 10, double maxExecutionTimeInSeconds = 0.25)
+        protected double Benchmark(String benchmarkName, Func<int, double> f, Action setup = null, int repeats = 10,
+            double maxExecutionTimeInSeconds = 0.25)
         {
             var count = 1;
             double dummy = 0.0, runningTimeInSeconds = 0.0, elapsedTime, elapsedSquaredTime;
@@ -67,14 +67,14 @@ namespace C5.Performance
                     }
                     runningTimeInSeconds = t.Check();
                     // Convert runningTime to nanoseconds and divide by the number of count
-                    var time = runningTimeInSeconds * 1e9 / count;
+                    var time = runningTimeInSeconds*1e9/count;
                     elapsedTime += time;
-                    elapsedSquaredTime += time * time;
+                    elapsedSquaredTime += time*time;
                 }
             } while (runningTimeInSeconds < maxExecutionTimeInSeconds && count < MaxCount);
-            var meanTime = elapsedTime / repeats;
-            var standardDeviation = Math.Sqrt(elapsedSquaredTime / repeats - meanTime * meanTime) / meanTime * 100;
-            Console.Out.WriteLine("Running benchmark with collection size "+CollectionSize);
+            var meanTime = elapsedTime/repeats;
+            var standardDeviation = Math.Sqrt(elapsedSquaredTime/repeats - meanTime*meanTime)/meanTime*100;
+            Console.Out.WriteLine("Running benchmark with collection size " + CollectionSize);
 
             _benchmark.IncreaseNumberOfBenchmarks();
             _benchmark.MeanTimes.Add(meanTime);
