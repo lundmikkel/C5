@@ -250,16 +250,6 @@ namespace C5.intervals
                 res.RemoveAll(s2);
                 return res;
             }
-
-            public static IntervalSet operator +(IntervalSet s1, IntervalSet s2)
-            {
-                if (s1 == null || s2 == null)
-                    throw new ArgumentNullException("Set+Set");
-
-                var res = new IntervalSet(s1);
-                res.AddAll(s2);
-                return res;
-            }
         }
 
         #endregion
@@ -677,7 +667,14 @@ namespace C5.intervals
             if (_root == null)
                 throw new NoSuchItemException();
 
-            return (_root.Less + _root.Equal + _root.Greater).Choose();
+            // At least one of Less, Equal, or Greater will contain at least one interval
+            if (!_root.Less.IsEmpty)
+                return _root.Less.Choose();
+
+            if (!_root.Equal.IsEmpty)
+                return _root.Equal.Choose();
+
+            return _root.Greater.Choose();
         }
 
         #endregion
@@ -988,9 +985,12 @@ namespace C5.intervals
             // Otherwise add overlapping nodes in split node
             else
             {
-                foreach (var interval in root.Less + root.Equal + root.Greater)
-                    if (query.Overlaps(interval))
-                        yield return interval;
+                foreach (var interval in root.Less.Where(interval => query.Overlaps(interval)))
+                    yield return interval;
+                foreach (var interval in root.Equal.Where(interval => query.Overlaps(interval)))
+                    yield return interval;
+                foreach (var interval in root.Greater.Where(interval => query.Overlaps(interval)))
+                    yield return interval;
             }
         }
 
@@ -1014,7 +1014,11 @@ namespace C5.intervals
             //
             else if (compareTo < 0)
             {
-                foreach (var interval in root.Less + root.Equal + root.Greater)
+                foreach (var interval in root.Less)
+                    yield return interval;
+                foreach (var interval in root.Equal)
+                    yield return interval;
+                foreach (var interval in root.Greater)
                     yield return interval;
 
                 // Recursively add all intervals in right subtree as they must be
@@ -1067,7 +1071,11 @@ namespace C5.intervals
             {
                 // As our query interval contains the interval [root.Key:splitNode]
                 // all intervals in root can be returned without any checks
-                foreach (var interval in root.Less + root.Equal + root.Greater)
+                foreach (var interval in root.Less)
+                    yield return interval;
+                foreach (var interval in root.Equal)
+                    yield return interval;
+                foreach (var interval in root.Greater)
                     yield return interval;
 
                 // Recursively add all intervals in right subtree as they must be
@@ -1113,7 +1121,11 @@ namespace C5.intervals
             }
 
             // Go through all intervals in the node
-            foreach (var interval in root.Less + root.Equal + root.Greater)
+            foreach (var interval in root.Less)
+                yield return interval;
+            foreach (var interval in root.Equal)
+                yield return interval;
+            foreach (var interval in root.Greater)
                 yield return interval;
 
             // Recursively retrieve intervals in right subtree
