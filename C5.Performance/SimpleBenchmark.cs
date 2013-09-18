@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace C5.Performance {
-    class SimpleBenchmark : Benchmarkable
+    public class SimpleBenchmark : Benchmarkable
     {
         private int[] intArray;
         
@@ -22,8 +22,8 @@ namespace C5.Performance {
         protected override void CollectionSetup()
         {
             var rnd = new Random();
-            intArray = new int[size];
-            for (var i = 0; i < size; i++)
+            intArray = new int[CollectionSize];
+            for (var i = 0; i < CollectionSize; i++)
                 intArray[i] = rnd.Next();
         }
 
@@ -32,11 +32,6 @@ namespace C5.Performance {
         protected override double Call(int i)
         {
             return BinarySearch(i, intArray);
-        }
-
-        protected override string Info()
-        {
-            return String.Format("{0,8:D} size", size);
         }
 
         protected override string BenchMarkName()

@@ -7,17 +7,17 @@ namespace C5.Performance
         public static void Main(string[] args)
         {
             var jit = new LCListEnumeratorSorted();
-            jit.StartBenchmark();
+            jit.GetBenchmark();
             var simple = new SimpleBenchmark();
-            simple.StartBenchmark(100000);
+            simple.GetBenchmark(100000);
 
             //var jit = new JITCheater();
-            //jit.StartBenchmark();
+            //jit.GetBenchmark();
             //var simple = new SimpleBenchmark();
-            //simple.StartBenchmark(maxCollectionSize: 10000000);
+            //simple.GetBenchmark(maxCollectionSize: 10000000);
 
             //var scalability = new SearchScalability();
-            //scalability.StartBenchmark(maxCollectionSize: 10000000);
+            //scalability.GetBenchmark(maxCollectionSize: 10000000);
             //Console.Out.WriteLine("Done");
             //WaitForKey();
         }

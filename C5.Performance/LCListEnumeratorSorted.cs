@@ -18,7 +18,7 @@ namespace C5.Performance
 
         protected override void CollectionSetup()
         {
-            _lclist = new LayeredContainmentList2<int>(BenchmarkTestCases.DataSetA(size));
+            _lclist = new LayeredContainmentList2<int>(BenchmarkTestCases.DataSetA(CollectionSize));
         }
 
         protected override void Setup()
@@ -31,11 +31,6 @@ namespace C5.Performance
             foreach (var interval in _lclist.Sorted)
                 sum += interval.Low;
             return sum;
-        }
-
-        protected override string Info()
-        {
-            return String.Format("{0,8:D}", size);
         }
     }
 }

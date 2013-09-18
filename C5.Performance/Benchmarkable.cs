@@ -1,21 +1,28 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace C5.Performance
 {
     public abstract class Benchmarkable
     {
-        internal int size;
+        internal int CollectionSize;
 
         protected abstract String BenchMarkName();
 
-        public void StartBenchmark(int maxCollectionSize = 50000, int minCollectionSize = 100)
+        public Benchmark GetBenchmark(int maxCollectionSize = 5000, int minCollectionSize = 100)
         {
-            SystemInfo();
-            for (size = minCollectionSize; size < maxCollectionSize; size *= 2)
+            var results = new List<double[]>();
+            var benchmark = new Benchmark(BenchMarkName());
+            for (CollectionSize = minCollectionSize; CollectionSize < maxCollectionSize; CollectionSize *= 2)
             {
                 CollectionSetup();
-                Benchmark(BenchMarkName(), Info(), Call, Setup);
+                results.Add(Benchmark(BenchMarkName(), Call, Setup));
+                benchmark.IncreaseNumberOfBenchmarks();
             }
+            benchmark.MeanTimes = results[0];
+            benchmark.CollectionSizes = results[1];
+            benchmark.StandardDeviations = results[2];
+            return benchmark;
         }
 
         protected abstract void CollectionSetup();
@@ -23,8 +30,6 @@ namespace C5.Performance
         protected abstract void Setup();
 
         protected abstract double Call(int i);
-
-        protected abstract String Info();
 
         protected void SystemInfo()
         {
@@ -42,10 +47,9 @@ namespace C5.Performance
               DateTime.Now);
         }
 
-        protected double Benchmark(String msg, String info, Func<int, double> f, Action setup = null, int repeats = 10, double maxExecutionTimeInSeconds = 0.25)
+        protected double[] Benchmark(String benchmarkName, Func<int, double> f, Action setup = null, int repeats = 10, double maxExecutionTimeInSeconds = 0.25)
         {
             var count = 1;
-            var totalCount = count;
             double dummy = 0.0, runningTimeInSeconds = 0.0, elapsedTime, elapsedSquaredTime;
             do
             {
@@ -70,14 +74,10 @@ namespace C5.Performance
                     elapsedTime += time;
                     elapsedSquaredTime += time * time;
                 }
-                totalCount += count;
-            } while (runningTimeInSeconds < maxExecutionTimeInSeconds && count < Int32.MaxValue / 10);
-            double meanTime = elapsedTime / repeats;
-            double standardDeviation = Math.Sqrt(elapsedSquaredTime / repeats - meanTime * meanTime) / meanTime * 100;
-            const int maxMsgLength = 17;
-            var trimmedName = msg.Substring(0, Math.Min(msg.Length, maxMsgLength));
-            Console.WriteLine("{0,-18} {1} {2,15:F1}ns {3,9:F1}%+/- {4,10:D} count", trimmedName, info, meanTime, standardDeviation, count);
-            return dummy;
+            } while (runningTimeInSeconds < maxExecutionTimeInSeconds && count < Int32.MaxValue / 100000);
+            var meanTime = elapsedTime / repeats;
+            var standardDeviation = Math.Sqrt(elapsedSquaredTime / repeats - meanTime * meanTime) / meanTime * 100;
+            return new[]{meanTime,CollectionSize,standardDeviation};
         }
     }
 }

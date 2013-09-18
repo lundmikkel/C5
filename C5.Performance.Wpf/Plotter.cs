@@ -13,10 +13,10 @@ namespace C5.Performance.Wpf
         public PlotModel PlotModel { get; set; }
         private readonly List<Point[]> _benchmarks = new List<Point[]>();
 
-        public Plotter()
+        public Plotter(Benchmark benchmarks)
         {
             PlotModel = new PlotModel();
-            SetUpModel();
+            SetUpModel(benchmarks);
             ExportPdf();
         }
 
@@ -26,7 +26,7 @@ namespace C5.Performance.Wpf
         }
 
 
-        private void SetUpModel()
+        private void SetUpModel(Benchmark benchmarks)
         {
             PlotModel.Title = "Interval Plotter";
             // Remove the padding on the left side of the plot
@@ -54,31 +54,29 @@ namespace C5.Performance.Wpf
             PlotModel.Axes.Add(sizeAxis);
             PlotModel.Axes.Add(valueAxis);
 
-            AddBenchmarks();
+            AddBenchmarks(benchmarks);
         }
 
-        private void AddBenchmarks()
+        private void AddBenchmarks(Benchmark benchmark)
         {
             var testData1 = new[] {new Point(0, 1), new Point(4, 5), new Point(100, 6)};
             var testData2 = new[] {new Point(1, 15), new Point(4, 25), new Point(100, 8)};
             var testData3 = new[] {new Point(2, 30), new Point(4, 45), new Point(100, 9)};
             _benchmarks.Add(testData1);
-
-            foreach (var benchmark in _benchmarks)
+            var lineSerie = new LineSeries {
+                StrokeThickness = 2,
+                MarkerSize = 3,
+                MarkerStroke = OxyColors.Black,
+                MarkerType = MarkerType.Circle,
+                CanTrackerInterpolatePoints = false,
+                Title = benchmark.BenchmarkName,
+                Smooth = false,
+            };
+            for (var i = 0; i < benchmark.NumberOfBenchmarks-1; i++)
             {
-                var lineSerie = new LineSeries
-                {
-                    StrokeThickness = 2,
-                    MarkerSize = 3,
-                    MarkerStroke = OxyColors.Black,
-                    MarkerType = MarkerType.Circle,
-                    CanTrackerInterpolatePoints = false,
-                    Title = string.Format("Test {0}", benchmark.First().X),
-                    Smooth = false,
-                };
-                benchmark.ToList().ForEach(point => lineSerie.Points.Add(new DataPoint(point.X, point.Y)));
-                PlotModel.Series.Add(lineSerie);
+                lineSerie.Points.Add(new DataPoint(benchmark.CollectionSizes[i],benchmark.MeanTimes[i]));
             }
+            PlotModel.Series.Add(lineSerie);
         }
     }
 }
