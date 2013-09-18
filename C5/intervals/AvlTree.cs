@@ -191,73 +191,31 @@ namespace C5.intervals
         /// <summary>
         /// Adds the specified data to the tree identified by the specified argument.
         /// </summary>
-        /// <param name="node">The node.</param>
-        /// <param name="data">The data.</param>
+        /// <param name="root">The node.</param>
+        /// <param name="value">The data.</param>
         /// <param name="wasAdded">States if a new node was added. If true we need to check the tree balance on the way back, to see if we need to do a rotation</param>
         /// <param name="wasSuccessful"></param>
         /// <returns></returns>
-        private Node<T> add(Node<T> node, T data, ref bool wasAdded, ref bool wasSuccessful)
+        private Node<T> add(Node<T> root, T value, ref bool wasAdded, ref bool wasSuccessful)
         {
             // Insert new node
-            if (node == null)
+            if (root == null)
             {
-                node = new Node<T> { Data = data };
+                root = new Node<T> { Key = value };
                 wasAdded = true;
                 wasSuccessful = true;
-                return node;
+                return root;
             }
 
-            var compare = _comparer.Compare(data, node.Data);
+            var compare = _comparer.Compare(root.Key, value);
+
             if (compare < 0)
             {
-
-                var newLeft = add(node.Left, data, ref wasAdded, ref wasSuccessful);
-                if (node.Left != newLeft)
-                    node.Left = newLeft;
-
-                // A new node was added
-                if (wasAdded)
-                {
-                    switch (--node.Balance)
-                    {
-                        // Node is balanced
-                        case 0:
-                            wasAdded = false;
-                            break;
-
-                        case -2:
-                            switch (newLeft.Balance)
-                            {
-                                case 1:
-                                    {
-                                        node.Left = rotateLeft(newLeft);
-                                        node = rotateRight(node);
-
-                                        node.Balance = 0;
-                                        node.Left.Balance = newLeft.Right.Balance == 1 ? -1 : 0;
-                                        node.Right.Balance = newLeft.Right.Balance == -1 ? 1 : 0;
-                                    }
-                                    break;
-                                case -1:
-                                    node = rotateRight(node);
-                                    node.Balance = 0;
-                                    node.Right.Balance = 0;
-                                    break;
-                            }
-                            wasAdded = false;
-                            break;
-                    }
-                }
-            }
-            else if (compare > 0)
-            {
-                var newRight = add(node.Right, data, ref wasAdded, ref wasSuccessful);
-                if (node.Right != newRight)
-                    node.Right = newRight;
+                root.Right = add(root.Right, value, ref wasAdded, ref wasSuccessful);
 
                 if (wasAdded)
                 {
-                    switch (++node.Balance)
+                    switch (++root.Balance)
                     {
                         case 0:
                             wasAdded = false;
@@ -265,20 +223,20 @@ namespace C5.intervals
 
                         case 2:
                             {
-                                switch (newRight.Balance)
+                                switch (root.Right.Balance)
                                 {
                                     case -1:
-                                        node.Right = rotateRight(newRight);
-                                        node = rotateLeft(node);
+                                        root.Right = rotateRight(root.Right);
+                                        root = rotateLeft(root);
 
-                                        node.Balance = 0;
-                                        node.Left.Balance = newRight.Left.Balance == 1 ? -1 : 0;
-                                        node.Right.Balance = newRight.Left.Balance == -1 ? 1 : 0;
+                                        root.Left.Balance = root.Balance == 1 ? -1 : 0;
+                                        root.Right.Balance = root.Balance == -1 ? 1 : 0;
+                                        root.Balance = 0;
                                         break;
 
                                     case 1:
-                                        node = rotateLeft(node);
-                                        node.Balance = node.Left.Balance = 0;
+                                        root = rotateLeft(root);
+                                        root.Balance = root.Left.Balance = 0;
                                         break;
                                 }
 
@@ -288,8 +246,52 @@ namespace C5.intervals
                     }
                 }
             }
+            else if (compare > 0)
+            {
 
-            return node;
+                root.Left = add(root.Left, value, ref wasAdded, ref wasSuccessful);
+
+                // A new node was added
+                if (wasAdded)
+                {
+                    switch (--root.Balance)
+                    {
+                        // Node was unbalanced, but is now in balance after the node was added
+                        case 0:
+                            wasAdded = false;
+                            break;
+
+                        // Node is unbalanced, but doesn't need to be balanced
+                        case -1:
+                            break;
+
+                        // Node is unbalanced, so we rotate
+                        case -2:
+                            switch (root.Left.Balance)
+                            {
+                                case 1:
+                                    {
+                                        root.Left = rotateLeft(root.Left);
+                                        root = rotateRight(root);
+
+                                        root.Left.Balance = root.Balance == 1 ? -1 : 0;
+                                        root.Right.Balance = root.Balance == -1 ? 1 : 0;
+                                        root.Balance = 0;
+                                    }
+                                    break;
+                                case -1:
+                                    root = rotateRight(root);
+                                    root.Balance = 0;
+                                    root.Right.Balance = 0;
+                                    break;
+                            }
+                            wasAdded = false;
+                            break;
+                    }
+                }
+            }
+
+            return root;
         }
 
         /// <summary>
@@ -302,7 +304,7 @@ namespace C5.intervals
         /// <returns></returns>
         private Node<T> delete(Node<T> node, T arg, ref bool wasDeleted, ref bool wasSuccessful)
         {
-            var compare = _comparer.Compare(arg, node.Data);
+            var compare = _comparer.Compare(arg, node.Key);
             Node<T> newChild;
 
             if (compare < 0)
@@ -323,9 +325,9 @@ namespace C5.intervals
                 if (node.Left != null && node.Right != null)
                 {
                     var min = findMin(node.Right);
-                    var data = node.Data;
-                    node.Data = min.Data;
-                    min.Data = data;
+                    var data = node.Key;
+                    node.Key = min.Key;
+                    min.Key = data;
 
                     wasDeleted = false;
 
@@ -466,7 +468,7 @@ namespace C5.intervals
         {
             if (subtree != null)
             {
-                var compare = _comparer.Compare(data, subtree.Data);
+                var compare = _comparer.Compare(data, subtree.Key);
                 if (compare < 0)
                     return search(subtree.Left, data);
                 if (0 < compare)
@@ -718,7 +720,7 @@ namespace C5.intervals
 
             public Node<TElem> Right { get; set; }
 
-            public TElem Data { get; set; }
+            public TElem Key { get; set; }
 
             public int Balance { get; set; }
 

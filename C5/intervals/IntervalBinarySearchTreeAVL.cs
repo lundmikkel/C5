@@ -10,30 +10,72 @@ namespace C5.intervals
     // TODO: Document reference equality duplicates
     public class IntervalBinarySearchTreeAVL<T> : CollectionValueBase<IInterval<T>>, IIntervalCollection<T> where T : IComparable<T>
     {
-        private const bool RED = true;
-        private const bool BLACK = false;
-
         private Node _root;
         private int _count;
 
-        #region Red-black tree helper methods
+        #region AVL tree helper methods
 
-        private static bool isRed(Node node)
+        private static Node rotate(Node root, ref bool nodeWasAdded)
         {
-            // Null nodes are by convention black
-            return node != null && node.Color == RED;
-        }
-
-        private static Node rotate(Node root)
-        {
-            if (isRed(root.Right) && !isRed(root.Left))
-                root = rotateLeft(root);
-            if (isRed(root.Left) && isRed(root.Left.Left))
-                root = rotateRight(root);
-            if (isRed(root.Left) && isRed(root.Right))
+            switch (root.Balance)
             {
-                root.Color = RED;
-                root.Left.Color = root.Right.Color = BLACK;
+                // Node is balanced after the node was added
+                case 0:
+                    nodeWasAdded = false;
+                    break;
+
+                // Node is unbalanced, so we rotate
+                case -2:
+                    switch (root.Left.Balance)
+                    {
+                        // Left Right Case
+                        case +1:
+                            root.Left = rotateLeft(root.Left);
+                            root = rotateRight(root);
+
+                            // root.Balance is either -1, 0, or +1
+                            root.Left.Balance = (root.Balance == +1 ? -1 : 0);
+                            root.Right.Balance = (root.Balance == -1 ? 1 : 0);
+                            root.Balance = 0;
+                            break;
+
+                        // Left Left Case
+                        case -1:
+                            {
+                                root = rotateRight(root);
+                                root.Balance = root.Right.Balance = 0;
+                                break;
+                            }
+                    }
+                    nodeWasAdded = false;
+                    break;
+
+                // Node is unbalanced, so we rotate
+                case +2:
+                    switch (root.Right.Balance)
+                    {
+                        // Right Right Case
+                        case +1:
+                            {
+                                root = rotateLeft(root);
+                                root.Balance = root.Left.Balance = 0;
+                                break;
+                            }
+
+                        // Right Left Case
+                        case -1:
+                            root.Right = rotateRight(root.Right);
+                            root = rotateLeft(root);
+
+                            // root.Balance is either -1, 0, or +1
+                            root.Left.Balance = (root.Balance == +1 ? -1 : 0);
+                            root.Right.Balance = (root.Balance == -1 ? 1 : 0);
+                            root.Balance = 0;
+                            break;
+                    }
+
+                    nodeWasAdded = false;
+                    break;
             }
 
             return root;
@@ -45,8 +87,6 @@ namespace C5.intervals
             var node = root.Left;
             root.Left = node.Right;
             node.Right = root;
-            node.Color = root.Color;
-            root.Color = RED;
 
 
             // 1
@@ -63,7 +103,7 @@ namespace C5.intervals
             root.Greater.RemoveAll(node.Greater);
 
 
-            // Update PMO
+            // Update MNO
             root.UpdateMaximumOverlap();
             node.UpdateMaximumOverlap();
 
@@ -76,10 +116,8 @@ namespace C5.intervals
             var node = root.Right;
             root.Right = node.Left;
             node.Left = root;
-            node.Color = root.Color;
-            root.Color = RED;
 
-
+            // TODO: Look into if these operations can be optimised
             // 1
             node.Greater.AddAll(root.Greater);
             node.Equal.AddAll(root.Greater);
@@ -94,7 +132,7 @@ namespace C5.intervals
             root.Less.RemoveAll(node.Less);
 
 
-            // Update PMO
+            // Update MNO
             root.UpdateMaximumOverlap();
             node.UpdateMaximumOverlap();
 
@@ -129,23 +167,18 @@ namespace C5.intervals
             public Node Left { get; internal set; }
             public Node Right { get; internal set; }
 
+            // Fields for Maximum Number of Overlaps
             public int Delta { get; internal set; }
             public int DeltaAfter { get; internal set; }
             private int Sum { get; set; }
             public int Max { get; private set; }
 
-            public bool Color { get; set; }
-
-            public int Balance
-            {
-                get { return -1; }
-                set { throw new NotImplementedException(); }
-            }
+            // Balance - between -2 and +2
+            public sbyte Balance { get; internal set; }
 
             public Node(T key)
             {
                 Key = key;
-                Color = RED;
             }
 
             public void UpdateMaximumOverlap()
@@ -175,7 +208,7 @@ namespace C5.intervals
 
             public override string ToString()
             {
-                return String.Format("{0}-{1}", Color ? "R" : "B", Key);
+                return Key.ToString();
             }
         }
 
@@ -241,118 +274,185 @@ namespace C5.intervals
 
         #endregion
 
+        #region Events
+
+        public override EventTypeEnum ListenableEvents { get { return EventTypeEnum.Basic; } }
+        //public EventTypeEnum ActiveEvents { get; private set; }
+        //public event CollectionChangedHandler<T> CollectionChanged;
+        //public event CollectionClearedHandler<T> CollectionCleared;
+        //public event ItemsAddedHandler<T> ItemsAdded;
+        //public event ItemInsertedHandler<T> ItemInserted;
+        //public event ItemsRemovedHandler<T> ItemsRemoved;
+        //public event ItemRemovedAtHandler<T> ItemRemovedAt;
+
+        #endregion
+
         #region ICollection, IExtensible
 
         #region insertion
 
-        private Node addLow(Node root, Node right, IInterval<T> interval)
+        public bool Add(IInterval<T> interval)
         {
+            // Variables for tree rotations
+            var nodeWasAdded = false;
+            // Variable for check if interval was actually added
+            var intervalWasAdded = false;
+
+            _root = addLow(_root, null, interval, ref nodeWasAdded, ref intervalWasAdded);
+
+            // Only try to add High if it is different from Low
+            if (intervalWasAdded && interval.CompareLowHigh(interval) != 0)
+            {
+                nodeWasAdded = false;
+                _root = addHigh(_root, null, interval, ref nodeWasAdded, ref intervalWasAdded);
+            }
+
+            // Increase counter and raise event if interval was added
+            if (intervalWasAdded)
+            {
+                _count++;
+                raiseForAdd(interval);
+            }
+
+            // TODO: Add event for change in MNO
+
+            return intervalWasAdded;
+        }
+
+        private static Node addLow(Node root, Node right, IInterval<T> interval, ref bool nodeWasAdded, ref bool intervalWasAdded)
+        {
+            // No node existed for the Low endpoint
             if (root == null)
+            {
                 root = new Node(interval.Low);
-
-            var compareTo = root.Key.CompareTo(interval.Low);
-
-            if (compareTo < 0)
-            {
-                root.Right = addLow(root.Right, right, interval);
+                nodeWasAdded = true;
+                intervalWasAdded = true;
             }
-            else if (compareTo == 0)
+
+            var compare = interval.Low.CompareTo(root.Key);
+
+            if (compare > 0)
             {
-                // If everything in the right subtree of root will lie within the interval
-                if (right != null && right.Key.CompareTo(interval.High) <= 0)
-                    root.Greater.Add(interval);
+                root.Right = addLow(root.Right, right, interval, ref nodeWasAdded, ref intervalWasAdded);
 
-                if (interval.LowIncluded)
-                    root.Equal.Add(interval);
-
-                // Update delta
-                if (interval.LowIncluded)
-                    root.Delta++;
-                else
-                    root.DeltaAfter++;
+                // Adjust node balance, if node was added
+                if (nodeWasAdded)
+                    root.Balance++;
             }
-            else if (compareTo > 0)
+            else if (compare < 0)
             {
                 // Everything in the right subtree of root will lie within the interval
                 if (right != null && right.Key.CompareTo(interval.High) <= 0)
-                    root.Greater.Add(interval);
+                    intervalWasAdded = root.Greater.Add(interval);
 
                 // root key is between interval.low and interval.high
                 if (root.Key.CompareTo(interval.High) < 0)
-                    root.Equal.Add(interval);
+                    intervalWasAdded = root.Equal.Add(interval);
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
-                root.Left = addLow(root.Left, root, interval);
+                root.Left = addLow(root.Left, root, interval, ref nodeWasAdded, ref intervalWasAdded);
+
+                // Adjust node balance, if node was added
+                if (nodeWasAdded)
+                    root.Balance--;
+            }
+            else
+            {
+                // If everything in the right subtree of root will lie within the interval
+                if (right != null && right.Key.CompareTo(interval.High) <= 0)
+                    intervalWasAdded = root.Greater.Add(interval);
+
+                if (interval.LowIncluded)
+                    intervalWasAdded = root.Equal.Add(interval);
+
+                // If interval was added, we need to update MNO
+                if (intervalWasAdded)
+                    // Update delta
+                    if (interval.LowIncluded)
+                        root.Delta++;
+                    else
+                        root.DeltaAfter++;
             }
 
-            // Red Black tree rotations
-            root = rotate(root);
+            // Tree might be unbalanced after node was added, so we rotate
+            if (nodeWasAdded && compare != 0)
+                root = rotate(root, ref nodeWasAdded);
 
-            // Update PMO
-            root.UpdateMaximumOverlap();
+            // Update MNO
+            if (intervalWasAdded)
+                root.UpdateMaximumOverlap();
 
             return root;
         }
 
-        private Node addHigh(Node root, Node left, IInterval<T> interval)
+        private static Node addHigh(Node root, Node left, IInterval<T> interval, ref bool nodeWasAdded, ref bool intervalWasAdded)
         {
+            // No node existed for the High endpoint
             if (root == null)
+            {
                 root = new Node(interval.High);
-
-            var compareTo = root.Key.CompareTo(interval.High);
-
-            if (compareTo > 0)
-            {
-                root.Left = addHigh(root.Left, left, interval);
+                nodeWasAdded = true;
+                intervalWasAdded = true;
             }
-            else if (compareTo == 0)
+
+            var compare = interval.High.CompareTo(root.Key);
+
+            if (compare < 0)
             {
-                // If everything in the right subtree of root will lie within the interval
-                if (left != null && left.Key.CompareTo(interval.Low) >= 0)
-                    root.Less.Add(interval);
+                root.Left = addHigh(root.Left, left, interval, ref nodeWasAdded, ref intervalWasAdded);
 
-                if (interval.HighIncluded)
-                    root.Equal.Add(interval);
-
-                if (!interval.HighIncluded)
-                    root.Delta--;
-                else
-                    root.DeltaAfter--;
+                // Adjust node balance, if node was added
+                if (nodeWasAdded)
+                    root.Balance--;
             }
-            else if (compareTo < 0)
+            else if (compare > 0)
             {
                 // Everything in the right subtree of root will lie within the interval
                 if (left != null && left.Key.CompareTo(interval.Low) >= 0)
-                    root.Less.Add(interval);
+                    intervalWasAdded = root.Less.Add(interval);
 
                 // root key is between interval.low and interval.high
                 if (root.Key.CompareTo(interval.Low) > 0)
-                    root.Equal.Add(interval);
+                    intervalWasAdded = root.Equal.Add(interval);
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
-                root.Right = addHigh(root.Right, root, interval);
+                root.Right = addHigh(root.Right, root, interval, ref nodeWasAdded, ref intervalWasAdded);
+
+                // Adjust node balance, if node was added
+                if (nodeWasAdded)
+                    root.Balance++;
+            }
+            else
+            {
+                // If everything in the right subtree of root will lie within the interval
+                if (left != null && left.Key.CompareTo(interval.Low) >= 0)
+                    intervalWasAdded = root.Less.Add(interval);
+
+                if (interval.HighIncluded)
+                    intervalWasAdded = root.Equal.Add(interval);
+
+                // If interval was added, we need to update MNO
+                if (intervalWasAdded)
+                    if (!interval.HighIncluded)
+                        root.Delta--;
+                    else
+                        root.DeltaAfter--;
             }
 
-            // Red Black tree rotations
-            root = rotate(root);
+            // Tree might be unbalanced after node was added, so we rotate
+            if (nodeWasAdded && compare != 0)
+                root = rotate(root, ref nodeWasAdded);
 
-            // TODO: Figure out if this is still the correct place to put update
-            // Update PMO
-            root.UpdateMaximumOverlap();
+            // Update MNO
+            if (intervalWasAdded)
+                root.UpdateMaximumOverlap();
 
             return root;
         }
 
-        public bool Add(IInterval<T> interval)
+        public void Remove(IInterval<T> interval)
         {
-            // TODO: Add event!
-
-            _root = addLow(_root, null, interval);
-            _root = addHigh(_root, null, interval);
-
-            _root.Color = BLACK;
-
-            return true;
+            throw new NotImplementedException();
         }
 
         #endregion
@@ -504,63 +604,7 @@ namespace C5.intervals
             return null;
         }
 
-        // Flip the colors of a node and its two children
-        private void flipColors(Node h)
-        {
-            // h must have opposite color of its two children
-            if ((h != null) && (h.Left != null) && (h.Right != null)
-                && ((!isRed(h) && isRed(h.Left) && isRed(h.Right))
-                || (isRed(h) && !isRed(h.Left) && !isRed(h.Right))))
-            {
-                h.Color = !h.Color;
-                h.Left.Color = !h.Left.Color;
-                h.Right.Color = !h.Right.Color;
-            }
-        }
 
-        // Assuming that h is red and both h.left and h.left.left
-        // are black, make h.left or one of its children red.
-        private Node moveRedLeft(Node h)
-        {
-            flipColors(h);
-            if (isRed(h.Right.Left))
-            {
-                h.Right = rotateRight(h.Right);
-                h = rotateLeft(h);
-                // flipColors(h);
-            }
-            return h;
-        }
-
-        // Assuming that h is red and both h.right and h.right.left
-        // are black, make h.right or one of its children red.
-        private Node moveRedRight(Node h)
-        {
-            flipColors(h);
-            if (isRed(h.Left.Left))
-            {
-                h = rotateRight(h);
-                // flipColors(h);
-            }
-            return h;
-        }
-
-        // 
-        private Node deleteNode(Node h, Node toRemove)
-        {
-            if (h.Left == toRemove)
-            {
-                h.Left = null;
-                return null;
-            }
-
-            if (!isRed(h.Left) && !isRed(h.Left.Left))
-                h = moveRedLeft(h);
-
-            h.Left = deleteNode(h.Left, toRemove);
-
-            return rotate(h);
-        }
 
         // the smallest key; null if no such key
         public T min()
@@ -577,103 +621,7 @@ namespace C5.intervals
             return min(x.Left);
         }
 
-        // delete the key-value pair with the given key
-        public void remove(T endpoint)
-        {
 
-            // if both children of root are black, set root to red
-            if (!isRed(_root.Left) && !isRed(_root.Right))
-                _root.Color = RED;
-
-            _root = remove(_root, null, false, endpoint);
-            // TODO: if (!isEmpty()) root.color = BLACK;
-        }
-
-        // delete the key-value pair with the given key rooted at h
-        private Node remove(Node root, Node parent, bool left, T endpoint)
-        {
-
-            if (endpoint.CompareTo(root.Key) < 0)
-            {
-                if (!isRed(root.Left) && !isRed(root.Left.Left))
-                {
-                    if (isRed(root))
-                        root = moveRedLeft(root);
-                }
-                root.Left = remove(root.Left, root, true, endpoint);
-            }
-            else
-            {
-                if (isRed(root.Left))
-                    root = rotateRight(root);
-                if (endpoint.CompareTo(root.Key) == 0 && (root.Right == null))
-                    return null;
-                if (!isRed(root.Right) && !isRed(root.Right.Left))
-                    if (isRed(root))
-                        root = moveRedRight(root);
-                if (endpoint.CompareTo(root.Key) == 0)
-                {
-                    // Save the Greater and Less set of root
-                    //IntervalSet rootGreater = root.Greater;
-                    //IntervalSet rootLess = root.Less;
-
-                    // Save key and sets of right child's minimum
-                    Node minChild = min(root.Right);
-                    IntervalSet minGreater = minChild.Greater;
-                    IntervalSet minLess = minChild.Less;
-                    IntervalSet minEqual = minChild.Equal;
-
-                    // Make new node with the Key of the right child's minimum
-                    var node = new Node(minChild.Key) { Left = root.Left, Right = root.Right };
-                    node.Greater.AddAll(minGreater);
-                    node.Less.AddAll(minLess);
-                    node.Equal.AddAll(minEqual);
-
-                    node.Greater.AddAll(root.Greater);
-                    node.Less.AddAll(root.Less);
-                    node.Equal.AddAll(root.Equal);
-
-                    // Update deltas
-                    node.Delta = root.Delta + minChild.Delta;
-                    node.DeltaAfter = root.DeltaAfter + minChild.DeltaAfter;
-
-                    if (parent == null)
-                        _root = node;
-                    else
-                    {
-                        if (left)
-                            parent.Left = node;
-                        else parent.Right = node;
-                    }
-
-                    deleteNode(root.Right, minChild);
-
-                    return rotate(node);
-                }
-                root.Right = remove(root.Right, root, false, endpoint);
-            }
-            return rotate(root);
-        }
-
-        public void Remove(IInterval<T> interval)
-        {
-            // Delete the interval from the sets
-            _root = removeByLow(_root, null, interval);
-            _root = removeByHigh(_root, null, interval);
-
-            // If no other interval has the same endpoint, delete the endpoint
-            if (!notAlone(_root, interval.Low))
-            {
-                // Delete endpoint
-                remove(interval.Low);
-            }
-
-            if (!notAlone(_root, interval.High))
-            {
-                // Delete endpoint
-                remove(interval.High);
-            }
-        }
 
         #endregion
 
@@ -799,9 +747,12 @@ namespace C5.intervals
                 e.VertexFormatter.Record.Cells.Add(cell);
             };
             gw.FormatEdge += delegate(object sender, FormatEdgeEventArgs<Node, Edge<Node>> e)
+            {
+                e.EdgeFormatter.Label = new GraphvizEdgeLabel
                 {
-                    e.EdgeFormatter.Label = new GraphvizEdgeLabel { Value = e.Edge.Target.Balance.ToString() };
+                    Value = (e.Edge.Target.Balance > 0 ? "+" : "") + e.Edge.Target.Balance
                 };
+            };
 
 
             var graphviz = gw.Generate();
@@ -835,8 +786,7 @@ namespace C5.intervals
             }
 
             id = nodeCounter++;
-            var color = isRed(root) ? "red" : "black";
-            var rootString = direction == null ? "" : String.Format("\t{0} -> struct{1}:n [color={2}];\n", parent, id, color);
+            var rootString = direction == null ? "" : String.Format("\t{0} -> struct{1}:n [color={2}];\n", parent, id);
 
             return
                 // Creates the structid: structid [label="<key> keyValue|{lessSet|equalSet|greaterSet}|{<idleft> leftChild|<idright> rightChild}"];
