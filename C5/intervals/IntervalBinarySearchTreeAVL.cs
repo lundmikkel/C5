@@ -34,8 +34,8 @@ namespace C5.intervals
                             root = rotateRight(root);
 
                             // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (root.Balance == +1 ? -1 : 0);
-                            root.Right.Balance = (root.Balance == -1 ? 1 : 0);
+                            root.Left.Balance = (sbyte) (root.Balance == +1 ? -1 : 0);
+                            root.Right.Balance = (sbyte) (root.Balance == -1 ? 1 : 0);
                             root.Balance = 0;
                             break;
 
@@ -68,8 +68,8 @@ namespace C5.intervals
                             root = rotateLeft(root);
 
                             // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (root.Balance == +1 ? -1 : 0);
-                            root.Right.Balance = (root.Balance == -1 ? 1 : 0);
+                            root.Left.Balance = (sbyte) (root.Balance == +1 ? -1 : 0);
+                            root.Right.Balance = (sbyte) (root.Balance == -1 ? 1 : 0);
                             root.Balance = 0;
                             break;
                     }
