@@ -161,7 +161,7 @@ namespace C5.intervals
             throw new NotSupportedException();
         }
 
-        public void Remove(IInterval<T> interval)
+        public bool Remove(IInterval<T> interval)
         {
             throw new NotSupportedException();
         }

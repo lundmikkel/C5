@@ -461,7 +461,7 @@ namespace C5.intervals
 
         #region Remove
 
-        public void Remove(IInterval<T> interval)
+        public bool Remove(IInterval<T> interval)
         {
             // TODO: Implement count
 

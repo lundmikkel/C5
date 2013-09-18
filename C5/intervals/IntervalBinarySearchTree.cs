@@ -655,7 +655,7 @@ namespace C5.intervals
             return rotate(root);
         }
 
-        public void Remove(IInterval<T> interval)
+        public bool Remove(IInterval<T> interval)
         {
             // Delete the interval from the sets
             _root = removeByLow(_root, null, interval);
@@ -673,6 +673,8 @@ namespace C5.intervals
                 // Delete endpoint
                 remove(interval.High);
             }
+
+            return true;
         }
 
         #endregion
