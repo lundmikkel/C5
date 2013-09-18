@@ -30,6 +30,7 @@ namespace C5.Performance.Wpf
             PlotModel.Padding = new OxyThickness(-10, 0, 0, 0);
 
             PlotModel.LegendTitle = "Legend";
+            PlotModel.LegendPosition = LegendPosition.BottomRight;
             PlotModel.LegendBackground = OxyColors.White;
             PlotModel.LegendBorder = OxyColors.Black;
 
@@ -44,7 +45,7 @@ namespace C5.Performance.Wpf
             var valueAxis = new LinearAxis(AxisPosition.Left)
             {
                 AxisTitleDistance = 10,
-                Title = "Execution Time",
+                Title = "Execution Time in nano seconds",
                 MajorGridlineStyle = LineStyle.Solid,
                 MinorGridlineStyle = LineStyle.Dot
             };
