@@ -8,8 +8,6 @@ namespace C5.Performance.Wpf
 {
     public class Plotter
     {
-        public PlotModel PlotModel { get; set; }
-
         public Plotter(Benchmark benchmark)
         {
             PlotModel = new PlotModel();
@@ -17,18 +15,16 @@ namespace C5.Performance.Wpf
             ExportPdf();
         }
 
+        public PlotModel PlotModel { get; set; }
+
         private void ExportPdf(String path = "plot.pdf")
         {
             PdfExporter.Export(PlotModel, path, 800, 600);
         }
 
-
         private void SetUpModel(Benchmark benchmark)
         {
             PlotModel.Title = "Interval Plotter";
-            // Remove the padding on the left side of the plot
-            PlotModel.Padding = new OxyThickness(-10, 0, 0, 0);
-
             PlotModel.LegendTitle = "Legend";
             PlotModel.LegendPosition = LegendPosition.BottomRight;
             PlotModel.LegendBackground = OxyColors.White;
@@ -57,7 +53,8 @@ namespace C5.Performance.Wpf
 
         private void AddBenchmarks(Benchmark benchmark)
         {
-            var lineSerie = new LineSeries {
+            var lineSerie = new LineSeries
+            {
                 StrokeThickness = 2,
                 MarkerSize = 3,
                 MarkerStroke = OxyColors.Black,
@@ -68,7 +65,7 @@ namespace C5.Performance.Wpf
             };
             for (var i = 0; i < benchmark.NumberOfBenchmarks; i++)
             {
-                lineSerie.Points.Add(new DataPoint(benchmark.CollectionSizes[i],benchmark.MeanTimes[i]));
+                lineSerie.Points.Add(new DataPoint(benchmark.CollectionSizes[i], benchmark.MeanTimes[i]));
             }
             PlotModel.Series.Add(lineSerie);
         }
