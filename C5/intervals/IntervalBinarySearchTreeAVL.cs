@@ -145,7 +145,9 @@ namespace C5.intervals
 
         class Node
         {
-            public T Key { get; private set; }
+            private readonly T _key;
+
+            public T Key { get { return _key; } }
 
             private IntervalSet _less;
             private IntervalSet _equal;
@@ -168,7 +170,7 @@ namespace C5.intervals
             public Node Right { get; internal set; }
 
             // Fields for Maximum Number of Overlaps
-            public int Delta { get; internal set; }
+            public int DeltaAt { get; internal set; }
             public int DeltaAfter { get; internal set; }
             private int Sum { get; set; }
             public int Max { get; private set; }
@@ -178,16 +180,18 @@ namespace C5.intervals
 
             public Node(T key)
             {
-                Key = key;
+                _key = key;
             }
 
             public void UpdateMaximumOverlap()
             {
+                // TODO: Find a clever way only to update what needs to be updated!
+
                 // Set Max to Left's Max
                 Max = Left != null ? Left.Max : 0;
 
                 // Start building up the other possible Max sums
-                var value = (Left != null ? Left.Sum : 0) + Delta;
+                var value = (Left != null ? Left.Sum : 0) + DeltaAt;
                 // And check if they are higher the previously found max
                 if (value > Max)
                     Max = value;
@@ -208,7 +212,7 @@ namespace C5.intervals
 
             public override string ToString()
             {
-                return Key.ToString();
+                return _key.ToString();
             }
         }
 
@@ -264,10 +268,15 @@ namespace C5.intervals
 
         public IntervalBinarySearchTreeAVL(IEnumerable<IInterval<T>> intervals)
         {
+            // TODO: Pre-generate balanced tree based on endpoints and insert intervals afterwards
+
             foreach (var interval in intervals)
                 Add(interval);
         }
 
+        /// <summary>
+        /// Create empty Interval Binary Search Tree
+        /// </summary>
         public IntervalBinarySearchTreeAVL()
         {
         }
@@ -289,13 +298,13 @@ namespace C5.intervals
 
         #region ICollection, IExtensible
 
-        #region insertion
+        #region Add
 
         public bool Add(IInterval<T> interval)
         {
-            // Variables for tree rotations
+            // Used tree rotations
             var nodeWasAdded = false;
-            // Variable for check if interval was actually added
+            // Used to check if interval was actually added
             var intervalWasAdded = false;
 
             _root = addLow(_root, null, interval, ref nodeWasAdded, ref intervalWasAdded);
@@ -321,7 +330,7 @@ namespace C5.intervals
 
         private static Node addLow(Node root, Node right, IInterval<T> interval, ref bool nodeWasAdded, ref bool intervalWasAdded)
         {
-            // No node existed for the Low endpoint
+            // No node existed for the low endpoint
             if (root == null)
             {
                 root = new Node(interval.Low);
@@ -369,7 +378,7 @@ namespace C5.intervals
                 if (intervalWasAdded)
                     // Update delta
                     if (interval.LowIncluded)
-                        root.Delta++;
+                        root.DeltaAt++;
                     else
                         root.DeltaAfter++;
             }
@@ -387,7 +396,7 @@ namespace C5.intervals
 
         private static Node addHigh(Node root, Node left, IInterval<T> interval, ref bool nodeWasAdded, ref bool intervalWasAdded)
         {
-            // No node existed for the High endpoint
+            // No node existed for the high endpoint
             if (root == null)
             {
                 root = new Node(interval.High);
@@ -434,7 +443,7 @@ namespace C5.intervals
                 // If interval was added, we need to update MNO
                 if (intervalWasAdded)
                     if (!interval.HighIncluded)
-                        root.Delta--;
+                        root.DeltaAt--;
                     else
                         root.DeltaAfter--;
             }
@@ -450,14 +459,14 @@ namespace C5.intervals
             return root;
         }
 
+        #endregion
+
+        #region Remove
+
         public void Remove(IInterval<T> interval)
         {
             throw new NotImplementedException();
         }
-
-        #endregion
-
-        #region deletion
 
         private Node removeByLow(Node root, Node right, IInterval<T> interval)
         {
@@ -482,7 +491,7 @@ namespace C5.intervals
 
                 // Update delta
                 if (interval.LowIncluded)
-                    root.Delta--;
+                    root.DeltaAt--;
                 else
                     root.DeltaAfter--;
             }
@@ -527,7 +536,7 @@ namespace C5.intervals
                     root.Equal.Remove(interval);
 
                 if (!interval.HighIncluded)
-                    root.Delta++;
+                    root.DeltaAt++;
                 else
                     root.DeltaAfter++;
             }
