@@ -449,9 +449,118 @@ namespace C5.intervals
 
         public bool Remove(IInterval<T> interval)
         {
-            // TODO: Implement count
+            // Used to check if interval was actually added
+            var intervalWasRemoved = false;
 
-            throw new NotImplementedException();
+            removeLow(_root, null, interval, ref intervalWasRemoved);
+
+            // Only try to add High if it is different from Low
+            if (intervalWasRemoved && interval.CompareEndpointsValues() < 0)
+                removeHigh(_root, null, interval, ref intervalWasRemoved);
+
+            // TODO: remove node and fix balance
+
+            // Increase counter and raise event if interval was added
+            if (intervalWasRemoved)
+            {
+                _count--;
+                raiseForRemove(interval);
+            }
+
+            // TODO: Add event for change in MNO
+
+            return intervalWasRemoved;
+        }
+
+        private void removeLow(Node root, Node right, IInterval<T> interval, ref bool intervalWasRemoved)
+        {
+            // No node existed for the low endpoint
+            if (root == null)
+                return;
+
+            var compare = interval.Low.CompareTo(root.Key);
+
+            if (compare > 0)
+                removeLow(root.Right, right, interval, ref intervalWasRemoved);
+            else if (compare < 0)
+            {
+                // Everything in the right subtree of root will lie within the interval
+                if (right != null && right.Key.CompareTo(interval.High) <= 0)
+                    intervalWasRemoved = root.Greater.Remove(interval);
+
+                // root key is between interval.low and interval.high
+                if (root.Key.CompareTo(interval.High) < 0)
+                    intervalWasRemoved = root.Equal.Remove(interval);
+
+                // TODO: Figure this one out: if (interval.low != -inf.)
+                removeLow(root.Left, root, interval, ref intervalWasRemoved);
+            }
+            else
+            {
+                // If everything in the right subtree of root will lie within the interval
+                if (right != null && right.Key.CompareTo(interval.High) <= 0)
+                    intervalWasRemoved = root.Greater.Remove(interval);
+
+                if (interval.LowIncluded)
+                    intervalWasRemoved = root.Equal.Remove(interval);
+
+                // If interval was added, we need to update MNO
+                if (intervalWasRemoved)
+                    // Update delta
+                    if (interval.LowIncluded)
+                        root.DeltaAt--;
+                    else
+                        root.DeltaAfter--;
+            }
+
+            // Update MNO
+            if (intervalWasRemoved)
+                root.UpdateMaximumOverlap();
+        }
+
+        private void removeHigh(Node root, Node left, IInterval<T> interval, ref bool intervalWasRemoved)
+        {
+            // No node existed for the high endpoint
+            if (root == null)
+                return;
+
+            var compare = interval.High.CompareTo(root.Key);
+
+            if (compare < 0)
+                removeHigh(root.Left, left, interval, ref intervalWasRemoved);
+            else if (compare > 0)
+            {
+                // Everything in the right subtree of root will lie within the interval
+                if (left != null && left.Key.CompareTo(interval.Low) >= 0)
+                    intervalWasRemoved = root.Less.Remove(interval);
+
+                // root key is between interval.low and interval.high
+                if (root.Key.CompareTo(interval.Low) > 0)
+                    intervalWasRemoved = root.Equal.Remove(interval);
+
+                // TODO: Figure this one out: if (interval.low != -inf.)
+                removeHigh(root.Right, root, interval, ref intervalWasRemoved);
+            }
+            else
+            {
+                // If everything in the right subtree of root will lie within the interval
+                if (left != null && left.Key.CompareTo(interval.Low) >= 0)
+                    intervalWasRemoved = root.Less.Remove(interval);
+
+                if (interval.HighIncluded)
+                    intervalWasRemoved = root.Equal.Remove(interval);
+
+                // If interval was removed, we need to update MNO
+                if (intervalWasRemoved)
+                    if (!interval.HighIncluded)
+                        root.DeltaAt++;
+                    else
+                        root.DeltaAfter++;
+            }
+
+            // Update MNO
+            if (intervalWasRemoved)
+                root.UpdateMaximumOverlap();
         }
 
         private Node removeByLow(Node root, Node right, IInterval<T> interval)
