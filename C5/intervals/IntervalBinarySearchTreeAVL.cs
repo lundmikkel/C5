@@ -166,6 +166,9 @@ namespace C5.intervals
             public Node Left { get; internal set; }
             public Node Right { get; internal set; }
 
+            // The number of intervals with an endpoint in one of the interval sets in the node
+            public int intervalsEndingInNode;
+
             // Fields for Maximum Number of Overlaps
             public int DeltaAt { get; internal set; }
             public int DeltaAfter { get; internal set; }
@@ -358,13 +361,16 @@ namespace C5.intervals
                 if (interval.LowIncluded)
                     intervalWasAdded = root.Equal.Add(interval);
 
-                // If interval was added, we need to update MNO
                 if (intervalWasAdded)
-                    // Update delta
+                {
+                    root.intervalsEndingInNode++;
+
+                    // If interval was added, we need to update delta
                     if (interval.LowIncluded)
                         root.DeltaAt++;
                     else
                         root.DeltaAfter++;
+                }
             }
 
             // Tree might be unbalanced after node was added, so we rotate
@@ -426,10 +432,14 @@ namespace C5.intervals
 
                 // If interval was added, we need to update MNO
                 if (intervalWasAdded)
+                {
+                    root.intervalsEndingInNode++;
+
                     if (!interval.HighIncluded)
                         root.DeltaAt--;
                     else
                         root.DeltaAfter--;
+                }
             }
 
             // Tree might be unbalanced after node was added, so we rotate
@@ -449,16 +459,31 @@ namespace C5.intervals
 
         public bool Remove(IInterval<T> interval)
         {
+            // Used tree rotations
+            var removeNode = false;
             // Used to check if interval was actually added
             var intervalWasRemoved = false;
 
-            removeLow(_root, null, interval, ref intervalWasRemoved);
+            removeLow(_root, null, interval, ref removeNode, ref intervalWasRemoved);
+
+            // Remove node and rebalance tree, if node containing low endpoint is now empty
+            // (it doesn't contain intervals with endpoint values equal to the node value)
+            if (removeNode)
+                removeNodeWithKey(interval.Low);
 
             // Only try to add High if it is different from Low
             if (intervalWasRemoved && interval.CompareEndpointsValues() < 0)
-                removeHigh(_root, null, interval, ref intervalWasRemoved);
+            {
+                // Reset value
+                removeNode = false;
 
-            // TODO: remove node and fix balance
+                removeHigh(_root, null, interval, ref removeNode, ref intervalWasRemoved);
+
+                // Remove node and rebalance tree, if node containing high endpoint is now empty
+                // (it doesn't contain intervals with endpoint values equal to the node value)
+                if (removeNode)
+                    removeNodeWithKey(interval.High);
+            }
 
             // Increase counter and raise event if interval was added
             if (intervalWasRemoved)
@@ -472,7 +497,13 @@ namespace C5.intervals
             return intervalWasRemoved;
         }
 
-        private void removeLow(Node root, Node right, IInterval<T> interval, ref bool intervalWasRemoved)
+        private void removeNodeWithKey(T key)
+        {
+            // TODO: Implement
+            var node = findNode(_root, key);
+        }
+
+        private static void removeLow(Node root, Node right, IInterval<T> interval, ref bool removeNode, ref bool intervalWasRemoved)
         {
             // No node existed for the low endpoint
             if (root == null)
@@ -481,7 +512,7 @@ namespace C5.intervals
             var compare = interval.Low.CompareTo(root.Key);
 
             if (compare > 0)
-                removeLow(root.Right, right, interval, ref intervalWasRemoved);
+                removeLow(root.Right, right, interval, ref removeNode, ref intervalWasRemoved);
             else if (compare < 0)
             {
                 // Everything in the right subtree of root will lie within the interval
@@ -493,7 +524,7 @@ namespace C5.intervals
                     intervalWasRemoved = root.Equal.Remove(interval);
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
-                removeLow(root.Left, root, interval, ref intervalWasRemoved);
+                removeLow(root.Left, root, interval, ref removeNode, ref intervalWasRemoved);
             }
             else
             {
@@ -506,11 +537,16 @@ namespace C5.intervals
 
                 // If interval was added, we need to update MNO
                 if (intervalWasRemoved)
+                {
+                    if (--root.intervalsEndingInNode == 0)
+                        removeNode = true;
+
                     // Update delta
                     if (interval.LowIncluded)
                         root.DeltaAt--;
                     else
                         root.DeltaAfter--;
+                }
             }
 
             // Update MNO
@@ -518,7 +554,7 @@ namespace C5.intervals
                 root.UpdateMaximumOverlap();
         }
 
-        private void removeHigh(Node root, Node left, IInterval<T> interval, ref bool intervalWasRemoved)
+        private static void removeHigh(Node root, Node left, IInterval<T> interval, ref bool removeNode, ref bool intervalWasRemoved)
         {
             // No node existed for the high endpoint
             if (root == null)
@@ -527,7 +563,7 @@ namespace C5.intervals
             var compare = interval.High.CompareTo(root.Key);
 
             if (compare < 0)
-                removeHigh(root.Left, left, interval, ref intervalWasRemoved);
+                removeHigh(root.Left, left, interval, ref removeNode, ref intervalWasRemoved);
             else if (compare > 0)
             {
                 // Everything in the right subtree of root will lie within the interval
@@ -539,7 +575,7 @@ namespace C5.intervals
                     intervalWasRemoved = root.Equal.Remove(interval);
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
-                removeHigh(root.Right, root, interval, ref intervalWasRemoved);
+                removeHigh(root.Right, root, interval, ref removeNode, ref intervalWasRemoved);
             }
             else
             {
@@ -552,10 +588,15 @@ namespace C5.intervals
 
                 // If interval was removed, we need to update MNO
                 if (intervalWasRemoved)
+                {
+                    if (--root.intervalsEndingInNode == 0)
+                        removeNode = true;
+
                     if (!interval.HighIncluded)
                         root.DeltaAt++;
                     else
                         root.DeltaAfter++;
+                }
             }
 
             // Update MNO
@@ -702,9 +743,10 @@ namespace C5.intervals
 
                 if (compare > 0)
                     node = node.Right;
-
-                if (compare < 0)
+                else if (compare < 0)
                     node = node.Left;
+                else
+                    break;
             }
 
             return node;
