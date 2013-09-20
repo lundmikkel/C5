@@ -496,13 +496,7 @@ namespace C5.intervals
 
             return intervalWasRemoved;
         }
-
-        private void removeNodeWithKey(T key)
-        {
-            // TODO: Implement
-            var node = findNode(_root, key);
-        }
-
+        
         private static void removeLow(Node root, Node right, IInterval<T> interval, ref bool removeNode, ref bool intervalWasRemoved)
         {
             // No node existed for the low endpoint
@@ -604,6 +598,11 @@ namespace C5.intervals
                 root.UpdateMaximumOverlap();
         }
 
+        private void removeNodeWithKey(T key)
+        {
+            // TODO: Implement
+            var node = findNode(_root, key);
+        }
 
         /// <summary>
         /// Find the node containing the search key.
