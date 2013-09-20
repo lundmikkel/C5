@@ -12,6 +12,7 @@ namespace C5.intervals
     {
         private Node _root;
         private int _count;
+        private static readonly IEqualityComparer<IInterval<T>> Comparer = ComparerFactory<IInterval<T>>.CreateEqualityComparer(ReferenceEquals, IntervalExtensions.GetHashCode);
 
         #region AVL tree helper methods
 
@@ -216,18 +217,16 @@ namespace C5.intervals
             }
         }
 
-        public sealed class IntervalSet : HashSet<IInterval<T>>
+        private sealed class IntervalSet : HashSet<IInterval<T>>
         {
-            private static IEqualityComparer<IInterval<T>> _comparer = ComparerFactory<IInterval<T>>.CreateEqualityComparer(ReferenceEquals, IntervalExtensions.GetHashCode);
-
-            public IntervalSet(IEnumerable<IInterval<T>> intervals)
-                : base(_comparer)
+            private IntervalSet(IEnumerable<IInterval<T>> intervals)
+                : base(Comparer)
             {
                 AddAll(intervals);
             }
 
             public IntervalSet()
-                : base(_comparer)
+                : base(Comparer)
             {
             }
 
