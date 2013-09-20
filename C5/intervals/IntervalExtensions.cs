@@ -173,6 +173,11 @@ namespace C5.intervals
             return compare;
         }
 
+        public static int CompareEndpointsValues<T>(this IInterval<T> x) where T : IComparable<T>
+        {
+            return x.Low.CompareTo(x.High);
+        }
+
         /// <summary>
         /// Check if two intervals are equal, i.e. have the same low and high endpoint including endpoint inclusion
         /// </summary>

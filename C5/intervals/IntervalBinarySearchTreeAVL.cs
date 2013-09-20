@@ -42,11 +42,9 @@ namespace C5.intervals
 
                         // Left Left Case
                         case -1:
-                            {
-                                root = rotateRight(root);
-                                root.Balance = root.Right.Balance = 0;
-                                break;
-                            }
+                            root = rotateRight(root);
+                            root.Balance = root.Right.Balance = 0;
+                            break;
                     }
                     nodeWasAdded = false;
                     break;
@@ -57,11 +55,9 @@ namespace C5.intervals
                     {
                         // Right Right Case
                         case +1:
-                            {
-                                root = rotateLeft(root);
-                                root.Balance = root.Left.Balance = 0;
-                                break;
-                            }
+                            root = rotateLeft(root);
+                            root.Balance = root.Left.Balance = 0;
+                            break;
 
                         // Right Left Case
                         case -1:
@@ -297,7 +293,7 @@ namespace C5.intervals
             _root = addLow(_root, null, interval, ref nodeWasAdded, ref intervalWasAdded);
 
             // Only try to add High if it is different from Low
-            if (intervalWasAdded && interval.CompareLowHigh(interval) != 0)
+            if (intervalWasAdded && interval.CompareEndpointsValues() < 0)
             {
                 nodeWasAdded = false;
                 _root = addHigh(_root, null, interval, ref nodeWasAdded, ref intervalWasAdded);
@@ -315,6 +311,7 @@ namespace C5.intervals
             return intervalWasAdded;
         }
 
+        // TODO: Make iterative?
         private static Node addLow(Node root, Node right, IInterval<T> interval, ref bool nodeWasAdded, ref bool intervalWasAdded)
         {
             // No node existed for the low endpoint
@@ -582,41 +579,40 @@ namespace C5.intervals
             return false;
         }
 
-        private Node findNode(Node root, T endpoint)
+        /// <summary>
+        /// Find the node containing the search key.
+        /// </summary>
+        /// <param name="node">The root node which subtree should be searched.</param>
+        /// <param name="searchKey">The key being searched.</param>
+        /// <returns>The node containing the key if it exists, otherwise null.</returns>
+        private static Node findNode(Node node, T searchKey)
         {
-            if (root.Key.CompareTo(endpoint) == 0)
+            while (node != null)
             {
-                return root;
+                var compare = node.Key.CompareTo(searchKey);
+
+                if (compare > 0)
+                    node = node.Right;
+
+                if (compare < 0)
+                    node = node.Left;
             }
 
-            if (root.Key.CompareTo(endpoint) < 0)
-            {
-                return findNode(root.Right, endpoint);
-            }
-
-            if (root.Key.CompareTo(endpoint) > 0)
-            {
-                return findNode(root.Left, endpoint);
-            }
-
-            return null;
+            return node;
         }
 
-
-
-        // the smallest key; null if no such key
-        public T min()
+        /// <summary>
+        /// Find the current least node in the interval tree.
+        /// </summary>
+        /// <returns>The least node. Null if the tree is empty.</returns>
+        private Node findMinNode()
         {
-            return min(_root).Key;
-        }
+            var node = _root;
 
-        // the smallest key in subtree rooted at x; null if no such key
-        private Node min(Node x)
-        {
-            if (x.Left == null)
-                return x;
+            while (node != null)
+                node = node.Left;
 
-            return min(x.Left);
+            return node;
         }
 
 
@@ -1157,6 +1153,5 @@ namespace C5.intervals
         }
 
         #endregion
-
     }
 }
