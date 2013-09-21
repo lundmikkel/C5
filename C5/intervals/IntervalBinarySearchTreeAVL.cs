@@ -631,10 +631,8 @@ namespace C5.intervals
         /// Find the current least node in the interval tree.
         /// </summary>
         /// <returns>The least node. Null if the tree is empty.</returns>
-        private Node findMinNode()
+        private Node findMinNode(Node node)
         {
-            var node = _root;
-
             while (node != null)
                 node = node.Left;
 
