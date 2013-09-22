@@ -15,7 +15,8 @@ namespace C5.intervals
 
         private IInterval<T> _span;
 
-        private int _MaximumNumberOfOverlaps = -1;
+        // MNO
+        private int _maximumNumberOfOverlaps = -1;
         private IInterval<T> _intervalOfMaximumOverlap;
 
         #region Node nested classes
@@ -198,10 +199,6 @@ namespace C5.intervals
             return count;
         }
 
-        /// <summary>
-        /// Will return the index of the first interval that overlaps the query
-        /// </summary>
-        /// <returns></returns>
         private int findFirst(int layer, int lower, int upper, IInterval<T> query)
         {
             int min = lower - 1, max = upper;
@@ -530,56 +527,77 @@ namespace C5.intervals
             return 0 <= i && i < _firstLayerCount && _intervalLayers[0][i].Overlaps(query);
         }
 
+        #region MNO
+
         public int MaximumOverlap
         {
             get
             {
-                if (_MaximumNumberOfOverlaps < 0)
-                {
-                    // Init running maximum to the number of layers as that is the minimum number of overlaps
-                    var max = _layerCount;
+                if (IsEmpty)
+                    throw new InvalidOperationException("An empty collection has no interval of maximum overlap");
 
-                    // Create queue sorted on high intervals
-                    var comparer = ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareHigh);
-                    var queue = new IntervalHeap<IInterval<T>>(comparer);
+                if (_maximumNumberOfOverlaps < 0)
+                    findMaximumOverlap();
 
-                    // Loop through intervals in sorted order
-                    foreach (var interval in Sorted)
-                    {
-                        // Remove all intervals not overlapping the current interval from the queue
-                        while (!queue.IsEmpty && interval.CompareLowHigh(queue.FindMin()) > 0)
-                            queue.DeleteMin();
-
-                        queue.Add(interval);
-
-                        if (queue.Count > max)
-                        {
-                            max = queue.Count;
-                            // Create a new interval when new maximum is found
-                            // The low is the current intervals low due to the intervals being sorted
-                            // The high is the smallest high in the queue
-                            _intervalOfMaximumOverlap = new IntervalBase<T>(interval, queue.FindMin());
-                        }
-                    }
-
-                    // Cache value for later requests
-                    _MaximumNumberOfOverlaps = max;
-                }
-
-                return _MaximumNumberOfOverlaps;
+                return _maximumNumberOfOverlaps;
             }
         }
 
+        /// <summary>
+        /// Get the interval in which the maximum number of overlaps is.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">If collection is empty.</exception>
         public IInterval<T> IntervalOfMaximumOverlap
         {
             get
             {
-                if (_intervalOfMaximumOverlap == null)
+                if (IsEmpty)
                     throw new InvalidOperationException("An empty collection has no interval of maximum overlap");
+
+                if (_intervalOfMaximumOverlap == null)
+                    findMaximumOverlap();
 
                 return _intervalOfMaximumOverlap;
             }
         }
+
+        /// <summary>
+        /// Find the maximum number of overlaps and save the values in
+        /// <see cref="_maximumNumberOfOverlaps"/> and <see cref="_intervalOfMaximumOverlap"/>.
+        /// </summary>
+        private void findMaximumOverlap()
+        {
+            // Init running maximum to the number of layers as that is the minimum number of overlaps
+            var max = _layerCount;
+
+            // Create queue sorted on high intervals
+            var comparer = ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareHigh);
+            var queue = new IntervalHeap<IInterval<T>>(comparer);
+
+            // Loop through intervals in sorted order
+            foreach (var interval in Sorted)
+            {
+                // Remove all intervals from the queue not overlapping the current interval
+                while (!queue.IsEmpty && interval.CompareLowHigh(queue.FindMin()) > 0)
+                    queue.DeleteMin();
+
+                queue.Add(interval);
+
+                if (queue.Count > max)
+                {
+                    max = queue.Count;
+                    // Create a new interval when new maximum is found
+                    // The low is the current intervals low due to the intervals being sorted
+                    // The high is the smallest high in the queue
+                    _intervalOfMaximumOverlap = new IntervalBase<T>(interval, queue.FindMin());
+                }
+            }
+
+            // Cache value for later requests
+            _maximumNumberOfOverlaps = max;
+        }
+
+        #endregion
 
         public string Graphviz()
         {
