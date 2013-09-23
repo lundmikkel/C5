@@ -167,7 +167,7 @@ namespace C5.intervals
             public Node Right { get; internal set; }
 
             // The number of intervals with an endpoint in one of the interval sets in the node
-            public int intervalsEndingInNode;
+            public int IntervalsEndingInNode;
 
             // Fields for Maximum Number of Overlaps
             public int DeltaAt { get; internal set; }
@@ -360,7 +360,7 @@ namespace C5.intervals
 
                 if (intervalWasAdded)
                 {
-                    root.intervalsEndingInNode++;
+                    root.IntervalsEndingInNode++;
 
                     // If interval was added, we need to update delta
                     if (interval.LowIncluded)
@@ -430,7 +430,7 @@ namespace C5.intervals
                 // If interval was added, we need to update MNO
                 if (intervalWasAdded)
                 {
-                    root.intervalsEndingInNode++;
+                    root.IntervalsEndingInNode++;
 
                     if (!interval.HighIncluded)
                         root.DeltaAt--;
@@ -521,7 +521,7 @@ namespace C5.intervals
                 // If interval was added, we need to update MNO
                 if (intervalWasRemoved)
                 {
-                    if (--root.intervalsEndingInNode == 0)
+                    if (--root.IntervalsEndingInNode == 0)
                         removeNode = true;
 
                     // Update delta
@@ -572,7 +572,7 @@ namespace C5.intervals
                 // If interval was removed, we need to update MNO
                 if (intervalWasRemoved)
                 {
-                    if (--root.intervalsEndingInNode == 0)
+                    if (--root.IntervalsEndingInNode == 0)
                         removeNode = true;
 
                     if (!interval.HighIncluded)
