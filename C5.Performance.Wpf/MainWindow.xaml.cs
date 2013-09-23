@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.Odbc;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
@@ -17,10 +16,12 @@ namespace C5.Performance.Wpf
         private const int Repeats = 10;
         private const double MaxExecutionTimeInSeconds = 0.25;
 
-
         private readonly Plotter _viewModel;
         // Every time we benchmark we count this up in order to get a new color for every benchmark
-        private int _lineSeriesIndex = 0;
+        private int _lineSeriesIndex;
+
+        // Path of the exported pdf file containing the benchmark
+        private const String PdfPath = "plot.pdf";
 
         public MainWindow()
         {
@@ -29,31 +30,24 @@ namespace C5.Performance.Wpf
             InitializeComponent();
         }
 
-        private void button1_Click_1(object sender, RoutedEventArgs e) {
+        private void button1_Click_1(object sender, RoutedEventArgs e)
+        {
             var b = new SimpleBenchmark();
             var b2 = new IbsAddBenchmarker();
-            var thread = new Thread(() => RunBenchmarks(b,b2));
+            var thread = new Thread(() => RunBenchmarks(b, b2));
             thread.Start();
-        }
-
-        private void updateStatusLabel(String s)
-        {
-            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => this.StatusLabel.Content = s));
-        }
-
-        public void updateRunningLabel(String s)
-        {
-            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => this.RunningLabel.Content = s));
         }
 
         private void RunBenchmarks(params Benchmarkable[] benchmarks)
         {
             foreach (var b in benchmarks)
             {
-                _viewModel.AddLineSeries(b.BenchMarkName());
-                for (b.CollectionSize = MinCollectionSize; b.CollectionSize < MaxCollectionSize; b.CollectionSize *= CollectionMultiplier)
+                _viewModel.AddAreaSeries(b.BenchMarkName());
+                for (b.CollectionSize = MinCollectionSize;
+                    b.CollectionSize < MaxCollectionSize;
+                    b.CollectionSize *= CollectionMultiplier)
                 {
-                    updateStatusLabel("Running " + b.BenchMarkName() + " with collection size " + b.CollectionSize);
+                    UpdateStatusLabel("Running " + b.BenchMarkName() + " with collection size " + b.CollectionSize);
                     var benchmark = b.Benchmark(MaxCount, Repeats, MaxExecutionTimeInSeconds, this);
                     var index = _lineSeriesIndex;
                     Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
@@ -62,10 +56,21 @@ namespace C5.Performance.Wpf
                 }
                 _lineSeriesIndex++;
             }
-            updateRunningLabel("");
-            updateStatusLabel("Finished");
+            UpdateRunningLabel("");
+            UpdateStatusLabel("Finished");
             Thread.Sleep(1000);
-            updateStatusLabel("");
+            UpdateStatusLabel("");
+            _viewModel.ExportPdf(PdfPath);
+        }
+
+        public void UpdateRunningLabel(String s)
+        {
+            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => RunningLabel.Content = s));
+        }
+
+        private void UpdateStatusLabel(String s)
+        {
+            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => StatusLabel.Content = s));
         }
     }
 }
