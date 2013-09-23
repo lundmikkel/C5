@@ -9,8 +9,10 @@ namespace C5.Performance.Wpf.Benchmarks
 
         public abstract String BenchMarkName();
 
+        // Prepare the collections used for the benchmark
         public abstract void CollectionSetup();
 
+        // Do some setup before each benchmark run
         public abstract void Setup();
 
         public abstract double Call(int i);
@@ -28,7 +30,8 @@ namespace C5.Performance.Wpf.Benchmarks
                 for (var j = 0; j < repeats; j++)
                 {
                     caller.updateRunningLabel("");
-                    caller.updateRunningLabel("Running benchmark " + (j + 1) + " of " + repeats);
+                    caller.updateRunningLabel("Benchmarking " + count + " calls " + (j + 1) + " of " + repeats + " times");
+                    
                     var t = new Timer();
                     for (var i = 0; i < count; i++)
                     {
