@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using QuickGraph;
 using QuickGraph.Graphviz;
@@ -288,20 +289,26 @@ namespace C5.intervals
 
         public bool Add(IInterval<T> interval)
         {
+            // References to endpoint nodes needed when maintaining Interval
+            Node lowNode = null, highNode = null;
+
             // Used to check if interval was actually added
             var intervalWasAdded = false;
 
             // Insert low endpoint
             var nodeWasAdded = false;
-            _root = addLow(_root, null, interval, ref nodeWasAdded, ref intervalWasAdded);
+            _root = addLow(_root, null, interval, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
 
             // Insert high endpoint
             nodeWasAdded = false;
-            _root = addHigh(_root, null, interval, ref nodeWasAdded, ref intervalWasAdded);
+            _root = addHigh(_root, null, interval, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
 
             // Increase counter and raise event if interval was added
             if (intervalWasAdded)
             {
+                lowNode.IntervalsEndingInNode++;
+                highNode.IntervalsEndingInNode++;
+
                 _count++;
                 raiseForAdd(interval);
             }
@@ -312,7 +319,7 @@ namespace C5.intervals
         }
 
         // TODO: Make iterative?
-        private static Node addLow(Node root, Node right, IInterval<T> interval, ref bool nodeWasAdded, ref bool intervalWasAdded)
+        private static Node addLow(Node root, Node right, IInterval<T> interval, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node lowNode)
         {
             // No node existed for the low endpoint
             if (root == null)
@@ -326,7 +333,7 @@ namespace C5.intervals
 
             if (compare > 0)
             {
-                root.Right = addLow(root.Right, right, interval, ref nodeWasAdded, ref intervalWasAdded);
+                root.Right = addLow(root.Right, right, interval, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
 
                 // Adjust node balance, if node was added
                 if (nodeWasAdded)
@@ -343,7 +350,7 @@ namespace C5.intervals
                     intervalWasAdded = root.Equal.Add(interval);
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
-                root.Left = addLow(root.Left, root, interval, ref nodeWasAdded, ref intervalWasAdded);
+                root.Left = addLow(root.Left, root, interval, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
 
                 // Adjust node balance, if node was added
                 if (nodeWasAdded)
@@ -360,14 +367,15 @@ namespace C5.intervals
 
                 if (intervalWasAdded)
                 {
-                    root.IntervalsEndingInNode++;
-
                     // If interval was added, we need to update delta
                     if (interval.LowIncluded)
                         root.DeltaAt++;
                     else
                         root.DeltaAfter++;
                 }
+
+                // Save reference to endpoint node
+                lowNode = root;
             }
 
             // Tree might be unbalanced after node was added, so we rotate
@@ -381,7 +389,7 @@ namespace C5.intervals
             return root;
         }
 
-        private static Node addHigh(Node root, Node left, IInterval<T> interval, ref bool nodeWasAdded, ref bool intervalWasAdded)
+        private static Node addHigh(Node root, Node left, IInterval<T> interval, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node highNode)
         {
             // No node existed for the high endpoint
             if (root == null)
@@ -395,7 +403,7 @@ namespace C5.intervals
 
             if (compare < 0)
             {
-                root.Left = addHigh(root.Left, left, interval, ref nodeWasAdded, ref intervalWasAdded);
+                root.Left = addHigh(root.Left, left, interval, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
 
                 // Adjust node balance, if node was added
                 if (nodeWasAdded)
@@ -412,7 +420,7 @@ namespace C5.intervals
                     intervalWasAdded = root.Equal.Add(interval);
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
-                root.Right = addHigh(root.Right, root, interval, ref nodeWasAdded, ref intervalWasAdded);
+                root.Right = addHigh(root.Right, root, interval, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
 
                 // Adjust node balance, if node was added
                 if (nodeWasAdded)
@@ -430,13 +438,14 @@ namespace C5.intervals
                 // If interval was added, we need to update MNO
                 if (intervalWasAdded)
                 {
-                    root.IntervalsEndingInNode++;
-
                     if (!interval.HighIncluded)
                         root.DeltaAt--;
                     else
                         root.DeltaAfter--;
                 }
+
+                // Save reference to endpoint node
+                highNode = root;
             }
 
             // Tree might be unbalanced after node was added, so we rotate
@@ -456,27 +465,27 @@ namespace C5.intervals
 
         public bool Remove(IInterval<T> interval)
         {
+            // References to endpoint nodes needed when maintaining Interval
+            Node lowNode = null, highNode = null;
+
             // Used to check if interval was actually added
             var intervalWasRemoved = false;
 
             // Remove low endpoint
-            var removeNode = false;
-            removeLow(_root, null, interval, ref removeNode, ref intervalWasRemoved);
-            // Remove low endpoint node, if empty
-            if (removeNode)
-                removeNodeWithKey(interval.Low);
-
+            removeLow(_root, null, interval, ref intervalWasRemoved, ref lowNode);
 
             // Remove high endpoint
-            removeNode = false;
-            removeHigh(_root, null, interval, ref removeNode, ref intervalWasRemoved);
-            // Remove high endpoint node, if empty
-            if (removeNode)
-                removeNodeWithKey(interval.High);
+            removeHigh(_root, null, interval, ref intervalWasRemoved, ref highNode);
 
             // Increase counter and raise event if interval was added
             if (intervalWasRemoved)
             {
+                // Check for unnecessary endpoint nodes, if interval was actually removed
+                if (--lowNode.IntervalsEndingInNode == 0)
+                    removeNodeWithKey(interval.Low);
+                if (--highNode.IntervalsEndingInNode == 0)
+                    removeNodeWithKey(interval.High);
+
                 _count--;
                 raiseForRemove(interval);
             }
@@ -486,7 +495,7 @@ namespace C5.intervals
             return intervalWasRemoved;
         }
 
-        private static void removeLow(Node root, Node right, IInterval<T> interval, ref bool removeNode, ref bool intervalWasRemoved)
+        private static void removeLow(Node root, Node right, IInterval<T> interval, ref bool intervalWasRemoved, ref Node lowNode)
         {
             // No node existed for the low endpoint
             if (root == null)
@@ -495,7 +504,7 @@ namespace C5.intervals
             var compare = interval.Low.CompareTo(root.Key);
 
             if (compare > 0)
-                removeLow(root.Right, right, interval, ref removeNode, ref intervalWasRemoved);
+                removeLow(root.Right, right, interval, ref intervalWasRemoved, ref lowNode);
             else if (compare < 0)
             {
                 // Everything in the right subtree of root will lie within the interval
@@ -507,7 +516,7 @@ namespace C5.intervals
                     intervalWasRemoved = root.Equal.Remove(interval);
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
-                removeLow(root.Left, root, interval, ref removeNode, ref intervalWasRemoved);
+                removeLow(root.Left, root, interval, ref intervalWasRemoved, ref lowNode);
             }
             else
             {
@@ -521,15 +530,15 @@ namespace C5.intervals
                 // If interval was added, we need to update MNO
                 if (intervalWasRemoved)
                 {
-                    if (--root.IntervalsEndingInNode == 0)
-                        removeNode = true;
-
                     // Update delta
                     if (interval.LowIncluded)
                         root.DeltaAt--;
                     else
                         root.DeltaAfter--;
                 }
+
+                // Save reference to endpoint node
+                lowNode = root;
             }
 
             // Update MNO
@@ -537,7 +546,7 @@ namespace C5.intervals
                 root.UpdateMaximumOverlap();
         }
 
-        private static void removeHigh(Node root, Node left, IInterval<T> interval, ref bool removeNode, ref bool intervalWasRemoved)
+        private static void removeHigh(Node root, Node left, IInterval<T> interval, ref bool intervalWasRemoved, ref Node highNode)
         {
             // No node existed for the high endpoint
             if (root == null)
@@ -546,7 +555,7 @@ namespace C5.intervals
             var compare = interval.High.CompareTo(root.Key);
 
             if (compare < 0)
-                removeHigh(root.Left, left, interval, ref removeNode, ref intervalWasRemoved);
+                removeHigh(root.Left, left, interval, ref intervalWasRemoved, ref highNode);
             else if (compare > 0)
             {
                 // Everything in the right subtree of root will lie within the interval
@@ -558,7 +567,7 @@ namespace C5.intervals
                     intervalWasRemoved = root.Equal.Remove(interval);
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
-                removeHigh(root.Right, root, interval, ref removeNode, ref intervalWasRemoved);
+                removeHigh(root.Right, root, interval, ref intervalWasRemoved, ref highNode);
             }
             else
             {
@@ -572,14 +581,14 @@ namespace C5.intervals
                 // If interval was removed, we need to update MNO
                 if (intervalWasRemoved)
                 {
-                    if (--root.IntervalsEndingInNode == 0)
-                        removeNode = true;
-
                     if (!interval.HighIncluded)
                         root.DeltaAt++;
                     else
                         root.DeltaAfter++;
                 }
+
+                // Save reference to endpoint node
+                highNode = root;
             }
 
             // Update MNO
@@ -591,6 +600,12 @@ namespace C5.intervals
         {
             // TODO: Implement
             var node = findNode(_root, key);
+
+            // We only remove nodes that exist
+            Contract.Assert(node != null);
+
+            if (node.Left == null && node.Right == null)
+            { }
         }
 
         /// <summary>
@@ -774,7 +789,7 @@ namespace C5.intervals
             {
                 e.EdgeFormatter.Label = new GraphvizEdgeLabel
                 {
-                    Value = (e.Edge.Target.Balance > 0 ? "+" : "") + e.Edge.Target.Balance
+                    Value = (e.Edge.Target.Balance > 0 ? "+" : "") + e.Edge.Target.Balance + " / " + e.Edge.Target.IntervalsEndingInNode
                 };
             };
 
