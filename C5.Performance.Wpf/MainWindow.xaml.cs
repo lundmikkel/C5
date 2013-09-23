@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Odbc;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
@@ -35,6 +36,16 @@ namespace C5.Performance.Wpf
             thread.Start();
         }
 
+        private void updateStatusLabel(String s)
+        {
+            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => this.StatusLabel.Content = s));
+        }
+
+        public void updateRunningLabel(String s)
+        {
+            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => this.RunningLabel.Content = s));
+        }
+
         private void RunBenchmarks(params Benchmarkable[] benchmarks)
         {
             foreach (var b in benchmarks)
@@ -42,7 +53,8 @@ namespace C5.Performance.Wpf
                 _viewModel.AddLineSeries(b.BenchMarkName());
                 for (b.CollectionSize = MinCollectionSize; b.CollectionSize < MaxCollectionSize; b.CollectionSize *= CollectionMultiplier)
                 {
-                    var benchmark = b.Benchmark(MaxCount,Repeats,MaxExecutionTimeInSeconds);
+                    updateStatusLabel("Running " + b.BenchMarkName() + " with collection size " + b.CollectionSize);
+                    var benchmark = b.Benchmark(MaxCount, Repeats, MaxExecutionTimeInSeconds, this);
                     var index = _lineSeriesIndex;
                     Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
                         _viewModel.AddDataPoint(index, benchmark)));
@@ -50,6 +62,10 @@ namespace C5.Performance.Wpf
                 }
                 _lineSeriesIndex++;
             }
+            updateRunningLabel("");
+            updateStatusLabel("Finished");
+            Thread.Sleep(1000);
+            updateStatusLabel("");
         }
     }
 }

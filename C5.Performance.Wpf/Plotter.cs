@@ -1,4 +1,5 @@
 ﻿using System;
+using C5.Performance.Wpf.Benchmarks;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Pdf;

@@ -7,7 +7,9 @@
     <Grid>
         <oxy:Plot Model="{Binding (wpf:Plotter.PlotModel)}" Margin="0" Grid.Row="1" />
         <Button Height="23" HorizontalAlignment="Left" Margin="10,0,0,10" 
-            Name="button1" VerticalAlignment="Bottom"
-            Width="75" Click="button1_Click_1">Benchmark</Button>
+            x:Name="button1" VerticalAlignment="Bottom"
+            Width="75" Click="button1_Click_1" Content="Benchmark"/>
+        <Label x:Name="StatusLabel" Content="" HorizontalAlignment="Left" Margin="10,9,0,0" VerticalAlignment="Top" Height="45" FontWeight="Bold" Width="277"/>
+        <Label x:Name="RunningLabel" Content="" HorizontalAlignment="Left" Margin="599,9,0,516.667" FontWeight="Bold" RenderTransformOrigin="0.667,-0.272" Width="184"/>
     </Grid>
 </Window>
