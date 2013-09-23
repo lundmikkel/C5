@@ -296,7 +296,7 @@ namespace C5.intervals
             _root = addLow(_root, null, interval, ref nodeWasAdded, ref intervalWasAdded);
 
             // Only try to add High if it is different from Low
-            if (intervalWasAdded && interval.CompareEndpointsValues() < 0)
+            if (intervalWasAdded)
             {
                 nodeWasAdded = false;
                 _root = addHigh(_root, null, interval, ref nodeWasAdded, ref intervalWasAdded);
