@@ -288,19 +288,16 @@ namespace C5.intervals
 
         public bool Add(IInterval<T> interval)
         {
-            // Used tree rotations
-            var nodeWasAdded = false;
             // Used to check if interval was actually added
             var intervalWasAdded = false;
 
+            // Insert low endpoint
+            var nodeWasAdded = false;
             _root = addLow(_root, null, interval, ref nodeWasAdded, ref intervalWasAdded);
 
-            // Only try to add High if it is different from Low
-            if (intervalWasAdded)
-            {
-                nodeWasAdded = false;
-                _root = addHigh(_root, null, interval, ref nodeWasAdded, ref intervalWasAdded);
-            }
+            // Insert high endpoint
+            nodeWasAdded = false;
+            _root = addHigh(_root, null, interval, ref nodeWasAdded, ref intervalWasAdded);
 
             // Increase counter and raise event if interval was added
             if (intervalWasAdded)
@@ -459,31 +456,23 @@ namespace C5.intervals
 
         public bool Remove(IInterval<T> interval)
         {
-            // Used tree rotations
-            var removeNode = false;
             // Used to check if interval was actually added
             var intervalWasRemoved = false;
 
+            // Remove low endpoint
+            var removeNode = false;
             removeLow(_root, null, interval, ref removeNode, ref intervalWasRemoved);
-
-            // Remove node and rebalance tree, if node containing low endpoint is now empty
-            // (it doesn't contain intervals with endpoint values equal to the node value)
+            // Remove low endpoint node, if empty
             if (removeNode)
                 removeNodeWithKey(interval.Low);
 
-            // Only try to add High if it is different from Low
-            if (intervalWasRemoved && interval.CompareEndpointsValues() < 0)
-            {
-                // Reset value
-                removeNode = false;
 
-                removeHigh(_root, null, interval, ref removeNode, ref intervalWasRemoved);
-
-                // Remove node and rebalance tree, if node containing high endpoint is now empty
-                // (it doesn't contain intervals with endpoint values equal to the node value)
-                if (removeNode)
-                    removeNodeWithKey(interval.High);
-            }
+            // Remove high endpoint
+            removeNode = false;
+            removeHigh(_root, null, interval, ref removeNode, ref intervalWasRemoved);
+            // Remove high endpoint node, if empty
+            if (removeNode)
+                removeNodeWithKey(interval.High);
 
             // Increase counter and raise event if interval was added
             if (intervalWasRemoved)
@@ -496,7 +485,7 @@ namespace C5.intervals
 
             return intervalWasRemoved;
         }
-        
+
         private static void removeLow(Node root, Node right, IInterval<T> interval, ref bool removeNode, ref bool intervalWasRemoved)
         {
             // No node existed for the low endpoint
@@ -821,7 +810,7 @@ namespace C5.intervals
             }
 
             id = nodeCounter++;
-            var rootString = direction == null ? "" : String.Format("\t{0} -> struct{1}:n [color={2}];\n", parent, id);
+            var rootString = direction == null ? "" : String.Format("\t{0} -> struct{1}:n;\n", parent, id);
 
             return
                 // Creates the structid: structid [label="<key> keyValue|{lessSet|equalSet|greaterSet}|{<idleft> leftChild|<idright> rightChild}"];
