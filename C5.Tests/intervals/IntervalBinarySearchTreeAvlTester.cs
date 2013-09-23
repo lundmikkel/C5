@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using C5.Tests.intervals.Generic;
@@ -38,7 +39,9 @@ namespace C5.Tests.intervals
         {
             internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new IntervalBinarySearchTreeAVL<int>(intervals);
+                var avl = new IntervalBinarySearchTreeAVL<int>(intervals);
+                Console.Out.WriteLine(avl.QuickGraph());
+                return avl;
             }
         }
 
