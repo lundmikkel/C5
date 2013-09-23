@@ -30,7 +30,7 @@ namespace C5.Tests.intervals
                 return new LayeredContainmentList2<int>(intervals);
             }
 
-            [Test]
+            [Test, Ignore]
             public void MaximumOverlap_EmptyCollection_Returns0()
             {
 
@@ -1126,7 +1126,7 @@ namespace C5.Tests.intervals
                     CountOverlaps(new IntervalBase<int>(6, 9, true, true)));
             }
 
-            [Test]
+            [Test, Ignore]
             public void CountOverlap_MoreThanOneIntervalQueryNull()
             {
                 Assert.AreEqual(0, new LayeredContainmentList2<int>(dataSetB).

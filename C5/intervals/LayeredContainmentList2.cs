@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace C5.intervals
 {
     public class LayeredContainmentList2<T> : CollectionValueBase<IInterval<T>>, IIntervalCollection<T> where T : IComparable<T>
     {
+        // Number of intervals in the collection
         private readonly int _count;
+        // Number of intervals in the first layer
         private readonly int _firstLayerCount;
+        // Number of layers
         private readonly int _layerCount;
 
         private readonly IInterval<T>[][] _intervalLayers;
@@ -64,12 +68,13 @@ namespace C5.intervals
             _layerCount = nodeLayers.Count();
             _firstLayerCount = nodeLayers.First.Count;
 
-            // Create the list that contains the containment layers
+            // Create the layers for intervals and pointers
             _intervalLayers = new IInterval<T>[_layerCount][];
             _pointerLayers = new int[_layerCount][];
 
-            // Create each containment layer
-            var lastCount = 0;
+            // Remember the count from the layer above
+            var previousCount = 0;
+            // Create each layer starting at the last layer
             for (var i = _layerCount - 1; i >= 0; i--)
             {
                 var count = nodeLayers[i].Count;
@@ -84,8 +89,8 @@ namespace C5.intervals
                 }
 
                 // Add sentinel pointer
-                _pointerLayers[i][count] = lastCount;
-                lastCount = count;
+                _pointerLayers[i][count] = previousCount;
+                previousCount = count;
             }
         }
 
@@ -148,56 +153,49 @@ namespace C5.intervals
 
         #endregion
 
+        #region Count Overlaps
+
         public int CountOverlaps(IInterval<T> query)
         {
+            Contract.Requires(query != null);
+
             // Break if we won't find any overlaps
-            if (query == null || IsEmpty)
-                return 0;
-
-            return countOverlaps(0, 0, _firstLayerCount, query);
+            return !IsEmpty ? countOverlaps(query) : 0;
         }
 
-        public bool Add(IInterval<T> interval)
+        private int countOverlaps(IInterval<T> query)
         {
-            throw new NotSupportedException();
-        }
-
-        public bool Remove(IInterval<T> interval)
-        {
-            throw new NotSupportedException();
-        }
-
-        private int countOverlaps(int layer, int lower, int upper, IInterval<T> query)
-        {
-            var count = 0;
+            int layer = 0, lower = 0, upper = _firstLayerCount, count = 0;
 
             while (lower < upper)
             {
-                var first = lower;
-
                 // The first interval doesn't overlap we need to search for it
-                if (!_intervalLayers[layer][first].Overlaps(query))
+                // TODO: Can we tighten the check here? Like i.low < q.high...
+                if (!_intervalLayers[layer][lower].Overlaps(query))
                 {
                     // We know first doesn't overlap so we can increment it before searching
-                    first = findFirst(layer, ++first, upper, query);
+                    lower = findFirst(layer, ++lower, upper, query);
 
                     // If index is out of bound, or found interval doesn't overlap, then the layer won't contain any overlaps
-                    if (upper <= first || !_intervalLayers[layer][first].Overlaps(query))
+                    // TODO: Can we tighten the check here? Like i.low < q.high...
+                    if (upper <= lower || !_intervalLayers[layer][lower].Overlaps(query))
                         return count;
                 }
 
                 // We can use first as lower to speed up the search
-                var last = findLast(layer, first, upper, query);
+                upper = findLast(layer, lower, upper, query);
 
-                lower = _pointerLayers[layer][first];
-                upper = _pointerLayers[layer][last];
+                count += upper - lower;
+
+                lower = _pointerLayers[layer][lower];
+                upper = _pointerLayers[layer][upper];
                 layer++;
-
-                count += last - first;
             }
 
             return count;
         }
+
+        #endregion
 
         private int findFirst(int layer, int lower, int upper, IInterval<T> query)
         {
@@ -407,14 +405,94 @@ namespace C5.intervals
             }
         }
 
-        public IEnumerable<IInterval<T>> FindOverlapsSorted(IInterval<T> query)
+        #region Find Overlaps
+
+        #region Find Overlaps Sorted
+
+        /// <summary>
+        /// Create an enumerable, enumerating all intervals in the collection that overlap the query point in sorted order.
+        /// </summary>
+        /// <param name="query">The query point.</param>
+        /// <returns>All intervals that overlap the query point.</returns>
+        public IEnumerable<IInterval<T>> FindOverlapsSorted(T query)
         {
-            // No overlap if query is null, collection is empty, or query doesn't overlap collection
-            if (query == null || IsEmpty || !query.Overlaps(Span))
+            Contract.Requires(!ReferenceEquals(query, null));
+
+            var queryInterval = new IntervalBase<T>(query);
+
+            // No overlap if collection is empty or query doesn't overlap collection
+            if (IsEmpty || !queryInterval.Overlaps(Span))
                 return Enumerable.Empty<IInterval<T>>();
 
-            return findOverlapsSortedIterative(query, 0, _firstLayerCount);
-            return findOverlapsSortedRecursive(query, 0, 0, _firstLayerCount, -1);
+            return findOverlapsSorted(queryInterval, 0, _firstLayerCount);
+        }
+
+        /// <summary>
+        /// Create an enumerable, enumerating all intervals in the collection that overlap the query interval in sorted order.
+        /// </summary>
+        /// <param name="query">The query interval.</param>
+        /// <returns>All intervals that overlap the query interval.</returns>
+        public IEnumerable<IInterval<T>> FindOverlapsSorted(IInterval<T> query)
+        {
+            Contract.Requires(query != null);
+
+            // No overlap if collection is empty or query doesn't overlap collection
+            if (IsEmpty || !query.Overlaps(Span))
+                return Enumerable.Empty<IInterval<T>>();
+
+            return findOverlapsSorted(query, 0, _firstLayerCount);
+        }
+
+        private IEnumerable<IInterval<T>> findOverlapsSorted(IInterval<T> query, int start, int end)
+        {
+            // Create our own stack to avoid stack overflow and to speed up the enumerator
+            var stack = new int[_layerCount << 1];
+            var i = 0;
+            // Keeps track of when we need to search for first overlap
+            var highestVisitedLayer = -1;
+
+            // We stack both values consecutively instead of stacking pairs
+            stack[i++] = start;
+            stack[i++] = end;
+
+            // Continue as long as we still have values on the stack
+            while (i > 0)
+            {
+                // Get start and end from stack
+                end = stack[--i];
+                start = stack[--i];
+                var layer = i >> 1;
+
+                // Cache layers for speed
+                var intervalLayer = _intervalLayers[layer];
+                var pointerLayer = _pointerLayers[layer];
+
+                if (layer > highestVisitedLayer)
+                {
+                    start = findFirst(layer, start, end, query);
+                    highestVisitedLayer++;
+                }
+
+                // Iterate through all overlaps
+                while (start < end && intervalLayer[start].CompareLowHigh(query) <= 0)
+                {
+                    yield return intervalLayer[start];
+
+                    // If this and the next interval point to different intervals in the next layer, we need to swap layer
+                    if (pointerLayer[start] < pointerLayer[start + 1])
+                    {
+                        // Push the current values
+                        stack[i++] = start + 1;
+                        stack[i++] = end;
+                        // Push the values for the next layer
+                        stack[i++] = pointerLayer[start];
+                        stack[i++] = pointerLayer[start + 1];
+                        break;
+                    }
+
+                    start++;
+                }
+            }
         }
 
         private IEnumerable<IInterval<T>> findOverlapsSortedRecursive(IInterval<T> query, int layer, int start, int end, int highestVisitedLayer)
@@ -444,57 +522,9 @@ namespace C5.intervals
             }
         }
 
-        private IEnumerable<IInterval<T>> findOverlapsSortedIterative(IInterval<T> query, int start, int end)
-        {
-            // Create our own stack to avoid stack overflow and to speed up the enumerator
-            var stack = new int[_layerCount << 1];
-            var i = 0;
-            // Keeps track of when we need to search for first overlap
-            var highestVisitedLayer = -1;
+        #endregion
 
-            // We stack both values consecutively instead of stacking pairs
-            stack[i++] = start;
-            stack[i++] = end;
-
-            // Continue as long as we still have values on the stack
-            while (i > 0)
-            {
-                // Get start and end from stack
-                end = stack[--i];
-                start = stack[--i];
-                var layer = i >> 1;
-
-                // Cache layers for speed
-                var intervalLayer = _intervalLayers[i >> 1];
-                var pointerLayer = _pointerLayers[i >> 1];
-
-                if (layer > highestVisitedLayer)
-                {
-                    start = findFirst(layer, start, end, query);
-                    highestVisitedLayer++;
-                }
-
-                // Iterate through all overlaps
-                while (start < end && intervalLayer[start].CompareLowHigh(query) <= 0)
-                {
-                    yield return intervalLayer[start];
-
-                    // If this and the next interval point to different intervals in the next layer, we need to swap layer
-                    if (pointerLayer[start] < pointerLayer[start + 1])
-                    {
-                        // Push the current values
-                        stack[i++] = start + 1;
-                        stack[i++] = end;
-                        // Push the values for the next layer
-                        stack[i++] = pointerLayer[start];
-                        stack[i++] = pointerLayer[start + 1];
-                        break;
-                    }
-
-                    start++;
-                }
-            }
-        }
+        #endregion
 
         public IInterval<T> FindAnyOverlap(IInterval<T> query)
         {
@@ -638,5 +668,19 @@ namespace C5.intervals
 
             return s;
         }
+
+        #region Not Supported
+
+        public bool Add(IInterval<T> interval)
+        {
+            throw new NotSupportedException();
+        }
+
+        public bool Remove(IInterval<T> interval)
+        {
+            throw new NotSupportedException();
+        }
+
+        #endregion
     }
 }
