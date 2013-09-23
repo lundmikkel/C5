@@ -8,15 +8,15 @@ namespace C5.Performance
         private IntervalBinarySearchTreeAVL<int> collection;
         private IInterval<int>[] intervals;
 
-        protected override void CollectionSetup()
+        public override void CollectionSetup()
         {
             intervals = C5.Tests.intervals.BenchmarkTestCases.DataSetC(CollectionSize);
             collection = new IntervalBinarySearchTreeAVL<int>();
         }
 
-        protected override void Setup() { }
+        public override void Setup() { }
 
-        protected override double Call(int i)
+        public override double Call(int i)
         {
             foreach (var interval in intervals)
                 collection.Add(interval);
@@ -24,7 +24,7 @@ namespace C5.Performance
             return collection.Count;
         }
 
-        protected override string BenchMarkName()
+        public override string BenchMarkName()
         {
             return "IBS Add (AVL)";
         }

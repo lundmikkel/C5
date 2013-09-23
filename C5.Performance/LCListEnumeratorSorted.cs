@@ -11,21 +11,21 @@ namespace C5.Performance
     {
         private LayeredContainmentList2<int> _lclist;
 
-        protected override string BenchMarkName()
+        public override string BenchMarkName()
         {
             return "LCList Enumerable Sorted";
         }
 
-        protected override void CollectionSetup()
+        public override void CollectionSetup()
         {
             _lclist = new LayeredContainmentList2<int>(BenchmarkTestCases.DataSetA(CollectionSize));
         }
 
-        protected override void Setup()
+        public override void Setup()
         {
         }
 
-        protected override double Call(int i)
+        public override double Call(int i)
         {
             var sum = 0.0;
             foreach (var interval in _lclist.Sorted)

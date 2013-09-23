@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace C5.Performance
+namespace C5.Performance.Wpf.Benchmarks
 {
     internal class SearchScalability : Benchmarkable
     {

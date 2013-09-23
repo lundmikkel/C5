@@ -1,9 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using C5.intervals;
 using C5.Tests.intervals;
 
-namespace C5.Performance
+namespace C5.Performance.Wpf.Benchmarks
 {
     internal class JITCheater : Benchmarkable
     {
