@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace C5.Performance
+﻿namespace C5.Performance.Wpf.Benchmarks
 {
     public class SimpleBenchmark : Benchmarkable
     {
-        private int[] intArray;
+        private int[] _intArray;
 
         public static int BinarySearch(int x, int[] arr)
         {
@@ -25,7 +23,7 @@ namespace C5.Performance
         public override void CollectionSetup()
         {
             // Setup an int array with sorted integers from 0 to CollectionSize
-            intArray = SearchAndSort.FillIntArray(CollectionSize);
+            _intArray = SearchAndSort.FillIntArray(CollectionSize);
 
             /*
              * Setup an items array with things to look for. Fill in random numbers from 0 to twice the value of the collection size.
@@ -40,7 +38,7 @@ namespace C5.Performance
 
         public override double Call(int i)
         {
-            return BinarySearch(i, intArray);
+            return BinarySearch(i, _intArray);
         }
 
         public override string BenchMarkName()

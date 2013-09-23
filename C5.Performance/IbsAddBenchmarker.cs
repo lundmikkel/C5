@@ -1,30 +1,32 @@
-﻿using System;
-using C5.intervals;
+﻿using C5.intervals;
+using C5.Tests.intervals;
 
 namespace C5.Performance
 {
     public class IbsAddBenchmarker : Benchmarkable
     {
+        private IInterval<int>[] _intervals;
         private IntervalBinarySearchTree<int> collection;
-        private IInterval<int>[] intervals;
 
-        protected override void CollectionSetup()
+        public override void CollectionSetup()
         {
-            intervals = C5.Tests.intervals.BenchmarkTestCases.DataSetC(CollectionSize);
+            _intervals = BenchmarkTestCases.DataSetC(CollectionSize);
             collection = new IntervalBinarySearchTree<int>();
+            ItemsArray = SearchAndSort.FillIntArray(CollectionSize);
+            SearchAndSort.Shuffle(ItemsArray);
         }
 
-        protected override void Setup() { }
-
-        protected override double Call(int i)
+        public override void Setup()
         {
-            foreach (var interval in intervals)
-                collection.Add(interval);
-
-            return collection.Count;
         }
 
-        protected override string BenchMarkName()
+        public override double Call(int i)
+        {
+            collection.Add(_intervals[i]);
+            return i;
+        }
+
+        public override string BenchMarkName()
         {
             return "IBS Add (AVL)";
         }

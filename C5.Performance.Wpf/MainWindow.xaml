@@ -6,5 +6,8 @@
         Title="C5 Interval Plotter" Width="800" Height="600">
     <Grid>
         <oxy:Plot Model="{Binding (wpf:Plotter.PlotModel)}" Margin="0" Grid.Row="1" />
+        <Button Height="23" HorizontalAlignment="Left" Margin="10,0,0,10" 
+            Name="button1" VerticalAlignment="Bottom"
+            Width="75" Click="button1_Click_1">Benchmark</Button>
     </Grid>
 </Window>

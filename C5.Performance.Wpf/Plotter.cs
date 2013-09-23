@@ -2,17 +2,19 @@
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Pdf;
-using OxyPlot.Series;
+using LinearAxis = OxyPlot.Axes.LinearAxis;
+using LineSeries = OxyPlot.Series.LineSeries;
 
 namespace C5.Performance.Wpf
 {
     public class Plotter
     {
-        public Plotter(Benchmark benchmark)
+        public Plotter(params Benchmarkable[] benchmarks)
         {
             PlotModel = new PlotModel();
-            SetUpModel(benchmark);
-            ExportPdf();
+            SetUpModel();
+//            AddBenchmarks(benchmarks);
+//            ExportPdf();
         }
 
         public PlotModel PlotModel { get; set; }
@@ -22,11 +24,11 @@ namespace C5.Performance.Wpf
             PdfExporter.Export(PlotModel, path, 800, 600);
         }
 
-        private void SetUpModel(Benchmark benchmark)
+        private void SetUpModel()
         {
             PlotModel.Title = "Interval Plotter";
             PlotModel.LegendTitle = "Legend";
-            PlotModel.LegendPosition = LegendPosition.BottomRight;
+            PlotModel.LegendPosition = LegendPosition.LeftTop;
             PlotModel.LegendBackground = OxyColors.White;
             PlotModel.LegendBorder = OxyColors.Black;
 
@@ -47,26 +49,42 @@ namespace C5.Performance.Wpf
             };
             PlotModel.Axes.Add(sizeAxis);
             PlotModel.Axes.Add(valueAxis);
-
-            AddBenchmarks(benchmark);
         }
 
-        private void AddBenchmarks(Benchmark benchmark)
+//        public void UpdateModel() {
+//            List<Measurement> measurements = Data.GetUpdateData(lastUpdate);
+//            var dataPerDetector = measurements.GroupBy(m => m.DetectorId).OrderBy(m => m.Key).ToList();
+//
+//            foreach (var benchmark in dataPerDetector) {
+//                var lineSerie = PlotModel.Series[0] as LineSeries;
+//                if (lineSerie != null) {
+//                    benchmark.ToList()
+//                        .ForEach(d => lineSerie.Points.Add(new DataPoint(DateTimeAxis.ToDouble(d.DateTime), d.Value)));
+//                }
+//            }
+//            lastUpdate = DateTime.Now;
+//        }
+
+        public void AddDataPoint(int indexOfLineSeries, Benchmark benchmark)
+        {
+            var lineSeries = PlotModel.Series[indexOfLineSeries] as LineSeries;
+            if (lineSeries != null)
+                lineSeries.Points.Add(new DataPoint(benchmark.CollectionSize, benchmark.MeanTime));
+            PlotModel.RefreshPlot(true);
+        }
+
+        public void AddLineSeries(String name)
         {
             var lineSerie = new LineSeries
-            {
-                StrokeThickness = 2,
-                MarkerSize = 3,
-                MarkerStroke = OxyColors.Black,
-                MarkerType = MarkerType.Circle,
-                CanTrackerInterpolatePoints = false,
-                Title = benchmark.BenchmarkName,
-                Smooth = false,
-            };
-            for (var i = 0; i < benchmark.NumberOfBenchmarks; i++)
-            {
-                lineSerie.Points.Add(new DataPoint(benchmark.CollectionSizes[i], benchmark.MeanTimes[i]));
-            }
+                {
+                    StrokeThickness = 2,
+                    MarkerSize = 3,
+                    MarkerStroke = OxyColors.Black,
+                    MarkerType = MarkerType.Circle,
+                    CanTrackerInterpolatePoints = false,
+                    Title = name,
+                    Smooth = false,
+                };
             PlotModel.Series.Add(lineSerie);
         }
     }

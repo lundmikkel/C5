@@ -76,6 +76,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Benchmarks\Benchmark.cs" />
+    <Compile Include="Benchmarks\Benchmarkable.cs" />
+    <Compile Include="Benchmarks\IbsAddBenchmarker.cs" />
+    <Compile Include="Benchmarks\IbsAvlAddBenchmarker.cs" />
+    <Compile Include="Benchmarks\JITCheater.cs" />
+    <Compile Include="Benchmarks\LCListEnumeratorSorted.cs" />
+    <Compile Include="Timer.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -84,6 +91,9 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Benchmarks\SearchAndSort.cs" />
+    <Compile Include="Benchmarks\SearchScalability.cs" />
+    <Compile Include="Benchmarks\SimpleBenchmark.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -120,9 +130,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\C5.Performance\C5.Performance.csproj">
-      <Project>{ED07D3F4-98EB-40FF-B1B9-C31FC98BB750}</Project>
-      <Name>C5.Performance</Name>
+    <ProjectReference Include="..\C5.Tests\C5.Tests.csproj">
+      <Project>{08cbfdeb-a2e2-4f0e-a4e1-b996b05569de}</Project>
+      <Name>C5.Tests</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\C5\C5.csproj">
+      <Project>{d02e0664-c56c-4c3f-98e5-c8ec881a8439}</Project>
+      <Name>C5</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
