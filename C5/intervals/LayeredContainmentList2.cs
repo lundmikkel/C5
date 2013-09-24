@@ -567,7 +567,7 @@ namespace C5.intervals
                     throw new InvalidOperationException("An empty collection has no interval of maximum overlap");
 
                 if (_maximumNumberOfOverlaps < 0)
-                    findMaximumOverlap();
+                    findMaximumOverlap(Sorted, _layerCount);
 
                 return _maximumNumberOfOverlaps;
             }
@@ -585,27 +585,39 @@ namespace C5.intervals
                     throw new InvalidOperationException("An empty collection has no interval of maximum overlap");
 
                 if (_intervalOfMaximumOverlap == null)
-                    findMaximumOverlap();
+                    // Init running maximum to the number of layers as that is the minimum number of overlaps
+                    findMaximumOverlap(Sorted, _layerCount);
 
                 return _intervalOfMaximumOverlap;
             }
         }
 
         /// <summary>
+        /// Find the maximum number of overlaps for all intervals overlapping the query interval.
+        /// </summary>
+        /// <param name="query">The query interval.</param>
+        /// <remarks>
+        /// The query interval is not in the maximum number of overlaps. If only one interval
+        /// overlaps the query, the result will therefore be 1.
+        /// </remarks>
+        /// <returns>The maximum number of overlaps</returns>
+        public int FindMaximumOverlap(IInterval<T> query)
+        {
+            return findMaximumOverlap(FindOverlapsSorted(query));
+        }
+
+        /// <summary>
         /// Find the maximum number of overlaps and save the values in
         /// <see cref="_maximumNumberOfOverlaps"/> and <see cref="_intervalOfMaximumOverlap"/>.
         /// </summary>
-        private void findMaximumOverlap()
+        private int findMaximumOverlap(IEnumerable<IInterval<T>> sortedIntervals, int max = 0)
         {
-            // Init running maximum to the number of layers as that is the minimum number of overlaps
-            var max = _layerCount;
-
             // Create queue sorted on high intervals
             var comparer = ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareHigh);
             var queue = new IntervalHeap<IInterval<T>>(comparer);
 
             // Loop through intervals in sorted order
-            foreach (var interval in Sorted)
+            foreach (var interval in sortedIntervals)
             {
                 // Remove all intervals from the queue not overlapping the current interval
                 while (!queue.IsEmpty && interval.CompareLowHigh(queue.FindMin()) > 0)
@@ -625,6 +637,8 @@ namespace C5.intervals
 
             // Cache value for later requests
             _maximumNumberOfOverlaps = max;
+
+            return max;
         }
 
         #endregion
