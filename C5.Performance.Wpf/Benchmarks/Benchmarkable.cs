@@ -54,17 +54,17 @@ namespace C5.Performance.Wpf.Benchmarks
 
         protected void SystemInfo()
         {
-            Console.WriteLine("# OS          {0}",
+            Console.WriteLine(@"# OS          {0}",
                 Environment.OSVersion.VersionString);
-            Console.WriteLine("# .NET vers.  {0}",
+            Console.WriteLine(@"# .NET vers.  {0}",
                 Environment.Version);
-            Console.WriteLine("# 64-bit OS   {0}",
+            Console.WriteLine(@"# 64-bit OS   {0}",
                 Environment.Is64BitOperatingSystem);
-            Console.WriteLine("# 64-bit proc {0}",
+            Console.WriteLine(@"# 64-bit proc {0}",
                 Environment.Is64BitProcess);
-            Console.WriteLine("# CPU         {0}",
+            Console.WriteLine(@"# CPU         {0}",
                 Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER"));
-            Console.WriteLine("# Date        {0:s}",
+            Console.WriteLine(@"# Date        {0:s}",
                 DateTime.Now);
         }
     }
