@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5ForNPerf", "C5ForNPerf\C5
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.Performance.Wpf", "C5.Performance.Wpf\C5.Performance.Wpf.csproj", "{2FDF20F0-55AF-4A44-90ED-E658ADD5D500}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.Ucsc", "C5.Ucsc\C5.Ucsc.csproj", "{2B89EBFA-7CBC-46B3-943F-10209C906294}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +48,10 @@ Global
 		{2FDF20F0-55AF-4A44-90ED-E658ADD5D500}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2FDF20F0-55AF-4A44-90ED-E658ADD5D500}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2FDF20F0-55AF-4A44-90ED-E658ADD5D500}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B89EBFA-7CBC-46B3-943F-10209C906294}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B89EBFA-7CBC-46B3-943F-10209C906294}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B89EBFA-7CBC-46B3-943F-10209C906294}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B89EBFA-7CBC-46B3-943F-10209C906294}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
