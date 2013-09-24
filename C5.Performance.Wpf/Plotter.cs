@@ -1,5 +1,4 @@
 ﻿using System;
-using C5.Performance.Wpf.Benchmarks;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Pdf;
@@ -9,7 +8,7 @@ namespace C5.Performance.Wpf
 {
     public class Plotter
     {
-        public Plotter(params Benchmarkable[] benchmarks)
+        public Plotter()
         {
             PlotModel = new PlotModel();
             SetUpModel();
@@ -17,7 +16,7 @@ namespace C5.Performance.Wpf
 
         public PlotModel PlotModel { get; set; }
 
-        public void ExportPdf(String path = "plot.pdf")
+        public void ExportPdf(String path)
         {
             PdfExporter.Export(PlotModel, path, 4960, 7016);
         }

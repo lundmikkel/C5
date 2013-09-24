@@ -6,7 +6,7 @@ using C5.Performance.Wpf.Benchmarks;
 
 namespace C5.Performance.Wpf
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         // Parameters for running the benchmarks
         private const int MinCollectionSize = 100;
