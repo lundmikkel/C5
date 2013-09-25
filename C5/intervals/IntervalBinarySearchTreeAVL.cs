@@ -351,17 +351,17 @@ namespace C5.intervals
         [ContractInvariantMethod]
         private void AVLInvariants()
         {
-            Contract.Invariant(ConfirmHeight());
+            Contract.Invariant(confirmBalance());
         }
 
         /// <summary>
         /// Checks that the height of the tree is balanced
         /// </summary>
         /// <returns></returns>
-        private bool ConfirmHeight()
+        private bool confirmBalance()
         {
             var result = true;
-            Height(_root, ref result);
+            height(_root, ref result);
             return result;
         }
 
@@ -371,12 +371,12 @@ namespace C5.intervals
         /// <param name="node">The node you wish to check the height on</param>
         /// <param name="result">Reference to a bool that will be set to false if an inbalance is discovered</param>
         /// <returns></returns>
-        private static int Height(Node node, ref bool result)
+        private static int height(Node node, ref bool result)
         {
             if (node == null)
                 return 0;
-            var heightLeft = Height(node.Left, ref result);
-            var heightRight = Height(node.Right, ref result);
+            var heightLeft = height(node.Left, ref result);
+            var heightRight = height(node.Right, ref result);
             if (node.Balance != heightRight - heightLeft)
                 result = false;
             return Math.Max(heightLeft,heightRight) + 1;

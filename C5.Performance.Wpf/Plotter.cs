@@ -1,7 +1,7 @@
 ﻿using System;
 using OxyPlot;
 using OxyPlot.Axes;
-using OxyPlot.Pdf;
+//using OxyPlot.Pdf;
 using OxyPlot.Series;
 
 namespace C5.Performance.Wpf
@@ -29,7 +29,7 @@ namespace C5.Performance.Wpf
         /// <param name="height">Height in pixels of the generated pfd</param>
         public void ExportPdf(String path = "plot.pdf", int width = 4960, int height = 7016)
         {
-            PdfExporter.Export(PlotModel, path, width, height);
+//            PdfExporter.Export(PlotModel, path, width, height);
         }
 
         /// <summary>
