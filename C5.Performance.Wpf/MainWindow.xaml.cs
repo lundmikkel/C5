@@ -15,18 +15,16 @@ namespace C5.Performance.Wpf
         private const int MaxCount = Int32.MaxValue/100000;
         private const int Repeats = 10;
         private const double MaxExecutionTimeInSeconds = 0.25;
-
-        private readonly Plotter _viewModel;
+        // Path of the exported pdf file containing the benchmark
+        private const String PdfPath = "pdfplot.pdf";
+        private readonly Plotter _plotter;
         // Every time we benchmark we count this up in order to get a new color for every benchmark
         private int _lineSeriesIndex;
 
-        // Path of the exported pdf file containing the benchmark
-        private const String PdfPath = "plot.pdf";
-
         public MainWindow()
         {
-            _viewModel = new Plotter();
-            DataContext = _viewModel;
+            _plotter = Plotter.CreatePlotter();
+            DataContext = _plotter;
             InitializeComponent();
         }
 
@@ -42,17 +40,16 @@ namespace C5.Performance.Wpf
         {
             foreach (var b in benchmarks)
             {
-                _viewModel.AddAreaSeries(b.BenchMarkName());
+                _plotter.AddAreaSeries(b.BenchMarkName());
                 for (b.CollectionSize = MinCollectionSize;
                     b.CollectionSize < MaxCollectionSize;
                     b.CollectionSize *= CollectionMultiplier)
                 {
                     UpdateStatusLabel("Running " + b.BenchMarkName() + " with collection size " + b.CollectionSize);
                     var benchmark = b.Benchmark(MaxCount, Repeats, MaxExecutionTimeInSeconds, this);
-                    var index = _lineSeriesIndex;
                     Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
-                        _viewModel.AddDataPoint(index, benchmark)));
-                    //Thread.Sleep(100);
+                        _plotter.AddDataPoint(_lineSeriesIndex, benchmark)));
+                    Thread.Sleep(100);
                 }
                 _lineSeriesIndex++;
             }
@@ -60,17 +57,17 @@ namespace C5.Performance.Wpf
             UpdateStatusLabel("Finished");
             Thread.Sleep(1000);
             UpdateStatusLabel("");
-            _viewModel.ExportPdf(PdfPath);
-        }
-
-        public void UpdateRunningLabel(String s)
-        {
-            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => RunningLabel.Content = s));
+            _plotter.ExportPdf(PdfPath);
         }
 
         private void UpdateStatusLabel(String s)
         {
             Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => StatusLabel.Content = s));
+        }
+
+        public void UpdateRunningLabel(String s)
+        {
+            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => RunningLabel.Content = s));
         }
     }
 }

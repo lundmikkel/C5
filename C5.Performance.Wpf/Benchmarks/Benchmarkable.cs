@@ -17,11 +17,19 @@ namespace C5.Performance.Wpf.Benchmarks
 
         public abstract double Call(int i);
 
-        public Benchmark Benchmark(int maxCount, int repeats, double maxExecutionTimeInSeconds, MainWindow caller)
+        public Benchmark Benchmark(int maxCount, int repeats, double maxExecutionTimeInSeconds, MainWindow caller, int warmups = 1000)
         {
             CollectionSetup();
             var count = 1;
             double dummy = 0.0, runningTimeInSeconds = 0.0, elapsedTime, elapsedSquaredTime;
+            // Warmup the JIT-compiler
+            for (var i = 0; i < warmups; i++)
+            {
+                Setup();
+                caller.UpdateRunningLabel("Warmup run " + i + " of " + warmups);
+                dummy += Call(ItemsArray[i % CollectionSize]);
+            }
+            dummy = 0.0;
             do
             {
                 // Step up the count by a factor
@@ -29,7 +37,6 @@ namespace C5.Performance.Wpf.Benchmarks
                 elapsedTime = elapsedSquaredTime = 0.0;
                 for (var j = 0; j < repeats; j++)
                 {
-                    caller.UpdateRunningLabel("");
                     caller.UpdateRunningLabel("Benchmarking " + count + " calls " + (j + 1) + " of " + repeats + " times");
                     
                     var t = new Timer();
@@ -49,6 +56,7 @@ namespace C5.Performance.Wpf.Benchmarks
             } while (runningTimeInSeconds < maxExecutionTimeInSeconds && count < maxCount);
             var meanTime = elapsedTime/repeats;
             var standardDeviation = Math.Sqrt(elapsedSquaredTime/repeats - meanTime*meanTime)/meanTime*100;
+            caller.UpdateRunningLabel("");
             return new Benchmark(BenchMarkName(), CollectionSize, meanTime, standardDeviation);
         }
 

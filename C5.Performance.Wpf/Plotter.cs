@@ -8,19 +8,33 @@ namespace C5.Performance.Wpf
 {
     public class Plotter
     {
-        public Plotter()
+        public PlotModel PlotModel { get; set; }
+
+        public static Plotter CreatePlotter()
+        {
+            return new Plotter();
+        }
+
+        private Plotter()
         {
             PlotModel = new PlotModel();
             SetUpModel();
         }
 
-        public PlotModel PlotModel { get; set; }
-
-        public void ExportPdf(String path)
+        /// <summary>
+        /// Export the plot as a pdf file
+        /// </summary>
+        /// <param name="path">The file path where the pdf should be created</param>
+        /// <param name="width">Width in pixels of the generated pfd</param>
+        /// <param name="height">Height in pixels of the generated pfd</param>
+        public void ExportPdf(String path = "plot.pdf", int width = 4960, int height = 7016)
         {
-            PdfExporter.Export(PlotModel, path, 4960, 7016);
+            PdfExporter.Export(PlotModel, path, width, height);
         }
 
+        /// <summary>
+        /// Prepare the plotter
+        /// </summary>
         private void SetUpModel()
         {
             PlotModel.Title = "Interval Plotter";
@@ -49,6 +63,11 @@ namespace C5.Performance.Wpf
             PlotModel.Axes.Add(valueAxis);
         }
 
+        /// <summary>
+        /// Add a benchmark data point to the graph being drawn
+        /// </summary>
+        /// <param name="indexOfAreaSeries">Index of the graph you wish to add data to</param>
+        /// <param name="benchmark">Benchmark containing the data to be added</param>
         public void AddDataPoint(int indexOfAreaSeries, Benchmark benchmark)
         {
             var areaSeries = PlotModel.Series[indexOfAreaSeries] as AreaSeries;
@@ -62,6 +81,10 @@ namespace C5.Performance.Wpf
             PlotModel.RefreshPlot(true);
         }
 
+        /// <summary>
+        /// Add a plot to the graph showing the benchmark you are running
+        /// </summary>
+        /// <param name="name">Name of the benchmark you wish to plot</param>
         public void AddAreaSeries(String name)
         {
             var areaSerie = new AreaSeries
