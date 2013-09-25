@@ -305,21 +305,28 @@ namespace C5.intervals
         private Node<T> delete(Node<T> node, T arg, ref bool wasDeleted, ref bool wasSuccessful)
         {
             var compare = _comparer.Compare(arg, node.Key);
-            Node<T> newChild;
 
-            if (compare < 0)
+            if (compare > 0)
+            {
+                if (node.Right != null)
+                {
+                    node.Right = delete(node.Right, arg, ref wasDeleted, ref wasSuccessful);
+
+                    if (wasDeleted)
+                        node.Balance--;
+                }
+            }
+            else if (compare < 0)
             {
                 if (node.Left != null)
                 {
-                    newChild = delete(node.Left, arg, ref wasDeleted, ref wasSuccessful);
-                    if (node.Left != newChild)
-                        node.Left = newChild;
+                    node.Left = delete(node.Left, arg, ref wasDeleted, ref wasSuccessful);
 
                     if (wasDeleted)
                         node.Balance++;
                 }
             }
-            else if (compare == 0)
+            else
             {
                 wasDeleted = true;
                 if (node.Left != null && node.Right != null)
@@ -331,10 +338,7 @@ namespace C5.intervals
 
                     wasDeleted = false;
 
-                    newChild = delete(node.Right, data, ref wasDeleted, ref wasSuccessful);
-
-                    if (node.Right != newChild)
-                        node.Right = newChild;
+                    node.Right = delete(node.Right, data, ref wasDeleted, ref wasSuccessful);
 
                     if (wasDeleted)
                         node.Balance--;
@@ -342,26 +346,12 @@ namespace C5.intervals
                 else if (node.Left == null)
                 {
                     wasSuccessful = true;
-
                     return node.Right;
                 }
                 else
                 {
                     wasSuccessful = true;
-
                     return node.Left;
-                }
-            }
-            else
-            {
-                if (node.Right != null)
-                {
-                    newChild = delete(node.Right, arg, ref wasDeleted, ref wasSuccessful);
-                    if (node.Right != newChild)
-                        node.Right = newChild;
-
-                    if (wasDeleted)
-                        node.Balance--;
                 }
             }
 
