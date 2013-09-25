@@ -421,9 +421,23 @@ namespace C5.intervals
             nodeWasAdded = false;
             _root = addHigh(_root, null, interval, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
 
-            // Increase counter and raise event if interval was added
+            // Increase counters and raise event if interval was added
             if (intervalWasAdded)
             {
+                // Update MNO delta for low
+                if (interval.LowIncluded)
+                    lowNode.DeltaAt++;
+                else
+                    lowNode.DeltaAfter++;
+                // Update MNO delta for high
+                if (!interval.HighIncluded)
+                    highNode.DeltaAt--;
+                else
+                    highNode.DeltaAfter--;
+                // TODO: Fix MNO
+                // Update MNO
+                //root.UpdateMaximumOverlap();
+
                 lowNode.IntervalsEndingInNode++;
                 highNode.IntervalsEndingInNode++;
 
@@ -483,15 +497,6 @@ namespace C5.intervals
                 if (interval.LowIncluded)
                     intervalWasAdded = root.Equal.Add(interval);
 
-                if (intervalWasAdded)
-                {
-                    // If interval was added, we need to update delta
-                    if (interval.LowIncluded)
-                        root.DeltaAt++;
-                    else
-                        root.DeltaAfter++;
-                }
-
                 // Save reference to endpoint node
                 lowNode = root;
             }
@@ -499,10 +504,6 @@ namespace C5.intervals
             // Tree might be unbalanced after node was added, so we rotate
             if (nodeWasAdded && compare != 0)
                 root = rotateForAdd(root, ref nodeWasAdded);
-
-            // Update MNO
-            if (intervalWasAdded)
-                root.UpdateMaximumOverlap();
 
             return root;
         }
@@ -553,15 +554,6 @@ namespace C5.intervals
                 if (interval.HighIncluded)
                     intervalWasAdded = root.Equal.Add(interval);
 
-                // If interval was added, we need to update MNO
-                if (intervalWasAdded)
-                {
-                    if (!interval.HighIncluded)
-                        root.DeltaAt--;
-                    else
-                        root.DeltaAfter--;
-                }
-
                 // Save reference to endpoint node
                 highNode = root;
             }
@@ -569,10 +561,6 @@ namespace C5.intervals
             // Tree might be unbalanced after node was added, so we rotate
             if (nodeWasAdded && compare != 0)
                 root = rotateForAdd(root, ref nodeWasAdded);
-
-            // Update MNO
-            if (intervalWasAdded)
-                root.UpdateMaximumOverlap();
 
             return root;
         }
@@ -595,9 +583,23 @@ namespace C5.intervals
             // Remove high endpoint
             removeHigh(_root, null, interval, ref intervalWasRemoved, ref highNode);
 
-            // Increase counter and raise event if interval was added
+            // Increase counters and raise event if interval was added
             if (intervalWasRemoved)
             {
+                // Update MNO delta for low
+                if (interval.LowIncluded)
+                    lowNode.DeltaAt--;
+                else
+                    lowNode.DeltaAfter--;
+                // Update MNO delta for high
+                if (!interval.HighIncluded)
+                    highNode.DeltaAt++;
+                else
+                    highNode.DeltaAfter++;
+                // TODO: Fix MNO
+                // Update MNO
+                //root.UpdateMaximumOverlap();
+
                 // Check for unnecessary endpoint nodes, if interval was actually removed
                 if (--lowNode.IntervalsEndingInNode == 0)
                     removeNodeWithKey(interval.Low);
@@ -645,23 +647,9 @@ namespace C5.intervals
                 if (interval.LowIncluded)
                     intervalWasRemoved = root.Equal.Remove(interval);
 
-                // If interval was added, we need to update MNO
-                if (intervalWasRemoved)
-                {
-                    // Update delta
-                    if (interval.LowIncluded)
-                        root.DeltaAt--;
-                    else
-                        root.DeltaAfter--;
-                }
-
                 // Save reference to endpoint node
                 lowNode = root;
             }
-
-            // Update MNO
-            if (intervalWasRemoved)
-                root.UpdateMaximumOverlap();
         }
 
         private static void removeHigh(Node root, Node left, IInterval<T> interval, ref bool intervalWasRemoved, ref Node highNode)
@@ -695,15 +683,6 @@ namespace C5.intervals
 
                 if (interval.HighIncluded)
                     intervalWasRemoved = root.Equal.Remove(interval);
-
-                // If interval was removed, we need to update MNO
-                if (intervalWasRemoved)
-                {
-                    if (!interval.HighIncluded)
-                        root.DeltaAt++;
-                    else
-                        root.DeltaAfter++;
-                }
 
                 // Save reference to endpoint node
                 highNode = root;
