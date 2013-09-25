@@ -30,6 +30,12 @@ namespace C5.intervals
                 case -2:
                     switch (root.Left.Balance)
                     {
+                        // Left Left Case
+                        case -1:
+                            root = rotateRight(root);
+                            root.Balance = root.Right.Balance = 0;
+                            break;
+
                         // Left Right Case
                         case +1:
                             root.Left = rotateLeft(root.Left);
@@ -37,14 +43,8 @@ namespace C5.intervals
 
                             // root.Balance is either -1, 0, or +1
                             root.Left.Balance = (sbyte) (root.Balance == +1 ? -1 : 0);
-                            root.Right.Balance = (sbyte) (root.Balance == -1 ? 1 : 0);
+                            root.Right.Balance = (sbyte) (root.Balance == -1 ? +1 : 0);
                             root.Balance = 0;
-                            break;
-
-                        // Left Left Case
-                        case -1:
-                            root = rotateRight(root);
-                            root.Balance = root.Right.Balance = 0;
                             break;
                     }
                     updateBalance = false;
@@ -67,12 +67,86 @@ namespace C5.intervals
 
                             // root.Balance is either -1, 0, or +1
                             root.Left.Balance = (sbyte) (root.Balance == +1 ? -1 : 0);
-                            root.Right.Balance = (sbyte) (root.Balance == -1 ? 1 : 0);
+                            root.Right.Balance = (sbyte) (root.Balance == -1 ? +1 : 0);
                             root.Balance = 0;
                             break;
                     }
 
                     updateBalance = false;
+                    break;
+            }
+
+            return root;
+        }
+
+        private static Node rotateForRemove(Node root, ref bool updateBalance)
+        {
+            switch (root.Balance)
+            {
+                // High will not change for parent, so we can stop here
+                case -1:
+                case +1:
+                    updateBalance = false;
+                    break;
+
+                // Node is unbalanced, so we rotate
+                case -2:
+                    switch (root.Left.Balance)
+                    {
+                        // Left Left Case
+                        case -1:
+                            root = rotateRight(root);
+                            root.Balance = root.Right.Balance = 0;
+                            break;
+
+                        case 0:
+                            root = rotateRight(root);
+                            root.Right.Balance = -1;
+                            root.Balance = +1;
+                    updateBalance = false;
+                    break;
+
+                        // Left Right Case
+                        case +1:
+                            root.Left = rotateLeft(root.Left);
+                            root = rotateRight(root);
+
+                            // root.Balance is either -1, 0, or +1
+                            root.Left.Balance = (sbyte) ((root.Balance == +1) ? -1 : 0);
+                            root.Right.Balance = (sbyte) ((root.Balance == -1) ? +1 : 0);
+                            root.Balance = 0;
+                            break;
+                    }
+                    break;
+
+                // Node is unbalanced, so we rotate
+                case +2:
+                    switch (root.Right.Balance)
+                    {
+                        // Right Right Case
+                        case +1:
+                            root = rotateLeft(root);
+                            root.Balance = root.Left.Balance = 0;
+                            break;
+
+                        case 0:
+                            root = rotateLeft(root);
+                            root.Left.Balance = 1;
+                            root.Balance = -1;
+                            updateBalance = false;
+                            break;
+
+                        // Right Left Case
+                        case -1:
+                            root.Right = rotateRight(root.Right);
+                            root = rotateLeft(root);
+
+                            // root.Balance is either -1, 0, or +1
+                            root.Left.Balance = (sbyte) ((root.Balance == +1) ? -1 : 0);
+                            root.Right.Balance = (sbyte) ((root.Balance == -1) ? +1 : 0);
+                            root.Balance = 0;
+                            break;
+                    }
                     break;
             }
 
