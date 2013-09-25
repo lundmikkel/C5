@@ -17,13 +17,13 @@ namespace C5.intervals
 
         #region AVL tree helper methods
 
-        private static Node rotate(Node root, ref bool nodeWasAdded)
+        private static Node rotate(Node root, ref bool updateBalance)
         {
             switch (root.Balance)
             {
                 // Node is balanced after the node was added
                 case 0:
-                    nodeWasAdded = false;
+                    updateBalance = false;
                     break;
 
                 // Node is unbalanced, so we rotate
@@ -47,7 +47,7 @@ namespace C5.intervals
                             root.Balance = root.Right.Balance = 0;
                             break;
                     }
-                    nodeWasAdded = false;
+                    updateBalance = false;
                     break;
 
                 // Node is unbalanced, so we rotate
@@ -72,7 +72,7 @@ namespace C5.intervals
                             break;
                     }
 
-                    nodeWasAdded = false;
+                    updateBalance = false;
                     break;
             }
 
