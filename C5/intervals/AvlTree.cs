@@ -376,32 +376,27 @@ namespace C5.intervals
 
                     case -2:
                         {
-                            var nodeLeft = node.Left;
-
-                            switch (nodeLeft.Balance)
+                            switch (node.Left.Balance)
                             {
                                 case -1:
                                     node = rotateRight(node);
-                                    node.Balance = 0;
-                                    node.Right.Balance = 0;
+                                    node.Balance = node.Right.Balance = 0;
                                     break;
 
                                 case 0:
                                     node = rotateRight(node);
-                                    node.Balance = 1;
                                     node.Right.Balance = -1;
+                                    node.Balance = 1;
                                     wasDeleted = false;
                                     break;
 
                                 case 1:
-                                    var leftRightBalance = nodeLeft.Right.Balance;
-
-                                    node.Left = rotateLeft(nodeLeft);
+                                    node.Left = rotateLeft(node.Left);
                                     node = rotateRight(node);
 
+                                    node.Left.Balance = (node.Balance == 1) ? -1 : 0;
+                                    node.Right.Balance = (node.Balance == -1) ? 1 : 0;
                                     node.Balance = 0;
-                                    node.Left.Balance = (leftRightBalance == 1) ? -1 : 0;
-                                    node.Right.Balance = (leftRightBalance == -1) ? 1 : 0;
                                     break;
                             }
                         }
@@ -409,32 +404,27 @@ namespace C5.intervals
 
                     case 2:
                         {
-                            var nodeRight = node.Right;
-
-                            switch (nodeRight.Balance)
+                            switch (node.Right.Balance)
                             {
                                 case 1:
                                     node = rotateLeft(node);
-                                    node.Balance = 0;
-                                    node.Left.Balance = 0;
+                                    node.Balance = node.Left.Balance = 0;
                                     break;
 
                                 case 0:
                                     node = rotateLeft(node);
-                                    node.Balance = -1;
                                     node.Left.Balance = 1;
+                                    node.Balance = -1;
                                     wasDeleted = false;
                                     break;
 
                                 case -1:
-                                    var rightLeftBalance = nodeRight.Left.Balance;
-
-                                    node.Right = rotateRight(nodeRight);
+                                    node.Right = rotateRight(node.Right);
                                     node = rotateLeft(node);
 
+                                    node.Left.Balance = (node.Balance == 1) ? -1 : 0;
+                                    node.Right.Balance = (node.Balance == -1) ? 1 : 0;
                                     node.Balance = 0;
-                                    node.Left.Balance = (rightLeftBalance == 1) ? -1 : 0;
-                                    node.Right.Balance = (rightLeftBalance == -1) ? 1 : 0;
                                     break;
                             }
                         }
