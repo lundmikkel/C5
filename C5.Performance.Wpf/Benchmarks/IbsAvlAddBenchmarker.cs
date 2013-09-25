@@ -11,6 +11,8 @@ namespace C5.Performance.Wpf.Benchmarks
         {
             _intervals = C5.Tests.intervals.BenchmarkTestCases.DataSetC(CollectionSize);
             _collection = new IntervalBinarySearchTreeAVL<int>();
+            ItemsArray = SearchAndSort.FillIntArray(CollectionSize);
+            SearchAndSort.Shuffle(ItemsArray);
         }
 
         public override void Setup() { }

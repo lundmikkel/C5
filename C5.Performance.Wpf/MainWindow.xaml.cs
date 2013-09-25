@@ -31,8 +31,8 @@ namespace C5.Performance.Wpf
         private void button1_Click_1(object sender, RoutedEventArgs e)
         {
             var b = new SimpleBenchmark();
-            var b2 = new IbsAddBenchmarker();
-            var thread = new Thread(() => RunBenchmarks(b, b2));
+            var b2 = new IbsAvlAddBenchmarker();
+            var thread = new Thread(() => RunBenchmarks(b2));
             thread.Start();
         }
 
