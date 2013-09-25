@@ -385,8 +385,8 @@ namespace C5.intervals
 
                                 case 0:
                                     node = rotateRight(node);
-                                    node.Balance = 1;
                                     node.Right.Balance = -1;
+                                    node.Balance = 1;
                                     wasDeleted = false;
                                     break;
 
@@ -413,8 +413,8 @@ namespace C5.intervals
 
                                 case 0:
                                     node = rotateLeft(node);
-                                    node.Balance = -1;
                                     node.Left.Balance = 1;
+                                    node.Balance = -1;
                                     wasDeleted = false;
                                     break;
 

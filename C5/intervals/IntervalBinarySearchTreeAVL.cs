@@ -17,7 +17,7 @@ namespace C5.intervals
 
         #region AVL tree helper methods
 
-        private static Node rotate(Node root, ref bool updateBalance)
+        private static Node rotateForAdd(Node root, ref bool updateBalance)
         {
             switch (root.Balance)
             {
@@ -380,7 +380,7 @@ namespace C5.intervals
 
             // Tree might be unbalanced after node was added, so we rotate
             if (nodeWasAdded && compare != 0)
-                root = rotate(root, ref nodeWasAdded);
+                root = rotateForAdd(root, ref nodeWasAdded);
 
             // Update MNO
             if (intervalWasAdded)
@@ -450,7 +450,7 @@ namespace C5.intervals
 
             // Tree might be unbalanced after node was added, so we rotate
             if (nodeWasAdded && compare != 0)
-                root = rotate(root, ref nodeWasAdded);
+                root = rotateForAdd(root, ref nodeWasAdded);
 
             // Update MNO
             if (intervalWasAdded)
