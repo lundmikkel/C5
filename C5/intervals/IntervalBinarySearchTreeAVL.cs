@@ -217,9 +217,8 @@ namespace C5.intervals
 
         class Node
         {
-            private readonly T _key;
 
-            public T Key { get { return _key; } }
+            public T Key { get; private set; }
 
             private IntervalSet _less;
             private IntervalSet _equal;
@@ -255,7 +254,7 @@ namespace C5.intervals
 
             public Node(T key)
             {
-                _key = key;
+                Key = key;
             }
 
             public void UpdateMaximumOverlap()
@@ -287,7 +286,14 @@ namespace C5.intervals
 
             public override string ToString()
             {
-                return _key.ToString();
+                return Key.ToString();
+            }
+
+            public void SwapKeys(Node successor)
+            {
+                var tmp = Key;
+                Key = successor.Key;
+                successor.Key = tmp;
             }
         }
 
