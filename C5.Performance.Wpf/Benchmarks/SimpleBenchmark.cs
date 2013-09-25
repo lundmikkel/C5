@@ -1,4 +1,6 @@
-﻿namespace C5.Performance.Wpf.Benchmarks
+﻿using System;
+
+namespace C5.Performance.Wpf.Benchmarks
 {
     public class SimpleBenchmark : Benchmarkable
     {
