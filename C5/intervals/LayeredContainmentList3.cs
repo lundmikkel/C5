@@ -93,14 +93,14 @@ namespace C5.intervals
                 while (layer > 0)
                 {
                     // If the interval is contained in the top of the stack, leave it...
-                    if (layers[layer - 1].Last.Interval.Contains(interval))
+                    if (layers[layer - 1].Last.Interval.StrictlyContains(interval))
                         break;
 
                     layer--;
                 }
 
                 // Check if interval will be contained in the next layer
-                while (!layers[layer].IsEmpty && layers[layer].Last.Interval.Contains(interval))
+                while (!layers[layer].IsEmpty && layers[layer].Last.Interval.StrictlyContains(interval))
                     layer++;
 
                 layer++;

@@ -691,8 +691,8 @@ namespace C5.Tests.intervals
             x.Overlaps(y); // true
             y.Overlaps(x); // true
 
-            x.Contains(y); // true
-            y.Contains(x); // false
+            x.StrictlyContains(y); // true
+            y.StrictlyContains(x); // false
 
             x.CompareTo(y); // -1
             y.CompareTo(x); // 1

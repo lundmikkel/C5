@@ -71,7 +71,7 @@ namespace C5.intervals
                 {
                     var nextInterval = intervals[s + 1];
 
-                    if (!interval.Contains(nextInterval))
+                    if (!interval.StrictlyContains(nextInterval))
                         break;
 
                     contained++;

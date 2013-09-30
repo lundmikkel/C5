@@ -297,7 +297,7 @@ namespace C5
         /// <para>See <see cref="T:C5.Speed"/> for the set of symbols.</para>
         /// </summary>
         /// <value>A characterization of the speed of lookup operations
-        /// (<code>Contains()</code> etc.) of the implementation of this collection.</value>
+        /// (<code>StrictlyContains()</code> etc.) of the implementation of this collection.</value>
         Speed ContainsSpeed { get; }
 
         /// <summary>
@@ -1632,7 +1632,7 @@ namespace C5
         /// <para>See <see cref="T:C5.Speed"/> for the set of symbols.</para>
         /// </summary>
         /// <value>A characterization of the speed of lookup operations
-        /// (<code>Contains()</code> etc.) of the implementation of this dictionary.</value>
+        /// (<code>StrictlyContains()</code> etc.) of the implementation of this dictionary.</value>
         Speed ContainsSpeed { get; }
 
         /// <summary>

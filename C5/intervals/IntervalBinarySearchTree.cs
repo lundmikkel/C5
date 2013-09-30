@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using QuickGraph;
 using QuickGraph.Graphviz;
@@ -15,6 +16,11 @@ namespace C5.intervals
 
         private Node _root;
         private int _count;
+
+        #region Code Contracts
+        
+
+        #endregion
 
         #region Red-black tree helper methods
 
@@ -613,9 +619,9 @@ namespace C5.intervals
                         root = moveRedRight(root);
                 if (endpoint.CompareTo(root.Key) == 0)
                 {
-                    // Save the Greater and Less set of root
+                    // Save the Greater and CheckIBSLessInvariant set of root
                     //IntervalSet rootGreater = root.Greater;
-                    //IntervalSet rootLess = root.Less;
+                    //IntervalSet rootLess = root.CheckIBSLessInvariant;
 
                     // Save key and sets of right child's minimum
                     Node minChild = min(root.Right);
@@ -791,7 +797,7 @@ namespace C5.intervals
                 var cell = new GraphvizRecordCell();
                 // Add Key in top cell
                 cell.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Key.ToString() });
-                // Add Less, Equal and Greater set in bottom cell
+                // Add CheckIBSLessInvariant, Equal and Greater set in bottom cell
                 var bottom = new GraphvizRecordCell();
                 bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Less.ToString() });
                 bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Equal.ToString() });
@@ -924,7 +930,7 @@ namespace C5.intervals
                 // Query is to the left of the current node
                 if (compareTo < 0)
                 {
-                    // Return all intervals in Less
+                    // Return all intervals in CheckIBSLessInvariant
                     foreach (var interval in root.Less)
                         yield return interval;
 

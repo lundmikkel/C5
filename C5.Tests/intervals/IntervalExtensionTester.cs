@@ -69,10 +69,10 @@ namespace C5.Tests.intervals
                 Assert.Greater(j.CompareTo(i), 0);
         }
 
-        [Test, Combinatorial, Category("IntervalComparer<T>.Contains")]
+        [Test, Combinatorial, Category("IntervalComparer<T>.StrictlyContains")]
         public void Contains_Before_Combitorial([ValueSource("I")] IInterval<int> i, [ValueSource("J")] IInterval<int> j, [Values(true, false)] bool swap)
         {
-            Assert.IsFalse(swap ? i.Contains(j) : j.Contains(i));
+            Assert.IsFalse(swap ? i.StrictlyContains(j) : j.StrictlyContains(i));
         }
     }
 
@@ -145,11 +145,11 @@ namespace C5.Tests.intervals
                 new object[] { J[3], I[3], Is.EqualTo(0)}
             };
 
-        //Contains
-        [TestCaseSource("ContainsCases"), Category("IntervalComparer<T>.Contains")]
+        //StrictlyContains
+        [TestCaseSource("ContainsCases"), Category("IntervalComparer<T>.StrictlyContains")]
         public void Contains_Equal_TestCase(IInterval<int> i, IInterval<int> j, IResolveConstraint expected)
         {
-            Assert.That(i.Contains(j), expected);
+            Assert.That(i.StrictlyContains(j), expected);
         }
 
         public static object[] ContainsCases = new object[] {
@@ -263,10 +263,10 @@ namespace C5.Tests.intervals
         }
 
 
-        [Test, Combinatorial, Category("IntervalComparer<T>.Contains")]
+        [Test, Combinatorial, Category("IntervalComparer<T>.StrictlyContains")]
         public void Contains_Meets_Combitorial([ValueSource("I")] IInterval<int> i, [ValueSource("J")] IInterval<int> j, [Values(true, false)] bool swap)
         {
-            Assert.IsFalse(swap ? i.Contains(j) : j.Contains(i));
+            Assert.IsFalse(swap ? i.StrictlyContains(j) : j.StrictlyContains(i));
         }
     }
 
@@ -306,10 +306,10 @@ namespace C5.Tests.intervals
                 Assert.Greater(j.CompareTo(i), 0);
         }
 
-        [Test, Combinatorial, Category("IntervalComparer<T>.Contains")]
+        [Test, Combinatorial, Category("IntervalComparer<T>.StrictlyContains")]
         public void Contains_Overlap_Combitorial([ValueSource("I")] IInterval<int> i, [ValueSource("J")] IInterval<int> j, [Values(true, false)] bool swap)
         {
-            Assert.IsFalse(swap ? i.Contains(j) : j.Contains(i));
+            Assert.IsFalse(swap ? i.StrictlyContains(j) : j.StrictlyContains(i));
         }
     }
 
@@ -349,13 +349,13 @@ namespace C5.Tests.intervals
                 Assert.Less(j.CompareTo(i), 0);
         }
 
-        [Test, Combinatorial, Category("IntervalComparer<T>.Contains")]
+        [Test, Combinatorial, Category("IntervalComparer<T>.StrictlyContains")]
         public void Contains_During_Combitorial([ValueSource("I")] IInterval<int> i, [ValueSource("J")] IInterval<int> j, [Values(true, false)] bool swap)
         {
             if (swap)
-                Assert.IsFalse(i.Contains(j));
+                Assert.IsFalse(i.StrictlyContains(j));
             else
-                Assert.That(j.Contains(i));
+                Assert.That(j.StrictlyContains(i));
         }
     }
 
@@ -429,16 +429,16 @@ namespace C5.Tests.intervals
             };
 
 
-        [Test, Combinatorial, Category("IntervalComparer<T>.Contains")]
+        [Test, Combinatorial, Category("IntervalComparer<T>.StrictlyContains")]
         public void Contains_Starts_Combitorial([ValueSource("I")] IInterval<int> i, [ValueSource("J")] IInterval<int> j)
         {
-            Assert.IsFalse(i.Contains(j));
+            Assert.IsFalse(i.StrictlyContains(j));
         }
 
-        [TestCaseSource("ContainsCases"), Category("IntervalComparer<T>.Contains")]
+        [TestCaseSource("ContainsCases"), Category("IntervalComparer<T>.StrictlyContains")]
         public void Contains_Starts_TestCase(IInterval<int> i, IInterval<int> j, IResolveConstraint expected)
         {
-            Assert.That(i.Contains(j), expected);
+            Assert.That(i.StrictlyContains(j), expected);
         }
 
         public static object[] ContainsCases = new object[] {
@@ -497,17 +497,17 @@ namespace C5.Tests.intervals
                 Assert.Less(j.CompareTo(i), 0);
         }
 
-        [Test, Combinatorial, Category("IntervalComparer<T>.Contains")]
+        [Test, Combinatorial, Category("IntervalComparer<T>.StrictlyContains")]
         public void Contains_Finishes_Combitorial([ValueSource("I")] IInterval<int> i, [ValueSource("J")] IInterval<int> j)
         {
-            Assert.IsFalse(i.Contains(j));
+            Assert.IsFalse(i.StrictlyContains(j));
         }
 
-        // Contains
-        [TestCaseSource("ContainsCases"), Category("IntervalComparer<T>.Contains")]
+        // StrictlyContains
+        [TestCaseSource("ContainsCases"), Category("IntervalComparer<T>.StrictlyContains")]
         public void Contains_Finishes_TestCase(IInterval<int> i, IInterval<int> j, IResolveConstraint expected)
         {
-            Assert.That(i.Contains(j), expected);
+            Assert.That(i.StrictlyContains(j), expected);
         }
 
         public static object[] ContainsCases = new object[] {
@@ -582,11 +582,11 @@ namespace C5.Tests.intervals
                 new object[] { P, I[3], Is.LessThan(0)}
             };
 
-        //Contains
-        [TestCaseSource("ContainsCases"), Category("IntervalComparer<T>.Contains")]
+        //StrictlyContains
+        [TestCaseSource("ContainsCases"), Category("IntervalComparer<T>.StrictlyContains")]
         public void Contains_TestCase(IInterval<int> i, IInterval<int> j, IResolveConstraint expected)
         {
-            Assert.That(i.Contains(j), expected);
+            Assert.That(i.StrictlyContains(j), expected);
         }
 
         public static object[] ContainsCases = new object[] {
@@ -652,15 +652,15 @@ namespace C5.Tests.intervals
         [Test]
         public void Contains()
         {
-            Assert.False(P.Contains(I[0]));
-            Assert.False(P.Contains(I[1]));
-            Assert.False(P.Contains(I[2]));
-            Assert.False(P.Contains(I[3]));
+            Assert.False(P.StrictlyContains(I[0]));
+            Assert.False(P.StrictlyContains(I[1]));
+            Assert.False(P.StrictlyContains(I[2]));
+            Assert.False(P.StrictlyContains(I[3]));
 
-            Assert.False(I[0].Contains(P));
-            Assert.False(I[1].Contains(P));
-            Assert.False(I[2].Contains(P));
-            Assert.False(I[3].Contains(P));
+            Assert.False(I[0].StrictlyContains(P));
+            Assert.False(I[1].StrictlyContains(P));
+            Assert.False(I[2].StrictlyContains(P));
+            Assert.False(I[3].StrictlyContains(P));
         }
     }
 
@@ -715,15 +715,15 @@ namespace C5.Tests.intervals
         [Test]
         public void Contains()
         {
-            Assert.False(P.Contains(I[0]));
-            Assert.False(P.Contains(I[1]));
-            Assert.False(P.Contains(I[2]));
-            Assert.False(P.Contains(I[3]));
+            Assert.False(P.StrictlyContains(I[0]));
+            Assert.False(P.StrictlyContains(I[1]));
+            Assert.False(P.StrictlyContains(I[2]));
+            Assert.False(P.StrictlyContains(I[3]));
 
-            Assert.That(I[0].Contains(P));
-            Assert.That(I[1].Contains(P));
-            Assert.That(I[2].Contains(P));
-            Assert.That(I[3].Contains(P));
+            Assert.That(I[0].StrictlyContains(P));
+            Assert.That(I[1].StrictlyContains(P));
+            Assert.That(I[2].StrictlyContains(P));
+            Assert.That(I[3].StrictlyContains(P));
         }
     }
 
@@ -781,14 +781,14 @@ namespace C5.Tests.intervals
         [Test]
         public void Contains()
         {
-            Assert.False(P.Contains(I[0]));
-            Assert.False(P.Contains(I[1]));
-            Assert.False(P.Contains(I[2]));
-            Assert.False(P.Contains(I[3]));
-            Assert.False(I[0].Contains(P));
-            Assert.False(I[1].Contains(P));
-            Assert.False(I[2].Contains(P));
-            Assert.False(I[3].Contains(P));
+            Assert.False(P.StrictlyContains(I[0]));
+            Assert.False(P.StrictlyContains(I[1]));
+            Assert.False(P.StrictlyContains(I[2]));
+            Assert.False(P.StrictlyContains(I[3]));
+            Assert.False(I[0].StrictlyContains(P));
+            Assert.False(I[1].StrictlyContains(P));
+            Assert.False(I[2].StrictlyContains(P));
+            Assert.False(I[3].StrictlyContains(P));
         }
     }
 
@@ -823,10 +823,10 @@ namespace C5.Tests.intervals
                 Assert.Less(i.CompareTo(P), 0);
         }
 
-        [Test, Combinatorial, Category("IntervalComparer<T>.Contains")]
+        [Test, Combinatorial, Category("IntervalComparer<T>.StrictlyContains")]
         public void Contains_After_Combitorial([ValueSource("I")] IInterval<int> i, [Values(true, false)] bool swap)
         {
-            Assert.IsFalse(swap ? P.Contains(i) : i.Contains(P));
+            Assert.IsFalse(swap ? P.StrictlyContains(i) : i.StrictlyContains(P));
         }
 
 

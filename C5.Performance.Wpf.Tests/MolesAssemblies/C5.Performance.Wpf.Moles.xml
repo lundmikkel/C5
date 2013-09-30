@@ -1,0 +1,929 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>C5.Performance.Wpf.Moles</name>
+    </assembly>
+    <members>
+        <member name="T:C5.Performance.Wpf.Moles.MApp">
+            <summary>Mole type of <see cref="T:C5.Performance.Wpf.App"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MApp.#ctor">
+            <summary>Initializes a new mole</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MApp.#ctor(C5.Performance.Wpf.App)">
+            <summary>Initializes a new mole for the given instance</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MApp.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MApp.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MApp.Bind(System.Windows.Markup.IQueryAmbient)">
+            <summary>Binds the members of the interface to the mole.</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MApp.Behavior">
+            <summary>Assigns the behavior for all methods of the moled type</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MApp.Constructor">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.App.#ctor"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MApp.InitializeComponent">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.App.InitializeComponent"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MApp.Main">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.App.Main"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Moles.MApp.AllInstances">
+            <summary>Define moles for all instances members</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MApp.AllInstances.InitializeComponent">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.App.InitializeComponent"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Moles.MBenchmark">
+            <summary>Mole type of <see cref="T:C5.Performance.Benchmark"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Moles.MBenchmark.#ctor">
+            <summary>Initializes a new mole</summary>
+        </member>
+        <member name="M:C5.Performance.Moles.MBenchmark.#ctor(C5.Performance.Benchmark)">
+            <summary>Initializes a new mole for the given instance</summary>
+        </member>
+        <member name="M:C5.Performance.Moles.MBenchmark.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="M:C5.Performance.Moles.MBenchmark.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MBenchmark.Behavior">
+            <summary>Assigns the behavior for all methods of the moled type</summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MBenchmark.BenchmarkNameGet">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Benchmark.BenchmarkName"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MBenchmark.BenchmarkNameSetString">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Benchmark.BenchmarkName"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MBenchmark.CollectionSizeGet">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Benchmark.CollectionSize"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MBenchmark.CollectionSizeSetInt32">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Benchmark.CollectionSize"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MBenchmark.ConstructorStringInt32DoubleDouble">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Benchmark.#ctor(System.String,System.Int32,System.Double,System.Double)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MBenchmark.MeanTimeGet">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Benchmark.MeanTime"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MBenchmark.MeanTimeSetDouble">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Benchmark.MeanTime"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MBenchmark.StandardDeviationGet">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Benchmark.StandardDeviation"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MBenchmark.StandardDeviationSetDouble">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Benchmark.StandardDeviation"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Moles.MBenchmark.AllInstances">
+            <summary>Define moles for all instances members</summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MBenchmark.AllInstances.BenchmarkNameGet">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Benchmark.BenchmarkName"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MBenchmark.AllInstances.BenchmarkNameSetString">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Benchmark.BenchmarkName"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MBenchmark.AllInstances.CollectionSizeGet">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Benchmark.CollectionSize"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MBenchmark.AllInstances.CollectionSizeSetInt32">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Benchmark.CollectionSize"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MBenchmark.AllInstances.MeanTimeGet">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Benchmark.MeanTime"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MBenchmark.AllInstances.MeanTimeSetDouble">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Benchmark.MeanTime"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MBenchmark.AllInstances.StandardDeviationGet">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Benchmark.StandardDeviation"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MBenchmark.AllInstances.StandardDeviationSetDouble">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Benchmark.StandardDeviation"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Benchmarks.Moles.MBenchmarkable">
+            <summary>Mole type of <see cref="T:C5.Performance.Wpf.Benchmarks.Benchmarkable"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MBenchmarkable.#ctor(C5.Performance.Wpf.Benchmarks.Benchmarkable)">
+            <summary>Initializes a new mole for the given instance</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MBenchmarkable.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MBenchmarkable.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MBenchmarkable.Behavior">
+            <summary>Assigns the behavior for all methods of the moled type</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MBenchmarkable.BenchmarkInt32Int32DoubleMainWindowInt32">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.Benchmarkable.Benchmark(System.Int32,System.Int32,System.Double,C5.Performance.Wpf.MainWindow,System.Int32)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MBenchmarkable.Constructor">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.Benchmarkable.#ctor"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MBenchmarkable.SystemInfo">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.Benchmarkable.SystemInfo"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Benchmarks.Moles.MBenchmarkable.AllInstances">
+            <summary>Define moles for all instances members</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MBenchmarkable.AllInstances.BenchmarkInt32Int32DoubleMainWindowInt32">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.Benchmarkable.Benchmark(System.Int32,System.Int32,System.Double,C5.Performance.Wpf.MainWindow,System.Int32)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MBenchmarkable.AllInstances.SystemInfo">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.Benchmarkable.SystemInfo"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Benchmarks.Moles.MIbsAddBenchmarker">
+            <summary>Mole type of <see cref="T:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MIbsAddBenchmarker.#ctor">
+            <summary>Initializes a new mole</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MIbsAddBenchmarker.#ctor(C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker)">
+            <summary>Initializes a new mole for the given instance</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MIbsAddBenchmarker.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MIbsAddBenchmarker.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAddBenchmarker.Behavior">
+            <summary>Assigns the behavior for all methods of the moled type</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAddBenchmarker.BenchMarkName">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker.BenchMarkName"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAddBenchmarker.CallInt32">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker.Call(System.Int32)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAddBenchmarker.CollectionSetup">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker.CollectionSetup"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAddBenchmarker.Constructor">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker.#ctor"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAddBenchmarker.Setup">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker.Setup"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Benchmarks.Moles.MIbsAddBenchmarker.AllInstances">
+            <summary>Define moles for all instances members</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAddBenchmarker.AllInstances.BenchMarkName">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker.BenchMarkName"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAddBenchmarker.AllInstances.CallInt32">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker.Call(System.Int32)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAddBenchmarker.AllInstances.CollectionSetup">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker.CollectionSetup"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAddBenchmarker.AllInstances.Setup">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker.Setup"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Benchmarks.Moles.MIbsAvlAddBenchmarker">
+            <summary>Mole type of <see cref="T:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MIbsAvlAddBenchmarker.#ctor">
+            <summary>Initializes a new mole</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MIbsAvlAddBenchmarker.#ctor(C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker)">
+            <summary>Initializes a new mole for the given instance</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MIbsAvlAddBenchmarker.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MIbsAvlAddBenchmarker.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAvlAddBenchmarker.Behavior">
+            <summary>Assigns the behavior for all methods of the moled type</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAvlAddBenchmarker.BenchMarkName">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker.BenchMarkName"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAvlAddBenchmarker.CallInt32">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker.Call(System.Int32)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAvlAddBenchmarker.CollectionSetup">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker.CollectionSetup"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAvlAddBenchmarker.Constructor">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker.#ctor"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAvlAddBenchmarker.Setup">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker.Setup"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Benchmarks.Moles.MIbsAvlAddBenchmarker.AllInstances">
+            <summary>Define moles for all instances members</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAvlAddBenchmarker.AllInstances.BenchMarkName">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker.BenchMarkName"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAvlAddBenchmarker.AllInstances.CallInt32">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker.Call(System.Int32)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAvlAddBenchmarker.AllInstances.CollectionSetup">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker.CollectionSetup"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MIbsAvlAddBenchmarker.AllInstances.Setup">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker.Setup"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Moles.MMainWindow">
+            <summary>Mole type of <see cref="T:C5.Performance.Wpf.MainWindow"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MMainWindow.#ctor">
+            <summary>Initializes a new mole</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MMainWindow.#ctor(C5.Performance.Wpf.MainWindow)">
+            <summary>Initializes a new mole for the given instance</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MMainWindow.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MMainWindow.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MMainWindow.Bind(System.Windows.IInputElement)">
+            <summary>Binds the members of the interface to the mole.</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MMainWindow.Bind(System.Windows.Markup.IAddChild)">
+            <summary>Binds the members of the interface to the mole.</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MMainWindow.Bind(System.Windows.Media.Animation.IAnimatable)">
+            <summary>Binds the members of the interface to the mole.</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MMainWindow.Bind(System.Windows.IFrameworkInputElement)">
+            <summary>Binds the members of the interface to the mole.</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MMainWindow.Bind(System.ComponentModel.ISupportInitialize)">
+            <summary>Binds the members of the interface to the mole.</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MMainWindow.Bind(System.Windows.Markup.IComponentConnector)">
+            <summary>Binds the members of the interface to the mole.</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MMainWindow.Bind(System.Windows.Markup.IQueryAmbient)">
+            <summary>Binds the members of the interface to the mole.</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MMainWindow.Behavior">
+            <summary>Assigns the behavior for all methods of the moled type</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MMainWindow.Constructor">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.MainWindow.#ctor"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MMainWindow.InitializeComponent">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.MainWindow.InitializeComponent"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MMainWindow.RunBenchmarksBenchmarkableArray">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.MainWindow.RunBenchmarks(C5.Performance.Wpf.Benchmarks.Benchmarkable[])"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MMainWindow.SystemWindowsMarkupIComponentConnectorConnectInt32Object">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.MainWindow.System.Windows.Markup.IComponentConnector.Connect(System.Int32,System.Object)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MMainWindow.UpdateRunningLabelString">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.MainWindow.UpdateRunningLabel(System.String)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MMainWindow.UpdateStatusLabelString">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.MainWindow.UpdateStatusLabel(System.String)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MMainWindow.adderInt32Int32">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.MainWindow.adder(System.Int32,System.Int32)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MMainWindow.button1_Click_1ObjectRoutedEventArgs">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.MainWindow.button1_Click_1(System.Object,System.Windows.RoutedEventArgs)"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Moles.MMainWindow.AllInstances">
+            <summary>Define moles for all instances members</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MMainWindow.AllInstances.InitializeComponent">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.MainWindow.InitializeComponent"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MMainWindow.AllInstances.RunBenchmarksBenchmarkableArray">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.MainWindow.RunBenchmarks(C5.Performance.Wpf.Benchmarks.Benchmarkable[])"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MMainWindow.AllInstances.SystemWindowsMarkupIComponentConnectorConnectInt32Object">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.MainWindow.System.Windows.Markup.IComponentConnector.Connect(System.Int32,System.Object)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MMainWindow.AllInstances.UpdateRunningLabelString">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.MainWindow.UpdateRunningLabel(System.String)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MMainWindow.AllInstances.UpdateStatusLabelString">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.MainWindow.UpdateStatusLabel(System.String)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MMainWindow.AllInstances.adderInt32Int32">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.MainWindow.adder(System.Int32,System.Int32)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MMainWindow.AllInstances.button1_Click_1ObjectRoutedEventArgs">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.MainWindow.button1_Click_1(System.Object,System.Windows.RoutedEventArgs)"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Moles.MPlotter">
+            <summary>Mole type of <see cref="T:C5.Performance.Wpf.Plotter"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MPlotter.#ctor">
+            <summary>Initializes a new mole</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MPlotter.#ctor(C5.Performance.Wpf.Plotter)">
+            <summary>Initializes a new mole for the given instance</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MPlotter.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.MPlotter.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MPlotter.AddAreaSeriesString">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Plotter.AddAreaSeries(System.String)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MPlotter.AddDataPointInt32Benchmark">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Plotter.AddDataPoint(System.Int32,C5.Performance.Benchmark)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MPlotter.Behavior">
+            <summary>Assigns the behavior for all methods of the moled type</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MPlotter.Constructor">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Plotter.#ctor"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MPlotter.CreatePlotter">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Plotter.CreatePlotter"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MPlotter.ExportPdfStringInt32Int32">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Plotter.ExportPdf(System.String,System.Int32,System.Int32)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MPlotter.PlotModelGet">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Wpf.Plotter.PlotModel"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MPlotter.PlotModelSetPlotModel">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Wpf.Plotter.PlotModel"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MPlotter.SetUpModel">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Plotter.SetUpModel"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Moles.MPlotter.AllInstances">
+            <summary>Define moles for all instances members</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MPlotter.AllInstances.AddAreaSeriesString">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Plotter.AddAreaSeries(System.String)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MPlotter.AllInstances.AddDataPointInt32Benchmark">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Plotter.AddDataPoint(System.Int32,C5.Performance.Benchmark)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MPlotter.AllInstances.ExportPdfStringInt32Int32">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Plotter.ExportPdf(System.String,System.Int32,System.Int32)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MPlotter.AllInstances.PlotModelGet">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Wpf.Plotter.PlotModel"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MPlotter.AllInstances.PlotModelSetPlotModel">
+            <summary>Sets the mole of <see cref="P:C5.Performance.Wpf.Plotter.PlotModel"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.MPlotter.AllInstances.SetUpModel">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Plotter.SetUpModel"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort">
+            <summary>Mole type of <see cref="T:C5.Performance.Wpf.Benchmarks.SearchAndSort"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort.#ctor">
+            <summary>Initializes a new mole</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort.#ctor(C5.Performance.Wpf.Benchmarks.SearchAndSort)">
+            <summary>Initializes a new mole for the given instance</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort.Behavior">
+            <summary>Assigns the behavior for all methods of the moled type</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort.BinarySearchInt32Int32Array">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SearchAndSort.BinarySearch(System.Int32,System.Int32[])"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort.Constructor">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SearchAndSort.#ctor"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort.FillIntArrayInt32">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SearchAndSort.FillIntArray(System.Int32)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort.FillIntArrayRandomlyInt32Int32Int32">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SearchAndSort.FillIntArrayRandomly(System.Int32,System.Int32,System.Int32)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort.HeapifyInt32ArrayInt32Int32">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SearchAndSort.Heapify(System.Int32[],System.Int32,System.Int32)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort.HeapsortInt32Array">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SearchAndSort.Heapsort(System.Int32[])"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort.LinearSearchInt32Int32Array">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SearchAndSort.LinearSearch(System.Int32,System.Int32[])"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort.QsortInt32ArrayInt32Int32">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SearchAndSort.Qsort(System.Int32[],System.Int32,System.Int32)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort.QuicksortInt32Array">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SearchAndSort.Quicksort(System.Int32[])"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort.SelsortInt32Array">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SearchAndSort.Selsort(System.Int32[])"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort.ShuffleInt32Array">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SearchAndSort.Shuffle(System.Int32[])"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort.SwapInt32ArrayInt32Int32">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SearchAndSort.Swap(System.Int32[],System.Int32,System.Int32)"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Benchmarks.Moles.MSearchAndSort.AllInstances">
+            <summary>Define moles for all instances members</summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Benchmarks.Moles.MSimpleBenchmark">
+            <summary>Mole type of <see cref="T:C5.Performance.Wpf.Benchmarks.SimpleBenchmark"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MSimpleBenchmark.#ctor">
+            <summary>Initializes a new mole</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MSimpleBenchmark.#ctor(C5.Performance.Wpf.Benchmarks.SimpleBenchmark)">
+            <summary>Initializes a new mole for the given instance</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MSimpleBenchmark.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.MSimpleBenchmark.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSimpleBenchmark.Behavior">
+            <summary>Assigns the behavior for all methods of the moled type</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSimpleBenchmark.BenchMarkName">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SimpleBenchmark.BenchMarkName"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSimpleBenchmark.BinarySearchInt32Int32Array">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SimpleBenchmark.BinarySearch(System.Int32,System.Int32[])"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSimpleBenchmark.CallInt32">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SimpleBenchmark.Call(System.Int32)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSimpleBenchmark.CollectionSetup">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SimpleBenchmark.CollectionSetup"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSimpleBenchmark.Constructor">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SimpleBenchmark.#ctor"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSimpleBenchmark.Setup">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SimpleBenchmark.Setup"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Benchmarks.Moles.MSimpleBenchmark.AllInstances">
+            <summary>Define moles for all instances members</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSimpleBenchmark.AllInstances.BenchMarkName">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SimpleBenchmark.BenchMarkName"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSimpleBenchmark.AllInstances.CallInt32">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SimpleBenchmark.Call(System.Int32)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSimpleBenchmark.AllInstances.CollectionSetup">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SimpleBenchmark.CollectionSetup"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.MSimpleBenchmark.AllInstances.Setup">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Wpf.Benchmarks.SimpleBenchmark.Setup"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Moles.MTimer">
+            <summary>Mole type of <see cref="T:C5.Performance.Timer"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Moles.MTimer.#ctor">
+            <summary>Initializes a new mole</summary>
+        </member>
+        <member name="M:C5.Performance.Moles.MTimer.#ctor(C5.Performance.Timer)">
+            <summary>Initializes a new mole for the given instance</summary>
+        </member>
+        <member name="M:C5.Performance.Moles.MTimer.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="M:C5.Performance.Moles.MTimer.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the moled type</summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MTimer.Behavior">
+            <summary>Assigns the behavior for all methods of the moled type</summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MTimer.Check">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Timer.Check"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MTimer.ConstructorBoolean">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Timer.#ctor(System.Boolean)"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MTimer.Pause">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Timer.Pause"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MTimer.Play">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Timer.Play"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Moles.MTimer.AllInstances">
+            <summary>Define moles for all instances members</summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MTimer.AllInstances.Check">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Timer.Check"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MTimer.AllInstances.Pause">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Timer.Pause"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Moles.MTimer.AllInstances.Play">
+            <summary>Sets the mole of <see cref="M:C5.Performance.Timer.Play"/>
+            </summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Moles.SApp">
+            <summary>Stub type of <see cref="T:C5.Performance.Wpf.App"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.SApp.#ctor">
+            <summary>Initializes a new instance</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.SApp.InitializeStub">
+            <summary>Initializes a new instance of type SApp</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.SApp.CallBase">
+            <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.SApp.InstanceBehavior">
+            <summary>Gets or sets the instance behavior.</summary>
+        </member>
+        <member name="T:C5.Performance.Moles.SBenchmark">
+            <summary>Stub type of <see cref="T:C5.Performance.Benchmark"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Moles.SBenchmark.#ctor(System.String,System.Int32,System.Double,System.Double)">
+            <summary>Initializes a new instance</summary>
+        </member>
+        <member name="M:C5.Performance.Moles.SBenchmark.InitializeStub">
+            <summary>Initializes a new instance of type SBenchmark</summary>
+        </member>
+        <member name="P:C5.Performance.Moles.SBenchmark.CallBase">
+            <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        </member>
+        <member name="P:C5.Performance.Moles.SBenchmark.InstanceBehavior">
+            <summary>Gets or sets the instance behavior.</summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Benchmarks.Moles.SBenchmarkable">
+            <summary>Stub type of <see cref="T:C5.Performance.Wpf.Benchmarks.Benchmarkable"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SBenchmarkable.#ctor">
+            <summary>Initializes a new instance</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SBenchmarkable.BenchMarkName">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.Benchmarkable.BenchMarkName"/>
+            </summary>
+        </member>
+        <member name="F:C5.Performance.Wpf.Benchmarks.Moles.SBenchmarkable.BenchMarkName01">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.Benchmarkable.BenchMarkName"/>
+            </summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SBenchmarkable.Call(System.Int32)">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.Benchmarkable.Call(System.Int32)"/>
+            </summary>
+        </member>
+        <member name="F:C5.Performance.Wpf.Benchmarks.Moles.SBenchmarkable.CallInt32">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.Benchmarkable.Call(System.Int32)"/>
+            </summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SBenchmarkable.CollectionSetup">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.Benchmarkable.CollectionSetup"/>
+            </summary>
+        </member>
+        <member name="F:C5.Performance.Wpf.Benchmarks.Moles.SBenchmarkable.CollectionSetup01">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.Benchmarkable.CollectionSetup"/>
+            </summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SBenchmarkable.InitializeStub">
+            <summary>Initializes a new instance of type SBenchmarkable</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SBenchmarkable.Setup">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.Benchmarkable.Setup"/>
+            </summary>
+        </member>
+        <member name="F:C5.Performance.Wpf.Benchmarks.Moles.SBenchmarkable.Setup01">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.Benchmarkable.Setup"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.SBenchmarkable.CallBase">
+            <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.SBenchmarkable.InstanceBehavior">
+            <summary>Gets or sets the instance behavior.</summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Benchmarks.Moles.SIbsAddBenchmarker">
+            <summary>Stub type of <see cref="T:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SIbsAddBenchmarker.#ctor">
+            <summary>Initializes a new instance</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SIbsAddBenchmarker.BenchMarkName">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker.BenchMarkName"/>
+            </summary>
+        </member>
+        <member name="F:C5.Performance.Wpf.Benchmarks.Moles.SIbsAddBenchmarker.BenchMarkName01">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker.BenchMarkName"/>
+            </summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SIbsAddBenchmarker.Call(System.Int32)">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker.Call(System.Int32)"/>
+            </summary>
+        </member>
+        <member name="F:C5.Performance.Wpf.Benchmarks.Moles.SIbsAddBenchmarker.CallInt32">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker.Call(System.Int32)"/>
+            </summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SIbsAddBenchmarker.CollectionSetup">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker.CollectionSetup"/>
+            </summary>
+        </member>
+        <member name="F:C5.Performance.Wpf.Benchmarks.Moles.SIbsAddBenchmarker.CollectionSetup01">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker.CollectionSetup"/>
+            </summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SIbsAddBenchmarker.InitializeStub">
+            <summary>Initializes a new instance of type SIbsAddBenchmarker</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SIbsAddBenchmarker.Setup">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker.Setup"/>
+            </summary>
+        </member>
+        <member name="F:C5.Performance.Wpf.Benchmarks.Moles.SIbsAddBenchmarker.Setup01">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAddBenchmarker.Setup"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.SIbsAddBenchmarker.CallBase">
+            <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.SIbsAddBenchmarker.InstanceBehavior">
+            <summary>Gets or sets the instance behavior.</summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Benchmarks.Moles.SIbsAvlAddBenchmarker">
+            <summary>Stub type of <see cref="T:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SIbsAvlAddBenchmarker.#ctor">
+            <summary>Initializes a new instance</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SIbsAvlAddBenchmarker.BenchMarkName">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker.BenchMarkName"/>
+            </summary>
+        </member>
+        <member name="F:C5.Performance.Wpf.Benchmarks.Moles.SIbsAvlAddBenchmarker.BenchMarkName01">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker.BenchMarkName"/>
+            </summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SIbsAvlAddBenchmarker.Call(System.Int32)">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker.Call(System.Int32)"/>
+            </summary>
+        </member>
+        <member name="F:C5.Performance.Wpf.Benchmarks.Moles.SIbsAvlAddBenchmarker.CallInt32">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker.Call(System.Int32)"/>
+            </summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SIbsAvlAddBenchmarker.CollectionSetup">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker.CollectionSetup"/>
+            </summary>
+        </member>
+        <member name="F:C5.Performance.Wpf.Benchmarks.Moles.SIbsAvlAddBenchmarker.CollectionSetup01">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker.CollectionSetup"/>
+            </summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SIbsAvlAddBenchmarker.InitializeStub">
+            <summary>Initializes a new instance of type SIbsAvlAddBenchmarker</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SIbsAvlAddBenchmarker.Setup">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker.Setup"/>
+            </summary>
+        </member>
+        <member name="F:C5.Performance.Wpf.Benchmarks.Moles.SIbsAvlAddBenchmarker.Setup01">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.IbsAvlAddBenchmarker.Setup"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.SIbsAvlAddBenchmarker.CallBase">
+            <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.SIbsAvlAddBenchmarker.InstanceBehavior">
+            <summary>Gets or sets the instance behavior.</summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Moles.SMainWindow">
+            <summary>Stub type of <see cref="T:C5.Performance.Wpf.MainWindow"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.SMainWindow.#ctor">
+            <summary>Initializes a new instance</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Moles.SMainWindow.InitializeStub">
+            <summary>Initializes a new instance of type SMainWindow</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.SMainWindow.CallBase">
+            <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Moles.SMainWindow.InstanceBehavior">
+            <summary>Gets or sets the instance behavior.</summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Benchmarks.Moles.SSearchAndSort">
+            <summary>Stub type of <see cref="T:C5.Performance.Wpf.Benchmarks.SearchAndSort"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SSearchAndSort.#ctor">
+            <summary>Initializes a new instance</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SSearchAndSort.InitializeStub">
+            <summary>Initializes a new instance of type SSearchAndSort</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.SSearchAndSort.CallBase">
+            <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.SSearchAndSort.InstanceBehavior">
+            <summary>Gets or sets the instance behavior.</summary>
+        </member>
+        <member name="T:C5.Performance.Wpf.Benchmarks.Moles.SSimpleBenchmark">
+            <summary>Stub type of <see cref="T:C5.Performance.Wpf.Benchmarks.SimpleBenchmark"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SSimpleBenchmark.#ctor">
+            <summary>Initializes a new instance</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SSimpleBenchmark.BenchMarkName">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.SimpleBenchmark.BenchMarkName"/>
+            </summary>
+        </member>
+        <member name="F:C5.Performance.Wpf.Benchmarks.Moles.SSimpleBenchmark.BenchMarkName01">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.SimpleBenchmark.BenchMarkName"/>
+            </summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SSimpleBenchmark.Call(System.Int32)">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.SimpleBenchmark.Call(System.Int32)"/>
+            </summary>
+        </member>
+        <member name="F:C5.Performance.Wpf.Benchmarks.Moles.SSimpleBenchmark.CallInt32">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.SimpleBenchmark.Call(System.Int32)"/>
+            </summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SSimpleBenchmark.CollectionSetup">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.SimpleBenchmark.CollectionSetup"/>
+            </summary>
+        </member>
+        <member name="F:C5.Performance.Wpf.Benchmarks.Moles.SSimpleBenchmark.CollectionSetup01">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.SimpleBenchmark.CollectionSetup"/>
+            </summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SSimpleBenchmark.InitializeStub">
+            <summary>Initializes a new instance of type SSimpleBenchmark</summary>
+        </member>
+        <member name="M:C5.Performance.Wpf.Benchmarks.Moles.SSimpleBenchmark.Setup">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.SimpleBenchmark.Setup"/>
+            </summary>
+        </member>
+        <member name="F:C5.Performance.Wpf.Benchmarks.Moles.SSimpleBenchmark.Setup01">
+            <summary>Sets the stub of <see cref="M:C5.Performance.Wpf.Benchmarks.SimpleBenchmark.Setup"/>
+            </summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.SSimpleBenchmark.CallBase">
+            <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        </member>
+        <member name="P:C5.Performance.Wpf.Benchmarks.Moles.SSimpleBenchmark.InstanceBehavior">
+            <summary>Gets or sets the instance behavior.</summary>
+        </member>
+        <member name="T:C5.Performance.Moles.STimer">
+            <summary>Stub type of <see cref="T:C5.Performance.Timer"/>
+            .</summary>
+        </member>
+        <member name="M:C5.Performance.Moles.STimer.#ctor(System.Boolean)">
+            <summary>Initializes a new instance</summary>
+        </member>
+        <member name="M:C5.Performance.Moles.STimer.InitializeStub">
+            <summary>Initializes a new instance of type STimer</summary>
+        </member>
+        <member name="P:C5.Performance.Moles.STimer.CallBase">
+            <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        </member>
+        <member name="P:C5.Performance.Moles.STimer.InstanceBehavior">
+            <summary>Gets or sets the instance behavior.</summary>
+        </member>
+    </members>
+</doc>

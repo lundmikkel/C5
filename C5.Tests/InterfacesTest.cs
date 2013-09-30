@@ -135,7 +135,7 @@ namespace C5UnitTests.interfaces
       list.Remove(b1);
       list.Remove(b2);
       Assert.IsFalse(list.Contains(b2));
-      Assert.AreEqual(1, list.Count); // Contains c2 only
+      Assert.AreEqual(1, list.Count); // StrictlyContains c2 only
       list.Insert(0, b2);
       list.Insert(2, b1);
       Assert.AreEqual(b2, list[0]);

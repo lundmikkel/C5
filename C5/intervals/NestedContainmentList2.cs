@@ -58,7 +58,7 @@ namespace C5.intervals
                 {
                     var current = enumerator.Current;
 
-                    if (previous.Contains(current))
+                    if (previous.StrictlyContains(current))
                         // Add contained intervals to sublist for previous node
                         sublist.Add(current);
                     else

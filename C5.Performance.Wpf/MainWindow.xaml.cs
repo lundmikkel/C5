@@ -23,7 +23,7 @@ namespace C5.Performance.Wpf
 
         public MainWindow()
         {
-            _plotter = Plotter.CreatePlotter();
+            _plotter = Plotter.createPlotter();
             DataContext = _plotter;
             InitializeComponent();
         }
@@ -32,7 +32,8 @@ namespace C5.Performance.Wpf
         {
             var b = new SimpleBenchmark();
             var b2 = new IbsAvlAddBenchmarker();
-            var thread = new Thread(() => RunBenchmarks(b));
+            var b3 = new IbsAddBenchmarker();
+            var thread = new Thread(() => RunBenchmarks(b2));
             thread.Start();
         }
 
@@ -40,7 +41,7 @@ namespace C5.Performance.Wpf
         {
             foreach (var b in benchmarks)
             {
-                _plotter.AddAreaSeries(b.BenchMarkName());
+                _plotter.addAreaSeries(b.BenchMarkName());
                 for (b.CollectionSize = MinCollectionSize;
                     b.CollectionSize < MaxCollectionSize;
                     b.CollectionSize *= CollectionMultiplier)
@@ -48,7 +49,7 @@ namespace C5.Performance.Wpf
                     UpdateStatusLabel("Running " + b.BenchMarkName() + " with collection size " + b.CollectionSize);
                     var benchmark = b.Benchmark(MaxCount, Repeats, MaxExecutionTimeInSeconds, this);
                     Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
-                        _plotter.AddDataPoint(_lineSeriesIndex, benchmark)));
+                        _plotter.addDataPoint(_lineSeriesIndex, benchmark)));
                     Thread.Sleep(100);
                 }
                 _lineSeriesIndex++;
