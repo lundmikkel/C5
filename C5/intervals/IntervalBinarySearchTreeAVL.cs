@@ -257,9 +257,15 @@ namespace C5.intervals
                 Key = key;
             }
 
-            public void UpdateMaximumOverlap()
+            /// <summary>
+            /// Update the maximum overlap value for the node.
+            /// </summary>
+            /// <returns>True if value changed.</returns>
+            public bool UpdateMaximumOverlap()
             {
-                // TODO: Find a clever way only to update what needs to be updated!
+                // Cache values
+                var oldMax = Max;
+                var oldSum = Sum;
 
                 // Set Max to Left's Max
                 Max = Left != null ? Left.Max : 0;
@@ -282,6 +288,9 @@ namespace C5.intervals
                 value += Right != null ? Right.Max : 0;
                 if (value > Max)
                     Max = value;
+
+                // Return true if either Max or Sum changed
+                return oldMax != Max || oldSum != Sum;
             }
 
             public override string ToString()
@@ -403,6 +412,53 @@ namespace C5.intervals
 
         #endregion
 
+        #region
+
+        public int MaximumOverlap
+        {
+            get { return _root != null ? _root.Max : 0; }
+        }
+
+        private static bool updateMaximumOverlap(Node root, IInterval<T> interval)
+        {
+            if (interval.High.CompareTo(root.Key) < 0)
+                return updateMaximumOverlap(root.Left, interval) && root.UpdateMaximumOverlap();
+            else if (root.Key.CompareTo(interval.Low) < 0)
+                return updateMaximumOverlap(root.Right, interval) && root.UpdateMaximumOverlap();
+            else
+            {
+                updateLowMaximumOverlap(root, interval.Low);
+                updateHighMaximumOverlap(root, interval.High);
+                return true;
+            }
+        }
+
+        private static bool updateLowMaximumOverlap(Node root, T low)
+        {
+            var compare = low.CompareTo(root.Key);
+
+            if (compare < 0)
+                return updateLowMaximumOverlap(root.Left, low) && root.UpdateMaximumOverlap();
+            else if (compare > 0)
+                return updateLowMaximumOverlap(root.Right, low) && root.UpdateMaximumOverlap();
+            else
+                return root.UpdateMaximumOverlap();
+        }
+
+        private static bool updateHighMaximumOverlap(Node root, T high)
+        {
+            var compare = high.CompareTo(root.Key);
+
+            if (compare < 0)
+                return updateLowMaximumOverlap(root.Left, high) && root.UpdateMaximumOverlap();
+            else if (compare > 0)
+                return updateLowMaximumOverlap(root.Right, high) && root.UpdateMaximumOverlap();
+            else
+                return root.UpdateMaximumOverlap();
+        }
+
+        #endregion
+
         #region Add
 
         public bool Add(IInterval<T> interval)
@@ -436,9 +492,8 @@ namespace C5.intervals
                 else
                     highNode.DeltaAfter--;
 
-                // TODO: Fix MNO
                 // Update MNO
-                //root.UpdateMaximumOverlap();
+                updateMaximumOverlap(_root, interval);
 
                 lowNode.IntervalsEndingInNode++;
                 highNode.IntervalsEndingInNode++;
@@ -598,9 +653,9 @@ namespace C5.intervals
                     highNode.DeltaAt++;
                 else
                     highNode.DeltaAfter++;
-                // TODO: Fix MNO
+
                 // Update MNO
-                //root.UpdateMaximumOverlap();
+                updateMaximumOverlap(_root, interval);
 
                 // Check for unnecessary endpoint nodes, if interval was actually removed
                 if (--lowNode.IntervalsEndingInNode == 0)
@@ -1272,11 +1327,6 @@ namespace C5.intervals
         public int CountOverlaps(IInterval<T> query)
         {
             return FindOverlaps(query).Count();
-        }
-
-        public int MaximumOverlap
-        {
-            get { return _root != null ? _root.Max : 0; }
         }
 
         #endregion
