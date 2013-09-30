@@ -206,6 +206,18 @@ namespace C5.intervals
         }
 
         /// <summary>
+        /// Check if the interval has the endpoint as its low or high endpoint.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="endpoint"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>True if either Low or High is equal to the endpoint.</returns>
+        public static bool HasEndpoint<T>(this IInterval<T> x, T endpoint) where T : IComparable<T>
+        {
+            return x.Low.CompareTo(endpoint) == 0 || x.High.CompareTo(endpoint) == 0;
+        }
+
+        /// <summary>
         /// Get the hashcode for an interval.
         /// Uses the low and high endpoints as well as endpoint inclusion.
         /// </summary>
