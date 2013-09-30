@@ -10,7 +10,7 @@ namespace C5.Performance.Wpf
     {
         public PlotModel PlotModel { get; set; }
 
-        public static Plotter CreatePlotter()
+        public static Plotter createPlotter()
         {
             return new Plotter();
         }
@@ -18,7 +18,7 @@ namespace C5.Performance.Wpf
         private Plotter()
         {
             PlotModel = new PlotModel();
-            SetUpModel();
+            setUpModel();
         }
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace C5.Performance.Wpf
         /// <param name="path">The file path where the pdf should be created</param>
         /// <param name="width">Width in pixels of the generated pfd</param>
         /// <param name="height">Height in pixels of the generated pfd</param>
-        public void ExportPdf(String path = "plot.pdf", int width = 4960, int height = 7016)
+        public void exportPdf(String path = "plot.pdf", int width = 4960, int height = 7016)
         {
             throw new Exception("You cannot make PDF unless the project is built against .NET 4.5");
 //            PdfExporter.Export(PlotModel, path, width, height);
@@ -36,7 +36,7 @@ namespace C5.Performance.Wpf
         /// <summary>
         /// Prepare the plotter
         /// </summary>
-        private void SetUpModel()
+        private void setUpModel()
         {
             PlotModel.Title = "Interval Plotter";
             PlotModel.LegendTitle = "Legend";
@@ -69,7 +69,7 @@ namespace C5.Performance.Wpf
         /// </summary>
         /// <param name="indexOfAreaSeries">Index of the graph you wish to add data to</param>
         /// <param name="benchmark">Benchmark containing the data to be added</param>
-        public void AddDataPoint(int indexOfAreaSeries, Benchmark benchmark)
+        public void addDataPoint(int indexOfAreaSeries, Benchmark benchmark)
         {
             var areaSeries = PlotModel.Series[indexOfAreaSeries] as AreaSeries;
             if (areaSeries != null)
@@ -80,13 +80,14 @@ namespace C5.Performance.Wpf
                     benchmark.MeanTime - benchmark.StandardDeviation));
             }
             PlotModel.RefreshPlot(true);
+
         }
 
         /// <summary>
         /// Add a plot to the graph showing the benchmark you are running
         /// </summary>
         /// <param name="name">Name of the benchmark you wish to plot</param>
-        public void AddAreaSeries(String name)
+        public void addAreaSeries(String name)
         {
             var areaSerie = new AreaSeries
             {

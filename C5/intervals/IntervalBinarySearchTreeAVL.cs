@@ -355,7 +355,7 @@ namespace C5.intervals
         #region Code Contracts
 
         [ContractInvariantMethod]
-        private void AVLInvariants()
+        private void avl_Invariants()
         {
             Contract.Invariant(confirmBalance());
         }

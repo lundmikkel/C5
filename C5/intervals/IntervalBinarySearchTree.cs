@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using QuickGraph;
 using QuickGraph.Graphviz;
@@ -15,6 +16,100 @@ namespace C5.intervals
 
         private Node _root;
         private int _count;
+
+        #region Code Contracts
+        
+        [ContractInvariantMethod]
+        private void ibs_Invariants()
+        {
+            Contract.Invariant(true);
+        }
+
+
+
+        private bool verifyLess(Node node)
+        {
+            var ancestor = node;
+            return true;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="root"></param>
+        /// <param name="child"></param>
+        /// <param name="currentAncestor">Internal parameter to keep track of the ancestor while searching.</param>
+        /// <returns></returns>
+        private Node findAncestor(Node root, Node child)
+        {
+            if (root == null || child == null)
+                return null;
+            var searchRight = child.Key.CompareTo(root.Key) > 0;
+            return findAncestor(root, child, searchRight);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="root"></param>
+        /// <param name="child"></param>
+        /// <param name="searchRight">Indicate which searchRight to search in the tree. Right == true, Left == false.</param>
+        /// <param name="currentAncestor">Internal parameter to keep track of the ancestor while searching.</param>
+        /// <returns></returns>
+        private Node findAncestor(Node root, Node child, bool searchRight, Node currentAncestor = null)
+        {
+            if (root == null)
+                return null;
+            if (root == child)
+                return currentAncestor;
+            var compare = child.Key.CompareTo(root.Key);
+            // Search in the right subtree
+            if (compare > 0)
+            {
+                if (searchRight)
+                    currentAncestor = root;
+                findAncestor(root.Right, child, searchRight, currentAncestor);
+            }
+            // Search in the left subtree
+            else if (compare < 0)
+            {
+                if (!searchRight)
+                    currentAncestor = root;
+                findAncestor(root.Left, child, searchRight, currentAncestor);
+            }
+            return currentAncestor;
+        }
+
+        private bool CheckIBSLessInvariant(Node v)
+        {
+            var u = findAncestor(_root, v);
+            foreach (var i in v.Less)
+            {
+                var intervalUV = new IntervalBase<T>(u.Key, v.Key);
+
+                // Check the containment invariont
+                if (!i.Contains(intervalUV))
+                    return false;
+
+                // Check the maximality invariant
+                Node ancestor;
+                while ((ancestor = findAncestor(_root, v)) != null)
+                {
+                    if (ancestor.Less.Any(j => i.Contains(j) && j.Contains(intervalUV)))
+                        return false;
+                    if (ancestor.Greater.Any(j => i.Contains(j) && j.Contains(intervalUV)))
+                        return false;
+                }
+            }
+            return true;
+        }
+        
+        private bool maximality()
+        {
+            return true;
+        }
+
+        #endregion
 
         #region Red-black tree helper methods
 
@@ -613,9 +708,9 @@ namespace C5.intervals
                         root = moveRedRight(root);
                 if (endpoint.CompareTo(root.Key) == 0)
                 {
-                    // Save the Greater and Less set of root
+                    // Save the Greater and CheckIBSLessInvariant set of root
                     //IntervalSet rootGreater = root.Greater;
-                    //IntervalSet rootLess = root.Less;
+                    //IntervalSet rootLess = root.CheckIBSLessInvariant;
 
                     // Save key and sets of right child's minimum
                     Node minChild = min(root.Right);
@@ -791,7 +886,7 @@ namespace C5.intervals
                 var cell = new GraphvizRecordCell();
                 // Add Key in top cell
                 cell.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Key.ToString() });
-                // Add Less, Equal and Greater set in bottom cell
+                // Add CheckIBSLessInvariant, Equal and Greater set in bottom cell
                 var bottom = new GraphvizRecordCell();
                 bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Less.ToString() });
                 bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Equal.ToString() });
@@ -924,7 +1019,7 @@ namespace C5.intervals
                 // Query is to the left of the current node
                 if (compareTo < 0)
                 {
-                    // Return all intervals in Less
+                    // Return all intervals in CheckIBSLessInvariant
                     foreach (var interval in root.Less)
                         yield return interval;
 
