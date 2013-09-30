@@ -103,8 +103,8 @@ namespace C5.intervals
                             root = rotateRight(root);
                             root.Right.Balance = -1;
                             root.Balance = +1;
-                    updateBalance = false;
-                    break;
+                            updateBalance = false;
+                            break;
 
                         // Left Right Case
                         case +1:
@@ -411,7 +411,7 @@ namespace C5.intervals
             var heightRight = height(node.Right, ref result);
             if (node.Balance != heightRight - heightLeft)
                 result = false;
-            return Math.Max(heightLeft,heightRight) + 1;
+            return Math.Max(heightLeft, heightRight) + 1;
         }
 
         #endregion
@@ -470,7 +470,7 @@ namespace C5.intervals
                 return updateLowMaximumOverlap(root.Right, low) && root.UpdateMaximumOverlap();
 
             // Update MNO when low is found
-                return root.UpdateMaximumOverlap();
+            return root.UpdateMaximumOverlap();
         }
 
         private static bool updateHighMaximumOverlap(Node root, T high)
@@ -486,7 +486,7 @@ namespace C5.intervals
                 return updateLowMaximumOverlap(root.Right, high) && root.UpdateMaximumOverlap();
 
             // Update MNO when high is found
-                return root.UpdateMaximumOverlap();
+            return root.UpdateMaximumOverlap();
         }
 
         #endregion
@@ -792,6 +792,68 @@ namespace C5.intervals
 
             if (node.Left == null && node.Right == null)
             { }
+        }
+
+        private static Node removeNodeWithKey(Node root, T key, ref bool updateBalanace)
+        {
+            if (root == null)
+                return null;
+
+            var compare = root.Key.CompareTo(key);
+
+            // Remove node from right subtree
+            if (compare > 0)
+            {
+                root.Right = removeNodeWithKey(root.Right, key, ref updateBalanace);
+
+                if (updateBalanace)
+                    root.Balance--;
+            }
+            // Remove node from left subtree
+            else if (compare < 0)
+            {
+                root.Left = removeNodeWithKey(root.Left, key, ref updateBalanace);
+
+                if (updateBalanace)
+                    root.Balance++;
+            }
+            // Node found
+            else
+            {
+                updateBalanace = true;
+
+                // Replace node with successor
+                if (root.Left != null && root.Right != null)
+                {
+                    // TODO: maintain IBS invariant
+
+                    var successor = findMinNode(root.Right);
+
+                    var intervalsNeedingReinsertion = successor.GetIntervalsEndingInNode();
+
+                    // Swap keys, so we can search for
+                    root.SwapKeys(successor);
+
+                    updateBalanace = false;
+
+                    root.Right = removeNodeWithKey(root.Right, successor.Key, ref updateBalanace);
+
+                    if (updateBalanace)
+                        root.Balance--;
+                }
+                // Replace node with right child
+                else if (root.Left == null)
+                    // If no children root.Right is null too, so we just return null
+                    return root.Right;
+                // Replace node with left child
+                else
+                    return root.Left;
+            }
+
+            if (updateBalanace)
+                root = rotateForRemove(root, ref updateBalanace);
+
+            return root;
         }
 
         /// <summary>
