@@ -353,7 +353,7 @@ namespace C5
         #region IEditableCollection<T> Members
 
         /// <summary>
-        /// The complexity of the Contains operation
+        /// The complexity of the StrictlyContains operation
         /// </summary>
         /// <value>Always returns Speed.Constant</value>
         public virtual Speed ContainsSpeed { get { return Speed.Constant; } }

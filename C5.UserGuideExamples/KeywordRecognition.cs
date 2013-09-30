@@ -128,7 +128,7 @@ namespace KeywordRecognition
                 String id = args[1];
 
                 {
-                    Console.Write("HashSet.Contains ");
+                    Console.Write("HashSet.StrictlyContains ");
                     var sw = Stopwatch.StartNew();
                     for (int i = 0; i < count; i++)
                         IsKeyword1(id);
@@ -137,7 +137,7 @@ namespace KeywordRecognition
                 }
 
                 {
-                    Console.Write("TreeSet.Contains ");
+                    Console.Write("TreeSet.StrictlyContains ");
                     var sw = Stopwatch.StartNew();
                     for (int i = 0; i < count; i++)
                         IsKeyword2(id);
@@ -146,7 +146,7 @@ namespace KeywordRecognition
                 }
 
                 {
-                    Console.Write("SortedArray.Contains ");
+                    Console.Write("SortedArray.StrictlyContains ");
                     var sw = Stopwatch.StartNew();
                     for (int i = 0; i < count; i++)
                         IsKeyword3(id);

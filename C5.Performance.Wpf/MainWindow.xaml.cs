@@ -26,14 +26,6 @@ namespace C5.Performance.Wpf
             _plotter = Plotter.createPlotter();
             DataContext = _plotter;
             InitializeComponent();
-            int i = adder();
-        }
-
-        public int adder(int x, int y)
-        {
-            if (x == 100)
-                return 3;
-            return x + y;
         }
 
         private void button1_Click_1(object sender, RoutedEventArgs e)
@@ -41,7 +33,7 @@ namespace C5.Performance.Wpf
             var b = new SimpleBenchmark();
             var b2 = new IbsAvlAddBenchmarker();
             var b3 = new IbsAddBenchmarker();
-            var thread = new Thread(() => RunBenchmarks(b3));
+            var thread = new Thread(() => RunBenchmarks(b2));
             thread.Start();
         }
 

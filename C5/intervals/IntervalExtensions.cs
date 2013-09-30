@@ -36,7 +36,7 @@ namespace C5.intervals
             return Overlaps(x, new IntervalBase<T>(p));
         }
 
-        // TODO: Same meaning as in IntervalRelation.Contains, but is a strict containment. Could be renamed something with subset?
+        // TODO: Same meaning as in IntervalRelation.StrictlyContains, but is a strict containment. Could be renamed something with subset?
         /// <summary>
         /// Check if one interval contains another interval.
         /// x contains y if x.Low is lower than y.Low and y.High is lower than x.High.
@@ -45,7 +45,7 @@ namespace C5.intervals
         /// <param name="x">Container interval</param>
         /// <param name="y">Contained interval</param>
         /// <returns>True if y is contained in x</returns>
-        public static bool Contains<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        public static bool StrictlyContains<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             // Save compare values to avoid comparing twice in case CompareTo() should be expensive
             int lowCompare = x.Low.CompareTo(y.Low), highCompare = y.High.CompareTo(x.High);
@@ -55,6 +55,19 @@ namespace C5.intervals
 
             // The same as (but faster than)
             // return x.CompareLow(y) < 0 && y.CompareHigh(x) < 0;
+        }
+
+        // TODO Fix this!
+        public static bool Contains<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            // Save compare values to avoid comparing twice in case CompareTo() should be expensive
+//            int lowCompare = x.Low.CompareTo(y.Low), highCompare = y.High.CompareTo(x.High);
+//            return
+//                (lowCompare < 0 || (lowCompare == 0 && x.LowIncluded && !y.LowIncluded))
+//                && (highCompare < 0 || (highCompare == 0 && !y.HighIncluded && x.HighIncluded));
+
+            // The same as (but faster than)
+            return x.CompareLow(y) <= 0 && y.CompareHigh(x) <= 0;
         }
 
         /// <summary>

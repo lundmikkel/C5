@@ -397,6 +397,114 @@ namespace C5.intervals
             return Math.Max(heightLeft,heightRight) + 1;
         }
 
+
+        [ContractInvariantMethod]
+        private void ibs_Invariants()
+        {
+            Contract.Invariant(true);
+            Contract.Invariant(checkIbsInvariants());
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="root"></param>
+        /// <param name="child"></param>
+        /// <param name="currentAncestor">Internal parameter to keep track of the ancestor while searching.</param>
+        /// <returns></returns>
+        private Node findAncestor(Node root, Node child)
+        {
+            if (root == null || child == null)
+                return null;
+            var searchRight = child.Key.CompareTo(root.Key) > 0;
+            return findAncestor(root, child, searchRight);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="root"></param>
+        /// <param name="child"></param>
+        /// <param name="searchRight">Indicate which searchRight to search in the tree. Right == true, Left == false.</param>
+        /// <param name="currentAncestor">Internal parameter to keep track of the ancestor while searching.</param>
+        /// <returns></returns>
+        private Node findAncestor(Node root, Node child, bool searchRight, Node currentAncestor = null)
+        {
+            if (root == null)
+                return null;
+            if (root == child)
+                return currentAncestor;
+            var compare = child.Key.CompareTo(root.Key);
+            // Search in the right subtree
+            if (compare > 0)
+            {
+                if (searchRight)
+                    currentAncestor = root;
+                findAncestor(root.Right, child, searchRight, currentAncestor);
+            }
+            // Search in the left subtree
+            else if (compare < 0)
+            {
+                if (!searchRight)
+                    currentAncestor = root;
+                findAncestor(root.Left, child, searchRight, currentAncestor);
+            }
+            return currentAncestor;
+        }
+
+        private bool checkIbsInvariantTraverser(Node node)
+        {
+            if (node == null)
+                return true;
+            return checkIbsInvariants(node) && checkIbsInvariantTraverser(node.Left) &&
+                   checkIbsInvariantTraverser(node.Right);
+        }
+
+        private bool checkIbsInvariants()
+        {
+            return checkIbsInvariantTraverser(_root);
+        }
+
+        // TODO Also check the "=" invariant
+        private bool checkIbsInvariants(Node v)
+        {
+            var u = findAncestor(_root, v);
+            if (u == null)
+                return true;
+            // TODO Is this right?
+            var compare = u.Key.CompareTo(v.Key);
+            IntervalBase<T> intervalUV = null;
+            if (compare < 0)
+                intervalUV = new IntervalBase<T>(u.Key, v.Key);
+            else if (compare > 0)
+                intervalUV = new IntervalBase<T>(v.Key, u.Key);
+            var set  = new IntervalSet();
+            set.AddAll(v.Less);
+            set.AddAll(v.Greater);
+            foreach (var i in set)
+            {
+                // Check the containment invariant
+                if (!i.Contains(intervalUV))
+                    return false;
+
+                // Check the maximality invariant
+                var ancestor = v;
+                while ((ancestor = findAncestor(_root, ancestor)) != null)
+                {
+                    if (ancestor.Less.Any(j => i.Contains(j) && j.Contains(intervalUV)))
+                        return false;
+                    if (ancestor.Greater.Any(j => i.Contains(j) && j.Contains(intervalUV)))
+                        return false;
+                }
+            }
+            return true;
+        }
+
+        private bool maximality()
+        {
+            return true;
+        }
+
         #endregion
 
         #region Events
