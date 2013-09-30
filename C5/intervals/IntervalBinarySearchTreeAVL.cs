@@ -804,15 +804,13 @@ namespace C5.intervals
         /// Find the current least node in the interval tree.
         /// </summary>
         /// <returns>The least node. Null if the tree is empty.</returns>
-        private Node findMinNode(Node node)
+        private static Node findMinNode(Node node)
         {
             while (node != null)
                 node = node.Left;
 
             return node;
         }
-
-
 
         #endregion
 
