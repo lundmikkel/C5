@@ -419,29 +419,40 @@ namespace C5.intervals
             get { return _root != null ? _root.Max : 0; }
         }
 
+        /// <summary>
+        /// Recursively search for the split node, while updating the maximum overlap on the way
+        /// back if necessary.
+        /// </summary>
+        /// <param name="root">The root for the tree to search.</param>
+        /// <param name="interval">The interval whose endpoints we search for.</param>
+        /// <returns>True if we need to update the maximum overlap for the parent node.</returns>
         private static bool updateMaximumOverlap(Node root, IInterval<T> interval)
         {
+            // Search left for split node and update MNO if necessary
             if (interval.High.CompareTo(root.Key) < 0)
                 return updateMaximumOverlap(root.Left, interval) && root.UpdateMaximumOverlap();
-            else if (root.Key.CompareTo(interval.Low) < 0)
+
+            // Search right for split node and update MNO if necessary
+            if (root.Key.CompareTo(interval.Low) < 0)
                 return updateMaximumOverlap(root.Right, interval) && root.UpdateMaximumOverlap();
-            else
-            {
-                updateLowMaximumOverlap(root, interval.Low);
-                updateHighMaximumOverlap(root, interval.High);
-                return true;
-            }
+
+            // Return true if MNO has changed for either endpoint
+            return updateLowMaximumOverlap(root, interval.Low) || updateHighMaximumOverlap(root, interval.High);
         }
 
         private static bool updateLowMaximumOverlap(Node root, T low)
         {
             var compare = low.CompareTo(root.Key);
 
+            // Search left for low and update MNO if necessary
             if (compare < 0)
                 return updateLowMaximumOverlap(root.Left, low) && root.UpdateMaximumOverlap();
-            else if (compare > 0)
+
+            // Search right for low and update MNO if necessary
+            if (compare > 0)
                 return updateLowMaximumOverlap(root.Right, low) && root.UpdateMaximumOverlap();
-            else
+
+            // Update MNO when low is found
                 return root.UpdateMaximumOverlap();
         }
 
@@ -449,11 +460,15 @@ namespace C5.intervals
         {
             var compare = high.CompareTo(root.Key);
 
+            // Search left for high and update MNO if necessary
             if (compare < 0)
                 return updateLowMaximumOverlap(root.Left, high) && root.UpdateMaximumOverlap();
-            else if (compare > 0)
+
+            // Search right for high and update MNO if necessary
+            if (compare > 0)
                 return updateLowMaximumOverlap(root.Right, high) && root.UpdateMaximumOverlap();
-            else
+
+            // Update MNO when high is found
                 return root.UpdateMaximumOverlap();
         }
 
