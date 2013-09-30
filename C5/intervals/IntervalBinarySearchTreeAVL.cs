@@ -355,7 +355,7 @@ namespace C5.intervals
         #region Code Contracts
 
         [ContractInvariantMethod]
-        private void AVLInvariants()
+        private void avlInvariants()
         {
             Contract.Invariant(confirmBalance());
         }
@@ -429,11 +429,13 @@ namespace C5.intervals
                     lowNode.DeltaAt++;
                 else
                     lowNode.DeltaAfter++;
+
                 // Update MNO delta for high
                 if (!interval.HighIncluded)
                     highNode.DeltaAt--;
                 else
                     highNode.DeltaAfter--;
+
                 // TODO: Fix MNO
                 // Update MNO
                 //root.UpdateMaximumOverlap();
@@ -1076,11 +1078,11 @@ namespace C5.intervals
         /// <summary>
         /// Create an enumerable, enumerating all intersecting intervals on the path to the split node. Returns the split node in splitNode.
         /// </summary>
-        private IEnumerable<IInterval<T>> findSplitNode(Node root, IInterval<T> query, Action<Node> splitNode)
+        private IEnumerable<IInterval<T>> findSplitNode(Node root, IInterval<T> query, Action<Node> setSplitNode)
         {
             if (root == null) yield break;
 
-            splitNode(root);
+            setSplitNode(root);
 
             // Interval is lower than root, go left
             if (query.High.CompareTo(root.Key) < 0)
@@ -1089,7 +1091,7 @@ namespace C5.intervals
                     yield return interval;
 
                 // Recursively travese left subtree
-                foreach (var interval in findSplitNode(root.Left, query, splitNode))
+                foreach (var interval in findSplitNode(root.Left, query, setSplitNode))
                     yield return interval;
             }
             // Interval is higher than root, go right
@@ -1099,17 +1101,17 @@ namespace C5.intervals
                     yield return interval;
 
                 // Recursively travese right subtree
-                foreach (var interval in findSplitNode(root.Right, query, splitNode))
+                foreach (var interval in findSplitNode(root.Right, query, setSplitNode))
                     yield return interval;
             }
             // Otherwise add overlapping nodes in split node
             else
             {
-                foreach (var interval in root.Less.Where(interval => query.Overlaps(interval)))
+                foreach (var interval in root.Less.Where(query.Overlaps))
                     yield return interval;
-                foreach (var interval in root.Equal.Where(interval => query.Overlaps(interval)))
+                foreach (var interval in root.Equal.Where(query.Overlaps))
                     yield return interval;
-                foreach (var interval in root.Greater.Where(interval => query.Overlaps(interval)))
+                foreach (var interval in root.Greater.Where(query.Overlaps))
                     yield return interval;
             }
         }
