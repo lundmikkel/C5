@@ -243,6 +243,23 @@ namespace C5.intervals
             // The number of intervals with an endpoint in one of the interval sets in the node
             public int IntervalsEndingInNode;
 
+            public IEnumerable<IInterval<T>> GetIntervalsEndingInNode()
+            {
+                var set = new IntervalSet();
+
+                if (_less != null)
+                    foreach (var interval in _less.Where(interval => interval.HasEndpoint(Key) && set.Add(interval)))
+                        yield return interval;
+
+                if (_equal != null)
+                    foreach (var interval in _equal.Where(interval => interval.HasEndpoint(Key) && set.Add(interval)))
+                        yield return interval;
+
+                if (_greater != null)
+                    foreach (var interval in _greater.Where(interval => interval.HasEndpoint(Key) && set.Add(interval)))
+                        yield return interval;
+            }
+
             // Fields for Maximum Number of Overlaps
             public int DeltaAt { get; internal set; }
             public int DeltaAfter { get; internal set; }
