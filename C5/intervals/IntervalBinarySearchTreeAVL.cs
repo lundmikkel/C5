@@ -257,9 +257,15 @@ namespace C5.intervals
                 Key = key;
             }
 
-            public void UpdateMaximumOverlap()
+            /// <summary>
+            /// Update the maximum overlap value for the node.
+            /// </summary>
+            /// <returns>True if value changed.</returns>
+            public bool UpdateMaximumOverlap()
             {
-                // TODO: Find a clever way only to update what needs to be updated!
+                // Cache values
+                var oldMax = Max;
+                var oldSum = Sum;
 
                 // Set Max to Left's Max
                 Max = Left != null ? Left.Max : 0;
@@ -282,6 +288,9 @@ namespace C5.intervals
                 value += Right != null ? Right.Max : 0;
                 if (value > Max)
                     Max = value;
+
+                // Return true if either Max or Sum changed
+                return oldMax != Max || oldSum != Sum;
             }
 
             public override string ToString()
@@ -355,7 +364,7 @@ namespace C5.intervals
         #region Code Contracts
 
         [ContractInvariantMethod]
-        private void avl_Invariants()
+        private void avlInvariants()
         {
             Contract.Invariant(confirmBalance());
         }
@@ -403,6 +412,53 @@ namespace C5.intervals
 
         #endregion
 
+        #region
+
+        public int MaximumOverlap
+        {
+            get { return _root != null ? _root.Max : 0; }
+        }
+
+        private static bool updateMaximumOverlap(Node root, IInterval<T> interval)
+        {
+            if (interval.High.CompareTo(root.Key) < 0)
+                return updateMaximumOverlap(root.Left, interval) && root.UpdateMaximumOverlap();
+            else if (root.Key.CompareTo(interval.Low) < 0)
+                return updateMaximumOverlap(root.Right, interval) && root.UpdateMaximumOverlap();
+            else
+            {
+                updateLowMaximumOverlap(root, interval.Low);
+                updateHighMaximumOverlap(root, interval.High);
+                return true;
+            }
+        }
+
+        private static bool updateLowMaximumOverlap(Node root, T low)
+        {
+            var compare = low.CompareTo(root.Key);
+
+            if (compare < 0)
+                return updateLowMaximumOverlap(root.Left, low) && root.UpdateMaximumOverlap();
+            else if (compare > 0)
+                return updateLowMaximumOverlap(root.Right, low) && root.UpdateMaximumOverlap();
+            else
+                return root.UpdateMaximumOverlap();
+        }
+
+        private static bool updateHighMaximumOverlap(Node root, T high)
+        {
+            var compare = high.CompareTo(root.Key);
+
+            if (compare < 0)
+                return updateLowMaximumOverlap(root.Left, high) && root.UpdateMaximumOverlap();
+            else if (compare > 0)
+                return updateLowMaximumOverlap(root.Right, high) && root.UpdateMaximumOverlap();
+            else
+                return root.UpdateMaximumOverlap();
+        }
+
+        #endregion
+
         #region Add
 
         public bool Add(IInterval<T> interval)
@@ -421,9 +477,24 @@ namespace C5.intervals
             nodeWasAdded = false;
             _root = addHigh(_root, null, interval, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
 
-            // Increase counter and raise event if interval was added
+            // Increase counters and raise event if interval was added
             if (intervalWasAdded)
             {
+                // Update MNO delta for low
+                if (interval.LowIncluded)
+                    lowNode.DeltaAt++;
+                else
+                    lowNode.DeltaAfter++;
+
+                // Update MNO delta for high
+                if (!interval.HighIncluded)
+                    highNode.DeltaAt--;
+                else
+                    highNode.DeltaAfter--;
+
+                // Update MNO
+                updateMaximumOverlap(_root, interval);
+
                 lowNode.IntervalsEndingInNode++;
                 highNode.IntervalsEndingInNode++;
 
@@ -483,15 +554,6 @@ namespace C5.intervals
                 if (interval.LowIncluded)
                     intervalWasAdded = root.Equal.Add(interval);
 
-                if (intervalWasAdded)
-                {
-                    // If interval was added, we need to update delta
-                    if (interval.LowIncluded)
-                        root.DeltaAt++;
-                    else
-                        root.DeltaAfter++;
-                }
-
                 // Save reference to endpoint node
                 lowNode = root;
             }
@@ -499,10 +561,6 @@ namespace C5.intervals
             // Tree might be unbalanced after node was added, so we rotate
             if (nodeWasAdded && compare != 0)
                 root = rotateForAdd(root, ref nodeWasAdded);
-
-            // Update MNO
-            if (intervalWasAdded)
-                root.UpdateMaximumOverlap();
 
             return root;
         }
@@ -553,15 +611,6 @@ namespace C5.intervals
                 if (interval.HighIncluded)
                     intervalWasAdded = root.Equal.Add(interval);
 
-                // If interval was added, we need to update MNO
-                if (intervalWasAdded)
-                {
-                    if (!interval.HighIncluded)
-                        root.DeltaAt--;
-                    else
-                        root.DeltaAfter--;
-                }
-
                 // Save reference to endpoint node
                 highNode = root;
             }
@@ -569,10 +618,6 @@ namespace C5.intervals
             // Tree might be unbalanced after node was added, so we rotate
             if (nodeWasAdded && compare != 0)
                 root = rotateForAdd(root, ref nodeWasAdded);
-
-            // Update MNO
-            if (intervalWasAdded)
-                root.UpdateMaximumOverlap();
 
             return root;
         }
@@ -595,9 +640,23 @@ namespace C5.intervals
             // Remove high endpoint
             removeHigh(_root, null, interval, ref intervalWasRemoved, ref highNode);
 
-            // Increase counter and raise event if interval was added
+            // Increase counters and raise event if interval was added
             if (intervalWasRemoved)
             {
+                // Update MNO delta for low
+                if (interval.LowIncluded)
+                    lowNode.DeltaAt--;
+                else
+                    lowNode.DeltaAfter--;
+                // Update MNO delta for high
+                if (!interval.HighIncluded)
+                    highNode.DeltaAt++;
+                else
+                    highNode.DeltaAfter++;
+
+                // Update MNO
+                updateMaximumOverlap(_root, interval);
+
                 // Check for unnecessary endpoint nodes, if interval was actually removed
                 if (--lowNode.IntervalsEndingInNode == 0)
                     removeNodeWithKey(interval.Low);
@@ -645,23 +704,9 @@ namespace C5.intervals
                 if (interval.LowIncluded)
                     intervalWasRemoved = root.Equal.Remove(interval);
 
-                // If interval was added, we need to update MNO
-                if (intervalWasRemoved)
-                {
-                    // Update delta
-                    if (interval.LowIncluded)
-                        root.DeltaAt--;
-                    else
-                        root.DeltaAfter--;
-                }
-
                 // Save reference to endpoint node
                 lowNode = root;
             }
-
-            // Update MNO
-            if (intervalWasRemoved)
-                root.UpdateMaximumOverlap();
         }
 
         private static void removeHigh(Node root, Node left, IInterval<T> interval, ref bool intervalWasRemoved, ref Node highNode)
@@ -695,15 +740,6 @@ namespace C5.intervals
 
                 if (interval.HighIncluded)
                     intervalWasRemoved = root.Equal.Remove(interval);
-
-                // If interval was removed, we need to update MNO
-                if (intervalWasRemoved)
-                {
-                    if (!interval.HighIncluded)
-                        root.DeltaAt++;
-                    else
-                        root.DeltaAfter++;
-                }
 
                 // Save reference to endpoint node
                 highNode = root;
@@ -1097,11 +1133,11 @@ namespace C5.intervals
         /// <summary>
         /// Create an enumerable, enumerating all intersecting intervals on the path to the split node. Returns the split node in splitNode.
         /// </summary>
-        private IEnumerable<IInterval<T>> findSplitNode(Node root, IInterval<T> query, Action<Node> splitNode)
+        private IEnumerable<IInterval<T>> findSplitNode(Node root, IInterval<T> query, Action<Node> setSplitNode)
         {
             if (root == null) yield break;
 
-            splitNode(root);
+            setSplitNode(root);
 
             // Interval is lower than root, go left
             if (query.High.CompareTo(root.Key) < 0)
@@ -1110,7 +1146,7 @@ namespace C5.intervals
                     yield return interval;
 
                 // Recursively travese left subtree
-                foreach (var interval in findSplitNode(root.Left, query, splitNode))
+                foreach (var interval in findSplitNode(root.Left, query, setSplitNode))
                     yield return interval;
             }
             // Interval is higher than root, go right
@@ -1120,17 +1156,17 @@ namespace C5.intervals
                     yield return interval;
 
                 // Recursively travese right subtree
-                foreach (var interval in findSplitNode(root.Right, query, splitNode))
+                foreach (var interval in findSplitNode(root.Right, query, setSplitNode))
                     yield return interval;
             }
             // Otherwise add overlapping nodes in split node
             else
             {
-                foreach (var interval in root.Less.Where(interval => query.Overlaps(interval)))
+                foreach (var interval in root.Less.Where(query.Overlaps))
                     yield return interval;
-                foreach (var interval in root.Equal.Where(interval => query.Overlaps(interval)))
+                foreach (var interval in root.Equal.Where(query.Overlaps))
                     yield return interval;
-                foreach (var interval in root.Greater.Where(interval => query.Overlaps(interval)))
+                foreach (var interval in root.Greater.Where(query.Overlaps))
                     yield return interval;
             }
         }
@@ -1291,11 +1327,6 @@ namespace C5.intervals
         public int CountOverlaps(IInterval<T> query)
         {
             return FindOverlaps(query).Count();
-        }
-
-        public int MaximumOverlap
-        {
-            get { return _root != null ? _root.Max : 0; }
         }
 
         #endregion
