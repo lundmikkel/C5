@@ -416,9 +416,8 @@ namespace C5.intervals
 
 
         [ContractInvariantMethod]
-        private void ibs_Invariants()
+        private void ibsInvariants()
         {
-            Contract.Invariant(true);
             Contract.Invariant(checkIbsInvariants());
         }
 
@@ -429,7 +428,7 @@ namespace C5.intervals
         /// <param name="child"></param>
         /// <param name="currentAncestor">Internal parameter to keep track of the ancestor while searching.</param>
         /// <returns></returns>
-        private Node findAncestor(Node root, Node child)
+        private static Node findAncestor(Node root, Node child)
         {
             if (root == null || child == null)
                 return null;
@@ -445,10 +444,12 @@ namespace C5.intervals
         /// <param name="searchRight">Indicate which searchRight to search in the tree. Right == true, Left == false.</param>
         /// <param name="currentAncestor">Internal parameter to keep track of the ancestor while searching.</param>
         /// <returns></returns>
-        private Node findAncestor(Node root, Node child, bool searchRight, Node currentAncestor = null)
+        private static Node findAncestor(Node root, Node child, bool searchRight, Node currentAncestor = null)
         {
+
             if (root == null)
                 return null;
+
             if (root == child)
                 return currentAncestor;
             var compare = child.Key.CompareTo(root.Key);
@@ -495,7 +496,7 @@ namespace C5.intervals
                 intervalUV = new IntervalBase<T>(u.Key, v.Key);
             else if (compare > 0)
                 intervalUV = new IntervalBase<T>(v.Key, u.Key);
-            var set  = new IntervalSet();
+            var set = new IntervalSet();
             set.AddAll(v.Less);
             set.AddAll(v.Greater);
             foreach (var i in set)
