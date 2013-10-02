@@ -418,7 +418,21 @@ namespace C5.intervals
         [ContractInvariantMethod]
         private void ibsInvariants()
         {
-            Contract.Invariant(checkIbsInvariants());
+            Contract.Invariant(Contract.ForAll(getNodeEnumerator(_root), checkIbsInvariants));
+        }
+
+        private static IEnumerable<Node> getNodeEnumerator(Node root)
+        {
+            if (root == null)
+                yield break;
+
+            foreach (var node in getNodeEnumerator(root.Left))
+                yield return node;
+
+            yield return root;
+
+            foreach (var node in getNodeEnumerator(root.Right))
+                yield return node;
         }
 
         /// <summary>
@@ -430,8 +444,9 @@ namespace C5.intervals
         /// <returns></returns>
         private static Node findAncestor(Node root, Node child)
         {
-            if (root == null || child == null)
-                return null;
+            Contract.Requires(root != null);
+            Contract.Requires(child != null);
+
             var searchRight = child.Key.CompareTo(root.Key) > 0;
             return findAncestor(root, child, searchRight);
         }
@@ -446,75 +461,65 @@ namespace C5.intervals
         /// <returns></returns>
         private static Node findAncestor(Node root, Node child, bool searchRight, Node currentAncestor = null)
         {
+            Contract.Requires(root != null);
 
-            if (root == null)
-                return null;
-
-            if (root == child)
-                return currentAncestor;
             var compare = child.Key.CompareTo(root.Key);
+
             // Search in the right subtree
             if (compare > 0)
             {
+                // Update ancestor
                 if (searchRight)
                     currentAncestor = root;
+
                 findAncestor(root.Right, child, searchRight, currentAncestor);
             }
             // Search in the left subtree
             else if (compare < 0)
             {
+                // Update ancestor
                 if (!searchRight)
                     currentAncestor = root;
+
                 findAncestor(root.Left, child, searchRight, currentAncestor);
             }
+
             return currentAncestor;
-        }
-
-        private bool checkIbsInvariantTraverser(Node node)
-        {
-            if (node == null)
-                return true;
-            return checkIbsInvariants(node) && checkIbsInvariantTraverser(node.Left) &&
-                   checkIbsInvariantTraverser(node.Right);
-        }
-
-        private bool checkIbsInvariants()
-        {
-            return checkIbsInvariantTraverser(_root);
         }
 
         // TODO Also check the "=" invariant
         private bool checkIbsInvariants(Node v)
         {
+            // Find v's anchestor
             var u = findAncestor(_root, v);
+
+            // If v doesn't have an ancestor return
             if (u == null)
                 return true;
-            // TODO Is this right?
-            var compare = u.Key.CompareTo(v.Key);
-            IntervalBase<T> intervalUV = null;
-            if (compare < 0)
-                intervalUV = new IntervalBase<T>(u.Key, v.Key);
-            else if (compare > 0)
-                intervalUV = new IntervalBase<T>(v.Key, u.Key);
-            var set = new IntervalSet();
-            set.AddAll(v.Less);
-            set.AddAll(v.Greater);
-            foreach (var i in set)
+
+            Contract.Assert(u != v);
+
+            var leftAncestor = u.Key.CompareTo(v.Key) < 0;
+
+            var intervalUV = leftAncestor ? new IntervalBase<T>(u.Key, v.Key, false, false) : new IntervalBase<T>(v.Key, u.Key, false, false);
+
+            var set = leftAncestor ? v.Less : v.Greater;
+
+            // Containment invariant
+            if (!set.All(i => i.Contains(intervalUV)))
+                return false;
+
+            // Maximality invariant 
+            while ((u = findAncestor(_root, v)) != null)
             {
-                // Check the containment invariant
-                if (!i.Contains(intervalUV))
+                var j = v.Key.CompareTo(u.Key) < 0 ? new IntervalBase<T>(v.Key, u.Key, false, false) : new IntervalBase<T>(u.Key, v.Key, false, false);
+
+                if (set.Exists(i => i.Contains(j) && j.Contains(intervalUV)))
                     return false;
 
-                // Check the maximality invariant
-                var ancestor = v;
-                while ((ancestor = findAncestor(_root, ancestor)) != null)
-                {
-                    if (ancestor.Less.Any(j => i.Contains(j) && j.Contains(intervalUV)))
-                        return false;
-                    if (ancestor.Greater.Any(j => i.Contains(j) && j.Contains(intervalUV)))
-                        return false;
-                }
+                v = u;
             }
+
             return true;
         }
 
