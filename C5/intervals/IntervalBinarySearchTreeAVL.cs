@@ -464,6 +464,7 @@ namespace C5.intervals
         private static Node findAncestor(Node root, Node child, bool searchRight, Node currentAncestor = null)
         {
             Contract.Requires(root != null);
+            Contract.Requires(child != null);
 
             var compare = child.Key.CompareTo(root.Key);
 
@@ -474,7 +475,7 @@ namespace C5.intervals
                 if (searchRight)
                     currentAncestor = root;
 
-                findAncestor(root.Right, child, searchRight, currentAncestor);
+                return findAncestor(root.Right, child, searchRight, currentAncestor);
             }
             // Search in the left subtree
             else if (compare < 0)
@@ -483,16 +484,15 @@ namespace C5.intervals
                 if (!searchRight)
                     currentAncestor = root;
 
-                findAncestor(root.Left, child, searchRight, currentAncestor);
+                return findAncestor(root.Left, child, searchRight, currentAncestor);
             }
 
             return currentAncestor;
         }
 
-        // TODO Also check the "=" invariant
         private bool checkIbsInvariants(Node v)
         {
-            // Find v's anchestor
+            // Find v's ancestor
             var u = findAncestor(_root, v);
 
             // If v doesn't have an ancestor return
@@ -511,15 +511,29 @@ namespace C5.intervals
             if (!set.All(i => i.Contains(intervalUV)))
                 return false;
 
-            // Maximality invariant 
-            while ((u = findAncestor(_root, v)) != null)
+            // "=" Invariant part 1
+            if (v.Equal.Exists(i => !i.Overlaps(v.Key)))
+                return false;
+
+            // Maximality invariant
+            var child = u; // Start by searching from the current ancestor
+            Node ancestor;
+            while ((ancestor = findAncestor(_root, child)) != null)
             {
-                var j = v.Key.CompareTo(u.Key) < 0 ? new IntervalBase<T>(v.Key, u.Key, false, false) : new IntervalBase<T>(u.Key, v.Key, false, false);
+                var compare = child.Key.CompareTo(ancestor.Key);
+                var j = compare < 0 ?
+                    new IntervalBase<T>(child.Key, ancestor.Key, false, false) :
+                    new IntervalBase<T>(ancestor.Key, child.Key, false, false);
 
                 if (set.Exists(i => i.Contains(j) && j.Contains(intervalUV)))
                     return false;
 
-                v = u;
+                // "=" Invariant part 2
+                var ancestorSet = compare < 0 ? ancestor.Less : ancestor.Greater;
+                if (v.Equal.Exists(i => ancestorSet.Exists(i2 => i.Equals(i2))))
+                    return false;
+
+                child = ancestor;
             }
 
             return true;
@@ -1069,15 +1083,15 @@ namespace C5.intervals
 
         public override IEnumerator<I> GetEnumerator()
         {
+            // TODO: Make enumerator lazy, by adding each interval and yield it if it wasn't already yielded
+
             var set = new IntervalSet();
 
             var enumerator = getEnumerator(_root);
             while (enumerator.MoveNext())
-            {
-                var interval = enumerator.Current;
-                if (set.Add(interval))
-                    yield return interval;
-            }
+                set.Add(enumerator.Current);
+
+            return set.GetEnumerator();
         }
 
         #endregion
@@ -1304,18 +1318,18 @@ namespace C5.intervals
 
             var splitNode = _root;
             // Use a lambda instead of out, as out or ref isn't allowed for itorators
-            foreach (var interval in findSplitNode(_root, query, n => { splitNode = n; }).Where(set.Add))
-                yield return interval;
+            set.AddAll(findSplitNode(_root, query, n => { splitNode = n; }));
 
             // Find all intersecting intervals in left subtree
             if (query.Low.CompareTo(splitNode.Key) < 0)
-                foreach (var interval in findLeft(splitNode.Left, query).Where(set.Add))
-                    yield return interval;
+                set.AddAll(findLeft(splitNode.Left, query));
 
             // Find all intersecting intervals in right subtree
             if (splitNode.Key.CompareTo(query.High) < 0)
-                foreach (var interval in findRight(splitNode.Right, query).Where(set.Add))
-                    yield return interval;
+                set.AddAll(findRight(splitNode.Right, query));
+
+            foreach (var interval in set)
+                yield return interval;
         }
 
         public bool FindOverlap(IInterval<T> query, ref I overlap)
