@@ -383,16 +383,20 @@ namespace C5.intervals
         #region Code Contracts
 
         [ContractInvariantMethod]
+        // Check the invariants of the IBS tree.
         private void invariants()
         {
+            // Check the balance invariant holds.
             Contract.Invariant(confirmBalance());
+
+            // Check that the IBS tree invariants from the Hanson article holds.
             Contract.Invariant(Contract.ForAll(getNodeEnumerator(_root), checkIbsInvariants));
         }
 
         /// <summary>
-        /// Checks that the height of the tree is balanced
+        /// Checks that the height of the tree is balanced.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>True if the tree is balanced, else false.</returns>
         private bool confirmBalance()
         {
             var result = true;
@@ -401,11 +405,11 @@ namespace C5.intervals
         }
 
         /// <summary>
-        /// Get the height of the tree
+        /// Get the height of the tree.
         /// </summary>
-        /// <param name="node">The node you wish to check the height on</param>
-        /// <param name="result">Reference to a bool that will be set to false if an inbalance is discovered</param>
-        /// <returns></returns>
+        /// <param name="node">The node you wish to check the height on.</param>
+        /// <param name="result">Reference to a bool that will be set to false if an in-balance is discovered.</param>
+        /// <returns>Height of the tree.</returns>
         private static int height(Node node, ref bool result)
         {
             if (node == null)
@@ -433,29 +437,25 @@ namespace C5.intervals
         }
 
         /// <summary>
-        /// 
+        /// Find the ancestor of a node.
         /// </summary>
-        /// <param name="root"></param>
-        /// <param name="child"></param>
-        /// <param name="currentAncestor">Internal parameter to keep track of the ancestor while searching.</param>
-        /// <returns></returns>
-        private static Node findAncestor(Node root, Node child)
+        /// <param name="child">The node you wish to find an ancestor for.</param>
+        /// <returns>The ancestor of the <paramref name="child"/> node.</returns>
+        private Node findAncestor(Node child)
         {
-            Contract.Requires(root != null);
             Contract.Requires(child != null);
-
-            var searchRight = child.Key.CompareTo(root.Key) > 0;
-            return findAncestor(root, child, searchRight);
+            var searchRight = child.Key.CompareTo(_root.Key) > 0;
+            return findAncestor(_root, child, searchRight);
         }
 
         /// <summary>
-        /// 
+        /// Find the ancestor of a node.
         /// </summary>
-        /// <param name="root"></param>
-        /// <param name="child"></param>
+        /// <param name="root">The root to start the search from.</param>
+        /// <param name="child">The node you wish to find an ancestor for.</param>
         /// <param name="searchRight">Indicate which searchRight to search in the tree. Right == true, Left == false.</param>
         /// <param name="currentAncestor">Internal parameter to keep track of the ancestor while searching.</param>
-        /// <returns></returns>
+        /// <returns>The ancestor of the <paramref name="child"/> node.</returns>
         private static Node findAncestor(Node root, Node child, bool searchRight, Node currentAncestor = null)
         {
             Contract.Requires(root != null);
@@ -463,19 +463,19 @@ namespace C5.intervals
 
             var compare = child.Key.CompareTo(root.Key);
 
-            // Search in the right subtree
+            // Search in the right subtree if the child's key value is larger than the root's key value.
             if (compare > 0)
             {
-                // Update ancestor
+                // Update ancestor if we are searching for an ancestor in the right sub tree.
                 if (searchRight)
                     currentAncestor = root;
 
                 return findAncestor(root.Right, child, searchRight, currentAncestor);
             }
-            // Search in the left subtree
-            else if (compare < 0)
+                // Search in the left subtree if the child's key value is smaller than the root's key value.
+            if (compare < 0)
             {
-                // Update ancestor
+                // Update ancestor if we are searching for an ancestor in the left sub tree.
                 if (!searchRight)
                     currentAncestor = root;
 
@@ -485,60 +485,66 @@ namespace C5.intervals
             return currentAncestor;
         }
 
+        /// <summary>
+        /// Check the invariants of the IBS tree.
+        /// The invariants are from the article "The IBS-tree: A Data Structure for Finding All Intervals That Overlap a Point" by Hanson and Chaabouni.
+        /// The invariants are located on page 4 of the article.
+        /// </summary>
+        /// <param name="v">The node to check (It only makes sense to check all the nodes of the tree, so call this enumerating the entire tree)</param>
+        /// <returns>Returns true if all the invariants hold and false if one of them does not hold.</returns>
         private bool checkIbsInvariants(Node v)
         {
-            // Find v's ancestor
-            var u = findAncestor(_root, v);
+            // Find v's ancestor.
+            var u = findAncestor(v);
 
-            // If v doesn't have an ancestor return
+            // If v doesn't have an ancestor return.
             if (u == null)
                 return true;
 
             Contract.Assert(u != v);
 
+            // Set this to true if we are searching for an ancestor in the left sub tree.
             var leftAncestor = u.Key.CompareTo(v.Key) < 0;
 
+            // Create the interval (U,V).
             var intervalUV = leftAncestor ? new IntervalBase<T>(u.Key, v.Key, false, false) : new IntervalBase<T>(v.Key, u.Key, false, false);
 
+            // Get the "<" or ">" set depending of the direction we are searching.
             var set = leftAncestor ? v.Less : v.Greater;
 
-            // Containment invariant
+            // Containment invariant.
             if (!set.All(i => i.Contains(intervalUV)))
                 return false;
 
-            // "=" Invariant part 1
+            // "=" Invariant part 1.
             if (v.Equal.Exists(i => !i.Overlaps(v.Key)))
                 return false;
 
-            // Maximality invariant
-            var child = u; // Start by searching from the current ancestor
+            // Maximality and "=" invariant while loop.
+            var child = u; // Start by searching from the current ancestor.
             Node ancestor;
-            while ((ancestor = findAncestor(_root, child)) != null)
+            // As long as the child has an ancestor check the invariants.
+            while ((ancestor = findAncestor(child)) != null)
             {
                 var compare = child.Key.CompareTo(ancestor.Key);
                 var j = compare < 0 ?
                     new IntervalBase<T>(child.Key, ancestor.Key, false, false) :
                     new IntervalBase<T>(ancestor.Key, child.Key, false, false);
 
+                // Maximality invariant.
                 if (set.Exists(i => i.Contains(j) && j.Contains(intervalUV)))
                     return false;
 
-                // "=" Invariant part 2
+                // "=" Invariant part 2.
                 var ancestorSet = compare < 0 ? ancestor.Less : ancestor.Greater;
                 if (v.Equal.Exists(i => ancestorSet.Exists(i2 => i.Equals(i2))))
                     return false;
 
+                // Set the child to the current ancestor and search upwards.
                 child = ancestor;
             }
-
             return true;
         }
-
-        private bool maximality()
-        {
-            return true;
-        }
-
         #endregion
 
         #region Events
