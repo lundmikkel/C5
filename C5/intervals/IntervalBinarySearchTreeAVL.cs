@@ -509,23 +509,32 @@ namespace C5.intervals
             if (!set.All(i => i.Contains(intervalUV)))
                 return false;
 
+            // "=" Invariant part 1
+            if (v.Equal.Exists(i => !i.Overlaps(v.Key)))
+                return false;
+            
             // Maximality invariant
             var child = u; // Start by searching from the current ancestor
             Node ancestor;
             while ((ancestor = findAncestor(_root, child)) != null)
             {
-                var j = child.Key.CompareTo(ancestor.Key) < 0 ? 
+                var compare = child.Key.CompareTo(ancestor.Key);
+                var j = compare < 0 ? 
                     new IntervalBase<T>(child.Key, ancestor.Key, false, false) :
                     new IntervalBase<T>(ancestor.Key, child.Key, false, false);
 
                 if (set.Exists(i => i.Contains(j) && j.Contains(intervalUV)))
                     return false;
 
+                // "=" Invariant part 2
+                var ancestorSet = compare < 0 ? ancestor.Less : ancestor.Greater;
+                if (v.Equal.Exists(i => ancestorSet.Exists(i.Equals)))
+                    return false;
+
                 child = ancestor;
             }
 
-            // "=" Invariant
-            return !v.Equal.Exists(i => i.Overlaps(v.Key));
+            return true;
         }
 
         private bool maximality()
@@ -1072,15 +1081,15 @@ namespace C5.intervals
 
         public override IEnumerator<IInterval<T>> GetEnumerator()
         {
+            // TODO: Make enumerator lazy, by adding each interval and yield it if it wasn't already yielded
+
             var set = new IntervalSet();
 
             var enumerator = getEnumerator(_root);
             while (enumerator.MoveNext())
-            {
-                var interval = enumerator.Current;
-                if (set.Add(interval))
-                    yield return interval;
-            }
+                set.Add(enumerator.Current);
+
+            return set.GetEnumerator();
         }
 
         #endregion
@@ -1307,18 +1316,18 @@ namespace C5.intervals
 
             var splitNode = _root;
             // Use a lambda instead of out, as out or ref isn't allowed for itorators
-            foreach (var interval in findSplitNode(_root, query, n => { splitNode = n; }).Where(set.Add))
-                yield return interval;
+            set.AddAll(findSplitNode(_root, query, n => { splitNode = n; }));
 
             // Find all intersecting intervals in left subtree
             if (query.Low.CompareTo(splitNode.Key) < 0)
-                foreach (var interval in findLeft(splitNode.Left, query).Where(set.Add))
-                    yield return interval;
+                set.AddAll(findLeft(splitNode.Left, query));
 
             // Find all intersecting intervals in right subtree
             if (splitNode.Key.CompareTo(query.High) < 0)
-                foreach (var interval in findRight(splitNode.Right, query).Where(set.Add))
-                    yield return interval;
+                set.AddAll(findRight(splitNode.Right, query));
+
+            foreach (var interval in set)
+                yield return interval;
         }
 
         public IInterval<T> FindAnyOverlap(IInterval<T> query)
@@ -1436,7 +1445,7 @@ namespace C5.intervals
             }
         }
 
-        private static IEnumerable<IInterval<T>> findRight(Node root, IInterval<T> query)
+        private IEnumerable<IInterval<T>> findRight(Node root, IInterval<T> query)
         {
             // If root is null we have reached the end
             if (root == null) yield break;
@@ -1494,7 +1503,7 @@ namespace C5.intervals
         }
 
 
-        private static IEnumerator<IInterval<T>> getEnumerator(Node root)
+        private IEnumerator<IInterval<T>> getEnumerator(Node root)
         {
             // Just return if tree is empty
             if (root == null) yield break;
@@ -1529,7 +1538,10 @@ namespace C5.intervals
 
         public bool OverlapExists(IInterval<T> query)
         {
-            return FindOverlaps(query).Any();
+            if (query == null)
+                return false;
+
+            return FindOverlaps(query).GetEnumerator().MoveNext();
         }
 
         public int CountOverlaps(IInterval<T> query)
