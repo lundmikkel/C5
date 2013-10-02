@@ -571,7 +571,7 @@ namespace C5.intervals
         }
 
         // the smallest key; null if no such key
-        public T min()
+        private T min()
         {
             return min(_root).Key;
         }
@@ -586,7 +586,7 @@ namespace C5.intervals
         }
 
         // delete the key-value pair with the given key
-        public void remove(T endpoint)
+        private void remove(T endpoint)
         {
 
             // if both children of root are black, set root to red
