@@ -487,7 +487,6 @@ namespace C5.intervals
             return currentAncestor;
         }
 
-        // TODO Also check the "=" invariant
         private bool checkIbsInvariants(Node v)
         {
             // Find v's ancestor
