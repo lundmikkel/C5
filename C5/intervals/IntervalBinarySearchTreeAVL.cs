@@ -383,9 +383,10 @@ namespace C5.intervals
         #region Code Contracts
 
         [ContractInvariantMethod]
-        private void avlInvariants()
+        private void invariants()
         {
             Contract.Invariant(confirmBalance());
+            Contract.Invariant(Contract.ForAll(getNodeEnumerator(_root), checkIbsInvariants));
         }
 
         /// <summary>
@@ -416,12 +417,6 @@ namespace C5.intervals
             return Math.Max(heightLeft, heightRight) + 1;
         }
 
-
-        [ContractInvariantMethod]
-        private void ibsInvariants()
-        {
-            //Contract.Invariant(Contract.ForAll(getNodeEnumerator(_root), checkIbsInvariants));
-        }
 
         private static IEnumerable<Node> getNodeEnumerator(Node root)
         {
