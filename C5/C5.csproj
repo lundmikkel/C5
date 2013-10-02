@@ -150,6 +150,8 @@
     <Compile Include="hashing\HashTable.cs" />
     <Compile Include="heaps\IntervalHeap.cs" />
     <Compile Include="Interfaces.cs" />
+    <Compile Include="interfaces\IInterval.cs" />
+    <Compile Include="interfaces\IIntervalCollection.cs" />
     <Compile Include="intervals\AvlTree.cs" />
     <Compile Include="intervals\IntervalBinarySearchTreeAVL.cs" />
     <Compile Include="intervals\IntervalRelations.cs" />
