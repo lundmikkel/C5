@@ -2083,8 +2083,11 @@ namespace C5
     /// A collection that allows fast overlap queries on collections of intervals.
     /// </summary>
     /// <remarks>The data structures do not support updates on its intervals' values. If you wish to change an interval's endpoints or their inclusion, the interval should be removed from the data structure first, changed and then added agian.</remarks>
-    /// <typeparam name="T">The generic type for an interval's endpoint values.</typeparam>
-    public interface IIntervalCollection<T> : ICollectionValue<IInterval<T>> where T : IComparable<T>
+    /// <typeparam name="I">The interval type in the collection. Especially used for return types for enumeration.</typeparam>
+    /// <typeparam name="T">The interval's endpoint values.</typeparam>
+    public interface IIntervalCollection<I, T> : ICollectionValue<I>
+        where I : IInterval<T>
+        where T : IComparable<T>
     {
         /// <summary>
         /// The smallest interval that spans all intervals in the collection. The interval's low is the lowest low endpoint in the collection and the high is the highest high endpoint.
@@ -2102,7 +2105,7 @@ namespace C5
         int MaximumOverlap { get; }
 
 
-        // TODO: Check seealso in documentation. Does it actually reference the other overloaded method? Add it to FindAnyOverlap as well
+        // TODO: Check seealso in documentation. Does it actually reference the other overloaded method? Add it to FindOverlap as well
         // @design: made to spare the user of making a point interval [q:q] and allow for more effective implementations of the interface for some data structures
         /// <summary>
         /// Create an enumerable, enumerating all intervals that overlap the query point.
@@ -2110,7 +2113,7 @@ namespace C5
         /// <param name="query">The query point.</param>
         /// <returns>All intervals that overlap the query point.</returns>
         /// <seealso cref="FindOverlaps(IInterval{T})"/>
-        SCG.IEnumerable<IInterval<T>> FindOverlaps(T query);
+        SCG.IEnumerable<I> FindOverlaps(T query);
 
         /// <summary>
         /// Create an enumerable, enumerating all intervals in the collection that overlap the query interval.
@@ -2118,32 +2121,26 @@ namespace C5
         /// <param name="query">The query interval.</param>
         /// <returns>All intervals that overlap the query interval.</returns>
         /// <seealso cref="FindOverlaps(T)"/>
-        SCG.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query);
+        SCG.IEnumerable<I> FindOverlaps(IInterval<T> query);
 
 
         /// <summary>
-        /// Find any interval overlapping the query interval.
+        /// Check if there exists an interval that overlaps the query point.
         /// </summary>
         /// <remarks>There is no garanty of which interval will be returned, but implementations must assure that the interval returned is the fastest to retrieve.</remarks>
-        /// <param name="query">The query interval</param>
-        /// <returns>An interval that overlaps the query interval, if one exists. If not, null is returned.</returns>
-        IInterval<T> FindAnyOverlap(IInterval<T> query);
+        /// <param name="query">The query point.</param>
+        /// <param name="overlap">The overlapping interval found, if return is true.</param>
+        /// <returns>True if an interval overlapped the query.</returns>
+        bool FindOverlap(T query, ref I overlap);
 
         /// <summary>
-        /// Find any interval overlapping the query interval.
+        /// Check if there exists an interval that overlaps the query interval.
         /// </summary>
         /// <remarks>There is no garanty of which interval will be returned, but implementations must assure that the interval returned is the fastest to retrieve.</remarks>
-        /// <param name="query">The query interval</param>
-        /// <returns>An interval that overlaps the query interval, if one exists. If not, null is returned.</returns>
-        IInterval<T> FindAnyOverlap(T query);
-
-        // @design: only implemented with interval that it is most unlikely to query a single point. If that would be needed it would still be possible to query a point with a closed single-point interval ([q:q])
-        /// <summary>
-        /// Check if there exists an interval in the collection that overlaps the query point.
-        /// </summary>
-        /// <param name="query">The query point</param>
-        /// <returns>True if at least one such interval exists</returns>
-        bool OverlapExists(IInterval<T> query);
+        /// <param name="query">The query interval.</param>
+        /// <param name="overlap">The overlapping interval found, if return is true.</param>
+        /// <returns>True if an interval overlapped the query.</returns>
+        bool FindOverlap(IInterval<T> query, ref I overlap);
 
 
         /// <summary>
@@ -2161,7 +2158,7 @@ namespace C5
         /// <remarks>Different implementations may handle duplicates differently.</remarks>
         /// <param name="interval">The interval to add.</param>
         /// <returns>True if the interval was added.</returns>
-        bool Add(IInterval<T> interval);
+        bool Add(I interval);
 
         /// <summary>
         /// Remove an interval from the collection.
@@ -2169,6 +2166,6 @@ namespace C5
         /// <remarks>Different implementations may remove duplicates differently.</remarks>
         /// <param name="interval">The interval to remove.</param>
         /// <returns>True if the interval was removed.</returns>
-        bool Remove(IInterval<T> interval);
+        bool Remove(I interval);
     }
 }

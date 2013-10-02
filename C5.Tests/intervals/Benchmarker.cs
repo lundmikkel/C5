@@ -8,6 +8,8 @@ using System.Linq;
 
 namespace C5.Tests.intervals
 {
+    using IntervalOfInt = IInterval<int>;
+
     [TestFixture]
     public class searchBenchmarker
     {
@@ -83,15 +85,15 @@ namespace C5.Tests.intervals
         }
     }
 
-    [TestFixture]
+    [TestFixture, Ignore]
     public class enumeratorBenchmarker
     {
-        private LayeredContainmentList2<int> intervals;
+        private LayeredContainmentList2<IntervalOfInt, int> intervals;
 
         [SetUp]
         public void SetUp()
         {
-            intervals = new LayeredContainmentList2<int>(BenchmarkTestCases.DataSetC(1000000));
+            intervals = new LayeredContainmentList2<IntervalOfInt, int>(BenchmarkTestCases.DataSetC(1000000));
         }
 
         [Test]
@@ -101,12 +103,8 @@ namespace C5.Tests.intervals
             sw.Start();
 
             for (int i = 0; i < 100; i++)
-            {
                 foreach (var interval in intervals.Sorted)
-                {
                     interval.Equals(interval);
-                }
-            }
 
             sw.Stop();
 
@@ -114,7 +112,7 @@ namespace C5.Tests.intervals
         }
     }
 
-    [TestFixture]
+    [TestFixture, Ignore]
     public class arraylistBenchmarker
     {
         [Test]
@@ -363,8 +361,8 @@ namespace C5.Tests.intervals
 
     abstract class DataSetTester
     {
-        protected IIntervalCollection<int> IntervalCollection;
-        protected abstract IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals);
+        protected IIntervalCollection<IntervalOfInt, int> IntervalCollection;
+        protected abstract IIntervalCollection<IntervalOfInt, int> Factory(IEnumerable<IInterval<int>> intervals);
 
         public abstract string Name { get; }
 
@@ -506,72 +504,72 @@ namespace C5.Tests.intervals
 
     class LayeredContainmentList_Benchmarker : DataSetTester
     {
-        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<IntervalOfInt, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
-            return new LayeredContainmentList<int>(intervals);
+            return new LayeredContainmentList<IntervalOfInt, int>(intervals);
         }
         public override string Name { get { return "Layered"; } }
     }
 
     class LayeredContainmentList2_Benchmarker : DataSetTester
     {
-        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<IntervalOfInt, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
-            return new LayeredContainmentList2<int>(intervals);
+            return new LayeredContainmentList2<IntervalOfInt, int>(intervals);
         }
         public override string Name { get { return "Layered2"; } }
     }
 
     class LayeredContainmentList3_Benchmarker : DataSetTester
     {
-        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<IntervalOfInt, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
-            return new LayeredContainmentList3<int>(intervals);
+            return new LayeredContainmentList3<IntervalOfInt, int>(intervals);
         }
         public override string Name { get { return "Layered3"; } }
     }
 
     class NestedContainmentList_Benchmarker : DataSetTester
     {
-        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<IntervalOfInt, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
-            return new NestedContainmentList<int>(intervals);
+            return new NestedContainmentList<IntervalOfInt, int>(intervals);
         }
         public override string Name { get { return "Nested"; } }
     }
 
     class NestedContainmentList2_Benchmarker : DataSetTester
     {
-        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<IntervalOfInt, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
-            return new NestedContainmentList2<int>(intervals);
+            return new NestedContainmentList2<IntervalOfInt, int>(intervals);
         }
         public override string Name { get { return "Nested2"; } }
     }
 
     class StaticIntervalTree_Benchmarker : DataSetTester
     {
-        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<IntervalOfInt, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
-            return new StaticIntervalTree<int>(intervals);
+            return new StaticIntervalTree<IntervalOfInt, int>(intervals);
         }
         public override string Name { get { return "Static"; } }
     }
 
     class IntervalBinarySearchTree_Benchmarker : DataSetTester
     {
-        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<IntervalOfInt, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
-            return new IntervalBinarySearchTree<int>(intervals);
+            return new IntervalBinarySearchTree<IntervalOfInt, int>(intervals);
         }
         public override string Name { get { return "IBS"; } }
     }
 
     class IntervalBinarySearchTreeAVL_Benchmarker : DataSetTester
     {
-        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<IntervalOfInt, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
-            return new IntervalBinarySearchTreeAVL<int>(intervals);
+            return new IntervalBinarySearchTreeAVL<IntervalOfInt, int>(intervals);
         }
         public override string Name { get { return "IBSAVL"; } }
     }

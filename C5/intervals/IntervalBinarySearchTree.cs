@@ -9,7 +9,9 @@ using QuickGraph.Graphviz.Dot;
 namespace C5.intervals
 {
     // TODO: Document reference equality duplicates
-    public class IntervalBinarySearchTree<T> : CollectionValueBase<IInterval<T>>, IIntervalCollection<T> where T : IComparable<T>
+    public class IntervalBinarySearchTree<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
+        where I : IInterval<T>
+        where T : IComparable<T>
     {
         private const bool RED = true;
         private const bool BLACK = false;
@@ -18,7 +20,7 @@ namespace C5.intervals
         private int _count;
 
         #region Code Contracts
-        
+
 
         #endregion
 
@@ -185,11 +187,11 @@ namespace C5.intervals
             }
         }
 
-        public sealed class IntervalSet : HashSet<IInterval<T>>
+        public sealed class IntervalSet : HashSet<I>
         {
-            private static IEqualityComparer<IInterval<T>> _comparer = ComparerFactory<IInterval<T>>.CreateEqualityComparer(ReferenceEquals, IntervalExtensions.GetHashCode);
+            private static IEqualityComparer<I> _comparer = ComparerFactory<I>.CreateEqualityComparer((x, y) => ReferenceEquals(x, y), x => x.GetHashCode());
 
-            public IntervalSet(IEnumerable<IInterval<T>> intervals)
+            public IntervalSet(IEnumerable<I> intervals)
                 : base(_comparer)
             {
                 AddAll(intervals);
@@ -235,7 +237,7 @@ namespace C5.intervals
 
         #region Constructors
 
-        public IntervalBinarySearchTree(IEnumerable<IInterval<T>> intervals)
+        public IntervalBinarySearchTree(IEnumerable<I> intervals)
         {
             foreach (var interval in intervals)
                 Add(interval);
@@ -251,7 +253,7 @@ namespace C5.intervals
 
         #region insertion
 
-        private Node addLow(Node root, Node right, IInterval<T> interval)
+        private Node addLow(Node root, Node right, I interval)
         {
             if (root == null)
                 root = new Node(interval.Low);
@@ -300,7 +302,7 @@ namespace C5.intervals
             return root;
         }
 
-        private Node addHigh(Node root, Node left, IInterval<T> interval)
+        private Node addHigh(Node root, Node left, I interval)
         {
             if (root == null)
                 root = new Node(interval.High);
@@ -349,7 +351,7 @@ namespace C5.intervals
             return root;
         }
 
-        public bool Add(IInterval<T> interval)
+        public bool Add(I interval)
         {
             // TODO: Add event!
 
@@ -365,7 +367,7 @@ namespace C5.intervals
 
         #region deletion
 
-        private Node removeByLow(Node root, Node right, IInterval<T> interval)
+        private Node removeByLow(Node root, Node right, I interval)
         {
             if (root == null)
                 return null;
@@ -412,7 +414,7 @@ namespace C5.intervals
             return root;
         }
 
-        private Node removeByHigh(Node root, Node left, IInterval<T> interval)
+        private Node removeByHigh(Node root, Node left, I interval)
         {
             if (root == null)
                 return null;
@@ -661,7 +663,7 @@ namespace C5.intervals
             return rotate(root);
         }
 
-        public bool Remove(IInterval<T> interval)
+        public bool Remove(I interval)
         {
             // Delete the interval from the sets
             _root = removeByLow(_root, null, interval);
@@ -716,7 +718,7 @@ namespace C5.intervals
 
         #region IEnumerable
 
-        public override IEnumerator<IInterval<T>> GetEnumerator()
+        public override IEnumerator<I> GetEnumerator()
         {
             var set = new IntervalSet();
 
@@ -864,7 +866,7 @@ namespace C5.intervals
 
         #region ICollectionValue
 
-        public override IInterval<T> Choose()
+        public override I Choose()
         {
             if (_root == null)
                 throw new NoSuchItemException();
@@ -913,13 +915,13 @@ namespace C5.intervals
             return !root.Equal.IsEmpty ? root.Equal.Choose() : root.Less.Choose();
         }
 
-        public IEnumerable<IInterval<T>> FindOverlaps(T query)
+        public IEnumerable<I> FindOverlaps(T query)
         {
             // TODO: Add checks for span overlap, null query, etc.
             return findOverlap(_root, query);
         }
 
-        private static IEnumerable<IInterval<T>> findOverlap(Node root, T query)
+        private static IEnumerable<I> findOverlap(Node root, T query)
         {
             // Search the tree until we reach the bottom of the tree    
             while (root != null)
@@ -960,7 +962,7 @@ namespace C5.intervals
             }
         }
 
-        public IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
+        public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
             if (ReferenceEquals(query, null))
                 yield break;
@@ -987,30 +989,10 @@ namespace C5.intervals
                 yield return interval;
         }
 
-        public IInterval<T> FindAnyOverlap(IInterval<T> query)
-        {
-            if (query == null)
-                return null;
-
-            var enumerator = FindOverlaps(query).GetEnumerator();
-
-            return enumerator.MoveNext() ? enumerator.Current : null;
-        }
-
-        public IInterval<T> FindAnyOverlap(T query)
-        {
-            if (ReferenceEquals(query, null))
-                return null;
-
-            var enumerator = FindOverlaps(query).GetEnumerator();
-
-            return enumerator.MoveNext() ? enumerator.Current : null;
-        }
-
         /// <summary>
         /// Create an enumerable, enumerating all intersecting intervals on the path to the split node. Returns the split node in splitNode.
         /// </summary>
-        private IEnumerable<IInterval<T>> findSplitNode(Node root, IInterval<T> query, Action<Node> splitNode)
+        private static IEnumerable<I> findSplitNode(Node root, IInterval<T> query, Action<Node> splitNode)
         {
             if (root == null) yield break;
 
@@ -1045,7 +1027,7 @@ namespace C5.intervals
             }
         }
 
-        private IEnumerable<IInterval<T>> findLeft(Node root, IInterval<T> query)
+        private IEnumerable<I> findLeft(Node root, IInterval<T> query)
         {
             // If root is null we have reached the end
             if (root == null) yield break;
@@ -1089,13 +1071,13 @@ namespace C5.intervals
                         yield return interval;
 
                 // If we find the matching node, we can add everything in the left subtree
-                IEnumerator<IInterval<T>> child = getEnumerator(root.Right);
+                var child = getEnumerator(root.Right);
                 while (child.MoveNext())
                     yield return child.Current;
             }
         }
 
-        private IEnumerable<IInterval<T>> findRight(Node root, IInterval<T> query)
+        private IEnumerable<I> findRight(Node root, IInterval<T> query)
         {
             // If root is null we have reached the end
             if (root == null) yield break;
@@ -1149,7 +1131,7 @@ namespace C5.intervals
         }
 
 
-        private IEnumerator<IInterval<T>> getEnumerator(Node node)
+        private IEnumerator<I> getEnumerator(Node node)
         {
             // Just return if tree is empty
             if (node == null) yield break;
@@ -1178,12 +1160,26 @@ namespace C5.intervals
 
         }
 
-        public bool OverlapExists(IInterval<T> query)
+        public bool FindOverlap(IInterval<T> query, ref I overlap)
         {
-            if (query == null)
-                return false;
+            var enumerator = FindOverlaps(query).GetEnumerator();
+            var result = enumerator.MoveNext();
 
-            return FindOverlaps(query).GetEnumerator().MoveNext();
+            if (result)
+                overlap = enumerator.Current;
+
+            return result;
+        }
+
+        public bool FindOverlap(T query, ref I overlap)
+        {
+            var enumerator = FindOverlaps(query).GetEnumerator();
+            var result = enumerator.MoveNext();
+
+            if (result)
+                overlap = enumerator.Current;
+
+            return result;
         }
 
         public int CountOverlaps(IInterval<T> query)

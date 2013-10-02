@@ -31,7 +31,7 @@ namespace C5.Tests.intervals
             {
                 var changedList = new ArrayList<int>();
                 list.ToList().ForEach(n => changedList.Add(n));
-                Assert.That(StaticIntervalTree<int>.GetK(changedList, i) == sorted[i]);
+                Assert.That(StaticIntervalTree<IInterval<int>, int>.GetK(changedList, i) == sorted[i]);
             }
         }
 
@@ -83,81 +83,81 @@ namespace C5.Tests.intervals
 
     public class StaticIntervalTreeEndpointInclusion : IntervaledEndpointInclusion
     {
-        internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
-            return new StaticIntervalTree<int>(intervals);
+            return new StaticIntervalTree<IInterval<int>, int>(intervals);
         }
     }
 
     public class StaticIntervalTreeNullCollection : IntervaledNullCollection
     {
-        internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
-            return new StaticIntervalTree<int>(intervals);
+            return new StaticIntervalTree<IInterval<int>, int>(intervals);
         }
     }
 
     public class StaticIntervalTreeEmptyCollection : IntervaledEmptyCollection
     {
-        internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
-            return new StaticIntervalTree<int>(intervals);
+            return new StaticIntervalTree<IInterval<int>, int>(intervals);
         }
     }
 
     public class StaticIntervalTreeIBS : IBS
     {
-        internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
-            return new StaticIntervalTree<int>(intervals);
+            return new StaticIntervalTree<IInterval<int>, int>(intervals);
         }
 
         [Test]
         public void Print()
         {
-            File.WriteAllText(@"../../intervals/data/static_interval_tree.gv", ((StaticIntervalTree<int>) IntervalCollection).Graphviz());
+            File.WriteAllText(@"../../intervals/data/static_interval_tree.gv", ((StaticIntervalTree<IInterval<int>, int>) IntervalCollection).Graphviz());
         }
     }
 
     public class StaticIntervalSample100 : Sample100
     {
-        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
-            return new StaticIntervalTree<int>(intervals);
+            return new StaticIntervalTree<IInterval<int>, int>(intervals);
         }
 
 
         [Test]
         public void Print()
         {
-            File.WriteAllText(@"../../intervals/data/sit100.gv", ((StaticIntervalTree<int>) IntervalCollection).Graphviz());
+            File.WriteAllText(@"../../intervals/data/sit100.gv", ((StaticIntervalTree<IInterval<int>, int>) IntervalCollection).Graphviz());
         }
     }
 
     [TestFixture]
     public class BensTest : intervals.Generic.BensTest
     {
-        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
-            return new NestedContainmentList<int>(intervals);
+            return new NestedContainmentList<IInterval<int>, int>(intervals);
         }
     }
 
     [TestFixture]
     public class StaticIntervalPerfomance : Performance23333
     {
-        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
-            return new StaticIntervalTree<int>(intervals);
+            return new StaticIntervalTree<IInterval<int>, int>(intervals);
         }
     }
 
     [TestFixture]
     public class StaticIntervalTree_LargeTest : LargeTest_100000
     {
-        protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+        protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
-            return new StaticIntervalTree<int>(intervals);
+            return new StaticIntervalTree<IInterval<int>, int>(intervals);
         }
     }
 
@@ -174,12 +174,12 @@ namespace C5.Tests.intervals
     [TestFixture]
     public class StabbingQueryMoreThanOneIntervals
     {
-        private StaticIntervalTree<int> _intervalTree;
+        private StaticIntervalTree<IInterval<int>, int> _intervalTree;
 
         [SetUp]
         public void Init()
         {
-            _intervalTree = new StaticIntervalTree<int>(new[]
+            _intervalTree = new StaticIntervalTree<IInterval<int>, int>(new[]
                 {
                     new IntervalOfInt( 5, 15, true, true),
                     new IntervalOfInt(10, 20, true, true),

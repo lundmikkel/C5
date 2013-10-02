@@ -4,7 +4,9 @@ using System.Linq;
 
 namespace C5.intervals
 {
-    public class LayeredContainmentListWithoutPointers<T> : CollectionValueBase<IInterval<T>>, IIntervalCollection<T> where T : IComparable<T>
+    public class LayeredContainmentListWithoutPointers<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
+        where I : IInterval<T>
+        where T : IComparable<T>
     {
         private readonly int _count;
         private readonly Node[][] _layers;
@@ -15,10 +17,10 @@ namespace C5.intervals
 
         struct Node
         {
-            internal IInterval<T> Interval { get; private set; }
+            internal I Interval { get; private set; }
             internal int Pointer { get; private set; }
 
-            internal Node(IInterval<T> interval, int pointer)
+            internal Node(I interval, int pointer)
                 : this()
             {
                 Interval = interval;
@@ -41,10 +43,10 @@ namespace C5.intervals
 
         #region Constructor
 
-        public LayeredContainmentListWithoutPointers(IEnumerable<IInterval<T>> intervals)
+        public LayeredContainmentListWithoutPointers(IEnumerable<I> intervals)
         {
             // Make intervals to array to allow fast sorting and counting
-            var intervalArray = intervals as IInterval<T>[] ?? intervals.ToArray();
+            var intervalArray = intervals as I[] ?? intervals.ToArray();
 
             // Only do the work if we have something to work with
             if (!intervalArray.IsEmpty())
@@ -53,7 +55,7 @@ namespace C5.intervals
                 _count = intervalArray.Length;
 
                 // Sort intervals
-                var comparer = ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareTo);
+                var comparer = ComparerFactory<I>.CreateComparer((x, y) => x.CompareTo(y));
                 Sorting.IntroSort(intervalArray, 0, _count, comparer);
 
                 // Put intervals in the arrays
@@ -74,7 +76,7 @@ namespace C5.intervals
             }
         }
 
-        private ArrayList<ArrayList<Node>> createLayers(IInterval<T>[] intervals)
+        private ArrayList<ArrayList<Node>> createLayers(I[] intervals)
         {
             // Use a stack to keep track of current containment
             var layer = 0;
@@ -130,7 +132,7 @@ namespace C5.intervals
             get { return Speed.Constant; }
         }
 
-        public override IInterval<T> Choose()
+        public override I Choose()
         {
             if (Count == 0)
                 throw new NoSuchItemException();
@@ -149,12 +151,12 @@ namespace C5.intervals
             return countOverlaps(0, 0, _counts[0], query);
         }
 
-        public bool Add(IInterval<T> interval)
+        public bool Add(I interval)
         {
             throw new NotSupportedException();
         }
 
-        public bool Remove(IInterval<T> interval)
+        public bool Remove(I interval)
         {
             throw new NotSupportedException();
         }
@@ -238,15 +240,15 @@ namespace C5.intervals
             return max;
         }
 
-        public override IEnumerator<IInterval<T>> GetEnumerator()
+        public override IEnumerator<I> GetEnumerator()
         {
             if (IsEmpty)
-                return (new IInterval<T>[] { }).Cast<IInterval<T>>().GetEnumerator();
+                return (new I[] { }).Cast<I>().GetEnumerator();
 
             return getEnumerator(0, 0, _counts[0]);
         }
 
-        private IEnumerator<IInterval<T>> getEnumerator(int level, int start, int end)
+        private IEnumerator<I> getEnumerator(int level, int start, int end)
         {
             while (start < end)
             {
@@ -283,16 +285,16 @@ namespace C5.intervals
             get { throw new NotSupportedException(); }
         }
 
-        public IEnumerable<IInterval<T>> FindOverlaps(T query)
+        public IEnumerable<I> FindOverlaps(T query)
         {
             // Break if we won't find any overlaps
             if (ReferenceEquals(query, null) || IsEmpty)
-                return Enumerable.Empty<IInterval<T>>();
+                return Enumerable.Empty<I>();
 
             return FindOverlaps(new IntervalBase<T>(query));
         }
 
-        public IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
+        public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
             // Break if we won't find any overlaps
             if (ReferenceEquals(query, null) || IsEmpty)
@@ -330,26 +332,30 @@ namespace C5.intervals
                     yield return currentLayer[first++].Interval;
             }
         }
-
-        public IInterval<T> FindAnyOverlap(IInterval<T> query)
+        public bool FindOverlap(IInterval<T> query, ref I overlap)
         {
             // No overlap if query is null, collection is empty, or query doesn't overlap collection
             if (query == null || IsEmpty || !query.Overlaps(Span))
-                return null;
+                return false;
 
             // Find first overlap
             var i = findFirst(0, 0, _counts[0], query);
 
             // Check if index is in bound and if the interval overlaps the query
-            return 0 <= i && i < _counts[0] && _layers[0][i].Interval.Overlaps(query) ? _layers[0][i].Interval : null;
+            var result = 0 <= i && i < _counts[0] && _layers[0][i].Interval.Overlaps(query);
+
+            if (result)
+                overlap = _layers[0][i].Interval;
+
+            return result;
         }
 
-        public IInterval<T> FindAnyOverlap(T query)
+        public bool FindOverlap(T query, ref I overlap)
         {
-            return FindAnyOverlap(new IntervalBase<T>(query));
+            return FindOverlap(new IntervalBase<T>(query), ref overlap);
         }
 
-        private IEnumerable<IInterval<T>> findOverlapsRecursive(int layer, int lower, int upper, IInterval<T> query)
+        private IEnumerable<I> findOverlapsRecursive(int layer, int lower, int upper, IInterval<T> query)
         {
             // Make sure first and last don't point at the same interval (theorem 2)
             if (lower >= upper)
@@ -378,19 +384,6 @@ namespace C5.intervals
 
             while (first < last)
                 yield return currentLayer[first++].Interval;
-        }
-
-        public bool OverlapExists(IInterval<T> query)
-        {
-            // No overlap if query is null, collection is empty, or query doesn't overlap collection
-            if (query == null || IsEmpty || !query.Overlaps(Span))
-                return false;
-
-            // Find first overlap
-            var i = findFirst(0, 0, _counts[0], query);
-
-            // Check if index is in bound and if the interval overlaps the query
-            return 0 <= i && i < _counts[0] && _layers[0][i].Interval.Overlaps(query);
         }
 
         public string Graphviz()

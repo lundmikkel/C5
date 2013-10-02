@@ -858,7 +858,7 @@ namespace C5.Tests.intervals
             return intervals.ToArray();
         }
 
-        [Test]
+        [Test, Ignore]
         public void Benchmark()
         {
             var intervals = BenchmarkIntervals();

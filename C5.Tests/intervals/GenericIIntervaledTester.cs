@@ -10,13 +10,15 @@ namespace C5.Tests.intervals
 {
     namespace Generic
     {
+        using IntervalOfInt = IInterval<int>;
+
         // TODO: make one test with testcases
         // The class tests that the stabbing query catches included endpoints and doesn't catches excluded endpoints
         public abstract class IntervaledEndpointInclusion
         {
-            private IIntervalCollection<int> _intervalCollection;
+            private IIntervalCollection<IntervalOfInt, int> _intervalCollection;
 
-            internal abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            internal abstract IIntervalCollection<IntervalOfInt, int> Factory(System.Collections.Generic.IEnumerable<IntervalOfInt> intervals);
 
             [SetUp]
             public void Init()
@@ -84,14 +86,14 @@ namespace C5.Tests.intervals
 
         public abstract class IntervaledNullCollection
         {
-            protected IIntervalCollection<int> _intervalCollection;
+            protected IIntervalCollection<IntervalOfInt, int> _intervalCollection;
 
-            internal abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            internal abstract IIntervalCollection<IntervalOfInt, int> Factory(System.Collections.Generic.IEnumerable<IntervalOfInt> intervals);
 
             [SetUp]
             public void Init()
             {
-                _intervalCollection = Factory(Enumerable.Empty<IInterval<int>>());
+                _intervalCollection = Factory(Enumerable.Empty<IntervalOfInt>());
             }
 
             [Test]
@@ -103,21 +105,22 @@ namespace C5.Tests.intervals
             [Test]
             public void OverlapExists_NullQuery_ThrowsException()
             {
-                Assert.IsFalse(_intervalCollection.OverlapExists(null));
+                IntervalOfInt overlap = null;
+                Assert.IsFalse(_intervalCollection.FindOverlap(null, ref overlap));
             }
         }
 
         public abstract class IntervaledEmptyCollection
         {
-            protected IIntervalCollection<int> _intervalCollection;
+            protected IIntervalCollection<IntervalOfInt, int> _intervalCollection;
 
-            internal abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            internal abstract IIntervalCollection<IntervalOfInt, int> Factory(System.Collections.Generic.IEnumerable<IntervalOfInt> intervals);
 
             [SetUp]
             public void Init()
             {
                 // Create Intervaled
-                _intervalCollection = Factory(Enumerable.Empty<IInterval<int>>());
+                _intervalCollection = Factory(Enumerable.Empty<IntervalOfInt>());
             }
 
             [Test]
@@ -151,13 +154,15 @@ namespace C5.Tests.intervals
             [Test]
             public void OverlapExists_InfiniteQuery_ReturnsFalse()
             {
-                Assert.IsFalse(_intervalCollection.OverlapExists(new IntervalBase<int>(int.MinValue, int.MaxValue, false, false)));
+                IntervalOfInt overlap = null;
+                Assert.IsFalse(_intervalCollection.FindOverlap(new IntervalBase<int>(int.MinValue, int.MaxValue, false, false), ref overlap));
             }
 
             [Test]
             public void OverlapExists_RandomQuery_ReturnsFalse()
             {
-                Assert.IsFalse(_intervalCollection.OverlapExists(new IntervalBase<int>(0, 5)));
+                IntervalOfInt overlap = null;
+                Assert.IsFalse(_intervalCollection.FindOverlap(new IntervalBase<int>(0, 5), ref overlap));
             }
         }
 
@@ -199,13 +204,13 @@ namespace C5.Tests.intervals
                     _name = name;
                 }
 
-                public Interval(string name, IInterval<int> i)
+                public Interval(string name, IntervalOfInt i)
                     : base(i)
                 {
                     _name = name;
                 }
 
-                public Interval(string name, IInterval<int> low, IInterval<int> high)
+                public Interval(string name, IntervalOfInt low, IntervalOfInt high)
                     : base(low, high)
                 {
                     _name = name;
@@ -218,20 +223,20 @@ namespace C5.Tests.intervals
             }
 
 
-            protected IIntervalCollection<int> IntervalCollection;
+            protected IIntervalCollection<IntervalOfInt, int> IntervalCollection;
 
-            private static readonly IInterval<int> A = new Interval("A", 9, 19, true, true);
-            private static readonly IInterval<int> B = new Interval("B", 2, 7, true, true);
-            private static readonly IInterval<int> C = new Interval("C", 1, 3);
-            private static readonly IInterval<int> D = new Interval("D", 17, 20, false, true);
-            private static readonly IInterval<int> E1 = new Interval("E1", 8, 12, true, true);
-            private static readonly IInterval<int> E2 = new Interval("E2", 8, 12, true, true);
-            private static readonly IInterval<int> F = new Interval("F", 18);
-            private static readonly IInterval<int> G = new Interval("G", int.MinValue, 17, false, true);
-            private static readonly IInterval<int> H = new Interval("H", 5, 10, false, false);
+            private static readonly IntervalOfInt A = new Interval("A", 9, 19, true, true);
+            private static readonly IntervalOfInt B = new Interval("B", 2, 7, true, true);
+            private static readonly IntervalOfInt C = new Interval("C", 1, 3);
+            private static readonly IntervalOfInt D = new Interval("D", 17, 20, false, true);
+            private static readonly IntervalOfInt E1 = new Interval("E1", 8, 12, true, true);
+            private static readonly IntervalOfInt E2 = new Interval("E2", 8, 12, true, true);
+            private static readonly IntervalOfInt F = new Interval("F", 18);
+            private static readonly IntervalOfInt G = new Interval("G", int.MinValue, 17, false, true);
+            private static readonly IntervalOfInt H = new Interval("H", 5, 10, false, false);
 
 
-            internal abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            internal abstract IIntervalCollection<IntervalOfInt, int> Factory(System.Collections.Generic.IEnumerable<IntervalOfInt> intervals);
 
             [SetUp]
             public void Init()
@@ -239,13 +244,13 @@ namespace C5.Tests.intervals
                 IntervalCollection = Factory(new[] { A, B, C, D, E1, E2, F, G, H });
             }
 
-            private void range(IInterval<int> query, System.Collections.Generic.IEnumerable<IInterval<int>> expected)
+            private void range(IntervalOfInt query, System.Collections.Generic.IEnumerable<IntervalOfInt> expected)
             {
                 CollectionAssert.AreEquivalent(expected, IntervalCollection.FindOverlaps(query));
             }
 
             [TestCaseSource(typeof(IBS), "StabCases")]
-            public void Overlap_StabbingAtKeyPoints_ReturnsSpecifiedIntervals_TestCase(int query, System.Collections.Generic.IEnumerable<IInterval<int>> expected)
+            public void Overlap_StabbingAtKeyPoints_ReturnsSpecifiedIntervals_TestCase(int query, System.Collections.Generic.IEnumerable<IntervalOfInt> expected)
             {
                 CollectionAssert.AreEquivalent(expected, IntervalCollection.FindOverlaps(query));
             }
@@ -266,7 +271,7 @@ namespace C5.Tests.intervals
                 new object[] {18, new[] { A, D, F }},
                 new object[] {19, new[] { A, D }},
                 new object[] {20, new[] { D }},
-                new object[] {21, Enumerable.Empty<IInterval<int>>()},
+                new object[] {21, Enumerable.Empty<IntervalOfInt>()},
             };
 
             // TODO: Finish
@@ -289,17 +294,17 @@ namespace C5.Tests.intervals
         [TestFixture]
         public abstract class Sample100
         {
-            protected IIntervalCollection<int> IntervalCollection;
-            private IInterval<int>[] _intervals;
+            protected IIntervalCollection<IntervalOfInt, int> IntervalCollection;
+            private IntervalOfInt[] _intervals;
 
-            protected abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            protected abstract IIntervalCollection<IntervalOfInt, int> Factory(System.Collections.Generic.IEnumerable<IntervalOfInt> intervals);
 
             [SetUp]
             public void Init()
             {
                 var intervals = File.ReadAllLines(@"../../intervals/data/sample100.csv").Select(line => line.Split(','));
 
-                _intervals = new IInterval<int>[intervals.Count()];
+                _intervals = new IntervalOfInt[intervals.Count()];
 
                 foreach (var interval in intervals)
                 {
@@ -314,12 +319,12 @@ namespace C5.Tests.intervals
 
             }
 
-            private void stabbing(int query, System.Collections.Generic.IEnumerable<IInterval<int>> expected)
+            private void stabbing(int query, System.Collections.Generic.IEnumerable<IntervalOfInt> expected)
             {
                 CollectionAssert.AreEquivalent(expected, IntervalCollection.FindOverlaps(query));
             }
 
-            private void range(IInterval<int> query, System.Collections.Generic.IEnumerable<IInterval<int>> expected)
+            private void range(IntervalOfInt query, System.Collections.Generic.IEnumerable<IntervalOfInt> expected)
             {
                 CollectionAssert.AreEquivalent(expected, IntervalCollection.FindOverlaps(query));
             }
@@ -329,19 +334,19 @@ namespace C5.Tests.intervals
             [Test]
             public void Stabbing()
             {
-                stabbing(2, new ArrayList<IInterval<int>> {
+                stabbing(2, new ArrayList<IntervalOfInt> {
                         _intervals[0],
                         _intervals[1],
                     });
 
-                stabbing(34, new ArrayList<IInterval<int>>());
+                stabbing(34, new ArrayList<IntervalOfInt>());
 
-                stabbing(78, new ArrayList<IInterval<int>>{
+                stabbing(78, new ArrayList<IntervalOfInt>{
                     _intervals[39],
                     _intervals[40],
                 });
 
-                stabbing(164, new ArrayList<IInterval<int>>{
+                stabbing(164, new ArrayList<IntervalOfInt>{
                     _intervals[83],
                 });
             }
@@ -349,31 +354,31 @@ namespace C5.Tests.intervals
             [Test]
             public void Range()
             {
-                range(new IntervalBase<int>(74, 80, true, false), new ArrayList<IInterval<int>>{
+                range(new IntervalBase<int>(74, 80, true, false), new ArrayList<IntervalOfInt>{
                     _intervals[37],
                     _intervals[38],
                     _intervals[39],
                     _intervals[40],
                 });
 
-                range(new IntervalBase<int>(97), new ArrayList<IInterval<int>>{
+                range(new IntervalBase<int>(97), new ArrayList<IntervalOfInt>{
                     _intervals[49],
                 });
 
-                range(new IntervalBase<int>(74, 80, true, true), new ArrayList<IInterval<int>>{
+                range(new IntervalBase<int>(74, 80, true, true), new ArrayList<IntervalOfInt>{
                     _intervals[37],
                     _intervals[38],
                     _intervals[39],
                     _intervals[40],
                     _intervals[41],
                 });
-                range(new IntervalBase<int>(74, 80, false, true), new ArrayList<IInterval<int>>{
+                range(new IntervalBase<int>(74, 80, false, true), new ArrayList<IntervalOfInt>{
                     _intervals[38],
                     _intervals[39],
                     _intervals[40],
                     _intervals[41],
                 });
-                range(new IntervalBase<int>(74, 80, false, false), new ArrayList<IInterval<int>>{
+                range(new IntervalBase<int>(74, 80, false, false), new ArrayList<IntervalOfInt>{
                     _intervals[38],
                     _intervals[39],
                     _intervals[40],
@@ -383,13 +388,13 @@ namespace C5.Tests.intervals
             [Test]
             public void BigRange()
             {
-                ArrayList<IInterval<int>> array;
+                ArrayList<IntervalOfInt> array;
 
-                array = new ArrayList<IInterval<int>>();
+                array = new ArrayList<IntervalOfInt>();
                 _intervals.ToList().ForEach(I => array.Add(I));
                 range(IntervalCollection.Span, array);
 
-                array = new ArrayList<IInterval<int>>();
+                array = new ArrayList<IntervalOfInt>();
                 _intervals.Take(50).ToList().ForEach(I => array.Add(I));
                 range(new IntervalBase<int>(0, 97), array);
             }
@@ -432,17 +437,17 @@ namespace C5.Tests.intervals
             // | 0    5    10   15   20   25   30   35|
             // ****************************************
 
-            protected IIntervalCollection<int> _intervalCollection;
+            protected IIntervalCollection<IntervalOfInt, int> _intervalCollection;
 
             // ReSharper disable InconsistentNaming
-            private static readonly IInterval<int> A = new IntervalBase<int>(5, 9, true, true);
-            private static readonly IInterval<int> B = new IntervalBase<int>(11, 15, true, true);
-            private static readonly IInterval<int> C = new IntervalBase<int>(15, 20, true, true);
-            private static readonly IInterval<int> D = new IntervalBase<int>(20, 24, true, true);
-            private static readonly IInterval<int> E = new IntervalBase<int>(26, 30, true, true);
+            private static readonly IntervalOfInt A = new IntervalBase<int>(5, 9, true, true);
+            private static readonly IntervalOfInt B = new IntervalBase<int>(11, 15, true, true);
+            private static readonly IntervalOfInt C = new IntervalBase<int>(15, 20, true, true);
+            private static readonly IntervalOfInt D = new IntervalBase<int>(20, 24, true, true);
+            private static readonly IntervalOfInt E = new IntervalBase<int>(26, 30, true, true);
             // ReSharper restore InconsistentNaming
 
-            protected abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            protected abstract IIntervalCollection<IntervalOfInt, int> Factory(System.Collections.Generic.IEnumerable<IntervalOfInt> intervals);
 
             [SetUp]
             public void Init()
@@ -451,7 +456,7 @@ namespace C5.Tests.intervals
             }
 
             [TestCaseSource(typeof(BensTest), "StabCases")]
-            public void Overlap_StabbingAtKeyRanges_ReturnsSpecifiedIntervals_TestCase(IntervalBase<int> range, System.Collections.Generic.IEnumerable<IInterval<int>> expected)
+            public void Overlap_StabbingAtKeyRanges_ReturnsSpecifiedIntervals_TestCase(IntervalBase<int> range, System.Collections.Generic.IEnumerable<IntervalOfInt> expected)
             {
                 CollectionAssert.AreEquivalent(expected, _intervalCollection.FindOverlaps(range));
             }
@@ -484,15 +489,15 @@ namespace C5.Tests.intervals
 
         public abstract class Performance23333
         {
-            protected IIntervalCollection<int> IntervalCollection;
+            protected IIntervalCollection<IntervalOfInt, int> IntervalCollection;
 
-            protected abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            protected abstract IIntervalCollection<IntervalOfInt, int> Factory(System.Collections.Generic.IEnumerable<IntervalOfInt> intervals);
 
             [SetUp]
             public void Init()
             {
                 var intervals = File.ReadAllLines(@"../../intervals/data/performance_23333.csv").Select(line => line.Split(','));
-                var intervalList = new ArrayList<IInterval<int>>();
+                var intervalList = new ArrayList<IntervalOfInt>();
 
                 foreach (var interval in intervals)
                 {
@@ -530,15 +535,15 @@ namespace C5.Tests.intervals
 
         public abstract class Performance100000
         {
-            protected IIntervalCollection<int> IntervalCollection;
+            protected IIntervalCollection<IntervalOfInt, int> IntervalCollection;
 
-            protected abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            protected abstract IIntervalCollection<IntervalOfInt, int> Factory(System.Collections.Generic.IEnumerable<IntervalOfInt> intervals);
 
             [SetUp]
             public void Init()
             {
                 var intervals = File.ReadAllLines(@"../../intervals/data/performance_100000.csv").Select(line => line.Split(','));
-                var intervalList = new ArrayList<IInterval<int>>();
+                var intervalList = new ArrayList<IntervalOfInt>();
 
                 foreach (var interval in intervals)
                 {
@@ -581,15 +586,15 @@ namespace C5.Tests.intervals
 
         public abstract class LargeTest_100000
         {
-            protected IIntervalCollection<int> IntervalCollection;
+            protected IIntervalCollection<IntervalOfInt, int> IntervalCollection;
 
-            protected abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+            protected abstract IIntervalCollection<IntervalOfInt, int> Factory(System.Collections.Generic.IEnumerable<IntervalOfInt> intervals);
 
             [TestFixtureSetUp]
             public void SetUp()
             {
                 var intervals = File.ReadAllLines(@"../../intervals/data/performance_100000.csv").Select(line => line.Split(','));
-                var intervalList = new ArrayList<IInterval<int>>();
+                var intervalList = new ArrayList<IntervalOfInt>();
 
                 foreach (var interval in intervals)
                 {
@@ -655,14 +660,14 @@ namespace C5.Tests.intervals
 
             public abstract class StaticIntervaledEmptyCollection
             {
-                private IIntervalCollection<int> _intervalCollection;
+                private IIntervalCollection<IntervalOfInt, int> _intervalCollection;
 
-                protected abstract IIntervalCollection<int> Factory(System.Collections.Generic.IEnumerable<IInterval<int>> intervals);
+                protected abstract IIntervalCollection<IntervalOfInt, int> Factory(System.Collections.Generic.IEnumerable<IntervalOfInt> intervals);
 
                 [SetUp]
                 public void Init()
                 {
-                    _intervalCollection = Factory(Enumerable.Empty<IInterval<int>>());
+                    _intervalCollection = Factory(Enumerable.Empty<IntervalOfInt>());
                 }
 
                 [Test]

@@ -6,17 +6,17 @@ namespace C5.Performance.Wpf.Benchmarks
     public class IbsAddBenchmarker : Benchmarkable
     {
         private IInterval<int>[] _intervals;
-        private IntervalBinarySearchTree<int> collection;
+        private IntervalBinarySearchTree<IInterval<int>, int> collection;
 
         public override void CollectionSetup()
         {
             _intervals = BenchmarkTestCases.DataSetC(CollectionSize);
-            collection = new IntervalBinarySearchTree<int>();
+            collection = new IntervalBinarySearchTree<IInterval<int>, int>();
             ItemsArray = SearchAndSort.FillIntArray(CollectionSize);
             SearchAndSort.Shuffle(ItemsArray);
         }
 
-        public override void Setup() {}
+        public override void Setup() { }
 
         public override double Call(int i)
         {

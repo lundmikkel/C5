@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections;
+using SCG = System.Collections.Generic;
 using System.Linq;
 
 namespace C5.intervals
 {
-    public class NestedContainmentList<T> : CollectionValueBase<IInterval<T>>, IIntervalCollection<T> where T : IComparable<T>
+    public class NestedContainmentList<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
+        where I : IInterval<T>
+        where T : IComparable<T>
     {
         private readonly Node[] _list;
         private readonly IInterval<T> _span;
@@ -28,10 +31,10 @@ namespace C5.intervals
 
         struct Node
         {
-            internal IInterval<T> Interval { get; private set; }
+            internal I Interval { get; private set; }
             internal Section Sublist { get; private set; }
 
-            internal Node(IInterval<T> interval, Section section)
+            internal Node(I interval, Section section)
                 : this()
             {
                 Interval = interval;
@@ -55,7 +58,7 @@ namespace C5.intervals
         /// <param name="source"></param>
         /// <param name="target"></param>
         /// <returns>A list of nodes</returns>
-        private int createList(IInterval<T>[] intervals, Section source, Section target)
+        private int createList(I[] intervals, Section source, Section target)
         {
             var end = target.Offset + target.Length;
             var t = target.Offset;
@@ -94,15 +97,15 @@ namespace C5.intervals
         /// Create a Nested Containment List with a enumerable of intervals
         /// </summary>
         /// <param name="intervals">A collection of intervals in arbitrary order</param>
-        public NestedContainmentList(System.Collections.Generic.IEnumerable<IInterval<T>> intervals)
+        public NestedContainmentList(SCG.IEnumerable<I> intervals)
         {
-            var intervalsArray = intervals as IInterval<T>[] ?? intervals.ToArray();
+            var intervalsArray = intervals as I[] ?? intervals.ToArray();
 
             if (!intervalsArray.IsEmpty())
             {
                 _count = intervalsArray.Count();
 
-                Sorting.IntroSort(intervalsArray, 0, _count, ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareTo));
+                Sorting.IntroSort(intervalsArray, 0, _count, ComparerFactory<I>.CreateComparer((x, y) => x.CompareTo(y)));
 
                 var totalSection = new Section(0, intervalsArray.Count());
                 _list = new Node[totalSection.Length];
@@ -126,7 +129,7 @@ namespace C5.intervals
 
         // TODO: Test the order is still the same as when sorted with IntervalComparer. This should be that case!
 
-        private System.Collections.Generic.IEnumerator<IInterval<T>> getEnumerator(Section section)
+        private SCG.IEnumerator<I> getEnumerator(Section section)
         {
             // Just for good measures
             if (_list == null || section.Length == 0)
@@ -156,7 +159,7 @@ namespace C5.intervals
         /// </summary>
         /// <returns>Enumerator</returns>
         // TODO: Test the order is still the same as when sorted with IntervalComparer. This should be that case!
-        public override System.Collections.Generic.IEnumerator<IInterval<T>> GetEnumerator()
+        public override SCG.IEnumerator<I> GetEnumerator()
         {
             return getEnumerator(_section);
         }
@@ -167,7 +170,7 @@ namespace C5.intervals
         public override int Count { get { return _count; } }
         public override Speed CountSpeed { get { return Speed.Constant; } }
 
-        public override IInterval<T> Choose()
+        public override I Choose()
         {
             if (Count > 0)
                 return _list[_section.Offset].Interval;
@@ -195,15 +198,15 @@ namespace C5.intervals
             get { throw new NotSupportedException(); }
         }
 
-        public System.Collections.Generic.IEnumerable<IInterval<T>> FindOverlaps(T query)
+        public SCG.IEnumerable<I> FindOverlaps(T query)
         {
             if (ReferenceEquals(query, null))
-                return Enumerable.Empty<IInterval<T>>();
+                return Enumerable.Empty<I>();
 
             return findOverlap(_section, new IntervalBase<T>(query));
         }
 
-        private System.Collections.Generic.IEnumerable<IInterval<T>> findOverlap(Section section, IInterval<T> query)
+        private SCG.IEnumerable<I> findOverlap(Section section, IInterval<T> query)
         {
             if (_list == null || section.Length == 0)
                 yield break;
@@ -285,33 +288,15 @@ namespace C5.intervals
             return min;
         }
 
-        public System.Collections.Generic.IEnumerable<IInterval<T>> FindOverlaps(IInterval<T> query)
+        public SCG.IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
             if (query == null)
-                return Enumerable.Empty<IInterval<T>>();
+                return Enumerable.Empty<I>();
 
             return findOverlap(_section, query);
         }
 
-        public IInterval<T> FindAnyOverlap(IInterval<T> query)
-        {
-            // Check if query overlaps the collection at all
-            if (query == null || _list == null || !query.Overlaps(Span))
-                return null;
-
-            // Find first overlap
-            var i = findFirst(_section, query);
-
-            // Check if index is in bound and if the interval overlaps the query
-            return _section.Offset <= i && i < _section.Offset + _section.Length && _list[i].Interval.Overlaps(query) ? _list[i].Interval : null;
-        }
-
-        public IInterval<T> FindAnyOverlap(T query)
-        {
-            return FindAnyOverlap(new IntervalBase<T>(query));
-        }
-
-        public bool OverlapExists(IInterval<T> query)
+        public bool FindOverlap(IInterval<T> query, ref I overlap)
         {
             // Check if query overlaps the collection at all
             if (query == null || _list == null || !query.Overlaps(Span))
@@ -321,7 +306,17 @@ namespace C5.intervals
             var i = findFirst(_section, query);
 
             // Check if index is in bound and if the interval overlaps the query
-            return _section.Offset <= i && i < _section.Offset + _section.Length && _list[i].Interval.Overlaps(query);
+            var result = _section.Offset <= i && i < _section.Offset + _section.Length && _list[i].Interval.Overlaps(query);
+
+            if (result)
+                overlap = _list[i].Interval;
+
+            return result;
+        }
+
+        public bool FindOverlap(T query, ref I overlap)
+        {
+            return FindOverlap(new IntervalBase<T>(query), ref overlap);
         }
 
         public int CountOverlaps(IInterval<T> query)
@@ -329,12 +324,12 @@ namespace C5.intervals
             return FindOverlaps(query).Count();
         }
 
-        public bool Add(IInterval<T> interval)
+        public bool Add(I interval)
         {
             throw new NotSupportedException();
         }
 
-        public bool Remove(IInterval<T> interval)
+        public bool Remove(I interval)
         {
             throw new NotSupportedException();
         }

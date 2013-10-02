@@ -11,12 +11,12 @@ namespace C5.Tests.intervals
     [TestFixture]
     class IntervalBinarySearchTreeAvlTester2
     {
-        private IntervalBinarySearchTreeAVL<int> intervals;
+        private IntervalBinarySearchTreeAVL<IInterval<int>, int> intervals;
 
         [SetUp]
         public void SetUp()
         {
-            intervals = new IntervalBinarySearchTreeAVL<int>();
+            intervals = new IntervalBinarySearchTreeAVL<IInterval<int>, int>();
 
             intervals.CollectionChanged
               += delegate
@@ -26,7 +26,7 @@ namespace C5.Tests.intervals
 
             intervals.ItemsAdded += delegate(object sender, ItemCountEventArgs<IInterval<int>> eventArgs)
                 {
-                    var intervalCollection = (IIntervalCollection<int>) sender;
+                    var intervalCollection = (IIntervalCollection<IInterval<int>, int>) sender;
                     //Console.WriteLine(eventArgs.Item);
                 };
         }

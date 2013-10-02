@@ -10,9 +10,9 @@ namespace C5.Ucsc
 
     class UcscHumanGenomeParser
     {
-        public static IEnumerable<IInterval<GenomePosition>> ParseFile(string filepath, bool headerRow = true)
+        public static IEnumerable<UcscHumanGene> ParseFile(string filepath, bool headerRow = true)
         {
-            var list = new ArrayList<IInterval<GenomePosition>>();
+            var list = new ArrayList<UcscHumanGene>();
 
             using (var parser = new TextFieldParser(filepath) { Delimiters = new[] { "\t" } })
             {

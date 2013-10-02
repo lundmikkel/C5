@@ -15,27 +15,27 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class LCListEndpointInclusion : IntervaledEndpointInclusion
         {
-            internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+            internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new LayeredContainmentList3<int>(intervals);
+                return new LayeredContainmentList3<IInterval<int>, int>(intervals);
             }
         }
 
         [TestFixture]
         public class LCListNullCollection : IntervaledNullCollection
         {
-            internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+            internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new LayeredContainmentList3<int>(intervals);
+                return new LayeredContainmentList3<IInterval<int>, int>(intervals);
             }
         }
 
         [TestFixture]
         public class LCListEmptyCollection : IntervaledEmptyCollection
         {
-            internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+            internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new LayeredContainmentList3<int>(intervals);
+                return new LayeredContainmentList3<IInterval<int>, int>(intervals);
             }
         }
 
@@ -55,69 +55,69 @@ namespace C5.Tests.intervals
         //************************************
         public class LCListIBS : IBS
         {
-            internal override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+            internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new LayeredContainmentList3<int>(intervals);
+                return new LayeredContainmentList3<IInterval<int>, int>(intervals);
             }
 
             [Test]
             public void Print()
             {
-                File.WriteAllText(@"../../intervals/data/layered_containment_list.gv", ((LayeredContainmentList3<int>) IntervalCollection).Graphviz());
+                File.WriteAllText(@"../../intervals/data/layered_containment_list.gv", ((LayeredContainmentList3<IInterval<int>, int>) IntervalCollection).Graphviz());
             }
         }
 
         [TestFixture]
         public class LCListSample100 : Sample100
         {
-            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new LayeredContainmentList3<int>(intervals);
+                return new LayeredContainmentList3<IInterval<int>, int>(intervals);
             }
         }
 
         [TestFixture]
         public class LCListBensTest : intervals.Generic.BensTest
         {
-            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new LayeredContainmentList3<int>(intervals);
+                return new LayeredContainmentList3<IInterval<int>, int>(intervals);
             }
         }
 
         [TestFixture]
         public class LCListStaticEmptyCollection : StaticIntervaledEmptyCollection
         {
-            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new LayeredContainmentList3<int>(intervals);
+                return new LayeredContainmentList3<IInterval<int>, int>(intervals);
             }
         }
 
         [TestFixture]
         public class LCListPerfomance : Performance23333
         {
-            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new LayeredContainmentList3<int>(intervals);
+                return new LayeredContainmentList3<IInterval<int>, int>(intervals);
             }
         }
 
         [TestFixture]
         public class LayeredContainmentList3_LargeTest : LargeTest_100000
         {
-            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new LayeredContainmentList3<int>(intervals);
+                return new LayeredContainmentList3<IInterval<int>, int>(intervals);
             }
         }
 
         [TestFixture]
         public class LCList100000Perfomance : Performance100000
         {
-            protected override IIntervalCollection<int> Factory(IEnumerable<IInterval<int>> intervals)
+            protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
             {
-                return new LayeredContainmentList3<int>(intervals);
+                return new LayeredContainmentList3<IInterval<int>, int>(intervals);
             }
 
             [Test]
@@ -126,7 +126,7 @@ namespace C5.Tests.intervals
                 var query = new IntervalBase<int>(9231, 24228);
 
                 Console.WriteLine(IntervalCollection.FindOverlaps(query).Count());
-                Console.WriteLine(((IIntervalCollection<int>) IntervalCollection).CountOverlaps(query));
+                Console.WriteLine(((IIntervalCollection<IInterval<int>, int>) IntervalCollection).CountOverlaps(query));
 
                 var comparer = ComparerFactory<IInterval<int>>.CreateEqualityComparer(IntervalExtensions.Equals, IntervalExtensions.GetHashCode);
 
@@ -146,7 +146,7 @@ namespace C5.Tests.intervals
             [Test, Ignore]
             public void Print()
             {
-                File.WriteAllText(@"../../intervals/data/lclist100000.gv", ((LayeredContainmentList3<int>) IntervalCollection).Graphviz());
+                File.WriteAllText(@"../../intervals/data/lclist100000.gv", ((LayeredContainmentList3<IInterval<int>, int>) IntervalCollection).Graphviz());
             }
         }
 
@@ -165,7 +165,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class LCListContainmentInSameLayer
         {
-            private IIntervalCollection<int> _intervalCollection;
+            private IIntervalCollection<IInterval<int>, int> _intervalCollection;
 
             private static readonly IInterval<int> A = new IntervalBase<int>(0, 10);
             private static readonly IInterval<int> B = new IntervalBase<int>(1, 8);
@@ -176,7 +176,7 @@ namespace C5.Tests.intervals
             [SetUp]
             public void SetUp()
             {
-                _intervalCollection = new LayeredContainmentList3<int>(new[] { A, B, C, D, E });
+                _intervalCollection = new LayeredContainmentList3<IInterval<int>, int>(new[] { A, B, C, D, E });
             }
 
             [TestCaseSource("StabCases")]
@@ -204,7 +204,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class LCListExample
         {
-            private IIntervalCollection<int> _intervalCollection;
+            private IIntervalCollection<IInterval<int>, int> _intervalCollection;
 
             private static readonly IInterval<int> A = new Interval("A", 0, 7);
             private static readonly IInterval<int> B = new Interval("B", 1, 8);
@@ -260,7 +260,7 @@ namespace C5.Tests.intervals
             [SetUp]
             public void SetUp()
             {
-                _intervalCollection = new LayeredContainmentList3<int>(new[] { A, B, C, D, E, F, G, H, I, J });
+                _intervalCollection = new LayeredContainmentList3<IInterval<int>, int>(new[] { A, B, C, D, E, F, G, H, I, J });
             }
 
             [Test]
@@ -284,7 +284,7 @@ namespace C5.Tests.intervals
             [TestFixture]
             public class LCListNoContainments
             {
-                private IIntervalCollection<int> _intervalCollection;
+                private IIntervalCollection<IInterval<int>, int> _intervalCollection;
 
                 /**
                  * 0    5   10   15   20   25   30
@@ -302,7 +302,7 @@ namespace C5.Tests.intervals
                 [SetUp]
                 public void Init()
                 {
-                    _intervalCollection = new LayeredContainmentList3<int>(new ArrayList<IInterval<int>>
+                    _intervalCollection = new LayeredContainmentList3<IInterval<int>, int>(new ArrayList<IInterval<int>>
                     {
                         new IntervalBase<int>(23, 28, true, true), // 8
                         new IntervalBase<int>(17, 20, true, true), // 7
@@ -344,7 +344,7 @@ namespace C5.Tests.intervals
             [TestFixture]
             public class LCListOnlyContainments
             {
-                private IIntervalCollection<int> _intervalCollection;
+                private IIntervalCollection<IInterval<int>, int> _intervalCollection;
 
                 /**
                  * 0    5   10   15   20   25   30
@@ -362,7 +362,7 @@ namespace C5.Tests.intervals
                 [SetUp]
                 public void Init()
                 {
-                    _intervalCollection = new LayeredContainmentList3<int>(new ArrayList<IInterval<int>>
+                    _intervalCollection = new LayeredContainmentList3<IInterval<int>, int>(new ArrayList<IInterval<int>>
                     {
                         new IntervalBase<int>(13, 14, true, true),
                         new IntervalBase<int>(12, 15, true, true),
@@ -415,12 +415,12 @@ namespace C5.Tests.intervals
             [TestFixture]
             public class LCListMixedContainments
             {
-                private IIntervalCollection<int> _intervalCollection;
+                private IIntervalCollection<IInterval<int>, int> _intervalCollection;
 
                 [SetUp]
                 public void Init()
                 {
-                    _intervalCollection = new LayeredContainmentList3<int>(new ArrayList<IInterval<int>>
+                    _intervalCollection = new LayeredContainmentList3<IInterval<int>, int>(new ArrayList<IInterval<int>>
                     {
                         new IntervalBase<int>( 9, 19, true, true),
                         new IntervalBase<int>( 2,  7, true, true),
@@ -436,7 +436,7 @@ namespace C5.Tests.intervals
                 [Test]
                 public void Print()
                 {
-                    Console.WriteLine(((LayeredContainmentList3<int>) _intervalCollection).Graphviz());
+                    Console.WriteLine(((LayeredContainmentList3<IInterval<int>, int>) _intervalCollection).Graphviz());
                 }
 
                 [Test]
@@ -452,7 +452,8 @@ namespace C5.Tests.intervals
                 [TestCaseSource(typeof(LCListMixedContainments), "StabCases")]
                 public void Overlap_StabbingAtKeyPoints_ReturnsSpecifiedIntervals_TestCase(IInterval<int> range, bool expected)
                 {
-                    Assert.AreEqual(_intervalCollection.OverlapExists(range), expected);
+                    IInterval<int> overlap = null;
+                    Assert.AreEqual(_intervalCollection.FindOverlap(range, ref overlap), expected);
                 }
 
                 public static object[] StabCases()
@@ -479,7 +480,7 @@ namespace C5.Tests.intervals
             [TestFixture]
             public class BinarySearchHighInLows
             {
-                private LayeredContainmentList3<int> _intervaled;
+                private LayeredContainmentList3<IInterval<int>, int> _intervaled;
 
                 // ReSharper disable InconsistentNaming
                 private static readonly IInterval<int> A = new IntervalOfInt(1, 4, true, true);
@@ -496,7 +497,7 @@ namespace C5.Tests.intervals
                 [SetUp]
                 public void Init()
                 {
-                    _intervaled = new LayeredContainmentList3<int>(new[] {A, B, C, D, E, F, G, H, I});
+                    _intervaled = new LayeredContainmentList3<IInterval<int>, int>(new[] {A, B, C, D, E, F, G, H, I});
                 }
 
                 [TestCaseSource(typeof(BinarySearchHighInLows), "StabCases")]
@@ -542,7 +543,7 @@ namespace C5.Tests.intervals
             [TestFixture]
             public class BinarySearchLowInHighs
             {
-                private LayeredContainmentList3<int> _intervaled;
+                private LayeredContainmentList3<IInterval<int>, int> _intervaled;
 
                 // ReSharper disable InconsistentNaming
                 private static readonly IInterval<int> A = new IntervalOfInt(1, 4, true, true);
@@ -559,7 +560,7 @@ namespace C5.Tests.intervals
                 [SetUp]
                 public void Init()
                 {
-                    _intervaled = new LayeredContainmentList3<int>(new[] { A, B, C, D, E, F, G, H, I });
+                    _intervaled = new LayeredContainmentList3<IInterval<int>, int>(new[] { A, B, C, D, E, F, G, H, I });
                 }
 
                 [TestCaseSource(typeof(BinarySearchLowInHighs), "StabCases")]
@@ -607,7 +608,7 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class StabbingQuery
         {
-            private LayeredContainmentList3<int> _intervaled;
+            private LayeredContainmentList3<IInterval<int>, int> _intervaled;
 
             // ReSharper disable InconsistentNaming
             private static readonly IInterval<int> A = new IntervalBase<int>(2, 7, true, true);
@@ -622,7 +623,7 @@ namespace C5.Tests.intervals
             [SetUp]
             public void Init()
             {
-                _intervaled = new LayeredContainmentList3<int>(new[] { A, B, C, D, E, F, G });
+                _intervaled = new LayeredContainmentList3<IInterval<int>, int>(new[] { A, B, C, D, E, F, G });
             }
 
             [Test]
@@ -658,6 +659,8 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class Statement
         {
+            private IInterval<int> overlap = null;
+
             // ReSharper disable InconsistentNaming
             private static readonly IInterval<int> A = new IntervalBase<int>(1, 5, true, true);
             private static readonly IInterval<int> B = new IntervalBase<int>(3, 8, true, true);
@@ -696,37 +699,37 @@ namespace C5.Tests.intervals
             [Test]
             public void Constructor_Empty()
             {
-                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentList3<int>(Enumerable.Empty<IInterval<int>>()));
+                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentList3<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()));
             }
 
             [Test]
             public void Constructor_OneInterval()
             {
-                CollectionAssert.AreEquivalent(dataSetA, new LayeredContainmentList3<int>(dataSetA));
+                CollectionAssert.AreEquivalent(dataSetA, new LayeredContainmentList3<IInterval<int>, int>(dataSetA));
             }
 
             [Test]
             public void Constructor_MoreThanOneIntervalAndOneContainmentLayer()
             {
-                CollectionAssert.AreEquivalent(dataSetB, new LayeredContainmentList3<int>(dataSetB));
+                CollectionAssert.AreEquivalent(dataSetB, new LayeredContainmentList3<IInterval<int>, int>(dataSetB));
             }
 
             [Test]
             public void Constructor_MoreThanOneIntervalAndTwoContainmentLayers()
             {
-                CollectionAssert.AreEquivalent(dataSetC, new LayeredContainmentList3<int>(dataSetC));
+                CollectionAssert.AreEquivalent(dataSetC, new LayeredContainmentList3<IInterval<int>, int>(dataSetC));
             }
 
             [Test]
             public void Constructor_MoreThanOneIntervalAndMoreThanTwoContainmentLayers()
             {
-                CollectionAssert.AreEquivalent(dataSetD, new LayeredContainmentList3<int>(dataSetD));
+                CollectionAssert.AreEquivalent(dataSetD, new LayeredContainmentList3<IInterval<int>, int>(dataSetD));
             }
 
             [Test]
             public void Constructor_ThreeContainments()
             {
-                var moreThanOne = new LayeredContainmentList3<int>(new[]
+                var moreThanOne = new LayeredContainmentList3<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(1, 7, true, true),
                         new IntervalBase<int>(2, 6, true, true),
@@ -744,7 +747,7 @@ namespace C5.Tests.intervals
             [Test]
             public void Constructor_FirstContainssecondEndEqual()
             {
-                var moreThanOne = new LayeredContainmentList3<int>(new[] { J, L });
+                var moreThanOne = new LayeredContainmentList3<IInterval<int>, int>(new[] { J, L });
                 CollectionAssert.AreEquivalent(new[] { J, L }, moreThanOne);
             }
             */
@@ -755,35 +758,35 @@ namespace C5.Tests.intervals
             [Test]
             public void CountOverlap_Empty()
             {
-                Assert.AreEqual(0, new LayeredContainmentList3<int>(Enumerable.Empty<IInterval<int>>()).
+                Assert.AreEqual(0, new LayeredContainmentList3<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).
                     CountOverlaps(new IntervalBase<int>(2, 7, true, true)));
             }
 
             [Test]
             public void CountOverlap_Empty_NullQuery()
             {
-                Assert.AreEqual(0, new LayeredContainmentList3<int>(Enumerable.Empty<IInterval<int>>()).
+                Assert.AreEqual(0, new LayeredContainmentList3<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).
                     CountOverlaps(null));
             }
 
             [Test]
             public void CountOverlap_OneInterval()
             {
-                Assert.AreEqual(1, new LayeredContainmentList3<int>(dataSetA).
+                Assert.AreEqual(1, new LayeredContainmentList3<IInterval<int>, int>(dataSetA).
                     CountOverlaps(new IntervalBase<int>(2, 7, true, true)));
             }
 
             [Test]
             public void CountOverlap_OneInterval2()
             {
-                Assert.AreEqual(1, new LayeredContainmentList3<int>(new[] { new IntervalBase<int>(2, 7, false, true) }).
+                Assert.AreEqual(1, new LayeredContainmentList3<IInterval<int>, int>(new[] { new IntervalBase<int>(2, 7, false, true) }).
                     CountOverlaps(new IntervalBase<int>(2, 7, true, true)));
             }
 
             [Test]
             public void CountOverlap_MoreIntervals3()
             {
-                Assert.AreEqual(1, new LayeredContainmentList3<int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentList3<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, true),
                         new IntervalBase<int>(1, 6, true, true),
@@ -795,7 +798,7 @@ namespace C5.Tests.intervals
             [Test]
             public void CountOverlap_MoreIntervals4()
             {
-                Assert.AreEqual(1, new LayeredContainmentList3<int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentList3<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, false, true),
                         new IntervalBase<int>(0, 6, true, true),
@@ -807,7 +810,7 @@ namespace C5.Tests.intervals
             [Test]
             public void CountOverlap_MoreIntervals5()
             {
-                Assert.AreEqual(1, new LayeredContainmentList3<int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentList3<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, false, true),
                         new IntervalBase<int>(0, 6, true, true),
@@ -819,7 +822,7 @@ namespace C5.Tests.intervals
             [Test]
             public void CountOverlap_MoreIntervals6()
             {
-                Assert.AreEqual(1, new LayeredContainmentList3<int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentList3<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, true),
                         new IntervalBase<int>(0, 6, true, true),
@@ -831,7 +834,7 @@ namespace C5.Tests.intervals
             [Test]
             public void CountOverlap_MoreIntervals61()
             {
-                Assert.AreEqual(1, new LayeredContainmentList3<int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentList3<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, false, true),
                         new IntervalBase<int>(0, 6, true, true),
@@ -843,7 +846,7 @@ namespace C5.Tests.intervals
             [Test]
             public void CountOverlap_MoreIntervals7()
             {
-                Assert.AreEqual(1, new LayeredContainmentList3<int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentList3<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, false, true),
                         new IntervalBase<int>(0, 6, true, true),
@@ -855,7 +858,7 @@ namespace C5.Tests.intervals
             [Test]
             public void CountOverlap_MoreIntervals8()
             {
-                Assert.AreEqual(1, new LayeredContainmentList3<int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentList3<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, true),
                         new IntervalBase<int>(0, 6, true, true),
@@ -869,7 +872,7 @@ namespace C5.Tests.intervals
             [Test]
             public void CountOverlap_MoreIntervals9()
             {
-                Assert.AreEqual(1, new LayeredContainmentList3<int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentList3<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, true),
                         new IntervalBase<int>(1, 6, true, true),
@@ -881,7 +884,7 @@ namespace C5.Tests.intervals
             [Test]
             public void CountOverlap_MoreIntervals10()
             {
-                Assert.AreEqual(0, new LayeredContainmentList3<int>(new[]
+                Assert.AreEqual(0, new LayeredContainmentList3<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, false),
                         new IntervalBase<int>(1, 6, true, true),
@@ -893,7 +896,7 @@ namespace C5.Tests.intervals
             [Test]
             public void CountOverlap_MoreIntervals11()
             {
-                Assert.AreEqual(0, new LayeredContainmentList3<int>(new[]
+                Assert.AreEqual(0, new LayeredContainmentList3<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, true),
                         new IntervalBase<int>(1, 6, true, true),
@@ -905,7 +908,7 @@ namespace C5.Tests.intervals
             [Test]
             public void CountOverlap_MoreIntervals12()
             {
-                Assert.AreEqual(0, new LayeredContainmentList3<int>(new[]
+                Assert.AreEqual(0, new LayeredContainmentList3<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, false),
                         new IntervalBase<int>(1, 6, true, true),
@@ -917,7 +920,7 @@ namespace C5.Tests.intervals
             [Test]
             public void CountOverlap_MoreIntervals13()
             {
-                Assert.AreEqual(0, new LayeredContainmentList3<int>(new[]
+                Assert.AreEqual(0, new LayeredContainmentList3<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, false),
                         new IntervalBase<int>(1, 6, true, true),
@@ -929,7 +932,7 @@ namespace C5.Tests.intervals
             [Test]
             public void CountOverlap_MoreIntervals14()
             {
-                Assert.AreEqual(0, new LayeredContainmentList3<int>(new[]
+                Assert.AreEqual(0, new LayeredContainmentList3<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, false),
                         new IntervalBase<int>(1, 6, true, true),
@@ -941,7 +944,7 @@ namespace C5.Tests.intervals
             [Test]
             public void CountOverlap_MoreIntervals15()
             {
-                Assert.AreEqual(0, new LayeredContainmentList3<int>(new[]
+                Assert.AreEqual(0, new LayeredContainmentList3<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, true),
                         new IntervalBase<int>(1, 6, true, true),
@@ -953,7 +956,7 @@ namespace C5.Tests.intervals
             [Test]
             public void CountOverlap_MoreIntervals16()
             {
-                Assert.AreEqual(0, new LayeredContainmentList3<int>(new[]
+                Assert.AreEqual(0, new LayeredContainmentList3<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, true),
                         new IntervalBase<int>(1, 6, true, true),
@@ -965,7 +968,7 @@ namespace C5.Tests.intervals
             [Test]
             public void CountOverlap_MoreIntervals17()
             {
-                Assert.AreEqual(1, new LayeredContainmentList3<int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentList3<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, true),
                         new IntervalBase<int>(1, 5, true, true),
@@ -977,7 +980,7 @@ namespace C5.Tests.intervals
             [Test]
             public void CountOverlap_MoreIntervals18()
             {
-                Assert.AreEqual(1, new LayeredContainmentList3<int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentList3<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, true),
                         new IntervalBase<int>(1, 5, true, true),
@@ -991,35 +994,35 @@ namespace C5.Tests.intervals
             [Test]
             public void CountOverlap_MoreThanOneInterval()
             {
-                Assert.AreEqual(5, new LayeredContainmentList3<int>(dataSetD).
+                Assert.AreEqual(5, new LayeredContainmentList3<IInterval<int>, int>(dataSetD).
                     CountOverlaps(new IntervalBase<int>(6, 9, true, true)));
             }
 
             [Test]
             public void CountOverlap_MoreThanOneIntervalQueryNull()
             {
-                Assert.AreEqual(0, new LayeredContainmentList3<int>(dataSetB).
+                Assert.AreEqual(0, new LayeredContainmentList3<IInterval<int>, int>(dataSetB).
                     CountOverlaps(null));
             }
 
             [Test]
             public void CountOverlap_ContainmentQueryHits()
             {
-                Assert.AreEqual(3, new LayeredContainmentList3<int>(dataSetF).
+                Assert.AreEqual(3, new LayeredContainmentList3<IInterval<int>, int>(dataSetF).
                     CountOverlaps(new IntervalBase<int>(6, 7, true, true)));
             }
 
             [Test]
             public void CountOverlap_MoreThanOneIntervalQueryBefore()
             {
-                Assert.AreEqual(0, new LayeredContainmentList3<int>(dataSetE).
+                Assert.AreEqual(0, new LayeredContainmentList3<IInterval<int>, int>(dataSetE).
                     CountOverlaps(new IntervalBase<int>(1, 2, true, true)));
             }
 
             [Test]
             public void CountOverlap_MoreThanOneIntervalQueryAfter()
             {
-                Assert.AreEqual(0, new LayeredContainmentList3<int>(dataSetE).
+                Assert.AreEqual(0, new LayeredContainmentList3<IInterval<int>, int>(dataSetE).
                     CountOverlaps(new IntervalBase<int>(21, 23, true, true)));
             }
 
@@ -1030,49 +1033,49 @@ namespace C5.Tests.intervals
             [Test]
             public void FindOverlaps_NullQueryZeroIntervals()
             {
-                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentList3<int>(Enumerable.Empty<IInterval<int>>()).FindOverlaps(null));
+                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentList3<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).FindOverlaps(null));
             }
 
             [Test]
             public void FindOverlaps_NullQueryOneOrMoreIntervals()
             {
-                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentList3<int>(dataSetB).FindOverlaps(null));
+                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentList3<IInterval<int>, int>(dataSetB).FindOverlaps(null));
             }
 
             [Test]
             public void FindOverlapsStabbing_QueryZeroIntervals()
             {
-                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentList3<int>(Enumerable.Empty<IInterval<int>>()).FindOverlaps(2));
+                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentList3<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).FindOverlaps(2));
             }
 
             [Test]
             public void FindOverlapsRange_QueryZeroIntervals()
             {
-                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentList3<int>(Enumerable.Empty<IInterval<int>>()).FindOverlaps(new IntervalBase<int>(21, 23, true, true)));
+                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentList3<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).FindOverlaps(new IntervalBase<int>(21, 23, true, true)));
             }
 
             [Test]
             public void FindOverlapsStabbing_QueryPointOneOrMoreIntervals()
             {
-                CollectionAssert.AreEquivalent(new[] { A }, new LayeredContainmentList3<int>(dataSetB).FindOverlaps(2));
+                CollectionAssert.AreEquivalent(new[] { A }, new LayeredContainmentList3<IInterval<int>, int>(dataSetB).FindOverlaps(2));
             }
 
             [Test]
             public void FindOverlaps_MoreThanOneIntervalQueryAfter()
             {
-                Assert.AreEqual(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentList3<int>(dataSetE).FindOverlaps(new IntervalBase<int>(21, 23, true, true)));
+                Assert.AreEqual(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentList3<IInterval<int>, int>(dataSetE).FindOverlaps(new IntervalBase<int>(21, 23, true, true)));
             }
 
             [Test]
             public void FindOverlaps_ContainmentQueryHits()
             {
-                Assert.AreEqual(3, new LayeredContainmentList3<int>(dataSetF).FindOverlaps(new IntervalBase<int>(6, 7, true, true)).Count());
+                Assert.AreEqual(3, new LayeredContainmentList3<IInterval<int>, int>(dataSetF).FindOverlaps(new IntervalBase<int>(6, 7, true, true)).Count());
             }
 
             [Test]
             public void FindOverlaps_MoreThanOneIntervalQueryBefore()
             {
-                Assert.AreEqual(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentList3<int>(dataSetE).FindOverlaps(new IntervalBase<int>(1, 2, true, true)));
+                Assert.AreEqual(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentList3<IInterval<int>, int>(dataSetE).FindOverlaps(new IntervalBase<int>(1, 2, true, true)));
             }
 
             #endregion
@@ -1083,7 +1086,7 @@ namespace C5.Tests.intervals
             public void Enumerator_Empty()
             {
                 var result = new ArrayList<IInterval<int>>();
-                var list = new LayeredContainmentList3<int>(Enumerable.Empty<IInterval<int>>());
+                var list = new LayeredContainmentList3<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>());
                 var enumerator = list.GetEnumerator();
 
                 while (enumerator.MoveNext())
@@ -1098,7 +1101,7 @@ namespace C5.Tests.intervals
             public void Enumerator_OneInterval()
             {
                 var result = new ArrayList<IInterval<int>>();
-                var list = new LayeredContainmentList3<int>(dataSetA);
+                var list = new LayeredContainmentList3<IInterval<int>, int>(dataSetA);
                 var enumerator = list.GetEnumerator();
 
                 while (enumerator.MoveNext())
@@ -1113,7 +1116,7 @@ namespace C5.Tests.intervals
             public void Enumerator_MoreContainments()
             {
                 var result = new ArrayList<IInterval<int>>();
-                var list = new LayeredContainmentList3<int>(dataSetC);
+                var list = new LayeredContainmentList3<IInterval<int>, int>(dataSetC);
                 var enumerator = list.GetEnumerator();
 
                 while (enumerator.MoveNext())
@@ -1128,7 +1131,7 @@ namespace C5.Tests.intervals
             public void Enumerator_OneContainment()
             {
                 var result = new ArrayList<IInterval<int>>();
-                var list = new LayeredContainmentList3<int>(dataSetG);
+                var list = new LayeredContainmentList3<IInterval<int>, int>(dataSetG);
                 var enumerator = list.GetEnumerator();
 
                 while (enumerator.MoveNext())
@@ -1146,13 +1149,13 @@ namespace C5.Tests.intervals
             [Test]
             public void Span_Empty()
             {
-                Assert.Throws<InvalidOperationException>(() => { var span = new LayeredContainmentList3<int>(Enumerable.Empty<IInterval<int>>()).Span; });
+                Assert.Throws<InvalidOperationException>(() => { var span = new LayeredContainmentList3<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).Span; });
             }
 
             [Test]
             public void Span_MoreThanZero()
             {
-                Assert.That(new LayeredContainmentList3<int>(dataSetB).Span.Equals(new IntervalBase<int>(1, 20, true, true)));
+                Assert.That(new LayeredContainmentList3<IInterval<int>, int>(dataSetB).Span.Equals(new IntervalBase<int>(1, 20, true, true)));
             }
 
             #endregion
@@ -1162,32 +1165,32 @@ namespace C5.Tests.intervals
             [Test]
             public void OverlapExists_NullQuery()
             {
-                Assert.False(new LayeredContainmentList3<int>(dataSetB).OverlapExists(null));
+                Assert.False(new LayeredContainmentList3<IInterval<int>, int>(dataSetB).FindOverlap(null, ref overlap));
             }
 
             [Test]
             public void OverlapExists_Empty()
             {
-                Assert.False(new LayeredContainmentList3<int>(Enumerable.Empty<IInterval<int>>()).
-                    OverlapExists(new IntervalBase<int>(4, 5, true, true)));
+                Assert.False(new LayeredContainmentList3<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).
+                    FindOverlap(new IntervalBase<int>(4, 5, true, true), ref overlap));
             }
 
             [Test]
             public void OverlapExists_QueryOutOfSpan()
             {
-                Assert.False(new LayeredContainmentList3<int>(dataSetB).OverlapExists(new IntervalBase<int>(21, 23, true, true)));
+                Assert.False(new LayeredContainmentList3<IInterval<int>, int>(dataSetB).FindOverlap(new IntervalBase<int>(21, 23, true, true), ref overlap));
             }
 
             [Test]
             public void OverlapExists_Hit()
             {
-                Assert.True(new LayeredContainmentList3<int>(dataSetB).OverlapExists(new IntervalBase<int>(4, 5, true, true)));
+                Assert.True(new LayeredContainmentList3<IInterval<int>, int>(dataSetB).FindOverlap(new IntervalBase<int>(4, 5, true, true), ref overlap));
             }
 
             [Test]
             public void OverlapExists_NoHit()
             {
-                Assert.False(new LayeredContainmentList3<int>(dataSetE).OverlapExists(new IntervalBase<int>(9, 11, true, true)));
+                Assert.False(new LayeredContainmentList3<IInterval<int>, int>(dataSetE).FindOverlap(new IntervalBase<int>(9, 11, true, true), ref overlap));
             }
 
             #endregion
@@ -1195,33 +1198,33 @@ namespace C5.Tests.intervals
             [Test]
             public void CountSpeed_NotEmpty()
             {
-                Assert.That(new LayeredContainmentList3<int>(dataSetA).CountSpeed.Equals(Speed.Constant));
+                Assert.That(new LayeredContainmentList3<IInterval<int>, int>(dataSetA).CountSpeed.Equals(Speed.Constant));
             }
 
             [Test]
             public void Choose_Empty()
             {
                 Assert.Throws<NoSuchItemException>(() =>
-                    { var choose = new LayeredContainmentList3<int>(Enumerable.Empty<IInterval<int>>()).Choose(); });
+                    { var choose = new LayeredContainmentList3<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).Choose(); });
             }
 
             [Test]
             public void Choose_NotEmpty()
             {
-                Assert.NotNull(new LayeredContainmentList3<int>(dataSetA).Choose());
+                Assert.NotNull(new LayeredContainmentList3<IInterval<int>, int>(dataSetA).Choose());
             }
 
             [Test]
             public void ToString_Null()
             {
-                var list = new LayeredContainmentList3<int>(Enumerable.Empty<IInterval<int>>());
+                var list = new LayeredContainmentList3<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>());
                 Assert.AreEqual("{  }", list.ToString());
             }
 
             [Test]
             public void ToString_NotNull()
             {
-                var list = new LayeredContainmentList3<int>(dataSetA);
+                var list = new LayeredContainmentList3<IInterval<int>, int>(dataSetA);
                 Assert.AreEqual("{ [2:7] }", list.ToString());
             }
 
