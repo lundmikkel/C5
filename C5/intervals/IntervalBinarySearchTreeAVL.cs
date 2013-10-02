@@ -462,6 +462,7 @@ namespace C5.intervals
         private static Node findAncestor(Node root, Node child, bool searchRight, Node currentAncestor = null)
         {
             Contract.Requires(root != null);
+            Contract.Requires(child != null);
 
             var compare = child.Key.CompareTo(root.Key);
 
