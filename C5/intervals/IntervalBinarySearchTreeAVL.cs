@@ -1067,15 +1067,15 @@ namespace C5.intervals
 
         public override IEnumerator<IInterval<T>> GetEnumerator()
         {
-            // TODO: Make enumerator lazy, by adding each interval and yield it if it wasn't already yielded
-
             var set = new IntervalSet();
 
             var enumerator = getEnumerator(_root);
             while (enumerator.MoveNext())
-                set.Add(enumerator.Current);
-
-            return set.GetEnumerator();
+            {
+                var interval = enumerator.Current;
+                if (set.Add(interval))
+                    yield return interval;
+            }
         }
 
         #endregion
@@ -1302,18 +1302,18 @@ namespace C5.intervals
 
             var splitNode = _root;
             // Use a lambda instead of out, as out or ref isn't allowed for itorators
-            set.AddAll(findSplitNode(_root, query, n => { splitNode = n; }));
+            foreach (var interval in findSplitNode(_root, query, n => { splitNode = n; }).Where(set.Add))
+                yield return interval;
 
             // Find all intersecting intervals in left subtree
             if (query.Low.CompareTo(splitNode.Key) < 0)
-                set.AddAll(findLeft(splitNode.Left, query));
+                foreach (var interval in findLeft(splitNode.Left, query).Where(set.Add))
+                    yield return interval;
 
             // Find all intersecting intervals in right subtree
             if (splitNode.Key.CompareTo(query.High) < 0)
-                set.AddAll(findRight(splitNode.Right, query));
-
-            foreach (var interval in set)
-                yield return interval;
+                foreach (var interval in findRight(splitNode.Right, query).Where(set.Add))
+                    yield return interval;
         }
 
         public IInterval<T> FindAnyOverlap(IInterval<T> query)
@@ -1431,7 +1431,7 @@ namespace C5.intervals
             }
         }
 
-        private IEnumerable<IInterval<T>> findRight(Node root, IInterval<T> query)
+        private static IEnumerable<IInterval<T>> findRight(Node root, IInterval<T> query)
         {
             // If root is null we have reached the end
             if (root == null) yield break;
@@ -1489,7 +1489,7 @@ namespace C5.intervals
         }
 
 
-        private IEnumerator<IInterval<T>> getEnumerator(Node root)
+        private static IEnumerator<IInterval<T>> getEnumerator(Node root)
         {
             // Just return if tree is empty
             if (root == null) yield break;
@@ -1524,10 +1524,7 @@ namespace C5.intervals
 
         public bool OverlapExists(IInterval<T> query)
         {
-            if (query == null)
-                return false;
-
-            return FindOverlaps(query).GetEnumerator().MoveNext();
+            return FindOverlaps(query).Any();
         }
 
         public int CountOverlaps(IInterval<T> query)
