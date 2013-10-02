@@ -695,8 +695,6 @@ namespace C5.intervals
             private set { _span = value; }
         }
 
-        public Speed SpanSpeed { get { return Speed.Constant; } }
-
         #endregion
     }
 }

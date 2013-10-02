@@ -13,6 +13,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 
 namespace C5.intervals
@@ -656,13 +657,11 @@ namespace C5.intervals
                 _root.Visit(visitor, 0);
         }
 
-        /// <summary>
-        /// Rotates lefts this instance. 
-        /// Precondition: (node != null && node.Right != null)
-        /// </summary>
-        /// <returns></returns>
         private static Node<T> rotateLeft(Node<T> node)
         {
+            Contract.Requires(node != null);
+            Contract.Requires(node.Right != null);
+
             var right = node.Right;
             node.Right = right.Left;
             right.Left = node;
@@ -670,13 +669,11 @@ namespace C5.intervals
             return right;
         }
 
-        /// <summary>
-        /// RotateRights this instance. 
-        /// Precondition: (node != null && node.Left != null)
-        /// </summary>
-        /// <returns></returns>
         private static Node<T> rotateRight(Node<T> node)
         {
+            Contract.Requires(node != null);
+            Contract.Requires(node.Left != null);
+
             var left = node.Left;
             node.Left = left.Right;
             left.Right = node;

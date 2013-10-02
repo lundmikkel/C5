@@ -420,7 +420,7 @@ namespace C5.intervals
         [ContractInvariantMethod]
         private void ibsInvariants()
         {
-            //Contract.Invariant(Contract.ForAll(getNodeEnumerator(_root), checkIbsInvariants));
+            Contract.Invariant(Contract.ForAll(getNodeEnumerator(_root), checkIbsInvariants));
         }
 
         private static IEnumerable<Node> getNodeEnumerator(Node root)
@@ -437,13 +437,6 @@ namespace C5.intervals
                 yield return node;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="root"></param>
-        /// <param name="child"></param>
-        /// <param name="currentAncestor">Internal parameter to keep track of the ancestor while searching.</param>
-        /// <returns></returns>
         private static Node findAncestor(Node root, Node child)
         {
             Contract.Requires(root != null);

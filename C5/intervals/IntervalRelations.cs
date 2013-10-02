@@ -2,10 +2,20 @@
 
 namespace C5.intervals
 {
+    /// <summary>
+    /// Attribute class for the symbol annotation for interval relations
+    /// </summary>
     public class SymbolAttribute : Attribute
     {
+        /// <summary>
+        /// The symbol name
+        /// </summary>
         public string S;
 
+        /// <summary>
+        /// Create a symbol with the given string
+        /// </summary>
+        /// <param name="s">The symbol name.</param>
         public SymbolAttribute(string s)
         {
             S = s;
@@ -17,15 +27,27 @@ namespace C5.intervals
         }
     }
 
+    /// <summary>
+    /// A reflection helper class to get the symbol name for an interval relation.
+    /// </summary>
     public static class ReflectionHelpers
     {
+        /// <summary>
+        /// Get the symbol name for a interval relation
+        /// </summary>
+        /// <param name="objEnum"></param>
+        /// <returns></returns>
         public static string GetCustomDescription(object objEnum)
         {
-            var fi = objEnum.GetType().GetField(objEnum.ToString());
-            var attributes = (SymbolAttribute[]) fi.GetCustomAttributes(typeof(SymbolAttribute), false);
+            var attributes = (SymbolAttribute[]) objEnum.GetType().GetField(objEnum.ToString()).GetCustomAttributes(typeof(SymbolAttribute), false);
             return (attributes.Length > 0) ? attributes[0].ToString() : objEnum.ToString();
         }
 
+        /// <summary>
+        /// Get the symbol name for an interval relation.
+        /// </summary>
+        /// <param name="value">The interval relation.</param>
+        /// <returns>A string representation of an interval relation.</returns>
         public static string Symbol(this IntervalRelation value)
         {
             return GetCustomDescription(value);
@@ -37,46 +59,88 @@ namespace C5.intervals
     /// </summary>
     public enum IntervalRelation
     {
+        /// <summary>
+        /// The interval is after another interval
+        /// </summary>
         [Symbol(">")]
         After = 0,
 
+        /// <summary>
+        /// The interval is met by another interval thereby sharing an endpoint
+        /// </summary>
         [Symbol("mi")]
         MetBy = 1,
 
+        /// <summary>
+        /// The interval is overlaped by another interval but share no endpoint
+        /// </summary>
         [Symbol("oi")]
         OverlappedBy = 2,
 
+        /// <summary>
+        /// The interval finishes another interval thereby sharing the high endpoint
+        /// </summary>
         [Symbol("f")]
         Finishes = 3,
 
+        /// <summary>
+        /// The interval is during another interval
+        /// </summary>
         [Symbol("d")]
         During = 4,
 
+        /// <summary>
+        /// The interval is started by another interval thereby sharing the low endpoint
+        /// </summary>
         [Symbol("si")]
         StartedBy = 5,
 
+        /// <summary>
+        /// The interval is equal to another interval thereby sharing both endpoints
+        /// </summary>
         [Symbol("e")]
         Equals = 6,
 
+        /// <summary>
+        /// The interval is starts another interval thereby sharing the low endpoint
+        /// </summary>
         [Symbol("s")]
         Starts = 7,
 
+        /// <summary>
+        /// The interval is contained in another interval
+        /// </summary>
         [Symbol("di")]
         Contains = 8,
 
+        /// <summary>
+        /// The interval finished by another interval thereby sharing the high endpoint
+        /// </summary>
         [Symbol("fi")]
         FinishedBy = 9,
 
+        /// <summary>
+        /// The interval overlaps another interval but share no endpoint
+        /// </summary>
         [Symbol("o")]
         Overlaps = 10,
 
+        /// <summary>
+        /// The interval meets another interval thereby sharing an endpoint
+        /// </summary>
         [Symbol("m")]
         Meets = 11,
 
+        /// <summary>
+        /// The interval is before another interval
+        /// </summary>
         [Symbol("<")]
         Before = 12,
     };
 
+    /// <summary>
+    /// An extension class for finding the relation between two intervals
+    /// </summary>
     public static class IntervalRelations
     {
         /// <summary>

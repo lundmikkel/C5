@@ -196,8 +196,6 @@ namespace C5.intervals
         /// <summary>
         /// Will return the index of the first interval that overlaps the query
         /// </summary>
-        /// <param name="query"></param>
-        /// <returns></returns>
         private int findFirst(int layer, int lower, int upper, IInterval<T> query)
         {
             int min = lower - 1, max = upper;
@@ -219,6 +217,9 @@ namespace C5.intervals
             return max;
         }
 
+        /// <summary>
+        /// Will return the index of the last interval that overlaps the query
+        /// </summary>
         private int findLast(int layer, int lower, int upper, IInterval<T> query)
         {
             int min = lower - 1, max = upper;
