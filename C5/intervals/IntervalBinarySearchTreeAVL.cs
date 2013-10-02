@@ -472,7 +472,7 @@ namespace C5.intervals
                 if (searchRight)
                     currentAncestor = root;
 
-                findAncestor(root.Right, child, searchRight, currentAncestor);
+                return findAncestor(root.Right, child, searchRight, currentAncestor);
             }
             // Search in the left subtree
             else if (compare < 0)
@@ -481,7 +481,7 @@ namespace C5.intervals
                 if (!searchRight)
                     currentAncestor = root;
 
-                findAncestor(root.Left, child, searchRight, currentAncestor);
+                return findAncestor(root.Left, child, searchRight, currentAncestor);
             }
 
             return currentAncestor;
@@ -490,7 +490,7 @@ namespace C5.intervals
         // TODO Also check the "=" invariant
         private bool checkIbsInvariants(Node v)
         {
-            // Find v's anchestor
+            // Find v's ancestor
             var u = findAncestor(_root, v);
 
             // If v doesn't have an ancestor return
@@ -509,18 +509,23 @@ namespace C5.intervals
             if (!set.All(i => i.Contains(intervalUV)))
                 return false;
 
-            // Maximality invariant 
-            while ((u = findAncestor(_root, v)) != null)
+            // Maximality invariant
+            var child = u; // Start by searching from the current ancestor
+            Node ancestor;
+            while ((ancestor = findAncestor(_root, child)) != null)
             {
-                var j = v.Key.CompareTo(u.Key) < 0 ? new IntervalBase<T>(v.Key, u.Key, false, false) : new IntervalBase<T>(u.Key, v.Key, false, false);
+                var j = child.Key.CompareTo(ancestor.Key) < 0 ? 
+                    new IntervalBase<T>(child.Key, ancestor.Key, false, false) :
+                    new IntervalBase<T>(ancestor.Key, child.Key, false, false);
 
                 if (set.Exists(i => i.Contains(j) && j.Contains(intervalUV)))
                     return false;
 
-                v = u;
+                child = ancestor;
             }
 
-            return true;
+            // "=" Invariant
+            return !v.Equal.Exists(i => i.Overlaps(v.Key));
         }
 
         private bool maximality()
