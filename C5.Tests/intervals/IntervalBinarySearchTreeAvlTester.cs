@@ -8,8 +8,6 @@ using NUnit.Framework;
 
 namespace C5.Tests.intervals
 {
-    //using SequencedIntervalsOfInt = TreeBag<IInterval<int>>;
-
     namespace IntervalBinarySearchTreeAVL
     {
 
