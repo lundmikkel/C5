@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.Text;
 
 namespace C5
 {
@@ -9,6 +13,7 @@ namespace C5
     /// <remarks>The data structures do not support updates on its intervals' values. If you wish to change an interval's endpoints or their inclusion, the interval should be removed from the data structure first, changed and then added agian.</remarks>
     /// <typeparam name="I">The interval type in the collection. Especially used for return types for enumeration.</typeparam>
     /// <typeparam name="T">The interval's endpoint values.</typeparam>
+    [ContractClass(typeof(IntervalCollectionContract<,>))]
     public interface IIntervalCollection<I, T> : ICollectionValue<I>
         where I : IInterval<T>
         where T : IComparable<T>
@@ -91,5 +96,68 @@ namespace C5
         /// <param name="interval">The interval to remove.</param>
         /// <returns>True if the interval was removed.</returns>
         bool Remove(I interval);
+    }
+
+    [ContractClassFor(typeof(IIntervalCollection<,>))]
+    abstract class IntervalCollectionContract<I, T> : IIntervalCollection<I, T>
+        where I : IInterval<T>
+        where T : IComparable<T>
+    {
+        public abstract IEnumerator<I> GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        public abstract bool IsEmpty { get; }
+        public int Count
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+        public abstract I Choose();
+
+        public abstract IInterval<T> Span { get; }
+        public abstract int MaximumOverlap { get; }
+
+        public abstract IEnumerable<I> FindOverlaps(T query);
+        public abstract IEnumerable<I> FindOverlaps(IInterval<T> query);
+        public abstract bool FindOverlap(T query, ref I overlap);
+        public abstract bool FindOverlap(IInterval<T> query, ref I overlap);
+
+        public int CountOverlaps(IInterval<T> query)
+        {
+            Contract.Requires(query != null);
+
+            throw new NotImplementedException();
+        }
+
+        public abstract bool Add(I interval);
+        public abstract bool Remove(I interval);
+
+        #region Non-interval methods
+
+        public abstract string ToString(string format, IFormatProvider formatProvider);
+        public abstract bool Show(StringBuilder stringbuilder, ref int rest, IFormatProvider formatProvider);
+        public abstract EventTypeEnum ListenableEvents { get; }
+        public abstract EventTypeEnum ActiveEvents { get; }
+        public abstract event CollectionChangedHandler<I> CollectionChanged;
+        public abstract event CollectionClearedHandler<I> CollectionCleared;
+        public abstract event ItemsAddedHandler<I> ItemsAdded;
+        public abstract event ItemInsertedHandler<I> ItemInserted;
+        public abstract event ItemsRemovedHandler<I> ItemsRemoved;
+        public abstract event ItemRemovedAtHandler<I> ItemRemovedAt;
+        public abstract Speed CountSpeed { get; }
+        public abstract void CopyTo(I[] array, int index);
+        public abstract I[] ToArray();
+        public abstract void Apply(Action<I> action);
+        public abstract bool Exists(Func<I, bool> predicate);
+        public abstract bool Find(Func<I, bool> predicate, out I item);
+        public abstract bool All(Func<I, bool> predicate);
+        public abstract IEnumerable<I> Filter(Func<I, bool> filter);
+
+        #endregion
     }
 }

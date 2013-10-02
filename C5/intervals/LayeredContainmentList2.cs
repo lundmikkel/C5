@@ -159,8 +159,6 @@ namespace C5.intervals
 
         public int CountOverlaps(IInterval<T> query)
         {
-            Contract.Requires(query != null);
-
             // Break if we won't find any overlaps
             return !IsEmpty ? countOverlaps(query) : 0;
         }

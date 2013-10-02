@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 
 namespace C5
 {
@@ -7,6 +8,7 @@ namespace C5
     /// </summary>
     /// <remarks>None of the values should be changed once the interval is stored in an interval collection, as it most certainly will break the data structure.</remarks>
     /// <typeparam name="T">The generic type of the interval's endpoint values.</typeparam>
+    [ContractClass(typeof(IntervalContract<>))]
     public interface IInterval<T> where T : IComparable<T>
     {
         // @design: shortest and most generic terms for endpoints
@@ -37,5 +39,20 @@ namespace C5
         /// <value>True if the high endpoint is included in the interval, otherwise false.</value>
         /// <remarks>A stabbing query using the high endpoint value will not include the interval, if the value is false.</remarks>
         bool HighIncluded { get; }
+    }
+
+    [ContractClassFor(typeof(IInterval<>))]
+    abstract class IntervalContract<T> : IInterval<T> where T : IComparable<T>
+    {
+        [ContractInvariantMethod]
+        private void invariants()
+        {
+            //Contract.Invariant(Low.CompareTo(High) < 0 || Low.CompareTo(High) == 0 && LowIncluded && HighIncluded);
+        }
+
+        public T Low { get; private set; }
+        public T High { get; private set; }
+        public bool LowIncluded { get; private set; }
+        public bool HighIncluded { get; private set; }
     }
 }
