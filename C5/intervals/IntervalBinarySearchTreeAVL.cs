@@ -548,6 +548,7 @@ namespace C5.intervals
 
         #region Events
 
+        /// <inheritdoc/>
         public override EventTypeEnum ListenableEvents { get { return EventTypeEnum.Basic; } }
         //public EventTypeEnum ActiveEvents { get; private set; }
         //public event CollectionChangedHandler<T> CollectionChanged;
@@ -561,6 +562,7 @@ namespace C5.intervals
 
         #region
 
+        /// <inheritdoc/>
         public int MaximumOverlap
         {
             get { return _root != null ? _root.Max : 0; }
@@ -623,6 +625,7 @@ namespace C5.intervals
 
         #region Add
 
+        /// <inheritdoc/>
         public bool Add(I interval)
         {
             // References to endpoint nodes needed when maintaining Interval
@@ -788,6 +791,7 @@ namespace C5.intervals
 
         #region Remove
 
+        /// <inheritdoc/>
         public bool Remove(I interval)
         {
             // References to endpoint nodes needed when maintaining Interval
@@ -1055,12 +1059,16 @@ namespace C5.intervals
 
         #region ICollectionValue
 
+        /// <inheritdoc/>
         public override bool IsEmpty { get { return _root == null; } }
 
+        /// <inheritdoc/>
         public override int Count { get { return _count; } }
 
+        /// <inheritdoc/>
         public override Speed CountSpeed { get { return Speed.Constant; } }
 
+        /// <inheritdoc/>
         public override I Choose()
         {
             if (_root == null)
@@ -1081,6 +1089,7 @@ namespace C5.intervals
 
         #region IEnumerable
 
+        /// <inheritdoc/>
         public override IEnumerator<I> GetEnumerator()
         {
             // TODO: Make enumerator lazy, by adding each interval and yield it if it wasn't already yielded
@@ -1221,6 +1230,7 @@ namespace C5.intervals
 
         #region IIntervaled
 
+        /// <inheritdoc/>
         public IInterval<T> Span
         {
             get
@@ -1258,6 +1268,7 @@ namespace C5.intervals
             return !root.Equal.IsEmpty ? root.Equal.Choose() : root.Less.Choose();
         }
 
+        /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
             // TODO: Add checks for span overlap, null query, etc.
@@ -1305,6 +1316,7 @@ namespace C5.intervals
             }
         }
 
+        /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
             if (ReferenceEquals(query, null))
@@ -1332,6 +1344,7 @@ namespace C5.intervals
                 yield return interval;
         }
 
+        /// <inheritdoc/>
         public bool FindOverlap(IInterval<T> query, ref I overlap)
         {
             var enumerator = FindOverlaps(query).GetEnumerator();
@@ -1343,6 +1356,7 @@ namespace C5.intervals
             return result;
         }
 
+        /// <inheritdoc/>
         public bool FindOverlap(T query, ref I overlap)
         {
             var enumerator = FindOverlaps(query).GetEnumerator();
@@ -1540,6 +1554,7 @@ namespace C5.intervals
 
         }
 
+        /// <inheritdoc/>
         public int CountOverlaps(IInterval<T> query)
         {
             return FindOverlaps(query).Count();

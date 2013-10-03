@@ -42,7 +42,7 @@ namespace C5
         /// <param name="query">The query point.</param>
         /// <returns>All intervals that overlap the query point.</returns>
         /// <seealso cref="FindOverlaps(IInterval{T})"/>
-        System.Collections.Generic.IEnumerable<I> FindOverlaps(T query);
+        IEnumerable<I> FindOverlaps(T query);
 
         /// <summary>
         /// Create an enumerable, enumerating all intervals in the collection that overlap the query interval.
@@ -50,7 +50,7 @@ namespace C5
         /// <param name="query">The query interval.</param>
         /// <returns>All intervals that overlap the query interval.</returns>
         /// <seealso cref="FindOverlaps(T)"/>
-        System.Collections.Generic.IEnumerable<I> FindOverlaps(IInterval<T> query);
+        IEnumerable<I> FindOverlaps(IInterval<T> query);
 
 
         /// <summary>

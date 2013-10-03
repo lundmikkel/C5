@@ -9,14 +9,22 @@ namespace C5.intervals
     public class IntervalBase<T> : IInterval<T> where T : IComparable<T>
     {
         // Use read-only fields to avoid breaking data structures, if values were changed
+        /// <inheritdoc/>
         private readonly T _low;
+        /// <inheritdoc/>
         private readonly T _high;
+        /// <inheritdoc/>
         private readonly bool _lowIncluded;
+        /// <inheritdoc/>
         private readonly bool _highIncluded;
 
+        /// <inheritdoc/>
         public T Low { get { return _low; } }
+        /// <inheritdoc/>
         public T High { get { return _high; } }
+        /// <inheritdoc/>
         public bool LowIncluded { get { return _lowIncluded; } }
+        /// <inheritdoc/>
         public bool HighIncluded { get { return _highIncluded; } }
 
         /// <summary>
@@ -77,6 +85,7 @@ namespace C5.intervals
             _highIncluded = high.HighIncluded;
         }
 
+        /// <inheritdoc/>
         public override bool Equals(object that)
         {
             // TODO: Is this done?
@@ -86,12 +95,14 @@ namespace C5.intervals
             return IntervalExtensions.Equals(this, (IInterval<T>) that);
         }
 
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
             return IntervalExtensions.GetHashCode(this);
         }
 
         // TODO: Is thi needed?!
+        /// <inheritdoc/>
         public override string ToString()
         {
             return IntervalExtensions.ToString(this);

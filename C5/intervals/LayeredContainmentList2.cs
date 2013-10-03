@@ -133,18 +133,22 @@ namespace C5.intervals
 
         #region CollectionValue
 
+        /// <inheritdoc/>
         public override bool IsEmpty
         {
             get { return Count == 0; }
         }
 
+        /// <inheritdoc/>
         public override int Count { get { return _count; } }
 
+        /// <inheritdoc/>
         public override Speed CountSpeed
         {
             get { return Speed.Constant; }
         }
 
+        /// <inheritdoc/>
         public override I Choose()
         {
             if (IsEmpty)
@@ -157,6 +161,7 @@ namespace C5.intervals
 
         #region Count Overlaps
 
+        /// <inheritdoc/>
         public int CountOverlaps(IInterval<T> query)
         {
             // Break if we won't find any overlaps
@@ -341,6 +346,7 @@ namespace C5.intervals
             }
         }
 
+        /// <inheritdoc/>
         public IInterval<T> Span
         {
             get
@@ -356,6 +362,7 @@ namespace C5.intervals
             }
         }
 
+        /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
             // Check for null to avoid creating empty interval
@@ -365,6 +372,7 @@ namespace C5.intervals
             return FindOverlaps(new IntervalBase<T>(query));
         }
 
+        /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
             // Break if we won't find any overlaps
@@ -526,6 +534,7 @@ namespace C5.intervals
 
         #endregion
 
+        /// <inheritdoc/>
         public bool FindOverlap(IInterval<T> query, ref I overlap)
         {
             // No overlap if query is null, collection is empty, or query doesn't overlap collection
@@ -544,6 +553,7 @@ namespace C5.intervals
             return result;
         }
 
+        /// <inheritdoc/>
         public bool FindOverlap(T query, ref I overlap)
         {
             return FindOverlap(new IntervalBase<T>(query), ref overlap);
@@ -551,6 +561,7 @@ namespace C5.intervals
 
         #region MNO
 
+        /// <inheritdoc/>
         public int MaximumOverlap
         {
             get
@@ -677,11 +688,13 @@ namespace C5.intervals
 
         #region Not Supported
 
+        /// <inheritdoc/>
         public bool Add(I interval)
         {
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         public bool Remove(I interval)
         {
             throw new NotSupportedException();

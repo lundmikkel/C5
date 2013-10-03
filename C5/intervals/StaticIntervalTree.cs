@@ -239,21 +239,25 @@ namespace C5.intervals
 
         #region IEnumerable
 
+        /// <inheritdoc/>
         public int CountOverlaps(IInterval<T> query)
         {
             return FindOverlaps(query).Count();
         }
 
+        /// <inheritdoc/>
         public bool Add(I interval)
         {
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         public bool Remove(I interval)
         {
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -355,6 +359,7 @@ namespace C5.intervals
             return String.Join(", ", s.ToArray());
         }
 
+        /// <inheritdoc/>
         public override SCG.IEnumerator<I> GetEnumerator()
         {
             return getEnumerator(_root);
@@ -365,10 +370,14 @@ namespace C5.intervals
 
         #region ICollectionValue
 
+        /// <inheritdoc/>
         public override bool IsEmpty { get { return _root == null; } }
+        /// <inheritdoc/>
         public override int Count { get { return _count; } }
+        /// <inheritdoc/>
         public override Speed CountSpeed { get { return Speed.Constant; } }
 
+        /// <inheritdoc/>
         public override I Choose()
         {
             if (_root == null)
@@ -381,11 +390,13 @@ namespace C5.intervals
 
         #region IIntervaled
 
+        /// <inheritdoc/>
         public int MaximumOverlap
         {
             get { throw new NotSupportedException(); }
         }
 
+        /// <inheritdoc/>
         public SCG.IEnumerable<I> FindOverlaps(T query)
         {
             if (ReferenceEquals(query, null))
@@ -450,6 +461,7 @@ namespace C5.intervals
             }
         }
 
+        /// <inheritdoc/>
         public SCG.IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
             if (ReferenceEquals(query, null))
@@ -473,6 +485,7 @@ namespace C5.intervals
                 yield return interval;
         }
 
+        /// <inheritdoc/>
         public bool FindOverlap(IInterval<T> query, ref I overlap)
         {
             var enumerator = FindOverlaps(query).GetEnumerator();
@@ -484,6 +497,7 @@ namespace C5.intervals
             return result;
         }
 
+        /// <inheritdoc/>
         public bool FindOverlap(T query, ref I overlap)
         {
             var enumerator = FindOverlaps(query).GetEnumerator();
@@ -682,6 +696,7 @@ namespace C5.intervals
             }
         }
 
+        /// <inheritdoc/>
         public IInterval<T> Span
         {
             get

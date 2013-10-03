@@ -21,6 +21,7 @@ namespace C5.intervals
             S = s;
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             return S;

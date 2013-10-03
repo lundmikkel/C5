@@ -153,10 +153,14 @@ namespace C5.intervals
         #region ICollectionValue
 
 
+        /// <inheritdoc/>
         public override bool IsEmpty { get { return Count == 0; } }
+        /// <inheritdoc/>
         public override int Count { get { return _count; } }
+        /// <inheritdoc/>
         public override Speed CountSpeed { get { return Speed.Constant; } }
 
+        /// <inheritdoc/>
         public override I Choose()
         {
             if (IsEmpty)
@@ -169,6 +173,7 @@ namespace C5.intervals
 
         #region IIntervaled
 
+        /// <inheritdoc/>
         public IInterval<T> Span
         {
             get
@@ -181,11 +186,13 @@ namespace C5.intervals
             }
         }
 
+        /// <inheritdoc/>
         public int MaximumOverlap
         {
             get { throw new NotSupportedException(); }
         }
 
+        /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
             if (ReferenceEquals(query, null))
@@ -280,6 +287,7 @@ namespace C5.intervals
             return min;
         }
 
+        /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
             if (query == null)
@@ -288,6 +296,7 @@ namespace C5.intervals
             return overlap(_list, query);
         }
 
+        /// <inheritdoc/>
         public bool FindOverlap(IInterval<T> query, ref I overlap)
         {
             if (query == null)
@@ -309,21 +318,25 @@ namespace C5.intervals
             return result;
         }
 
+        /// <inheritdoc/>
         public bool FindOverlap(T query, ref I overlap)
         {
             return FindOverlap(new IntervalBase<T>(query), ref overlap);
         }
 
+        /// <inheritdoc/>
         public int CountOverlaps(IInterval<T> query)
         {
             return FindOverlaps(query).Count();
         }
 
+        /// <inheritdoc/>
         public bool Add(I interval)
         {
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         public bool Remove(I interval)
         {
             throw new NotSupportedException();

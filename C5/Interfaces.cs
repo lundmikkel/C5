@@ -97,7 +97,7 @@ namespace C5
         event ItemRemovedAtHandler<T> ItemRemovedAt;
 
         /// <summary>
-        /// 
+        /// Check if collection is empty.
         /// </summary>
         /// <value>True if this collection is empty.</value>
         bool IsEmpty { get; }
