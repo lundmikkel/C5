@@ -397,6 +397,7 @@ namespace C5.intervals
         /// Checks that the height of the tree is balanced.
         /// </summary>
         /// <returns>True if the tree is balanced, else false.</returns>
+        [Pure]
         private bool confirmBalance()
         {
             var result = true;
@@ -410,6 +411,7 @@ namespace C5.intervals
         /// <param name="node">The node you wish to check the height on.</param>
         /// <param name="result">Reference to a bool that will be set to false if an in-balance is discovered.</param>
         /// <returns>Height of the tree.</returns>
+        [Pure]
         private static int height(Node node, ref bool result)
         {
             if (node == null)
@@ -421,6 +423,7 @@ namespace C5.intervals
             return Math.Max(heightLeft, heightRight) + 1;
         }
 
+        [Pure]
         private static IEnumerable<Node> getNodeEnumerator(Node root)
         {
             if (root == null)
@@ -471,7 +474,7 @@ namespace C5.intervals
 
                 return findAncestor(root.Right, child, searchRight, currentAncestor);
             }
-                // Search in the left subtree if the child's key value is smaller than the root's key value.
+            // Search in the left subtree if the child's key value is smaller than the root's key value.
             if (compare < 0)
             {
                 // Update ancestor if we are searching for an ancestor in the left sub tree.
@@ -491,6 +494,7 @@ namespace C5.intervals
         /// </summary>
         /// <param name="v">The node to check (It only makes sense to check all the nodes of the tree, so call this enumerating the entire tree)</param>
         /// <returns>Returns true if all the invariants hold and false if one of them does not hold.</returns>
+        [Pure]
         private bool checkIbsInvariants(Node v)
         {
             // Find v's ancestor.
