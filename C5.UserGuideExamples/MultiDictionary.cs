@@ -97,7 +97,7 @@ namespace MultiDictionary1 {
   // Golde's PowerCollections library), and therefore:
   //
   //  * A value collection associated with a key may be null or
-  //  non-empty.  Hence for correct semantics, the StrictlyContains(k) method
+  //  non-empty.  Hence for correct semantics, the Contains(k) method
   //  must check that the value collection associated with a key is
   //  non-null and non-empty.
   //  

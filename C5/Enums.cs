@@ -38,19 +38,19 @@ namespace C5
     /// </summary>
     PotentiallyInfinite = 1,
     /// <summary>
-    /// Lookup operations like <code>StrictlyContains(T item)</code> or the <code>Count</code>
+    /// Lookup operations like <code>Contains(T item)</code> or the <code>Count</code>
     /// property may take time O(n),
     /// where n is the size of the collection.
     /// </summary>
     Linear = 2,
     /// <summary>
-    /// Lookup operations like <code>StrictlyContains(T item)</code> or the <code>Count</code>
+    /// Lookup operations like <code>Contains(T item)</code> or the <code>Count</code>
     /// property  takes time O(log n),
     /// where n is the size of the collection.
     /// </summary>
     Log = 3,
     /// <summary>
-    /// Lookup operations like <code>StrictlyContains(T item)</code> or the <code>Count</code>
+    /// Lookup operations like <code>Contains(T item)</code> or the <code>Count</code>
     /// property  takes time O(1),
     /// where n is the size of the collection.
     /// </summary>
