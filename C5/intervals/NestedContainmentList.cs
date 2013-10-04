@@ -5,6 +5,13 @@ using System.Linq;
 
 namespace C5.intervals
 {
+    /// <summary>
+    /// An in-place implementation of Nested Containment List as described by Aleskeyenko et. al in "Nested
+    /// Containment List (NCList): a new algorithm for accelerating interval query of genome
+    /// alignment and interval databases"
+    /// </summary>
+    /// <typeparam name="I">The interval type.</typeparam>
+    /// <typeparam name="T">The interval endpoint type.</typeparam>
     public class NestedContainmentList<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
         where I : IInterval<T>
         where T : IComparable<T>

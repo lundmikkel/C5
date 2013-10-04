@@ -155,8 +155,6 @@
     <Compile Include="intervals\AvlTree.cs" />
     <Compile Include="intervals\IntervalBinarySearchTreeAVL.cs" />
     <Compile Include="intervals\IntervalRelations.cs" />
-    <Compile Include="intervals\LayeredContainmentListWithoutPointers.cs" />
-    <Compile Include="intervals\LayeredContainmentList3.cs" />
     <Compile Include="intervals\LayeredContainmentList2.cs" />
     <Compile Include="intervals\IntervalBase.cs" />
     <Compile Include="intervals\IntervalBinarySearchTree.cs" />

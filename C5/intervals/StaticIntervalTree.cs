@@ -38,6 +38,11 @@ namespace C5.intervals
         }
     }
 
+    /// <summary>
+    /// An implementation of a classic static interval tree as described by Berg et. al in "Computational Geometry - Algorithms and Applications"
+    /// </summary>
+    /// <typeparam name="I">The interval type.</typeparam>
+    /// <typeparam name="T">The interval endpoint type.</typeparam>
     public class StaticIntervalTree<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
         where I : IInterval<T>
         where T : IComparable<T>
@@ -316,21 +321,21 @@ namespace C5.intervals
                 + "}\n";
         }
 
-        private int nodeCounter;
-        private int nullCounter;
+        private int _nodeCounter;
+        private int _nullCounter;
         private string graphviz(Node root, string parent)
         {
             // Leaf
             int id;
             if (root == null)
             {
-                id = nullCounter++;
+                id = _nullCounter++;
                 return
                     String.Format("\tleaf{0} [shape=point];\n", id) +
                     String.Format("\t{0} -> leaf{1};\n", parent, id);
             }
 
-            id = nodeCounter++;
+            id = _nodeCounter++;
             return
                 String.Format("\tnode{0} [fontname=consolas,label=\"{1}\"];\n", id, root.Key) +
                 String.Format("\t{0} -> node{1};\n", parent, id) +
