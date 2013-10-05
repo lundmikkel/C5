@@ -7,13 +7,13 @@ namespace C5.intervals
     /// </summary>
     public static class IntervalExtensions
     {
-        // TODO: Rename to Intersects to avoid confusion with IntervalRelation.Overlaps. Remember IIntervaled has FindOverlaps! Avoid too many different names
         /// <summary>
-        /// Compare two intervals to see if they overlap.
+        /// Check if two intervals overlap.
         /// </summary>
         /// <param name="x">First interval</param>
         /// <param name="y">Second interval</param>
-        /// <returns>True if the intervals overlap, otherwise false</returns>
+        /// <remarks>True if their intersection is not empty. The meaning should not be confused with <see cref="IntervalRelation.Overlaps"/> and <see cref="IntervalRelation.OverlappedBy"/>!</remarks>
+        /// <returns>True if the intervals overlap.</returns>
         public static bool Overlaps<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             // Save compare values to avoid comparing twice in case CompareTo() should be expensive
@@ -28,23 +28,21 @@ namespace C5.intervals
         /// <summary>
         /// Compare an interval with a point interval to see if they overlap
         /// </summary>
-        /// <param name="x">Interval</param>
-        /// <param name="p">Point interval</param>
-        /// <returns>True if the intervals overlap, otherwise false</returns>
+        /// <param name="x">Interval.</param>
+        /// <param name="p">Point interval.</param>
+        /// <returns>True if the intervals overlap.</returns>
         public static bool Overlaps<T>(this IInterval<T> x, T p) where T : IComparable<T>
         {
             return Overlaps(x, new IntervalBase<T>(p));
         }
 
-        // TODO: Same meaning as in IntervalRelation.StrictlyContains, but is a strict containment. Could be renamed something with subset?
         /// <summary>
-        /// Check if one interval contains another interval.
-        /// x contains y if x.Low is lower than y.Low and y.High is lower than x.High.
-        /// If endpoints are equal endpoint inclusion is also taken into account.
+        /// Check if one interval strictly contains another interval. The container interval
+        /// contains all of the contained interval without sharing endpoints.
         /// </summary>
-        /// <param name="x">Container interval</param>
-        /// <param name="y">Contained interval</param>
-        /// <returns>True if y is contained in x</returns>
+        /// <param name="x">Container interval.</param>
+        /// <param name="y">Contained interval.</param>
+        /// <returns>True if y is strictly contained in x.</returns>
         public static bool StrictlyContains<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             // Save compare values to avoid comparing twice in case CompareTo() should be expensive
@@ -57,14 +55,21 @@ namespace C5.intervals
             // return x.CompareLow(y) < 0 && y.CompareHigh(x) < 0;
         }
 
-        // TODO Fix this!
+        /// <summary>
+        /// Check if one interval contains another interval. The container interval
+        /// contains all of the contained interval possibly sharing endpoints.
+        /// </summary>
+        /// <param name="x">Container interval.</param>
+        /// <param name="y">Contained interval.</param>
+        /// <returns>True if y is contained in x.</returns>
         public static bool Contains<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
+            // TODO: Fix the implementation to match StrictlyContains.s
             // Save compare values to avoid comparing twice in case CompareTo() should be expensive
-//            int lowCompare = x.Low.CompareTo(y.Low), highCompare = y.High.CompareTo(x.High);
-//            return
-//                (lowCompare < 0 || (lowCompare == 0 && x.LowIncluded && !y.LowIncluded))
-//                && (highCompare < 0 || (highCompare == 0 && !y.HighIncluded && x.HighIncluded));
+            //            int lowCompare = x.Low.CompareTo(y.Low), highCompare = y.High.CompareTo(x.High);
+            //            return
+            //                (lowCompare < 0 || (lowCompare == 0 && x.LowIncluded && !y.LowIncluded))
+            //                && (highCompare < 0 || (highCompare == 0 && !y.HighIncluded && x.HighIncluded));
 
             // The same as (but faster than)
             return x.CompareLow(y) <= 0 && y.CompareHigh(x) <= 0;
@@ -83,7 +88,7 @@ namespace C5.intervals
         /// </summary>
         /// <param name="x">First interval</param>
         /// <param name="y">Second interval</param>
-        /// <returns>Negative integer if x comes before y, 0 if they are equal, positive integer if x comes after y</returns>
+        /// <returns>Negative if first interval is before the second, 0 if they are equal, otherwise positive.</returns>
         public static int CompareTo<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             var lowCompare = x.Low.CompareTo(y.Low);
@@ -124,7 +129,7 @@ namespace C5.intervals
         /// </summary>
         /// <param name="x">First interval</param>
         /// <param name="y">Second interval</param>
-        /// <returns>Negative integer if x's low endpoint comes before y's low endpoint, 0 if they are equal, otherwise positive</returns>
+        /// <returns>Negative if first interval's low is less than second's low endpoint, 0 if they are equal, otherwise positive.</returns>
         public static int CompareLow<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             var compare = x.Low.CompareTo(y.Low);
@@ -143,7 +148,7 @@ namespace C5.intervals
         /// </summary>
         /// <param name="x">First interval</param>
         /// <param name="y">Second interval</param>
-        /// <returns>Negative integer if x's high endpoint comes before y's high endpoint, 0 if they are equal, otherwise positive</returns>
+        /// <returns>Negative if first interval's high is less than second's high endpoint, 0 if they are equal, otherwise positive.</returns>
         public static int CompareHigh<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             var compare = x.High.CompareTo(y.High);
@@ -159,9 +164,9 @@ namespace C5.intervals
         /// <summary>
         /// Compare the low endpoint of first interval to the high endpoint of the second interval.
         /// </summary>
-        /// <param name="x">First interval</param>
-        /// <param name="y">Second interval</param>
-        /// <returns></returns>
+        /// <param name="x">First interval.</param>
+        /// <param name="y">Second interval.</param>
+        /// <returns>Negative if first interval's low is less than second's high endpoint, 0 if they are equal, otherwise positive.</returns>
         public static int CompareLowHigh<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             var compare = x.Low.CompareTo(y.High);
@@ -173,7 +178,12 @@ namespace C5.intervals
 
             return compare;
         }
-
+        /// <summary>
+        /// Compare the high endpoint of first interval to the low endpoint of the second interval.
+        /// </summary>
+        /// <param name="x">First interval.</param>
+        /// <param name="y">Second interval.</param>
+        /// <returns>Negative if first interval's high is less than second's low endpoint, 0 if they are equal, otherwise positive.</returns>
         public static int CompareHighLow<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             var compare = x.High.CompareTo(y.Low);
@@ -186,17 +196,22 @@ namespace C5.intervals
             return compare;
         }
 
+        /// <summary>
+        /// Compare the endpoint values of an interval with each other.
+        /// </summary>
+        /// <param name="x">The interval.</param>
+        /// <returns>Negative if the high endpoint value is less than the low endpoint value, 0 if they are equal, otherwise positive.</returns>
         public static int CompareEndpointsValues<T>(this IInterval<T> x) where T : IComparable<T>
         {
             return x.Low.CompareTo(x.High);
         }
 
         /// <summary>
-        /// Check if two intervals are equal, i.e. have the same low and high endpoint including endpoint inclusion
+        /// Check if two intervals are equal, i.e. have the same low and high endpoint including endpoint inclusion.
         /// </summary>
-        /// <param name="x">First interval</param>
-        /// <param name="y">Second interval</param>
-        /// <returns>True if Low, High, LowIncluded, HighIncluded for both intervals are equal</returns>
+        /// <param name="x">First interval.</param>
+        /// <param name="y">Second interval.</param>
+        /// <returns>True if both endpoints are equal.</returns>
         public static bool Equals<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             return x.Low.CompareTo(y.Low) == 0 && x.High.CompareTo(y.High) == 0 && x.LowIncluded == y.LowIncluded &&
@@ -206,6 +221,14 @@ namespace C5.intervals
             // return CompareTo(x, y) == 0;
         }
 
+        /// <summary>
+        /// Get the intersection between two intervals.
+        /// </summary>
+        /// <param name="x">First interval.</param>
+        /// <param name="y">Second interval.</param>
+        /// <typeparam name="T">The endpoint type.</typeparam>
+        /// <returns>An interval of intersection.</returns>
+        /// <exception cref="ArgumentException">If intervals do not overlap.</exception>
         public static IInterval<T> IntersectionWith<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             var low = x.CompareLow(y) > 0 ? x : y;
@@ -219,11 +242,11 @@ namespace C5.intervals
         }
 
         /// <summary>
-        /// Check if the interval has the endpoint as its low or high endpoint.
+        /// Check if the interval has the value as its low or high endpoint value.
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="endpoint"></param>
-        /// <typeparam name="T"></typeparam>
+        /// <param name="x">The interval.</param>
+        /// <param name="endpoint">The endpoint value.</param>
+        /// <typeparam name="T">The interval endpoint value type.</typeparam>
         /// <returns>True if either Low or High is equal to the endpoint.</returns>
         public static bool HasEndpoint<T>(this IInterval<T> x, T endpoint) where T : IComparable<T>
         {
@@ -250,10 +273,10 @@ namespace C5.intervals
 
         /// <summary>
         /// Create a string representing the interval.
-        /// Closed intervals are represented with square brackets [a:b] and open with round brackets (a:b).
         /// </summary>
-        /// <param name="x">The interval</param>
-        /// <returns>The string representation</returns>
+        /// <param name="x">The interval.</param>
+        /// <remarks>Closed intervals are represented with square brackets [a:b] and open with round brackets (a:b).</remarks>
+        /// <returns>The string representation.</returns>
         public static string ToString<T>(this IInterval<T> x) where T : IComparable<T>
         {
             return String.Format("{0}{1}:{2}{3}",

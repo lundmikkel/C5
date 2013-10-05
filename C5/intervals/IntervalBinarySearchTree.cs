@@ -9,6 +9,11 @@ using QuickGraph.Graphviz.Dot;
 namespace C5.intervals
 {
     // TODO: Document reference equality duplicates
+    /// <summary>
+    /// An implementation of the Interval Binary Search Tree as described by Hanson et. al in "The IBS-Tree: A Data Structure for Finding All Intervals That Overlap a Point" using an Red-Black tree balancing scheme.
+    /// </summary>
+    /// <typeparam name="I">The interval type.</typeparam>
+    /// <typeparam name="T">The interval endpoint type.</typeparam>
     public class IntervalBinarySearchTree<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
         where I : IInterval<T>
         where T : IComparable<T>
@@ -18,6 +23,8 @@ namespace C5.intervals
 
         private Node _root;
         private int _count;
+
+        private static readonly IEqualityComparer<I> Comparer = ComparerFactory<I>.CreateEqualityComparer((x, y) => ReferenceEquals(x, y), x => x.GetHashCode());
 
         #region Code Contracts
 
@@ -187,18 +194,16 @@ namespace C5.intervals
             }
         }
 
-        public sealed class IntervalSet : HashSet<I>
+        private sealed class IntervalSet : HashSet<I>
         {
-            private static IEqualityComparer<I> _comparer = ComparerFactory<I>.CreateEqualityComparer((x, y) => ReferenceEquals(x, y), x => x.GetHashCode());
-
-            public IntervalSet(IEnumerable<I> intervals)
-                : base(_comparer)
+            private IntervalSet(IEnumerable<I> intervals)
+                : base(Comparer)
             {
                 AddAll(intervals);
             }
 
             public IntervalSet()
-                : base(_comparer)
+                : base(Comparer)
             {
             }
 
@@ -213,20 +218,32 @@ namespace C5.intervals
                 return s.IsEmpty ? String.Empty : String.Join(", ", s.ToArray());
             }
 
+            /// <summary>
+            /// The intersection of two interval sets.
+            /// </summary>
+            /// <param name="s1">First set.</param>
+            /// <param name="s2">Second set.</param>
+            /// <returns>The set intersection of the sets.</returns>
             public static IntervalSet operator -(IntervalSet s1, IntervalSet s2)
             {
-                if (s1 == null || s2 == null)
-                    throw new ArgumentNullException("Set-Set");
+                Contract.Requires(s1 != null);
+                Contract.Requires(s2 != null);
 
                 var res = new IntervalSet(s1);
                 res.RemoveAll(s2);
                 return res;
             }
 
+            /// <summary>
+            /// The union of two interval sets.
+            /// </summary>
+            /// <param name="s1">First set.</param>
+            /// <param name="s2">Second set.</param>
+            /// <returns>The set union of the sets.</returns>
             public static IntervalSet operator +(IntervalSet s1, IntervalSet s2)
             {
-                if (s1 == null || s2 == null)
-                    throw new ArgumentNullException("Set+Set");
+                Contract.Requires(s1 != null);
+                Contract.Requires(s2 != null);
 
                 var res = new IntervalSet(s1);
                 res.AddAll(s2);
@@ -238,12 +255,19 @@ namespace C5.intervals
 
         #region Constructors
 
+        /// <summary>
+        /// Create an Interval Binary Search Tree with a collection of intervals.
+        /// </summary>
+        /// <param name="intervals">The collection of intervals.</param>
         public IntervalBinarySearchTree(IEnumerable<I> intervals)
         {
             foreach (var interval in intervals)
                 Add(interval);
         }
 
+        /// <summary>
+        /// Create empty Interval Binary Search Tree.
+        /// </summary>
         public IntervalBinarySearchTree()
         {
         }
@@ -760,6 +784,10 @@ namespace C5.intervals
             }
         }
 
+        /// <summary>
+        /// Get a string representation of the tree in GraphViz dot format using QuickGraph.
+        /// </summary>
+        /// <returns>GraphViz string.</returns>
         public string QuickGraph()
         {
             var graph = new AdjacencyGraph<Node, Edge<Node>>();
@@ -815,9 +843,7 @@ namespace C5.intervals
                 };
 
 
-            var graphviz = gw.Generate();
-
-            return graphviz.Replace("GraphvizColor", "color");
+            return gw.Generate();
         }
 
         /// <summary>
@@ -1202,6 +1228,5 @@ namespace C5.intervals
         }
 
         #endregion
-
     }
 }

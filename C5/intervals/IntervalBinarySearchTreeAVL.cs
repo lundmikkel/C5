@@ -381,7 +381,7 @@ namespace C5.intervals
         }
 
         /// <summary>
-        /// Create empty Interval Binary Search Tree
+        /// Create empty Interval Binary Search Tree.
         /// </summary>
         public IntervalBinarySearchTreeAvl()
         {
@@ -1133,7 +1133,10 @@ namespace C5.intervals
             foreach (var node in nodeEnumerator(root.Right))
                 yield return node;
         }
-
+        /// <summary>
+        /// Get a string representation of the tree in GraphViz dot format using QuickGraph.
+        /// </summary>
+        /// <returns>GraphViz string.</returns>
         public string QuickGraph()
         {
             var graph = new AdjacencyGraph<Node, Edge<Node>>();

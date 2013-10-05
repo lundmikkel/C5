@@ -4,6 +4,11 @@ using System.Linq;
 
 namespace C5.intervals
 {
+    /// <summary>
+    /// An implementation of the Layered Containment List by Mikkel Riise Lund
+    /// </summary>
+    /// <typeparam name="I">The interval type.</typeparam>
+    /// <typeparam name="T">The interval endpoint type.</typeparam>
     public class LayeredContainmentList<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
         where I : IInterval<T>
         where T : IComparable<T>
@@ -43,6 +48,10 @@ namespace C5.intervals
 
         #region Constructor
 
+        /// <summary>
+        /// Create a Layered Containment List with a collection of intervals.
+        /// </summary>
+        /// <param name="intervals">The collection of intervals.</param>
         public LayeredContainmentList(IEnumerable<I> intervals)
         {
             // Make intervals to array to allow fast sorting and counting
@@ -401,7 +410,10 @@ namespace C5.intervals
             while (first < last)
                 yield return currentLayer[first++].Interval;
         }
-
+        /// <summary>
+        /// Get a string representation of the tree in GraphViz dot format.
+        /// </summary>
+        /// <returns>GraphViz string.</returns>
         public string Graphviz()
         {
             return String.Format("digraph LayeredContainmentList {{\n\trankdir=BT;\n\tnode [shape=record];\n\n{0}\n}}", graphviz());
