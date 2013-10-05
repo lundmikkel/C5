@@ -560,7 +560,7 @@ namespace C5.Tests.intervals
     {
         protected override IIntervalCollection<IntervalOfInt, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
-            return new IntervalBinarySearchTreeAVL<IntervalOfInt, int>(intervals);
+            return new IntervalBinarySearchTreeAvl<IntervalOfInt, int>(intervals);
         }
         public override string Name { get { return "IBSAVL"; } }
     }

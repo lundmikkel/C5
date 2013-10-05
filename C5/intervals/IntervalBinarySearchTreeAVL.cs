@@ -9,7 +9,12 @@ using QuickGraph.Graphviz.Dot;
 namespace C5.intervals
 {
     // TODO: Document reference equality duplicates
-    public class IntervalBinarySearchTreeAVL<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
+    /// <summary>
+    /// An implementation of the Interval Binary Search Tree as described by Hanson et. al in "The IBS-Tree: A Data Structure for Finding All Intervals That Overlap a Point" using an AVL tree balancing scheme.
+    /// </summary>
+    /// <typeparam name="I">The interval type.</typeparam>
+    /// <typeparam name="T">The interval endpoint type.</typeparam>
+    public class IntervalBinarySearchTreeAvl<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
         where I : IInterval<T>
         where T : IComparable<T>
     {
@@ -363,7 +368,11 @@ namespace C5.intervals
 
         #region Constructors
 
-        public IntervalBinarySearchTreeAVL(IEnumerable<I> intervals)
+        /// <summary>
+        /// Create an Interval Binary Search Tree with a collection of intervals.
+        /// </summary>
+        /// <param name="intervals">The collection of intervals.</param>
+        public IntervalBinarySearchTreeAvl(IEnumerable<I> intervals)
         {
             // TODO: Pre-generate balanced tree based on endpoints and insert intervals afterwards
 
@@ -374,7 +383,7 @@ namespace C5.intervals
         /// <summary>
         /// Create empty Interval Binary Search Tree
         /// </summary>
-        public IntervalBinarySearchTreeAVL()
+        public IntervalBinarySearchTreeAvl()
         {
         }
 

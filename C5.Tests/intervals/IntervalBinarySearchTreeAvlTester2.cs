@@ -11,12 +11,12 @@ namespace C5.Tests.intervals
     [TestFixture]
     class IntervalBinarySearchTreeAvlTester2
     {
-        private IntervalBinarySearchTreeAVL<IInterval<int>, int> intervals;
+        private IntervalBinarySearchTreeAvl<IInterval<int>, int> intervals;
 
         [SetUp]
         public void SetUp()
         {
-            intervals = new IntervalBinarySearchTreeAVL<IInterval<int>, int>();
+            intervals = new IntervalBinarySearchTreeAvl<IInterval<int>, int>();
 
             intervals.CollectionChanged
               += delegate
