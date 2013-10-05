@@ -158,7 +158,6 @@
     <Compile Include="intervals\LayeredContainmentList2.cs" />
     <Compile Include="intervals\IntervalBase.cs" />
     <Compile Include="intervals\IntervalBinarySearchTree.cs" />
-    <Compile Include="intervals\IntervaledHelper.cs" />
     <Compile Include="intervals\IntervalExtensions.cs" />
     <Compile Include="intervals\LayeredContainmentList.cs" />
     <Compile Include="intervals\NestedContainmentList.cs" />

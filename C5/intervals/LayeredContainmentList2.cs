@@ -61,7 +61,7 @@ namespace C5.intervals
             var intervals = intervalEnumerable as I[] ?? intervalEnumerable.ToArray();
 
             // Stop if we have no intervals
-            if (intervals.IsEmpty()) return;
+            if (!intervals.Any()) return;
 
             _count = intervals.Length;
 

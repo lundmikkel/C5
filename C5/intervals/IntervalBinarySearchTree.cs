@@ -210,7 +210,7 @@ namespace C5.intervals
                 foreach (var interval in this)
                     s.Add(interval.ToString());
 
-                return s.IsEmpty() ? String.Empty : String.Join(", ", s.ToArray());
+                return s.IsEmpty ? String.Empty : String.Join(", ", s.ToArray());
             }
 
             public static IntervalSet operator -(IntervalSet s1, IntervalSet s2)

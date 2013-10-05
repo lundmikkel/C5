@@ -165,7 +165,7 @@ namespace C5.intervals
         {
             var intervalArray = intervals as I[] ?? intervals.ToArray();
 
-            if (!intervalArray.IsEmpty())
+            if (intervalArray.Any())
             {
                 _count = intervalArray.Count();
 

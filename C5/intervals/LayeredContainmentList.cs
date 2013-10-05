@@ -49,7 +49,7 @@ namespace C5.intervals
             var intervalArray = intervals as I[] ?? intervals.ToArray();
 
             // Only do the work if we have something to work with
-            if (!intervalArray.IsEmpty())
+            if (intervalArray.Any())
             {
                 // Count intervals so we can use it later on
                 _count = intervalArray.Length;

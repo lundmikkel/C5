@@ -98,7 +98,7 @@ namespace C5.intervals
         {
             var intervalsArray = intervals as I[] ?? intervals.ToArray();
 
-            if (intervalsArray.IsEmpty())
+            if (!intervalsArray.Any())
                 return;
 
             _count = intervalsArray.Count();
@@ -310,7 +310,7 @@ namespace C5.intervals
                 return false;
 
             // Check if query overlaps the collection at all
-            if (_list.IsEmpty() || !query.Overlaps(Span))
+            if (_list == null || !query.Overlaps(Span))
                 return false;
 
             // Find first overlap
