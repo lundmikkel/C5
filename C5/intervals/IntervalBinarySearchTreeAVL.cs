@@ -519,7 +519,7 @@ namespace C5.intervals
             var leftAncestor = u.Key.CompareTo(v.Key) < 0;
 
             // Create the interval (U,V).
-            var intervalUV = leftAncestor ? new IntervalBase<T>(u.Key, v.Key, false, false) : new IntervalBase<T>(v.Key, u.Key, false, false);
+            var intervalUV = leftAncestor ? new IntervalBase<T>(u.Key, v.Key, false) : new IntervalBase<T>(v.Key, u.Key, false);
 
             // Get the "<" or ">" set depending of the direction we are searching.
             var set = leftAncestor ? v.Less : v.Greater;
@@ -540,8 +540,8 @@ namespace C5.intervals
             {
                 var compare = child.Key.CompareTo(ancestor.Key);
                 var j = compare < 0 ?
-                    new IntervalBase<T>(child.Key, ancestor.Key, false, false) :
-                    new IntervalBase<T>(ancestor.Key, child.Key, false, false);
+                    new IntervalBase<T>(child.Key, ancestor.Key, false) :
+                    new IntervalBase<T>(ancestor.Key, child.Key, false);
 
                 // Maximality invariant.
                 if (set.Exists(i => i.Contains(j) && j.Contains(intervalUV)))
@@ -1105,22 +1105,19 @@ namespace C5.intervals
         /// <inheritdoc/>
         public override IEnumerator<I> GetEnumerator()
         {
-            // TODO: Make enumerator lazy, by adding each interval and yield it if it wasn't already yielded
-
             var set = new IntervalSet();
 
             var enumerator = getEnumerator(_root);
             while (enumerator.MoveNext())
-                set.Add(enumerator.Current);
-
-            return set.GetEnumerator();
+                if (set.Add(enumerator.Current))
+                    yield return enumerator.Current;
         }
 
         #endregion
 
         #region GraphViz
 
-        private IEnumerable<Node> nodeEnumerator(Node root)
+        private static IEnumerable<Node> nodeEnumerator(Node root)
         {
             if (root == null)
                 yield break;
@@ -1212,20 +1209,20 @@ namespace C5.intervals
                 + "}\n";
         }
 
-        private int nodeCounter;
-        private int nullCounter;
+        private int _nodeCounter;
+        private int _nullCounter;
 
         private string graphviz(Node root, string parent, string direction)
         {
             int id;
             if (root == null)
             {
-                id = nullCounter++;
+                id = _nullCounter++;
                 return String.Format("\tleaf{0} [shape=point];\n", id) +
                     String.Format("\t{0}:{1} -> leaf{2};\n", parent, direction, id);
             }
 
-            id = nodeCounter++;
+            id = _nodeCounter++;
             var rootString = direction == null ? "" : String.Format("\t{0} -> struct{1}:n;\n", parent, id);
 
             return
