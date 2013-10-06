@@ -56,6 +56,9 @@ namespace C5.intervals
 
         private static Node rotateRight(Node root)
         {
+            Contract.Requires(root != null);
+            Contract.Requires(root.Left != null);
+
             // Rotate
             var node = root.Left;
             root.Left = node.Right;
@@ -87,6 +90,9 @@ namespace C5.intervals
 
         private static Node rotateLeft(Node root)
         {
+            Contract.Requires(root != null);
+            Contract.Requires(root.Right != null);
+
             // Rotate
             var node = root.Right;
             root.Right = node.Left;
@@ -486,6 +492,8 @@ namespace C5.intervals
 
         private bool notAlone(Node root, T endpoint)
         {
+            Contract.Requires(root != null);
+
             Node nodeForEndpoint = findNode(root, endpoint);
 
             if (nodeForEndpoint != null)
@@ -520,6 +528,8 @@ namespace C5.intervals
 
         private Node findNode(Node root, T endpoint)
         {
+            Contract.Requires(root != null);
+
             if (root.Key.CompareTo(endpoint) == 0)
             {
                 return root;
@@ -541,6 +551,8 @@ namespace C5.intervals
         // Flip the colors of a node and its two children
         private void flipColors(Node h)
         {
+            Contract.Requires(h != null);
+
             // h must have opposite color of its two children
             if ((h != null) && (h.Left != null) && (h.Right != null)
                 && ((!isRed(h) && isRed(h.Left) && isRed(h.Right))
@@ -758,7 +770,7 @@ namespace C5.intervals
 
         #region GraphViz
 
-        private IEnumerable<Node> nodeEnumerator(Node root)
+        private static IEnumerable<Node> nodeEnumerator(Node root)
         {
             if (root == null)
                 yield break;
@@ -770,18 +782,6 @@ namespace C5.intervals
 
             foreach (var node in nodeEnumerator(root.Right))
                 yield return node;
-        }
-
-        private class Vertex
-        {
-            Node Node { get; set; }
-            bool IsLeaf { get; set; }
-
-            public Vertex(Node node)
-            {
-                IsLeaf = node == null;
-                Node = node;
-            }
         }
 
         /// <summary>
@@ -920,7 +920,7 @@ namespace C5.intervals
 
         private static IInterval<T> getLowest(Node root)
         {
-            // TODO: Assert root != null
+            Contract.Requires(root != null);
 
             if (!root.Less.IsEmpty)
                 return root.Less.Choose();
@@ -933,7 +933,7 @@ namespace C5.intervals
 
         private static IInterval<T> getHighest(Node root)
         {
-            // TODO: Assert root != null
+            Contract.Requires(root != null);
 
             if (!root.Greater.IsEmpty)
                 return root.Greater.Choose();

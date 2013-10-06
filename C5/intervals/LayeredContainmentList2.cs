@@ -31,6 +31,31 @@ namespace C5.intervals
         private int _maximumNumberOfOverlaps = -1;
         private IInterval<T> _intervalOfMaximumOverlap;
 
+        #region Code Contracts
+
+        [ContractInvariantMethod]
+        private void invariant()
+        {
+            // Layer count is equal to the number of layers of intervals and pointers
+            Contract.Invariant(IsEmpty || _layerCount == _intervalLayers.Length);
+            Contract.Invariant(IsEmpty || _layerCount == _pointerLayers.Length);
+            // The first layer's count is non-negative and at most as big as count
+            Contract.Invariant(0 <= _firstLayerCount && _firstLayerCount <= _count);
+            // Either the collection is empty or there are one layer or more
+            Contract.Invariant(IsEmpty || 1 <= _layerCount);
+            // Either all intervals are in the first layer, or there are more than one layer
+            Contract.Invariant(_count == _firstLayerCount || 1 < _layerCount);
+
+            Contract.Invariant(IsEmpty || _intervalLayers != null && _pointerLayers != null);
+
+            // Each layer is sorted on both low and high endpoint
+            Contract.Invariant(IsEmpty || Contract.ForAll(0, _layerCount, l => Contract.ForAll(0, _intervalLayers[l].Length - 1, i => _intervalLayers[l][i].CompareLow(_intervalLayers[l][i + 1]) <= 0 && _intervalLayers[l][i].CompareHigh(_intervalLayers[l][i + 1]) <= 0)));
+            // Each interval in layer λ must be contained in an interval in layer λ-1
+            Contract.Invariant(IsEmpty || Contract.ForAll(1, _layerCount, l => Contract.ForAll(_intervalLayers[l], y => _intervalLayers[l - 1].Any(x => x.StrictlyContains(y)))));
+        }
+
+        #endregion
+
         #region Node nested classes
 
         struct Node
@@ -108,6 +133,8 @@ namespace C5.intervals
 
         private static ArrayList<ArrayList<Node>> generateLayers(ref I[] intervals)
         {
+            Contract.Requires(intervals != null);
+
             // Used for tracking current layer
             var layer = 0;
             var layers = new ArrayList<ArrayList<Node>> { new ArrayList<Node>(), new ArrayList<Node>() };
@@ -146,11 +173,22 @@ namespace C5.intervals
         /// <inheritdoc/>
         public override bool IsEmpty
         {
-            get { return Count == 0; }
+            get
+            {
+                Contract.Ensures(Contract.Result<bool>() == (_count == 0));
+                return _count == 0;
+            }
         }
 
         /// <inheritdoc/>
-        public override int Count { get { return _count; } }
+        public override int Count
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<int>() == _count);
+                return _count;
+            }
+        }
 
         /// <inheritdoc/>
         public override Speed CountSpeed
@@ -174,12 +212,17 @@ namespace C5.intervals
         /// <inheritdoc/>
         public int CountOverlaps(IInterval<T> query)
         {
+            Contract.Ensures(Contract.Result<int>() == FindOverlaps(query).Count());
+            Contract.Ensures(Contract.Result<int>() >= 0);
+
             // Break if we won't find any overlaps
             return !IsEmpty ? countOverlaps(query) : 0;
         }
 
         private int countOverlaps(IInterval<T> query)
         {
+            Contract.Requires(query != null);
+
             int layer = 0, lower = 0, upper = _firstLayerCount, count = 0;
 
             while (lower < upper)
@@ -214,6 +257,16 @@ namespace C5.intervals
 
         private int findFirst(int layer, int lower, int upper, IInterval<T> query)
         {
+            Contract.Requires(0 <= layer && layer < _intervalLayers.Length);
+            Contract.Requires(0 <= lower && lower <= _intervalLayers[layer].Length);
+            Contract.Requires(0 <= upper && upper <= _intervalLayers[layer].Length);
+            Contract.Requires(query != null);
+
+            // Either the interval at index result overlaps or no intervals in the layer overlap
+            Contract.Ensures(Contract.Result<int>() < 0 || _intervalLayers[layer].Length <= Contract.Result<int>() || _intervalLayers[layer][Contract.Result<int>()].Overlaps(query) || Contract.ForAll(_intervalLayers[layer], x => !x.Overlaps(query)));
+            // All intervals before index result do not overlap the query
+            Contract.Ensures(Contract.ForAll(0, Contract.Result<int>(), i => !_intervalLayers[layer][i].Overlaps(query)));
+
             int min = lower - 1, max = upper;
 
             var intervalLayer = _intervalLayers[layer];
@@ -237,6 +290,16 @@ namespace C5.intervals
 
         private int findLast(int layer, int lower, int upper, IInterval<T> query)
         {
+            Contract.Requires(0 <= layer && layer < _intervalLayers.Length);
+            Contract.Requires(0 <= lower && lower < _intervalLayers[layer].Length);
+            Contract.Requires(0 <= upper && upper <= _intervalLayers[layer].Length);
+            Contract.Requires(query != null);
+
+            // Either the interval at index result overlaps or no intervals in the layer overlap
+            Contract.Ensures(Contract.Result<int>() == 0 || _intervalLayers[layer][Contract.Result<int>() - 1].Overlaps(query) || Contract.ForAll(_intervalLayers[layer], x => !x.Overlaps(query)));
+            // All intervals after index result do not overlap the query
+            Contract.Ensures(Contract.ForAll(Contract.Result<int>(), _intervalLayers[layer].Count(), i => !_intervalLayers[layer][i].Overlaps(query)));
+
             int min = lower - 1, max = upper;
             var intervalLayer = _intervalLayers[layer];
 
@@ -609,13 +672,13 @@ namespace C5.intervals
         /// Find the maximum number of overlaps for all intervals overlapping the query interval.
         /// </summary>
         /// <param name="query">The query interval.</param>
-        /// <remarks>
-        /// The query interval is not in the maximum number of overlaps. If only one interval
-        /// overlaps the query, the result will therefore be 1.
-        /// </remarks>
+        /// <remarks>The query interval is not in the maximum number of overlaps. If only one interval
+        /// overlaps the query, the result will therefore be 1.</remarks>
         /// <returns>The maximum number of overlaps</returns>
         public int FindMaximumOverlap(IInterval<T> query)
         {
+            Contract.Requires(query != null);
+
             return findMaximumOverlap(FindOverlapsSorted(query));
         }
 
@@ -625,6 +688,9 @@ namespace C5.intervals
         /// </summary>
         private int findMaximumOverlap(IEnumerable<I> sortedIntervals, int max = 0)
         {
+            Contract.Requires(sortedIntervals != null);
+            Contract.Ensures(Contract.Result<int>() >= 0);
+
             // Create queue sorted on high intervals
             var comparer = ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareHigh);
             var queue = new IntervalHeap<IInterval<T>>(comparer);
@@ -667,6 +733,11 @@ namespace C5.intervals
 
         private string graphviz()
         {
+            // Auto-generated contracts to shut static analysis up
+            Contract.Requires(IsEmpty || 1 < _intervalLayers.Length);
+            Contract.Requires(IsEmpty || _layerCount == _intervalLayers.Length || Count != _firstLayerCount || 0 <= (_firstLayerCount - 1));
+            Contract.Requires(IsEmpty || _layerCount == _intervalLayers.Length || Count != _firstLayerCount || 0 >= _firstLayerCount || 0 >= _firstLayerCount || 0 < _intervalLayers.Length);
+
             var s = String.Empty;
 
             var layer = 0;

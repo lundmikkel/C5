@@ -38,7 +38,7 @@ namespace C5.intervals
         public static bool Overlaps<T>(this IInterval<T> x, T p) where T : IComparable<T>
         {
             Contract.Requires(x != null);
-            Contract.Requires(ReferenceEquals(p, null));
+            Contract.Requires(!ReferenceEquals(p, null));
 
             return Overlaps(x, new IntervalBase<T>(p));
         }

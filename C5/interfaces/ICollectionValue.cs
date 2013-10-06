@@ -44,8 +44,8 @@ namespace C5.interfaces
         {
             get
             {
-                Contract.Ensures(IsEmpty || Contract.Result<int>() > 0);
-                Contract.Ensures(Contract.Result<int>() >= 0);
+                Contract.Ensures(0 <= Contract.Result<int>());
+                Contract.Ensures(IsEmpty || 0 < Contract.Result<int>());
 
                 throw new NotImplementedException();
             }
@@ -84,13 +84,7 @@ namespace C5.interfaces
         }
 
         [Pure]
-        public T Choose()
-        {
-            Contract.Requires(!IsEmpty);
-            Contract.Ensures(!ReferenceEquals(Contract.Result<T>(), null));
-
-            throw new NotImplementedException();
-        }
+        public abstract T Choose();
 
         [Pure]
         public IEnumerable<T> Filter(Func<T, bool> filter)

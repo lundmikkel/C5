@@ -698,6 +698,7 @@ namespace C5
     ///
     /// NBNBNB: we need a description of the view functionality here!
     /// </summary>
+    [ContractClass(typeof(ListContract<>))]
     public interface IList<T> : IIndexed<T>, IDisposable, SCG.IList<T>, System.Collections.IList
     {
         /// <summary>

@@ -26,6 +26,16 @@ namespace C5.intervals
 
         private static Node rotateForAdd(Node root, ref bool updateBalance)
         {
+            Contract.Requires(root != null);
+
+            Contract.Requires(root.Balance != -2 || root.Left != null);
+            Contract.Requires(root.Balance != -2 || root.Left.Balance != -1 || root.Left.Left != null);
+            Contract.Requires(root.Balance != -2 || root.Left.Balance != 1 || root.Left.Right != null);
+
+            Contract.Requires(root.Balance != 2 || root.Right != null);
+            Contract.Requires(root.Balance != 2 || root.Right.Balance != -1 || root.Right.Left != null);
+            Contract.Requires(root.Balance != 2 || root.Right.Balance != 1 || root.Right.Right != null);
+
             switch (root.Balance)
             {
                 // Node is balanced after the node was added
@@ -88,6 +98,16 @@ namespace C5.intervals
 
         private static Node rotateForRemove(Node root, ref bool updateBalance)
         {
+            Contract.Requires(root != null);
+
+            Contract.Requires(root.Balance != -2 || root.Left != null);
+            Contract.Requires(root.Balance != -2 || root.Left.Balance != -1 || root.Left.Left != null);
+            Contract.Requires(root.Balance != -2 || root.Left.Balance != 1 || root.Left.Right != null);
+
+            Contract.Requires(root.Balance != 2 || root.Right != null);
+            Contract.Requires(root.Balance != 2 || root.Right.Balance != -1 || root.Right.Left != null);
+            Contract.Requires(root.Balance != 2 || root.Right.Balance != 1 || root.Right.Right != null);
+
             switch (root.Balance)
             {
                 // High will not change for parent, so we can stop here
@@ -162,6 +182,9 @@ namespace C5.intervals
 
         private static Node rotateRight(Node root)
         {
+            Contract.Requires(root != null);
+            Contract.Requires(root.Left != null);
+
             // Rotate
             var node = root.Left;
             root.Left = node.Right;
@@ -191,6 +214,9 @@ namespace C5.intervals
 
         private static Node rotateLeft(Node root)
         {
+            Contract.Requires(root != null);
+            Contract.Requires(root.Right != null);
+
             // Rotate
             var node = root.Right;
             root.Right = node.Left;
@@ -386,6 +412,8 @@ namespace C5.intervals
         /// <param name="intervals">The collection of intervals.</param>
         public IntervalBinarySearchTreeAvl(IEnumerable<I> intervals)
         {
+            Contract.Requires(intervals != null);
+
             // TODO: Pre-generate balanced tree based on endpoints and insert intervals afterwards
 
             foreach (var interval in intervals)
@@ -467,6 +495,8 @@ namespace C5.intervals
         private Node findAncestor(Node child)
         {
             Contract.Requires(child != null);
+            Contract.Requires(_root != null);
+
             var searchRight = child.Key.CompareTo(_root.Key) > 0;
             return findAncestor(_root, child, searchRight);
         }
@@ -518,6 +548,9 @@ namespace C5.intervals
         [Pure]
         private bool checkIbsInvariants(Node v)
         {
+            Contract.Requires(v != null);
+            Contract.Requires(_root != null);
+
             // Find v's ancestor.
             var u = findAncestor(v);
 
@@ -602,6 +635,9 @@ namespace C5.intervals
         /// <returns>True if we need to update the maximum overlap for the parent node.</returns>
         private static bool updateMaximumOverlap(Node root, IInterval<T> interval)
         {
+            Contract.Requires(root != null);
+            Contract.Requires(interval != null);
+
             // Search left for split node and update MNO if necessary
             if (interval.High.CompareTo(root.Key) < 0)
                 return updateMaximumOverlap(root.Left, interval) && root.UpdateMaximumOverlap();
@@ -616,6 +652,8 @@ namespace C5.intervals
 
         private static bool updateLowMaximumOverlap(Node root, T low)
         {
+            Contract.Requires(root != null);
+
             var compare = low.CompareTo(root.Key);
 
             // Search left for low and update MNO if necessary
@@ -632,6 +670,8 @@ namespace C5.intervals
 
         private static bool updateHighMaximumOverlap(Node root, T high)
         {
+            Contract.Requires(root != null);
+
             var compare = high.CompareTo(root.Key);
 
             // Search left for high and update MNO if necessary

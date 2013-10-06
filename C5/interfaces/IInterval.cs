@@ -17,6 +17,7 @@ namespace C5
         /// </summary>
         /// <value>The low endpoint value.</value>
         /// <remarks>Also known as left, start, first, or lower endpoint.</remarks>
+        [Pure]
         T Low { get; }
 
         /// <summary>
@@ -24,6 +25,7 @@ namespace C5
         /// </summary>
         /// <value>The high endpoint value.</value>
         /// <remarks>Also known as right, end, stop, last, or higher endpoint.</remarks>
+        [Pure]
         T High { get; }
 
         /// <summary>
@@ -31,6 +33,7 @@ namespace C5
         /// </summary>
         /// <value>True if the low endpoint is included in the interval, otherwise false.</value>
         /// <remarks>A stabbing query using the low endpoint value will not include the interval, if the value is false.</remarks>
+        [Pure]
         bool LowIncluded { get; }
 
         /// <summary>
@@ -38,6 +41,7 @@ namespace C5
         /// </summary>
         /// <value>True if the high endpoint is included in the interval, otherwise false.</value>
         /// <remarks>A stabbing query using the high endpoint value will not include the interval, if the value is false.</remarks>
+        [Pure]
         bool HighIncluded { get; }
     }
 

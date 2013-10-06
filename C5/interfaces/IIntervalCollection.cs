@@ -25,12 +25,14 @@ namespace C5
         /// <remarks>Not defined for an empty collection.</remarks>
         /// <returns>The smallest spanning interval.</returns>
         /// <exception cref="InvalidOperationException">Thrown if called on an empty collection.</exception>
+        [Pure]
         IInterval<T> Span { get; }
 
         /// <summary>
         /// The maximum number of intervals overlapping at a single point in the collection.
         /// <remarks>The point of maximum overlap may not be representable with an endpoint value, as it could be between two descrete values.</remarks>
         /// </summary>
+        [Pure]
         int MaximumOverlap { get; }
 
 
@@ -50,6 +52,7 @@ namespace C5
         /// <param name="query">The query interval.</param>
         /// <returns>All intervals that overlap the query interval.</returns>
         /// <seealso cref="FindOverlaps(T)"/>
+        [Pure]
         IEnumerable<I> FindOverlaps(IInterval<T> query);
 
 
@@ -60,6 +63,7 @@ namespace C5
         /// <param name="query">The query point.</param>
         /// <param name="overlap">The overlapping interval found, if return is true.</param>
         /// <returns>True if an interval overlapped the query.</returns>
+        [Pure]
         bool FindOverlap(T query, ref I overlap);
 
         /// <summary>
@@ -69,6 +73,7 @@ namespace C5
         /// <param name="query">The query interval.</param>
         /// <param name="overlap">The overlapping interval found, if return is true.</param>
         /// <returns>True if an interval overlapped the query.</returns>
+        [Pure]
         bool FindOverlap(IInterval<T> query, ref I overlap);
 
 
@@ -78,6 +83,7 @@ namespace C5
         /// </summary>
         /// <param name="query">The query interval</param>
         /// <returns>The number of intervals that overlap the query</returns>
+        [Pure]
         int CountOverlaps(IInterval<T> query);
 
 

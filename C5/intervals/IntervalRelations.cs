@@ -1,60 +1,8 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 
 namespace C5.intervals
 {
-    /// <summary>
-    /// Attribute class for the symbol annotation for interval relations
-    /// </summary>
-    public class SymbolAttribute : Attribute
-    {
-        /// <summary>
-        /// The symbol name
-        /// </summary>
-        public string S;
-
-        /// <summary>
-        /// Create a symbol with the given string
-        /// </summary>
-        /// <param name="s">The symbol name.</param>
-        public SymbolAttribute(string s)
-        {
-            S = s;
-        }
-
-        /// <inheritdoc/>
-        public override string ToString()
-        {
-            return S;
-        }
-    }
-
-    /// <summary>
-    /// A reflection helper class to get the symbol name for an interval relation.
-    /// </summary>
-    public static class ReflectionHelpers
-    {
-        /// <summary>
-        /// Get the symbol name for a interval relation
-        /// </summary>
-        /// <param name="objEnum"></param>
-        /// <returns></returns>
-        public static string GetCustomDescription(object objEnum)
-        {
-            var attributes = (SymbolAttribute[]) objEnum.GetType().GetField(objEnum.ToString()).GetCustomAttributes(typeof(SymbolAttribute), false);
-            return (attributes.Length > 0) ? attributes[0].ToString() : objEnum.ToString();
-        }
-
-        /// <summary>
-        /// Get the symbol name for an interval relation.
-        /// </summary>
-        /// <param name="value">The interval relation.</param>
-        /// <returns>A string representation of an interval relation.</returns>
-        public static string Symbol(this IntervalRelation value)
-        {
-            return GetCustomDescription(value);
-        }
-    }
-
     /// <summary>
     /// The relationship between two intervals as described by James F. Allen in "Maintaining Knowledge about Temporal Intervals"
     /// </summary>
@@ -153,6 +101,37 @@ namespace C5.intervals
         /// <returns>How x relates to y</returns>
         public static IntervalRelation RelateTo<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.After ||
+                y.CompareLow(x) < 0 && y.CompareHighLow(x) < 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.MetBy ||
+                y.CompareLow(x) < 0 && y.CompareHighLow(x) == 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.OverlappedBy ||
+                y.CompareLow(x) < 0 && y.CompareHighLow(x) > 0 && y.CompareHigh(x) < 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Finishes ||
+                y.CompareLow(x) < 0 && y.CompareHighLow(x) > 0 && y.CompareHigh(x) == 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.During ||
+                y.CompareLow(x) < 0 && y.CompareHighLow(x) > 0 && y.CompareHigh(x) > 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.StartedBy ||
+                y.CompareLow(x) == 0 && y.CompareHighLow(x) > 0 && y.CompareHigh(x) < 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Equals ||
+                y.CompareLow(x) == 0 && y.CompareHigh(x) == 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Starts ||
+                y.CompareLow(x) == 0 && y.CompareHigh(x) > 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Contains ||
+                y.CompareLow(x) > 0 && y.CompareHigh(x) < 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.FinishedBy ||
+                y.CompareLow(x) > 0 && y.CompareHigh(x) == 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Overlaps ||
+                y.CompareLow(x) > 0 && y.CompareHigh(x) > 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Meets ||
+                y.CompareLow(x) > 0 && y.CompareHigh(x) > 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Before ||
+                y.CompareLow(x) > 0 && y.CompareHigh(x) > 0);
+
+
             // Check if x is before y
             var compareBefore = x.CompareHighLow(y);
             if (compareBefore < 0)
@@ -175,6 +154,61 @@ namespace C5.intervals
 
             // Convert the compared values to the integer values of the interval relations
             return (IntervalRelation) ((compareLow > 0 ? 2 : (compareLow == 0 ? 5 : 8)) + (compareHigh > 0 ? 0 : (compareHigh == 0 ? 1 : 2)));
+        }
+    }
+
+    /// <summary>
+    /// Attribute class for the symbol annotation for interval relations
+    /// </summary>
+    public class SymbolAttribute : Attribute
+    {
+        /// <summary>
+        /// The symbol name
+        /// </summary>
+        public string S;
+
+        /// <summary>
+        /// Create a symbol with the given string
+        /// </summary>
+        /// <param name="s">The symbol name.</param>
+        public SymbolAttribute(string s)
+        {
+            Contract.Requires(s != null);
+
+            S = s;
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return S;
+        }
+    }
+
+    /// <summary>
+    /// A reflection helper class to get the symbol name for an interval relation.
+    /// </summary>
+    public static class ReflectionHelpers
+    {
+        /// <summary>
+        /// Get the symbol name for a interval relation
+        /// </summary>
+        /// <param name="objEnum"></param>
+        /// <returns></returns>
+        public static string GetCustomDescription(object objEnum)
+        {
+            var attributes = (SymbolAttribute[]) objEnum.GetType().GetField(objEnum.ToString()).GetCustomAttributes(typeof(SymbolAttribute), false);
+            return (attributes.Length > 0) ? attributes[0].ToString() : objEnum.ToString();
+        }
+
+        /// <summary>
+        /// Get the symbol name for an interval relation.
+        /// </summary>
+        /// <param name="value">The interval relation.</param>
+        /// <returns>A string representation of an interval relation.</returns>
+        public static string Symbol(this IntervalRelation value)
+        {
+            return GetCustomDescription(value);
         }
     }
 }
