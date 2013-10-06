@@ -10,7 +10,7 @@ namespace C5.Tests.intervals
 {
     using IntervalOfInt = IInterval<int>;
 
-    [TestFixture]
+    [TestFixture, Ignore]
     public class searchBenchmarker
     {
         private IInterval<int>[][] _intervalLayers;
@@ -394,7 +394,7 @@ namespace C5.Tests.intervals
             );
         }
 
-        [Test, Combinatorial]
+        [Test, Combinatorial, Ignore]
         public void SearchTime_Doubling(
             [ValueSource(typeof(BenchmarkTestCases), "DataSets")] string dataset,
             [ValueSource(typeof(BenchmarkTestCases), "DoubleCounts")] int count
@@ -423,7 +423,7 @@ namespace C5.Tests.intervals
             Console.WriteLine("Average search time for {0} intervals: {1} µs", IntervalCollection.Count, (float) sw.ElapsedMilliseconds / repetitions * 1000);
         }
 
-        [Test, Combinatorial]
+        [Test, Combinatorial, Ignore]
         public void FindOverlaps_OutputSize_QueryLength(
             [ValueSource(typeof(BenchmarkTestCases), "DataSets")] string dataset,
             [ValueSource(typeof(BenchmarkTestCases), "QueryLengths")] int length
@@ -453,7 +453,7 @@ namespace C5.Tests.intervals
             );
         }
 
-        [Test, Combinatorial]
+        [Test, Combinatorial, Ignore]
         public void CountOverlaps_OutputSize_QueryLength(
             [ValueSource(typeof(BenchmarkTestCases), "DataSets")] string dataset,
             [ValueSource(typeof(BenchmarkTestCases), "QueryLengths")] int length

@@ -565,7 +565,7 @@ namespace C5.Tests.intervals
                 Console.WriteLine("Creation time: " + (sw.ElapsedMilliseconds / count));
             }
 
-            [Test, Category("Simple performance")]
+            [Test, Category("Simple performance"), Ignore]
             public void Range()
             {
                 Console.WriteLine(IntervalCollection.FindOverlaps(new IntervalBase<int>(9231, 24228, true, true)).Count());
@@ -607,7 +607,7 @@ namespace C5.Tests.intervals
                 IntervalCollection = Factory(intervalList);
             }
 
-            [TestCaseSource(typeof(LargeTest_100000), "CountCases"), Category("Large tests")]
+            [TestCaseSource(typeof(LargeTest_100000), "CountCases"), Category("Large tests"), Ignore]
             public void FindOverlaps(int expected, IntervalBase<int> query)
             {
                 var sw = Stopwatch.StartNew();
@@ -624,7 +624,7 @@ namespace C5.Tests.intervals
                 Assert.AreEqual(expected, actual);
             }
 
-            [TestCaseSource(typeof(LargeTest_100000), "CountCases"), Category("Large tests")]
+            [TestCaseSource(typeof(LargeTest_100000), "CountCases"), Category("Large tests"), Ignore]
             public void CountOverlaps(int expected, IntervalBase<int> query)
             {
                 var actual = IntervalCollection.CountOverlaps(query);

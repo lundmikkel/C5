@@ -765,7 +765,7 @@ namespace C5.Tests.intervals
                     CountOverlaps(new IntervalOfInt(2, 7, true, true)));
             }
 
-            [Test]
+            [Test, Ignore]
             public void CountOverlap_Empty_NullQuery()
             {
                 Assert.AreEqual(0, new LayeredContainmentList<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).
@@ -1001,7 +1001,7 @@ namespace C5.Tests.intervals
                     CountOverlaps(new IntervalOfInt(6, 9, true, true)));
             }
 
-            [Test]
+            [Test, Ignore]
             public void CountOverlap_MoreThanOneIntervalQueryNull()
             {
                 Assert.AreEqual(0, new LayeredContainmentList<IInterval<int>, int>(dataSetB).
