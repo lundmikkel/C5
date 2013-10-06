@@ -47,7 +47,10 @@ namespace C5
         [ContractInvariantMethod]
         private void invariants()
         {
-            //Contract.Invariant(Low.CompareTo(High) < 0 || Low.CompareTo(High) == 0 && LowIncluded && HighIncluded);
+            Contract.Invariant(ReferenceEquals(Low, null));
+            Contract.Invariant(ReferenceEquals(High, null));
+            // Low should be less that High. If equal, both endpoints should be included.
+            Contract.Invariant(Low.CompareTo(High) < 0 || Low.CompareTo(High) == 0 && LowIncluded && HighIncluded);
         }
 
         public T Low { get; private set; }

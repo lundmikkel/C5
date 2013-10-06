@@ -224,6 +224,12 @@ namespace C5.intervals
 
         class Node
         {
+            [ContractInvariantMethod]
+            private void invariant()
+            {
+                Contract.Invariant(!ReferenceEquals(Key, null));
+                Contract.Invariant(IntervalsEndingInNode >= 0);
+            }
 
             public T Key { get; private set; }
 
@@ -252,6 +258,8 @@ namespace C5.intervals
 
             public IEnumerable<I> GetIntervalsEndingInNode()
             {
+                Contract.Ensures(Contract.Result<IEnumerable<I>>().All(i => i.HasEndpoint(Key)));
+
                 var set = new IntervalSet();
 
                 if (_less != null)
@@ -287,6 +295,8 @@ namespace C5.intervals
             /// <returns>True if value changed.</returns>
             public bool UpdateMaximumOverlap()
             {
+                Contract.Ensures(Contract.Result<bool>() == (Contract.OldValue(Max) != Max || Contract.OldValue(Sum) != Sum));
+
                 // Cache values
                 var oldMax = Max;
                 var oldSum = Sum;
@@ -324,6 +334,8 @@ namespace C5.intervals
 
             public void SwapKeys(Node successor)
             {
+                Contract.Requires(successor != null);
+
                 var tmp = Key;
                 Key = successor.Key;
                 successor.Key = tmp;
@@ -355,8 +367,8 @@ namespace C5.intervals
 
             public static IntervalSet operator -(IntervalSet s1, IntervalSet s2)
             {
-                if (s1 == null || s2 == null)
-                    throw new ArgumentNullException("Set-Set");
+                Contract.Requires(s1 != null);
+                Contract.Requires(s2 != null);
 
                 var res = new IntervalSet(s1);
                 res.RemoveAll(s2);
@@ -1073,10 +1085,24 @@ namespace C5.intervals
         #region ICollectionValue
 
         /// <inheritdoc/>
-        public override bool IsEmpty { get { return _root == null; } }
+        public override bool IsEmpty
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<bool>() == (_root == null));
+                return _root == null;
+            }
+        }
 
         /// <inheritdoc/>
-        public override int Count { get { return _count; } }
+        public override int Count
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<int>() == _count);
+                return _count;
+            }
+        }
 
         /// <inheritdoc/>
         public override Speed CountSpeed { get { return Speed.Constant; } }
@@ -1257,7 +1283,7 @@ namespace C5.intervals
 
         private static IInterval<T> getLowest(Node root)
         {
-            // TODO: Assert root != null
+            Contract.Requires(root != null);
 
             if (!root.Less.IsEmpty)
                 return root.Less.Choose();
@@ -1270,7 +1296,7 @@ namespace C5.intervals
 
         private static IInterval<T> getHighest(Node root)
         {
-            // TODO: Assert root != null
+            Contract.Requires(root != null);
 
             if (!root.Greater.IsEmpty)
                 return root.Greater.Choose();

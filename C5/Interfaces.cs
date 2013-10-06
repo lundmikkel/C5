@@ -20,6 +20,8 @@
 */
 
 using System;
+using System.Diagnostics.Contracts;
+using C5.interfaces;
 using SCG = System.Collections.Generic;
 namespace C5
 {
@@ -52,6 +54,7 @@ namespace C5
     /// collection. The main usage for this interface is to be the return type of 
     /// query operations on generic collection.
     /// </summary>
+    [ContractClass(typeof(CollectionValueContract<>))]
     public interface ICollectionValue<T> : SCG.IEnumerable<T>, IShowable
     {
         /// <summary>
