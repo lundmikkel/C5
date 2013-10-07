@@ -33,7 +33,7 @@ namespace C5.Performance.Wpf
             var b = new SimpleBenchmark();
             var b2 = new IbsAvlAddBenchmarker();
             var b3 = new IbsAddBenchmarker();
-            var thread = new Thread(() => RunBenchmarks(b2));
+            var thread = new Thread(() => RunBenchmarks(b));
             thread.Start();
         }
 
@@ -58,7 +58,7 @@ namespace C5.Performance.Wpf
             UpdateStatusLabel("Finished");
             Thread.Sleep(1000);
             UpdateStatusLabel("");
-//            _plotter.ExportPdf(PdfPath);
+            _plotter.exportPdf(PdfPath);
         }
 
         private void UpdateStatusLabel(String s)
