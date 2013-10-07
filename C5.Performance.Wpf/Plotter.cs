@@ -1,7 +1,6 @@
 ﻿using System;
 using OxyPlot;
 using OxyPlot.Axes;
-//using OxyPlot.Pdf;
 using OxyPlot.Pdf;
 using OxyPlot.Series;
 
