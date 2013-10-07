@@ -23,7 +23,7 @@ namespace C5.Performance.Wpf
 
         public MainWindow()
         {
-            _plotter = Plotter.createPlotter();
+            _plotter = Plotter.CreatePlotter();
             DataContext = _plotter;
             InitializeComponent();
         }
@@ -33,35 +33,35 @@ namespace C5.Performance.Wpf
             var b = new SimpleBenchmark();
             var b2 = new IbsAvlAddBenchmarker();
             var b3 = new IbsAddBenchmarker();
-            var thread = new Thread(() => RunBenchmarks(b));
+            var thread = new Thread(() => runBenchmarks(b2));
             thread.Start();
         }
 
-        private void RunBenchmarks(params Benchmarkable[] benchmarks)
+        private void runBenchmarks(params Benchmarkable[] benchmarks)
         {
             foreach (var b in benchmarks)
             {
-                _plotter.addAreaSeries(b.BenchMarkName());
+                _plotter.AddAreaSeries(b.BenchMarkName());
                 for (b.CollectionSize = MinCollectionSize;
                     b.CollectionSize < MaxCollectionSize;
                     b.CollectionSize *= CollectionMultiplier)
                 {
-                    UpdateStatusLabel("Running " + b.BenchMarkName() + " with collection size " + b.CollectionSize);
+                    updateStatusLabel("Running " + b.BenchMarkName() + " with collection size " + b.CollectionSize);
                     var benchmark = b.Benchmark(MaxCount, Repeats, MaxExecutionTimeInSeconds, this);
                     Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
-                        _plotter.addDataPoint(_lineSeriesIndex, benchmark)));
+                        _plotter.AddDataPoint(_lineSeriesIndex, benchmark)));
                     Thread.Sleep(100);
                 }
                 _lineSeriesIndex++;
             }
             UpdateRunningLabel("");
-            UpdateStatusLabel("Finished");
+            updateStatusLabel("Finished");
             Thread.Sleep(1000);
-            UpdateStatusLabel("");
+            updateStatusLabel("");
             _plotter.ExportPdf(PdfPath);
         }
 
-        private void UpdateStatusLabel(String s)
+        private void updateStatusLabel(String s)
         {
             Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => StatusLabel.Content = s));
         }

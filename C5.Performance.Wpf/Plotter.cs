@@ -10,7 +10,7 @@ namespace C5.Performance.Wpf
     {
         public PlotModel PlotModel { get; set; }
 
-        public static Plotter createPlotter()
+        public static Plotter CreatePlotter()
         {
             return new Plotter();
         }
@@ -68,7 +68,7 @@ namespace C5.Performance.Wpf
         /// </summary>
         /// <param name="indexOfAreaSeries">Index of the graph you wish to add data to</param>
         /// <param name="benchmark">Benchmark containing the data to be added</param>
-        public void addDataPoint(int indexOfAreaSeries, Benchmark benchmark)
+        public void AddDataPoint(int indexOfAreaSeries, Benchmark benchmark)
         {
             var areaSeries = PlotModel.Series[indexOfAreaSeries] as AreaSeries;
             if (areaSeries != null)
@@ -86,7 +86,7 @@ namespace C5.Performance.Wpf
         /// Add a plot to the graph showing the benchmark you are running
         /// </summary>
         /// <param name="name">Name of the benchmark you wish to plot</param>
-        public void addAreaSeries(String name)
+        public void AddAreaSeries(String name)
         {
             var areaSerie = new AreaSeries
             {
