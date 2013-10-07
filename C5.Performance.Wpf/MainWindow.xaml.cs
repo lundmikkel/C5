@@ -58,7 +58,7 @@ namespace C5.Performance.Wpf
             UpdateStatusLabel("Finished");
             Thread.Sleep(1000);
             UpdateStatusLabel("");
-            _plotter.exportPdf(PdfPath);
+            _plotter.ExportPdf(PdfPath);
         }
 
         private void UpdateStatusLabel(String s)

@@ -28,7 +28,7 @@ namespace C5.Performance.Wpf
         /// <param name="path">The file path where the pdf should be created</param>
         /// <param name="width">Width in pixels of the generated pfd</param>
         /// <param name="height">Height in pixels of the generated pfd</param>
-        public void exportPdf(String path = "plot.pdf", int width = 4960, int height = 7016)
+        public void ExportPdf(String path = "plot.pdf", int width = 4960, int height = 7016)
         {
             PdfExporter.Export(PlotModel, path, width, height);
         }
