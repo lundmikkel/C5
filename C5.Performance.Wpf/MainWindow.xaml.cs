@@ -12,7 +12,7 @@ namespace C5.Performance.Wpf
         private const int MinCollectionSize = 100;
         private const int MaxCollectionSize = 50000;
         private const int CollectionMultiplier = 2;
-        private const int MaxCount = Int32.MaxValue/100000;
+        private const int MaxCount = Int32.MaxValue/10;
         private const int Repeats = 10;
         private const double MaxExecutionTimeInSeconds = 0.25;
         // Path of the exported pdf file containing the benchmark
@@ -30,11 +30,13 @@ namespace C5.Performance.Wpf
 
         private void button1_Click_1(object sender, RoutedEventArgs e)
         {
-            var b = new SimpleBenchmark();
+            // This benchmark is the one we use to compare with Sestoft's cmd line version of the tool
+            var intervalsTestBenchmarks = new SimpleBenchmark();
             var b2 = new IbsAvlAddBenchmarker();
             var b3 = new IbsAddBenchmarker();
-            var thread = new Thread(() => runBenchmarks(b2));
+            var thread = new Thread(() => runBenchmarks(intervalsTestBenchmarks));
             thread.Start();
+//            _plotter.ExportPdf(PdfPath);
         }
 
         private void runBenchmarks(params Benchmarkable[] benchmarks)
@@ -58,7 +60,6 @@ namespace C5.Performance.Wpf
             updateStatusLabel("Finished");
             Thread.Sleep(1000);
             updateStatusLabel("");
-            _plotter.ExportPdf(PdfPath);
         }
 
         private void updateStatusLabel(String s)
