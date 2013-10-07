@@ -745,12 +745,16 @@ namespace C5.intervals
         /// <inheritdoc/>
         public void AddAll(IEnumerable<I> intervals)
         {
-            throw new NotImplementedException();
+            // TODO: Any fancy things missing here?
+            foreach (var interval in intervals)
+                Add(interval);
         }
 
         // TODO: Make iterative?
         private static Node addLow(Node root, Node right, I interval, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node lowNode)
         {
+            Contract.Requires(!ReferenceEquals(interval, null));
+
             // No node existed for the low endpoint
             if (root == null)
             {
@@ -758,6 +762,8 @@ namespace C5.intervals
                 nodeWasAdded = true;
                 intervalWasAdded = true;
             }
+
+            Contract.Assert(root != null);
 
             var compare = interval.Low.CompareTo(root.Key);
 
@@ -808,6 +814,8 @@ namespace C5.intervals
 
         private static Node addHigh(Node root, Node left, I interval, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node highNode)
         {
+            Contract.Requires(!ReferenceEquals(interval, null));
+
             // No node existed for the high endpoint
             if (root == null)
             {
@@ -815,6 +823,8 @@ namespace C5.intervals
                 nodeWasAdded = true;
                 intervalWasAdded = true;
             }
+
+            Contract.Assert(root != null);
 
             var compare = interval.High.CompareTo(root.Key);
 
@@ -916,6 +926,8 @@ namespace C5.intervals
 
         private static void removeLow(Node root, Node right, I interval, ref bool intervalWasRemoved, ref Node lowNode)
         {
+            Contract.Requires(!ReferenceEquals(interval, null));
+
             // No node existed for the low endpoint
             if (root == null)
                 return;
