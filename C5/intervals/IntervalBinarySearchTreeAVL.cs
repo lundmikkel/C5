@@ -762,11 +762,11 @@ namespace C5.intervals
             {
                 // Everything in the right subtree of root will lie within the interval
                 if (right != null && right.Key.CompareTo(interval.High) <= 0)
-                    intervalWasAdded = root.Greater.Add(interval);
+                    intervalWasAdded |= root.Greater.Add(interval);
 
                 // root key is between interval.low and interval.high
                 if (root.Key.CompareTo(interval.High) < 0)
-                    intervalWasAdded = root.Equal.Add(interval);
+                    intervalWasAdded |= root.Equal.Add(interval);
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
                 root.Left = addLow(root.Left, root, interval, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
@@ -779,10 +779,10 @@ namespace C5.intervals
             {
                 // If everything in the right subtree of root will lie within the interval
                 if (right != null && right.Key.CompareTo(interval.High) <= 0)
-                    intervalWasAdded = root.Greater.Add(interval);
+                    intervalWasAdded |= root.Greater.Add(interval);
 
                 if (interval.LowIncluded)
-                    intervalWasAdded = root.Equal.Add(interval);
+                    intervalWasAdded |= root.Equal.Add(interval);
 
                 // Save reference to endpoint node
                 lowNode = root;
@@ -819,11 +819,11 @@ namespace C5.intervals
             {
                 // Everything in the right subtree of root will lie within the interval
                 if (left != null && left.Key.CompareTo(interval.Low) >= 0)
-                    intervalWasAdded = root.Less.Add(interval);
+                    intervalWasAdded |= root.Less.Add(interval);
 
                 // root key is between interval.low and interval.high
                 if (root.Key.CompareTo(interval.Low) > 0)
-                    intervalWasAdded = root.Equal.Add(interval);
+                    intervalWasAdded |= root.Equal.Add(interval);
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
                 root.Right = addHigh(root.Right, root, interval, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
@@ -836,10 +836,10 @@ namespace C5.intervals
             {
                 // If everything in the right subtree of root will lie within the interval
                 if (left != null && left.Key.CompareTo(interval.Low) >= 0)
-                    intervalWasAdded = root.Less.Add(interval);
+                    intervalWasAdded |= root.Less.Add(interval);
 
                 if (interval.HighIncluded)
-                    intervalWasAdded = root.Equal.Add(interval);
+                    intervalWasAdded |= root.Equal.Add(interval);
 
                 // Save reference to endpoint node
                 highNode = root;
@@ -917,11 +917,11 @@ namespace C5.intervals
             {
                 // Everything in the right subtree of root will lie within the interval
                 if (right != null && right.Key.CompareTo(interval.High) <= 0)
-                    intervalWasRemoved = root.Greater.Remove(interval);
+                    intervalWasRemoved |= root.Greater.Remove(interval);
 
                 // root key is between interval.low and interval.high
                 if (root.Key.CompareTo(interval.High) < 0)
-                    intervalWasRemoved = root.Equal.Remove(interval);
+                    intervalWasRemoved |= root.Equal.Remove(interval);
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
                 removeLow(root.Left, root, interval, ref intervalWasRemoved, ref lowNode);
@@ -930,10 +930,10 @@ namespace C5.intervals
             {
                 // If everything in the right subtree of root will lie within the interval
                 if (right != null && right.Key.CompareTo(interval.High) <= 0)
-                    intervalWasRemoved = root.Greater.Remove(interval);
+                    intervalWasRemoved |= root.Greater.Remove(interval);
 
                 if (interval.LowIncluded)
-                    intervalWasRemoved = root.Equal.Remove(interval);
+                    intervalWasRemoved |= root.Equal.Remove(interval);
 
                 // Save reference to endpoint node
                 lowNode = root;
@@ -954,11 +954,11 @@ namespace C5.intervals
             {
                 // Everything in the right subtree of root will lie within the interval
                 if (left != null && left.Key.CompareTo(interval.Low) >= 0)
-                    intervalWasRemoved = root.Less.Remove(interval);
+                    intervalWasRemoved |= root.Less.Remove(interval);
 
                 // root key is between interval.low and interval.high
                 if (root.Key.CompareTo(interval.Low) > 0)
-                    intervalWasRemoved = root.Equal.Remove(interval);
+                    intervalWasRemoved |= root.Equal.Remove(interval);
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
                 removeHigh(root.Right, root, interval, ref intervalWasRemoved, ref highNode);
@@ -967,10 +967,10 @@ namespace C5.intervals
             {
                 // If everything in the right subtree of root will lie within the interval
                 if (left != null && left.Key.CompareTo(interval.Low) >= 0)
-                    intervalWasRemoved = root.Less.Remove(interval);
+                    intervalWasRemoved |= root.Less.Remove(interval);
 
                 if (interval.HighIncluded)
-                    intervalWasRemoved = root.Equal.Remove(interval);
+                    intervalWasRemoved |= root.Equal.Remove(interval);
 
                 // Save reference to endpoint node
                 highNode = root;
