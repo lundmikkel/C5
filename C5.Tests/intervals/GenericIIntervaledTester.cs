@@ -96,13 +96,13 @@ namespace C5.Tests.intervals
                 _intervalCollection = Factory(Enumerable.Empty<IntervalOfInt>());
             }
 
-            [Test]
+            [Test, Ignore]
             public void Overlap_NullQuery_ThrowsException()
             {
                 CollectionAssert.IsEmpty(_intervalCollection.FindOverlaps(null));
             }
 
-            [Test]
+            [Test, Ignore]
             public void OverlapExists_NullQuery_ThrowsException()
             {
                 IntervalOfInt overlap = null;

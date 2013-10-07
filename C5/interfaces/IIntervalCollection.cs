@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Text;
 using C5.intervals;
 
@@ -150,18 +151,42 @@ namespace C5
         {
             get
             {
-                // Span contains all interval and intervals that is not equal to span cannot contain it
-                Contract.Ensures(IsEmpty || Contract.ForAll(this, i =>
-                    Contract.Result<IInterval<T>>().Contains(i) && (i.Equals(Contract.Result<IInterval<T>>()) || !i.Contains(Contract.Result<IInterval<T>>()))
-                    ));
+                // Span contains all intervals
+                Contract.Ensures(IsEmpty || Contract.ForAll(this, i => Contract.Result<IInterval<T>>().Contains(i)));
+                // Span has the lowest and highest endpoint of the collection
+                Contract.Ensures(IsEmpty || Contract.ForAll(this, i => Contract.Result<IInterval<T>>().CompareLow(i) <= 0 && Contract.Result<IInterval<T>>().CompareHigh(i) >= 0));
+                // There is an interval that has the same low as span
+                Contract.Ensures(IsEmpty || Contract.Exists(this, i => Contract.Result<IInterval<T>>().CompareLow(i) == 0));
+                // There is an interval that has the same high as span
+                Contract.Ensures(IsEmpty || Contract.Exists(this, i => Contract.Result<IInterval<T>>().CompareHigh(i) == 0));
 
                 throw new NotImplementedException();
             }
         }
         public abstract int MaximumOverlap { get; }
 
-        public abstract IEnumerable<I> FindOverlaps(T query);
-        public abstract IEnumerable<I> FindOverlaps(IInterval<T> query);
+        public IEnumerable<I> FindOverlaps(T query)
+        {
+            Contract.Requires(!ReferenceEquals(query, null));
+            // All intervals in collect that overlap query must be in the result
+            Contract.Ensures(Contract.ForAll(this, i => !i.Overlaps(query) || Contract.Result<IEnumerable<I>>().Any(j => ReferenceEquals(i, j))));
+            // The number of intervals in the collection that overlap the query must be equal to the result size
+            Contract.Ensures(this.Count(i => i.Overlaps(query)) == Contract.Result<IEnumerable<I>>().Count());
+
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<I> FindOverlaps(IInterval<T> query)
+        {
+            Contract.Requires(query != null);
+            // All intervals in collect that overlap query must be in the result
+            Contract.Ensures(Contract.ForAll(this, i => !i.Overlaps(query) || Contract.Result<IEnumerable<I>>().Any(j => ReferenceEquals(i, j))));
+            // The number of intervals in the collection that overlap the query must be equal to the result size
+            Contract.Ensures(this.Count(i => i.Overlaps(query)) == Contract.Result<IEnumerable<I>>().Count());
+
+            throw new NotImplementedException();
+        }
+
         public abstract bool FindOverlap(T query, ref I overlap);
         public abstract bool FindOverlap(IInterval<T> query, ref I overlap);
 

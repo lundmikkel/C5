@@ -1160,13 +1160,13 @@ namespace C5.Tests.intervals
 
             #region FindOverlaps
 
-            [Test]
+            [Test, Ignore]
             public void FindOverlaps_NullQueryZeroIntervals()
             {
                 CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentList2<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).FindOverlaps(null));
             }
 
-            [Test]
+            [Test, Ignore]
             public void FindOverlaps_NullQueryOneOrMoreIntervals()
             {
                 CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentList2<IInterval<int>, int>(dataSetB).FindOverlaps(null));
