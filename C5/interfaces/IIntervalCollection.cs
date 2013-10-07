@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Text;
+using C5.intervals;
 
 namespace C5
 {
@@ -145,7 +146,18 @@ namespace C5
         }
         public abstract I Choose();
 
-        public abstract IInterval<T> Span { get; }
+        public IInterval<T> Span
+        {
+            get
+            {
+                // Span contains all interval and intervals that is not equal to span cannot contain it
+                Contract.Ensures(IsEmpty || Contract.ForAll(this, i =>
+                    Contract.Result<IInterval<T>>().Contains(i) && (i.Equals(Contract.Result<IInterval<T>>()) || !i.Contains(Contract.Result<IInterval<T>>()))
+                    ));
+
+                throw new NotImplementedException();
+            }
+        }
         public abstract int MaximumOverlap { get; }
 
         public abstract IEnumerable<I> FindOverlaps(T query);
@@ -161,10 +173,39 @@ namespace C5
         }
 
         public abstract bool IsReadOnly { get; }
-        public abstract bool Add(I interval);
-        public abstract void AddAll(IEnumerable<I> intervals);
-        public abstract bool Remove(I interval);
-        public abstract void Clear();
+        public bool Add(I interval)
+        {
+            Contract.Requires(!ReferenceEquals(interval, null));
+            // If the interval is added the count goes up by one
+            Contract.Ensures(!Contract.Result<bool>() || Count == Contract.OldValue(Count) + 1);
+            // The collection contains the interval
+            Contract.Ensures(Exists(i => i.Equals(interval)));
+
+            throw new NotImplementedException();
+        }
+        public void AddAll(IEnumerable<I> intervals)
+        {
+            Contract.Requires(intervals != null);
+            // The collection contains all intervals
+            Contract.Ensures(Contract.ForAll(intervals, i => Exists(j => i.Equals(j))));
+        }
+        public bool Remove(I interval)
+        {
+            Contract.Requires(!ReferenceEquals(interval, null));
+            // If the interval is removed the count goes down by one
+            Contract.Ensures(!Contract.Result<bool>() || Count == Contract.OldValue(Count) - 1);
+            // The collection contains the interval
+            Contract.Ensures(Exists(i => !i.Equals(interval)));
+
+            throw new NotImplementedException();
+        }
+        public void Clear()
+        {
+            Contract.Ensures(IsEmpty);
+            Contract.Ensures(Count == 0);
+
+            throw new NotImplementedException();
+        }
 
         #region Non-interval methods
 

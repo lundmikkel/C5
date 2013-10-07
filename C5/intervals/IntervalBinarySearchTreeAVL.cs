@@ -1110,6 +1110,8 @@ namespace C5.intervals
         /// </summary>  
         public void Clear()
         {
+            Contract.Ensures(_root == null);
+
             // Return if tree is empty
             if (_root == null)
                 return;

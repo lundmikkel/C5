@@ -10,7 +10,12 @@ namespace C5.interfaces
     [ContractClassFor(typeof(ICollectionValue<>))]
     abstract class CollectionValueContract<T> : ICollectionValue<T>
     {
-        public abstract IEnumerator<T> GetEnumerator();
+        public IEnumerator<T> GetEnumerator()
+        {
+            Contract.Ensures(Contract.Result<IEnumerator<T>>() != null);
+
+            throw new NotImplementedException();
+        }
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -85,7 +90,12 @@ namespace C5.interfaces
         }
 
         [Pure]
-        public abstract T Choose();
+        public T Choose()
+        {
+            Contract.Ensures(IsEmpty || !ReferenceEquals(Contract.Result<T>(), null));
+
+            throw new NotImplementedException();
+        }
 
         [Pure]
         public IEnumerable<T> Filter(Func<T, bool> filter)
