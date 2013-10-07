@@ -1164,7 +1164,7 @@ namespace C5.Tests.intervals
 
             #region OverlapExists
 
-            [Test]
+            [Test, Ignore]
             public void OverlapExists_NullQuery()
             {
                 Assert.False(new LayeredContainmentList<IInterval<int>, int>(dataSetB).FindOverlap(null, ref overlap));
