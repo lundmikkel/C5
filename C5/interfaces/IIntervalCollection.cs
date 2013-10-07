@@ -88,6 +88,14 @@ namespace C5
 
 
         /// <summary>
+        /// If true any call of an updating operation will throw an
+        /// <code>ReadOnlyCollectionException</code>
+        /// </summary>
+        /// <value>True if this collection is read-only.</value>
+        [Pure]
+        bool IsReadOnly { get; }
+
+        /// <summary>
         /// Add an interval to the collection.
         /// </summary>
         /// <remarks>Different implementations may handle duplicates differently.</remarks>
@@ -96,12 +104,24 @@ namespace C5
         bool Add(I interval);
 
         /// <summary>
+        /// Add a collection of intervals to the collection.
+        /// </summary>
+        /// <remarks>Different implementations may handle duplicates differently.</remarks>
+        /// <param name="intervals">The intervals to add.</param>
+        void AddAll(IEnumerable<I> intervals);
+
+        /// <summary>
         /// Remove an interval from the collection.
         /// </summary>
         /// <remarks>Different implementations may remove duplicates differently.</remarks>
         /// <param name="interval">The interval to remove.</param>
         /// <returns>True if the interval was removed.</returns>
         bool Remove(I interval);
+
+        /// <summary>
+        /// Remove all intervals from the collection.
+        /// </summary>
+        void Clear();
     }
 
     [ContractClassFor(typeof(IIntervalCollection<,>))]
@@ -140,8 +160,11 @@ namespace C5
             throw new NotImplementedException();
         }
 
+        public abstract bool IsReadOnly { get; }
         public abstract bool Add(I interval);
+        public abstract void AddAll(IEnumerable<I> intervals);
         public abstract bool Remove(I interval);
+        public abstract void Clear();
 
         #region Non-interval methods
 

@@ -337,16 +337,35 @@ namespace C5.intervals
             return FindOverlaps(query).Count();
         }
 
+        #endregion
+
+        #region Extensible
+
+        /// <inheritdoc/>
+        public bool IsReadOnly { get { return true; } }
+
         /// <inheritdoc/>
         public bool Add(I interval)
         {
-            throw new NotSupportedException();
+            throw new ReadOnlyCollectionException();
+        }
+
+        /// <inheritdoc/>
+        public void AddAll(IEnumerable<I> intervals)
+        {
+            throw new ReadOnlyCollectionException();
         }
 
         /// <inheritdoc/>
         public bool Remove(I interval)
         {
-            throw new NotSupportedException();
+            throw new ReadOnlyCollectionException();
+        }
+
+        /// <inheritdoc/>
+        public void Clear()
+        {
+            throw new ReadOnlyCollectionException();
         }
 
         #endregion

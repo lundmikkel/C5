@@ -165,18 +165,6 @@ namespace C5.intervals
             return countOverlaps(0, 0, _counts[0], query);
         }
 
-        /// <inheritdoc/>
-        public bool Add(I interval)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <inheritdoc/>
-        public bool Remove(I interval)
-        {
-            throw new NotSupportedException();
-        }
-
         private int countOverlaps(int layer, int lower, int upper, IInterval<T> query)
         {
             var count = 0;
@@ -441,5 +429,36 @@ namespace C5.intervals
 
             return s;
         }
+
+        #region Extensible
+
+        /// <inheritdoc/>
+        public bool IsReadOnly { get { return true; } }
+
+        /// <inheritdoc/>
+        public bool Add(I interval)
+        {
+            throw new ReadOnlyCollectionException();
+        }
+
+        /// <inheritdoc/>
+        public void AddAll(IEnumerable<I> intervals)
+        {
+            throw new ReadOnlyCollectionException();
+        }
+
+        /// <inheritdoc/>
+        public bool Remove(I interval)
+        {
+            throw new ReadOnlyCollectionException();
+        }
+
+        /// <inheritdoc/>
+        public void Clear()
+        {
+            throw new ReadOnlyCollectionException();
+        }
+
+        #endregion
     }
 }

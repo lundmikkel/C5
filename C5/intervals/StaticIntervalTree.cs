@@ -251,18 +251,6 @@ namespace C5.intervals
         }
 
         /// <inheritdoc/>
-        public bool Add(I interval)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <inheritdoc/>
-        public bool Remove(I interval)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <inheritdoc/>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -713,6 +701,37 @@ namespace C5.intervals
             }
 
             private set { _span = value; }
+        }
+
+        #endregion
+
+        #region Extensible
+
+        /// <inheritdoc/>
+        public bool IsReadOnly { get { return true; } }
+
+        /// <inheritdoc/>
+        public bool Add(I interval)
+        {
+            throw new ReadOnlyCollectionException();
+        }
+
+        /// <inheritdoc/>
+        public void AddAll(SCG.IEnumerable<I> intervals)
+        {
+            throw new ReadOnlyCollectionException();
+        }
+
+        /// <inheritdoc/>
+        public bool Remove(I interval)
+        {
+            throw new ReadOnlyCollectionException();
+        }
+
+        /// <inheritdoc/>
+        public void Clear()
+        {
+            throw new ReadOnlyCollectionException();
         }
 
         #endregion

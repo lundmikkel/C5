@@ -618,7 +618,7 @@ namespace C5.intervals
 
         #endregion
 
-        #region
+        #region MNO
 
         /// <inheritdoc/>
         public int MaximumOverlap
@@ -688,6 +688,11 @@ namespace C5.intervals
 
         #endregion
 
+        #region Extensible
+
+        /// <inheritdoc/>
+        public bool IsReadOnly { get { return false; } }
+
         #region Add
 
         /// <inheritdoc/>
@@ -735,6 +740,12 @@ namespace C5.intervals
             // TODO: Add event for change in MNO
 
             return intervalWasAdded;
+        }
+
+        /// <inheritdoc/>
+        public void AddAll(IEnumerable<I> intervals)
+        {
+            throw new NotImplementedException();
         }
 
         // TODO: Make iterative?
@@ -1119,6 +1130,8 @@ namespace C5.intervals
             _root = null;
             _count = 0;
         }
+
+        #endregion
 
         #endregion
 

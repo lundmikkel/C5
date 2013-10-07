@@ -382,6 +382,8 @@ namespace C5.intervals
             return root;
         }
 
+        public bool IsReadOnly { get { return false; } }
+
         /// <inheritdoc/>
         public bool Add(I interval)
         {
@@ -393,6 +395,13 @@ namespace C5.intervals
             _root.Color = BLACK;
 
             return true;
+        }
+
+        /// <inheritdoc/>
+        public void AddAll(IEnumerable<I> intervals)
+        {
+            foreach (var interval in intervals)
+                Add(interval);
         }
 
         #endregion
