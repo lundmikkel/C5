@@ -681,6 +681,38 @@ namespace C5.intervals
         }
 
         /// <summary>
+        /// Find the maximum number of overlaps for all intervals that match the filter and overlap the query interval.
+        /// </summary>
+        /// <param name="query">The query interval.</param>
+        /// <param name="filter">A filter.</param>
+        /// <remarks>The query interval is not in the maximum number of overlaps. If only one interval
+        /// overlaps the query, the result will therefore be 1.</remarks>
+        /// <returns>The maximum number of overlaps</returns>
+        public int FindMaximumOverlap(IInterval<T> query, Func<I, bool> filter)
+        {
+            Contract.Requires(query != null);
+            Contract.Requires(filter != null);
+            Contract.Ensures(Contract.Result<int>() >= 0);
+
+            return findMaximumOverlap(FindOverlapsSorted(query).Where(filter));
+        }
+
+        /// <summary>
+        /// Find the maximum number of overlaps for all intervals that match the filter.
+        /// </summary>
+        /// <param name="filter">A filter.</param>
+        /// <remarks>The query interval is not in the maximum number of overlaps. If only one interval
+        /// overlaps the query, the result will therefore be 1.</remarks>
+        /// <returns>The maximum number of overlaps</returns>
+        public int FindMaximumOverlap(Func<I, bool> filter)
+        {
+            Contract.Requires(filter != null);
+            Contract.Ensures(Contract.Result<int>() >= 0);
+
+            return findMaximumOverlap(Sorted.Where(filter));
+        }
+
+        /// <summary>
         /// Find the maximum number of overlaps and save the values in
         /// <see cref="_maximumNumberOfOverlaps"/> and <see cref="_intervalOfMaximumOverlap"/>.
         /// </summary>
@@ -710,7 +742,7 @@ namespace C5.intervals
                     // The low is the current intervals low due to the intervals being sorted
                     // The high is the smallest high in the queue
                     if (setIntervalOfMaximumOverlap)
-                    _intervalOfMaximumOverlap = new IntervalBase<T>(interval, queue.FindMin());
+                        _intervalOfMaximumOverlap = new IntervalBase<T>(interval, queue.FindMin());
                 }
             }
 
