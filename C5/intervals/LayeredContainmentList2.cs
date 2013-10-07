@@ -639,9 +639,6 @@ namespace C5.intervals
         {
             get
             {
-                if (IsEmpty)
-                    throw new InvalidOperationException("An empty collection has no interval of maximum overlap");
-
                 if (_maximumNumberOfOverlaps < 0)
                     findMaximumOverlap(Sorted, _layerCount);
 
@@ -662,7 +659,7 @@ namespace C5.intervals
 
                 if (_intervalOfMaximumOverlap == null)
                     // Init running maximum to the number of layers as that is the minimum number of overlaps
-                    findMaximumOverlap(Sorted, _layerCount);
+                    findMaximumOverlap(Sorted, _layerCount, true);
 
                 return _intervalOfMaximumOverlap;
             }
@@ -678,6 +675,7 @@ namespace C5.intervals
         public int FindMaximumOverlap(IInterval<T> query)
         {
             Contract.Requires(query != null);
+            Contract.Ensures(Contract.Result<int>() >= 0);
 
             return findMaximumOverlap(FindOverlapsSorted(query));
         }
@@ -686,9 +684,10 @@ namespace C5.intervals
         /// Find the maximum number of overlaps and save the values in
         /// <see cref="_maximumNumberOfOverlaps"/> and <see cref="_intervalOfMaximumOverlap"/>.
         /// </summary>
-        private int findMaximumOverlap(IEnumerable<I> sortedIntervals, int max = 0)
+        private int findMaximumOverlap(IEnumerable<I> sortedIntervals, int max = 0, bool setIntervalOfMaximumOverlap = false)
         {
             Contract.Requires(sortedIntervals != null);
+            Contract.Requires(max >= 0);
             Contract.Ensures(Contract.Result<int>() >= 0);
 
             // Create queue sorted on high intervals
@@ -710,6 +709,7 @@ namespace C5.intervals
                     // Create a new interval when new maximum is found
                     // The low is the current intervals low due to the intervals being sorted
                     // The high is the smallest high in the queue
+                    if (setIntervalOfMaximumOverlap)
                     _intervalOfMaximumOverlap = new IntervalBase<T>(interval, queue.FindMin());
                 }
             }
