@@ -111,11 +111,11 @@ namespace C5.intervals
             Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.OverlappedBy ||
                 y.CompareLow(x) < 0 && y.CompareHighLow(x) > 0 && y.CompareHigh(x) < 0);
             Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Finishes ||
-                y.CompareLow(x) < 0 && y.CompareHighLow(x) > 0 && y.CompareHigh(x) == 0);
+                y.CompareLow(x) < 0 && y.CompareHighLow(x) >= 0 && y.CompareHigh(x) == 0);
             Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.During ||
                 y.CompareLow(x) < 0 && y.CompareHighLow(x) > 0 && y.CompareHigh(x) > 0);
             Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.StartedBy ||
-                y.CompareLow(x) == 0 && y.CompareHighLow(x) > 0 && y.CompareHigh(x) < 0);
+                y.CompareLow(x) == 0 && y.CompareHighLow(x) >= 0 && y.CompareHigh(x) < 0);
             Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Equals ||
                 y.CompareLow(x) == 0 && y.CompareHigh(x) == 0);
             Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Starts ||
@@ -123,7 +123,7 @@ namespace C5.intervals
             Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Contains ||
                 y.CompareLow(x) > 0 && y.CompareHigh(x) < 0);
             Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.FinishedBy ||
-                y.CompareLow(x) > 0 && y.CompareHigh(x) == 0);
+                y.CompareLow(x) > 0 && y.CompareLowHigh(x) <= 0 && y.CompareHigh(x) == 0);
             Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Overlaps ||
                 y.CompareLow(x) > 0 && y.CompareHigh(x) > 0);
             Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Meets ||

@@ -1004,8 +1004,7 @@ namespace C5.Tests.intervals
             [Test, Ignore]
             public void CountOverlap_MoreThanOneIntervalQueryNull()
             {
-                Assert.AreEqual(0, new LayeredContainmentList<IInterval<int>, int>(dataSetB).
-                    CountOverlaps(null));
+                //Assert.AreEqual(0, new LayeredContainmentList<IInterval<int>, int>(dataSetB).CountOverlaps(null));
             }
 
             [Test]

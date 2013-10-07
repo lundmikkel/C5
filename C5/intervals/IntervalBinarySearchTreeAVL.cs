@@ -30,11 +30,11 @@ namespace C5.intervals
 
             Contract.Requires(root.Balance != -2 || root.Left != null);
             Contract.Requires(root.Balance != -2 || root.Left.Balance != -1 || root.Left.Left != null);
-            Contract.Requires(root.Balance != -2 || root.Left.Balance != 1 || root.Left.Right != null);
+            Contract.Requires(root.Balance != -2 || root.Left.Balance != +1 || root.Left.Right != null);
 
-            Contract.Requires(root.Balance != 2 || root.Right != null);
-            Contract.Requires(root.Balance != 2 || root.Right.Balance != -1 || root.Right.Left != null);
-            Contract.Requires(root.Balance != 2 || root.Right.Balance != 1 || root.Right.Right != null);
+            Contract.Requires(root.Balance != +2 || root.Right != null);
+            Contract.Requires(root.Balance != +2 || root.Right.Balance != -1 || root.Right.Left != null);
+            Contract.Requires(root.Balance != +2 || root.Right.Balance != +1 || root.Right.Right != null);
 
             switch (root.Balance)
             {
@@ -102,11 +102,11 @@ namespace C5.intervals
 
             Contract.Requires(root.Balance != -2 || root.Left != null);
             Contract.Requires(root.Balance != -2 || root.Left.Balance != -1 || root.Left.Left != null);
-            Contract.Requires(root.Balance != -2 || root.Left.Balance != 1 || root.Left.Right != null);
+            Contract.Requires(root.Balance != -2 || root.Left.Balance != +1 || root.Left.Right != null);
 
-            Contract.Requires(root.Balance != 2 || root.Right != null);
-            Contract.Requires(root.Balance != 2 || root.Right.Balance != -1 || root.Right.Left != null);
-            Contract.Requires(root.Balance != 2 || root.Right.Balance != 1 || root.Right.Right != null);
+            Contract.Requires(root.Balance != +2 || root.Right != null);
+            Contract.Requires(root.Balance != +2 || root.Right.Balance != -1 || root.Right.Left != null);
+            Contract.Requires(root.Balance != +2 || root.Right.Balance != +1 || root.Right.Right != null);
 
             switch (root.Balance)
             {

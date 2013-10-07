@@ -46,6 +46,7 @@ namespace C5.interfaces
             {
                 Contract.Ensures(0 <= Contract.Result<int>());
                 Contract.Ensures(IsEmpty || 0 < Contract.Result<int>());
+                Contract.Ensures(Enumerable.Count(this) == Contract.Result<int>());
 
                 throw new NotImplementedException();
             }
