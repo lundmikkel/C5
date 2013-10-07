@@ -131,21 +131,6 @@ namespace C5
         where I : IInterval<T>
         where T : IComparable<T>
     {
-        public abstract IEnumerator<I> GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public abstract bool IsEmpty { get; }
-        public int Count
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-        public abstract I Choose();
 
         public IInterval<T> Span
         {
@@ -163,13 +148,24 @@ namespace C5
                 throw new NotImplementedException();
             }
         }
-        public abstract int MaximumOverlap { get; }
+
+        public int MaximumOverlap
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<int>() >= 0);
+
+                throw new NotImplementedException();
+            }
+        }
 
         public IEnumerable<I> FindOverlaps(T query)
         {
             Contract.Requires(!ReferenceEquals(query, null));
             // All intervals in collect that overlap query must be in the result
-            Contract.Ensures(Contract.ForAll(this, i => !i.Overlaps(query) || Contract.Result<IEnumerable<I>>().Any(j => ReferenceEquals(i, j))));
+            Contract.Ensures(Contract.ForAll(this.Where(i => i.Overlaps(query)), i => Contract.Result<IEnumerable<I>>().Any(j => ReferenceEquals(i, j))));
+            // All intervals in the collection that do not overlap cannot by in the result
+            Contract.Ensures(Contract.ForAll(this.Where(i => i.Overlaps(query)), i => Contract.Result<IEnumerable<I>>().Any(j => ReferenceEquals(i, j))));
             // The number of intervals in the collection that overlap the query must be equal to the result size
             Contract.Ensures(this.Count(i => i.Overlaps(query)) == Contract.Result<IEnumerable<I>>().Count());
 
@@ -180,50 +176,73 @@ namespace C5
         {
             Contract.Requires(query != null);
             // All intervals in collect that overlap query must be in the result
-            Contract.Ensures(Contract.ForAll(this, i => !i.Overlaps(query) || Contract.Result<IEnumerable<I>>().Any(j => ReferenceEquals(i, j))));
+            Contract.Ensures(Contract.ForAll(this.Where(i => i.Overlaps(query)), i => Contract.Result<IEnumerable<I>>().Any(j => ReferenceEquals(i, j))));
+            // All intervals in the collection that do not overlap cannot by in the result
+            Contract.Ensures(Contract.ForAll(this.Where(i => i.Overlaps(query)), i => Contract.Result<IEnumerable<I>>().Any(j => ReferenceEquals(i, j))));
             // The number of intervals in the collection that overlap the query must be equal to the result size
             Contract.Ensures(this.Count(i => i.Overlaps(query)) == Contract.Result<IEnumerable<I>>().Count());
 
             throw new NotImplementedException();
         }
 
-        public abstract bool FindOverlap(T query, ref I overlap);
-        public abstract bool FindOverlap(IInterval<T> query, ref I overlap);
+        public bool FindOverlap(T query, ref I overlap)
+        {
+            Contract.Requires(!ReferenceEquals(query, null));
+            // A found overlap is not null and overlaps query
+            Contract.Ensures(!Contract.Result<bool>() || !ReferenceEquals(overlap, null) && overlap.Overlaps(query));
+
+            throw new NotImplementedException();
+        }
+
+        public bool FindOverlap(IInterval<T> query, ref I overlap)
+        {
+            Contract.Requires(query != null);
+            // A found overlap is not null and overlaps query
+            Contract.Ensures(!Contract.Result<bool>() || !ReferenceEquals(overlap, null) && overlap.Overlaps(query));
+
+            throw new NotImplementedException();
+        }
 
         public int CountOverlaps(IInterval<T> query)
         {
             Contract.Requires(query != null);
+            Contract.Ensures(Contract.Result<int>() >= 0);
+            Contract.Ensures(this.Count(i => i.Overlaps(query)) == Contract.Result<int>());
 
             throw new NotImplementedException();
         }
 
         public abstract bool IsReadOnly { get; }
+
         public bool Add(I interval)
         {
             Contract.Requires(!ReferenceEquals(interval, null));
             // If the interval is added the count goes up by one
             Contract.Ensures(!Contract.Result<bool>() || Count == Contract.OldValue(Count) + 1);
             // The collection contains the interval
-            Contract.Ensures(Exists(i => i.Equals(interval)));
+            Contract.Ensures(Exists(i => ReferenceEquals(i, interval)));
 
             throw new NotImplementedException();
         }
+
         public void AddAll(IEnumerable<I> intervals)
         {
             Contract.Requires(intervals != null);
             // The collection contains all intervals
-            Contract.Ensures(Contract.ForAll(intervals, i => Exists(j => i.Equals(j))));
+            Contract.Ensures(Contract.ForAll(intervals, i => Exists(j => ReferenceEquals(i, j))));
         }
+
         public bool Remove(I interval)
         {
             Contract.Requires(!ReferenceEquals(interval, null));
             // If the interval is removed the count goes down by one
             Contract.Ensures(!Contract.Result<bool>() || Count == Contract.OldValue(Count) - 1);
             // The collection contains the interval
-            Contract.Ensures(Exists(i => !i.Equals(interval)));
+            Contract.Ensures(Exists(i => !ReferenceEquals(i, interval)));
 
             throw new NotImplementedException();
         }
+
         public void Clear()
         {
             Contract.Ensures(IsEmpty);
@@ -234,6 +253,11 @@ namespace C5
 
         #region Non-interval methods
 
+        public abstract IEnumerator<I> GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() { throw new NotImplementedException(); }
+        public abstract bool IsEmpty { get; }
+        public abstract int Count { get; }
+        public abstract I Choose();
         public abstract string ToString(string format, IFormatProvider formatProvider);
         public abstract bool Show(StringBuilder stringbuilder, ref int rest, IFormatProvider formatProvider);
         public abstract EventTypeEnum ListenableEvents { get; }
