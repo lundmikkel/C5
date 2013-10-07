@@ -752,7 +752,7 @@ namespace C5.intervals
         /// <inheritdoc/>
         public override int Count
         {
-            get { return _count; }
+            get { return this.Count(); }
         }
 
         /// <inheritdoc/>
