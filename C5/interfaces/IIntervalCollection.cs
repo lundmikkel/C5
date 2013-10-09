@@ -62,6 +62,9 @@ namespace C5
         [Pure]
         IEnumerable<I> FindOverlaps(IInterval<T> query);
 
+        #endregion
+
+        #region Find Overlap
 
         /// <summary>
         /// Check if there exists an interval that overlaps the query point.

@@ -89,7 +89,7 @@ namespace C5.intervals
 
         #endregion
 
-        #region Constructor
+        #region Constructors
 
         /// <summary>
         /// Create a Layered Containment List with a collection of intervals.
@@ -527,31 +527,6 @@ namespace C5.intervals
             }
         }
 
-        /// <inheritdoc/>
-        public bool FindOverlap(T query, ref I overlap)
-        {
-            return FindOverlap(new IntervalBase<T>(query), ref overlap);
-        }
-
-        /// <inheritdoc/>
-        public bool FindOverlap(IInterval<T> query, ref I overlap)
-        {
-            // No overlap if query is null, collection is empty, or query doesn't overlap collection
-            if (query == null || IsEmpty || !query.Overlaps(Span))
-                return false;
-
-            // Find first overlap
-            var i = findFirst(0, 0, _firstLayerCount, query);
-
-            // Check if index is in bound and if the interval overlaps the query
-            var result = 0 <= i && i < _firstLayerCount && _intervalLayers[0][i].Overlaps(query);
-
-            if (result)
-                overlap = _intervalLayers[0][i];
-
-            return result;
-        }
-
         // TODO: Decide on using either start/end or lower/upper.
         private int findFirst(int layer, int lower, int upper, IInterval<T> query)
         {
@@ -734,6 +709,35 @@ namespace C5.intervals
         }
 
         #endregion
+
+        #endregion
+
+        #region Find Overlap
+
+        /// <inheritdoc/>
+        public bool FindOverlap(T query, ref I overlap)
+        {
+            return FindOverlap(new IntervalBase<T>(query), ref overlap);
+        }
+
+        /// <inheritdoc/>
+        public bool FindOverlap(IInterval<T> query, ref I overlap)
+        {
+            // No overlap if query is null, collection is empty, or query doesn't overlap collection
+            if (query == null || IsEmpty || !query.Overlaps(Span))
+                return false;
+
+            // Find first overlap
+            var i = findFirst(0, 0, _firstLayerCount, query);
+
+            // Check if index is in bound and if the interval overlaps the query
+            var result = 0 <= i && i < _firstLayerCount && _intervalLayers[0][i].Overlaps(query);
+
+            if (result)
+                overlap = _intervalLayers[0][i];
+
+            return result;
+        }
 
         #endregion
 
