@@ -1,5 +1,3 @@
-// <copyright file="IntervalBaseFactory.cs">Copyright ©  2013</copyright>
-
 using C5.intervals;
 using Microsoft.Pex.Framework;
 
@@ -12,7 +10,7 @@ namespace C5.Pex.Factories
         [PexFactoryMethod(typeof(IntervalBase<int>))]
         public static IntervalBase<int> Create(int low, int high, bool lowIncluded, bool highIncluded)
         {
-            return new IntervalBase<int>(low,high,lowIncluded,highIncluded);
+            return new IntervalBase<int>(low, high, lowIncluded, highIncluded);
         }
     }
 }

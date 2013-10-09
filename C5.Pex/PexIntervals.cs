@@ -8,14 +8,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace C5.Pex
 {
-//    [PexClass(typeof(IntervalExtensions))]
-//    [PexAllowedExceptionFromTypeUnderTest(typeof(InvalidOperationException))]
-//    [PexAllowedExceptionFromTypeUnderTest(typeof(ArgumentException), AcceptExceptionSubtypes = true)]
     [TestClass]
     public partial class PexIntervals
     {
         [PexMethod]
-//        [PexUseType(typeof(IntervalBase<int>))]
         public bool OverlapTester(IntervalBase<int> target, IntervalBase<int> y)
         {
             return target.Overlaps(y);
