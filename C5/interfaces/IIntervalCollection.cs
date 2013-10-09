@@ -147,6 +147,7 @@ namespace C5
         where I : IInterval<T>
         where T : IComparable<T>
     {
+        #region Properties
 
         public IInterval<T> Span
         {
@@ -175,6 +176,10 @@ namespace C5
             }
         }
 
+        #endregion
+
+        #region Find Overlaps
+
         public IEnumerable<I> FindOverlaps(T query)
         {
             Contract.Requires(!ReferenceEquals(query, null));
@@ -201,6 +206,10 @@ namespace C5
             throw new NotImplementedException();
         }
 
+        #endregion
+
+        #region Find Overlap
+
         public bool FindOverlap(T query, ref I overlap)
         {
             Contract.Requires(!ReferenceEquals(query, null));
@@ -219,6 +228,10 @@ namespace C5
             throw new NotImplementedException();
         }
 
+        #endregion
+
+        #region Count Overlaps
+
         public int CountOverlaps(IInterval<T> query)
         {
             Contract.Requires(query != null);
@@ -227,6 +240,10 @@ namespace C5
 
             throw new NotImplementedException();
         }
+
+        #endregion
+
+        #region Extensible
 
         public abstract bool IsReadOnly { get; }
 
@@ -268,6 +285,8 @@ namespace C5
 
             throw new NotImplementedException();
         }
+
+        #endregion
 
         #region Non-interval methods
 
