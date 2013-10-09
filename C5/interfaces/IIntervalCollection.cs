@@ -20,6 +20,8 @@ namespace C5
         where I : IInterval<T>
         where T : IComparable<T>
     {
+        #region Properties
+
         /// <summary>
         /// The smallest interval that spans all intervals in the collection. The interval's low is the lowest low endpoint in the collection and the high is the highest high endpoint.
         /// <c>coll.FindOverlaps(coll.Span())</c> will by definition return all intervals in the collection.
@@ -37,6 +39,9 @@ namespace C5
         [Pure]
         int MaximumOverlap { get; }
 
+        #endregion
+
+        #region Find Overlaps
 
         // TODO: Check seealso in documentation. Does it actually reference the other overloaded method? Add it to FindOverlap as well
         // @design: made to spare the user of making a point interval [q:q] and allow for more effective implementations of the interface for some data structures
@@ -78,6 +83,9 @@ namespace C5
         [Pure]
         bool FindOverlap(IInterval<T> query, ref I overlap);
 
+        #endregion
+
+        #region Count Overlaps
 
         /// <summary>
         /// Count the number of intervals overlapping the query interval.
@@ -88,6 +96,9 @@ namespace C5
         [Pure]
         int CountOverlaps(IInterval<T> query);
 
+        #endregion
+
+        #region Extensible
 
         /// <summary>
         /// If true any call of an updating operation will throw an
@@ -124,6 +135,8 @@ namespace C5
         /// Remove all intervals from the collection.
         /// </summary>
         void Clear();
+
+        #endregion
     }
 
     [ContractClassFor(typeof(IIntervalCollection<,>))]
