@@ -156,10 +156,20 @@ namespace C5.intervals
         #endregion
 
         /// <inheritdoc/>
-        public int CountOverlaps(IInterval<T> query)
+        public int CountOverlaps(T query)
         {
             // Break if we won't find any overlaps
             if (ReferenceEquals(query, null) || IsEmpty)
+                return 0;
+
+            return countOverlaps(0, 0, _counts[0], new IntervalBase<T>(query));
+        }
+
+        /// <inheritdoc/>
+        public int CountOverlaps(IInterval<T> query)
+        {
+            // Break if we won't find any overlaps
+            if (query == null || IsEmpty)
                 return 0;
 
             return countOverlaps(0, 0, _counts[0], query);

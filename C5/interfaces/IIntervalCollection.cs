@@ -91,6 +91,15 @@ namespace C5
         #region Count Overlaps
 
         /// <summary>
+        /// Count the number of intervals overlapping the query point.
+        /// </summary>
+        /// <param name="query">The query interval</param>
+        /// <remarks>Beware that not all data structure support this operation any faster than <c>FindOverlaps.Count()</c>!</remarks>
+        /// <returns>The number of intervals that overlap the query point.</returns>
+        [Pure]
+        int CountOverlaps(T query);
+
+        /// <summary>
         /// Count the number of intervals overlapping the query interval.
         /// Beware that not all data structure support this operation any faster than FindOverlaps.Count().
         /// </summary>
@@ -232,11 +241,20 @@ namespace C5
 
         #region Count Overlaps
 
+        public int CountOverlaps(T query)
+        {
+            Contract.Requires(!ReferenceEquals(query, null));
+            Contract.Ensures(Contract.Result<int>() >= 0);
+            Contract.Ensures(Contract.Result<int>() == this.Count(i => i.Overlaps(query)));
+
+            throw new NotImplementedException();
+        }
+
         public int CountOverlaps(IInterval<T> query)
         {
-            Contract.Requires(query != null);
+            Contract.Requires(!ReferenceEquals(query, null));
             Contract.Ensures(Contract.Result<int>() >= 0);
-            Contract.Ensures(this.Count(i => i.Overlaps(query)) == Contract.Result<int>());
+            Contract.Ensures(Contract.Result<int>() == this.Count(i => i.Overlaps(query)));
 
             throw new NotImplementedException();
         }

@@ -337,6 +337,11 @@ namespace C5.intervals
         }
 
         /// <inheritdoc/>
+        public int CountOverlaps(T query)
+        {
+            return FindOverlaps(query).Count();
+        }
+        /// <inheritdoc/>
         public int CountOverlaps(IInterval<T> query)
         {
             return FindOverlaps(query).Count();

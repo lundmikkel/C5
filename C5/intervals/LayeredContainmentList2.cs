@@ -744,12 +744,14 @@ namespace C5.intervals
         #region Count Overlaps
 
         /// <inheritdoc/>
+        public int CountOverlaps(T query)
+        {
+            return countOverlaps(new IntervalBase<T>(query));
+        }
+
+        /// <inheritdoc/>
         public int CountOverlaps(IInterval<T> query)
         {
-            Contract.Ensures(Contract.Result<int>() == FindOverlaps(query).Count());
-            Contract.Ensures(Contract.Result<int>() >= 0);
-
-            // Break if we won't find any overlaps
             return !IsEmpty ? countOverlaps(query) : 0;
         }
 

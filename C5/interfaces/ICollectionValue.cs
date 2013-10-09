@@ -66,7 +66,7 @@ namespace C5.interfaces
         public bool Exists(Func<T, bool> predicate)
         {
             Contract.Requires(predicate != null);
-            Contract.Ensures(Contract.Result<bool>() == Enumerable.Any(this, predicate));
+            Contract.Ensures(Contract.Result<bool>() == this.Any(predicate));
 
             throw new NotImplementedException();
         }

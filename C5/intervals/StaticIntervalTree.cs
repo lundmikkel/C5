@@ -245,6 +245,12 @@ namespace C5.intervals
         #region IEnumerable
 
         /// <inheritdoc/>
+        public int CountOverlaps(T query)
+        {
+            return FindOverlaps(query).Count();
+        }
+
+        /// <inheritdoc/>
         public int CountOverlaps(IInterval<T> query)
         {
             return FindOverlaps(query).Count();
