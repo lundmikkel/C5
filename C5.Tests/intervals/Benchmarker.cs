@@ -220,7 +220,7 @@ namespace C5.Tests.intervals
         {
             get
             {
-                return Benchmarking ? 200 : 1;
+                return Benchmarking ? 20 : 1;
             }
         }
         public static int QueryRepetitions
@@ -231,25 +231,25 @@ namespace C5.Tests.intervals
             }
         }
 
-        public static bool Benchmarking { get { return false; } }
+        public static bool Benchmarking { get { return true; } }
 
         public static object[] DataSets = new object[] { 
-            "A", "B", "C", 
+            "A",// "B", "C", 
             //"D" 
         };
 
         public static int[] ConstructorCounts = new[]
             {
-                 100000,
-                 200000,
-                 300000,
-                 400000,
-                 500000,
+                 10000,
+                 20000,
+                 30000,
+                 40000,
+                 /*500000,
                  600000,
                  700000,
                  800000,
                  900000,
-                1000000
+                1000000*/
             };
 
         public static int[] DoubleCounts = new[]
@@ -556,7 +556,7 @@ namespace C5.Tests.intervals
         public override string Name { get { return "IBS"; } }
     }
 
-    class IntervalBinarySearchTreeAVL_Benchmarker : DataSetTester
+    class IntervalBinarySearchTreeAvl_Benchmarker : DataSetTester
     {
         protected override IIntervalCollection<IntervalOfInt, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
