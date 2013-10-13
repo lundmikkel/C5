@@ -63,6 +63,22 @@ namespace C5.intervals
         }
 
         /// <summary>
+        /// Create an interval using <see cref="IntervalType"/> to determine endpoint types. This
+        /// can be useful for making code more readable.
+        /// </summary>
+        /// <param name="low">Low endpoint.</param>
+        /// <param name="high">High endpoint.</param>
+        /// <param name="type">The interval type.</param>
+        /// <exception cref="ArgumentException">Thrown if interval is an empty point set.</exception>
+        public IntervalBase(T low, T high, IntervalType type)
+        {
+            _low = low;
+            _high = high;
+            _lowIncluded = (type & IntervalType.LowIncluded) == IntervalType.LowIncluded;
+            _highIncluded = (type & IntervalType.HighIncluded) == IntervalType.HighIncluded;
+        }
+
+        /// <summary>
         /// Copy the interval data from an <see cref="IInterval&lt;T&gt;"/> to a new interval. 
         /// </summary>
         /// <param name="i"><see cref="IInterval&lt;T&gt;"/> to copy the information from</param>
