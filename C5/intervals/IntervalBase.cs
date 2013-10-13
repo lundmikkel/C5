@@ -8,6 +8,8 @@ namespace C5.intervals
     /// <seealso cref="IInterval{T}"/>
     public class IntervalBase<T> : IInterval<T> where T : IComparable<T>
     {
+        #region Fields
+
         // Use read-only fields to avoid breaking data structures, if values were changed
         /// <inheritdoc/>
         private readonly T _low;
@@ -27,6 +29,10 @@ namespace C5.intervals
         /// <inheritdoc/>
         public bool HighIncluded { get { return _highIncluded; } }
 
+        #endregion
+
+        #region Constructors
+
         /// <summary>
         /// Make a point with same Low and High and both endpoints included.
         /// </summary>
@@ -40,15 +46,15 @@ namespace C5.intervals
         /// <summary>
         /// Create an interval. Default to time interval, which has low included and high excluded.
         /// </summary>
-        /// <param name="low">Low endpoint</param>
-        /// <param name="high">High endpoint</param>
-        /// <param name="lowIncluded">True if low endpoint is included</param>
-        /// <param name="highIncluded">True if high endpoint is included</param>
-        /// <exception cref="ArgumentException">Thrown if interval is an empty point set</exception>
+        /// <param name="low">Low endpoint.</param>
+        /// <param name="high">High endpoint.</param>
+        /// <param name="lowIncluded">True if low endpoint is included.</param>
+        /// <param name="highIncluded">True if high endpoint is included.</param>
+        /// <exception cref="ArgumentException">Thrown if interval is an empty point set.</exception>
         public IntervalBase(T low, T high, bool lowIncluded = true, bool highIncluded = false)
         {
-            if (high.CompareTo(low) < 0 || (low.CompareTo(high) == 0 && !lowIncluded && !highIncluded))
-                throw new ArgumentException("Low must be smaller than high. If low and high are equal, both lowIncluded and highIncluded should be true!");
+            //if (high.CompareTo(low) < 0 || (low.CompareTo(high) == 0 && (!lowIncluded || !highIncluded)))
+            //    throw new ArgumentException("Low must be smaller than high. If low and high are equal, both lowIncluded and highIncluded should be true!");
 
             _low = low;
             _high = high;
@@ -85,6 +91,10 @@ namespace C5.intervals
             _highIncluded = high.HighIncluded;
         }
 
+        #endregion
+
+        #region Public Methods
+
         /// <inheritdoc/>
         public override bool Equals(object that)
         {
@@ -101,11 +111,12 @@ namespace C5.intervals
             return IntervalExtensions.GetHashCode(this);
         }
 
-        // TODO: Is thi needed?!
         /// <inheritdoc/>
         public override string ToString()
         {
             return IntervalExtensions.ToString(this);
         }
+
+        #endregion
     }
 }
