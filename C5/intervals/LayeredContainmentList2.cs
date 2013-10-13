@@ -146,7 +146,7 @@ namespace C5.intervals
 
             // Sort intervals
             var comparer = ComparerFactory<I>.CreateComparer((x, y) => x.CompareTo(y));
-            Sorting.IntroSort(intervals, 0, intervals.Count(), comparer);
+            Sorting.IntroSort(intervals, 0, intervals.Length, comparer);
 
             foreach (var interval in intervals)
             {
