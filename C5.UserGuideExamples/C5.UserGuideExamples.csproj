@@ -58,6 +58,7 @@
     <Compile Include="GConvexHull.cs" />
     <Compile Include="GNfaToDfa.cs" />
     <Compile Include="HashCodes.cs" />
+    <Compile Include="intervals\WeigthedIntervalScheduling.cs" />
     <Compile Include="Jobqueue.cs" />
     <Compile Include="KeywordRecognition.cs" />
     <Compile Include="ListPatterns.cs" />
