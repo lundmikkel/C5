@@ -180,6 +180,7 @@ namespace C5
             get
             {
                 Contract.Ensures(Contract.Result<int>() >= 0);
+                //Contract.Ensures(Contract.ForAll(this, i => CountOverlaps(i.Low) <= Contract.Result<int>() && CountOverlaps(i.High) <= Contract.Result<int>()));
 
                 throw new NotImplementedException();
             }
