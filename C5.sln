@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2010
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{7873EAA2-F28E-48A0-B90E-9E733505C036}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.exe = .nuget\NuGet.exe
@@ -23,6 +23,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.Performance.Wpf", "C5.Performance.Wpf\C5.Performance.Wpf.csproj", "{2FDF20F0-55AF-4A44-90ED-E658ADD5D500}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.Ucsc", "C5.Ucsc\C5.Ucsc.csproj", "{2B89EBFA-7CBC-46B3-943F-10209C906294}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.Pex", "C5.Pex\C5.Pex.csproj", "{C426E299-32DA-470B-8154-05486D353680}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
@@ -52,6 +54,10 @@ Global
 		{2B89EBFA-7CBC-46B3-943F-10209C906294}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B89EBFA-7CBC-46B3-943F-10209C906294}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B89EBFA-7CBC-46B3-943F-10209C906294}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C426E299-32DA-470B-8154-05486D353680}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C426E299-32DA-470B-8154-05486D353680}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C426E299-32DA-470B-8154-05486D353680}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C426E299-32DA-470B-8154-05486D353680}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
