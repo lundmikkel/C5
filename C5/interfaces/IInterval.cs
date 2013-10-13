@@ -48,6 +48,10 @@ namespace C5
     [ContractClassFor(typeof(IInterval<>))]
     abstract class IntervalContract<T> : IInterval<T> where T : IComparable<T>
     {
+        /// <summary>
+        /// The invariant has no effect for interface. The invariants are stated in the properties
+        /// of the Low and High. They are left here to make them more readable.
+        /// </summary>
         [ContractInvariantMethod]
         private void invariants()
         {
@@ -57,8 +61,39 @@ namespace C5
             Contract.Invariant(Low.CompareTo(High) < 0 || Low.CompareTo(High) == 0 && LowIncluded && HighIncluded);
         }
 
-        public T Low { get; private set; }
-        public T High { get; private set; }
+        public T Low
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<T>() != null);
+                Contract.Ensures(Contract.Result<T>().CompareTo(High) < 0 || (Contract.Result<T>().CompareTo(High) == 0 && LowIncluded && HighIncluded));
+
+                throw new NotImplementedException();
+            }
+            private set
+            {
+                Contract.Requires(!ReferenceEquals(value, null));
+                throw new NotImplementedException();
+            }
+        }
+
+        public T High
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<T>() != null);
+                Contract.Ensures(Low.CompareTo(Contract.Result<T>()) < 0 || (Low.CompareTo(Contract.Result<T>()) == 0 && LowIncluded && HighIncluded));
+
+                throw new NotImplementedException();
+            }
+
+            private set
+            {
+                Contract.Requires(!ReferenceEquals(value, null));
+                throw new NotImplementedException();
+            }
+        }
+
         public bool LowIncluded { get; private set; }
         public bool HighIncluded { get; private set; }
     }
