@@ -220,10 +220,6 @@ namespace C5.intervals
 
             public T Key { get; private set; }
 
-            private IntervalSet _less;
-            private IntervalSet _equal;
-            private IntervalSet _greater;
-
             public Node Left { get; internal set; }
             public Node Right { get; internal set; }
 
@@ -243,18 +239,9 @@ namespace C5.intervals
 
             #region Properties
 
-            public IntervalSet Less
-            {
-                get { return _less ?? (_less = new IntervalSet()); }
-            }
-            public IntervalSet Equal
-            {
-                get { return _equal ?? (_equal = new IntervalSet()); }
-            }
-            public IntervalSet Greater
-            {
-                get { return _greater ?? (_greater = new IntervalSet()); }
-            }
+            public IntervalSet Less { get; set; }
+            public IntervalSet Equal { get; set; }
+            public IntervalSet Greater { get; set; }
 
             #endregion
 
@@ -275,16 +262,16 @@ namespace C5.intervals
 
                 var set = new IntervalSet();
 
-                if (_less != null)
-                    foreach (var interval in _less.Where(interval => interval.HasEndpoint(Key) && set.Add(interval)))
+                if (Less != null && !Less.IsEmpty)
+                    foreach (var interval in Less.Where(interval => interval.HasEndpoint(Key) && set.Add(interval)))
                         yield return interval;
 
-                if (_equal != null)
-                    foreach (var interval in _equal.Where(interval => interval.HasEndpoint(Key) && set.Add(interval)))
+                if (Equal != null && !Equal.IsEmpty)
+                    foreach (var interval in Equal.Where(interval => interval.HasEndpoint(Key) && set.Add(interval)))
                         yield return interval;
 
-                if (_greater != null)
-                    foreach (var interval in _greater.Where(interval => interval.HasEndpoint(Key) && set.Add(interval)))
+                if (Greater != null && !Greater.IsEmpty)
+                    foreach (var interval in Greater.Where(interval => interval.HasEndpoint(Key) && set.Add(interval)))
                         yield return interval;
             }
 
@@ -550,17 +537,39 @@ namespace C5.intervals
 
 
             // 1
-            node.Less.AddAll(root.Less);
-            node.Equal.AddAll(root.Less);
+            if (root.Less != null && !root.Less.IsEmpty)
+            {
+                if (node.Less == null)
+                    node.Less = new IntervalSet();
+
+                node.Less.AddAll(root.Less);
+
+                if (node.Equal == null)
+                    node.Equal = new IntervalSet();
+
+                node.Equal.AddAll(root.Less);
+            }
 
             // 2
-            var between = node.Greater - root.Greater;
-            root.Less.AddAll(between);
-            node.Greater.RemoveAll(between);
+            if (node.Greater != null && !node.Greater.IsEmpty)
+            {
+                var between = root.Greater != null ? node.Greater - root.Greater : node.Greater;
+                if (root.Less == null)
+                    root.Less = new IntervalSet();
+
+                root.Less.AddAll(between);
+
+                node.Greater.RemoveAll(between);
+            }
 
             // 3
-            root.Equal.RemoveAll(node.Greater);
-            root.Greater.RemoveAll(node.Greater);
+            if (node.Greater != null && !node.Greater.IsEmpty)
+            {
+                if (root.Equal != null && !root.Equal.IsEmpty)
+                    root.Equal.RemoveAll(node.Greater);
+                if (root.Greater != null && !root.Greater.IsEmpty)
+                    root.Greater.RemoveAll(node.Greater);
+            }
 
 
             // Update MNO
@@ -582,17 +591,39 @@ namespace C5.intervals
 
             // TODO: Look into if these operations can be optimised
             // 1
-            node.Greater.AddAll(root.Greater);
-            node.Equal.AddAll(root.Greater);
+            if (root.Greater != null && !root.Greater.IsEmpty)
+            {
+                if (node.Greater == null)
+                    node.Greater = new IntervalSet();
+
+                node.Greater.AddAll(root.Greater);
+
+                if (node.Equal == null)
+                    node.Equal = new IntervalSet();
+
+                node.Equal.AddAll(root.Greater);
+            }
 
             // 2
-            var between = node.Less - root.Less;
-            root.Greater.AddAll(between);
-            node.Less.RemoveAll(between);
+            if (node.Less != null && !node.Less.IsEmpty)
+            {
+                var between = root.Less != null ? node.Less - root.Less : node.Less;
+                if (root.Greater == null)
+                    root.Greater = new IntervalSet();
+
+                root.Greater.AddAll(between);
+
+                node.Less.RemoveAll(between);
+            }
 
             // 3
-            root.Equal.RemoveAll(node.Less);
-            root.Less.RemoveAll(node.Less);
+            if (node.Less != null && node.Less.IsEmpty)
+            {
+                if (root.Equal != null && !root.Equal.IsEmpty)
+                    root.Equal.RemoveAll(node.Less);
+                if (root.Less != null && !root.Less.IsEmpty)
+                    root.Less.RemoveAll(node.Less);
+            }
 
 
             // Update MNO
@@ -700,12 +731,15 @@ namespace C5.intervals
             }
 
             // Go through all intervals in the node
-            foreach (var interval in root.Less)
-                yield return interval;
-            foreach (var interval in root.Equal)
-                yield return interval;
-            foreach (var interval in root.Greater)
-                yield return interval;
+            if (root.Less != null && !root.Less.IsEmpty)
+                foreach (var interval in root.Less)
+                    yield return interval;
+            if (root.Equal != null && !root.Equal.IsEmpty)
+                foreach (var interval in root.Equal)
+                    yield return interval;
+            if (root.Greater != null && !root.Greater.IsEmpty)
+                foreach (var interval in root.Greater)
+                    yield return interval;
 
             // Recursively retrieve intervals in right subtree
             if (root.Right != null)
@@ -769,26 +803,26 @@ namespace C5.intervals
         {
             Contract.Requires(root != null);
 
-            if (!root.Less.IsEmpty)
+            if (root.Less != null && !root.Less.IsEmpty)
                 return root.Less.Choose();
 
             if (root.Left != null)
                 return getLowest(root.Left);
 
-            return !root.Equal.IsEmpty ? root.Equal.Choose() : root.Greater.Choose();
+            return root.Equal != null && !root.Equal.IsEmpty ? root.Equal.Choose() : root.Greater.Choose();
         }
 
         private static IInterval<T> getHighest(Node root)
         {
             Contract.Requires(root != null);
 
-            if (!root.Greater.IsEmpty)
+            if (root.Greater != null && !root.Greater.IsEmpty)
                 return root.Greater.Choose();
 
             if (root.Right != null)
                 return getHighest(root.Right);
 
-            return !root.Equal.IsEmpty ? root.Equal.Choose() : root.Less.Choose();
+            return root.Equal != null && !root.Equal.IsEmpty ? root.Equal.Choose() : root.Less.Choose();
         }
 
         #endregion
@@ -913,8 +947,9 @@ namespace C5.intervals
                 if (compareTo < 0)
                 {
                     // Return all intervals in Less
-                    foreach (var interval in root.Less)
-                        yield return interval;
+                    if (root.Less != null && !root.Less.IsEmpty)
+                        foreach (var interval in root.Less)
+                            yield return interval;
 
                     // Move left
                     root = root.Left;
@@ -923,8 +958,9 @@ namespace C5.intervals
                 else if (0 < compareTo)
                 {
                     // Return all intervals in Greater
-                    foreach (var interval in root.Greater)
-                        yield return interval;
+                    if (root.Greater != null && !root.Greater.IsEmpty)
+                        foreach (var interval in root.Greater)
+                            yield return interval;
 
                     // Move right
                     root = root.Right;
@@ -933,8 +969,9 @@ namespace C5.intervals
                 else
                 {
                     // Return all intervals in Equal
-                    foreach (var interval in root.Equal)
-                        yield return interval;
+                    if (root.Equal != null && !root.Equal.IsEmpty)
+                        foreach (var interval in root.Equal)
+                            yield return interval;
 
                     // Stop as the search is done
                     yield break;
@@ -954,8 +991,9 @@ namespace C5.intervals
             // Interval is lower than root, go left
             if (query.High.CompareTo(root.Key) < 0)
             {
-                foreach (var interval in root.Less)
-                    yield return interval;
+                if (root.Less != null && !root.Less.IsEmpty)
+                    foreach (var interval in root.Less)
+                        yield return interval;
 
                 // Recursively travese left subtree
                 foreach (var interval in findSplitNode(root.Left, query, setSplitNode))
@@ -964,8 +1002,9 @@ namespace C5.intervals
             // Interval is higher than root, go right
             else if (root.Key.CompareTo(query.Low) < 0)
             {
-                foreach (var interval in root.Greater)
-                    yield return interval;
+                if (root.Greater != null && !root.Greater.IsEmpty)
+                    foreach (var interval in root.Greater)
+                        yield return interval;
 
                 // Recursively travese right subtree
                 foreach (var interval in findSplitNode(root.Right, query, setSplitNode))
@@ -974,12 +1013,15 @@ namespace C5.intervals
             // Otherwise add overlapping nodes in split node
             else
             {
-                foreach (var interval in root.Less.Where(i => query.Overlaps(i)))
-                    yield return interval;
-                foreach (var interval in root.Equal.Where(i => query.Overlaps(i)))
-                    yield return interval;
-                foreach (var interval in root.Greater.Where(i => query.Overlaps(i)))
-                    yield return interval;
+                if (root.Less != null && !root.Less.IsEmpty)
+                    foreach (var interval in root.Less.Where(i => query.Overlaps(i)))
+                        yield return interval;
+                if (root.Equal != null && !root.Equal.IsEmpty)
+                    foreach (var interval in root.Equal.Where(i => query.Overlaps(i)))
+                        yield return interval;
+                if (root.Greater != null && !root.Greater.IsEmpty)
+                    foreach (var interval in root.Greater.Where(i => query.Overlaps(i)))
+                        yield return interval;
             }
         }
 
@@ -1003,12 +1045,15 @@ namespace C5.intervals
             //
             else if (compareTo < 0)
             {
-                foreach (var interval in root.Less)
-                    yield return interval;
-                foreach (var interval in root.Equal)
-                    yield return interval;
-                foreach (var interval in root.Greater)
-                    yield return interval;
+                if (root.Less != null && !root.Less.IsEmpty)
+                    foreach (var interval in root.Less)
+                        yield return interval;
+                if (root.Equal != null && !root.Equal.IsEmpty)
+                    foreach (var interval in root.Equal)
+                        yield return interval;
+                if (root.Greater != null && !root.Greater.IsEmpty)
+                    foreach (var interval in root.Greater)
+                        yield return interval;
 
                 // Recursively add all intervals in right subtree as they must be
                 // contained by [root.Key:splitNode]
@@ -1023,10 +1068,11 @@ namespace C5.intervals
             else
             {
                 // Add all intersecting intervals from right list
-                foreach (var interval in root.Greater)
-                    yield return interval;
+                if (root.Greater != null && !root.Greater.IsEmpty)
+                    foreach (var interval in root.Greater)
+                        yield return interval;
 
-                if (query.LowIncluded)
+                if (query.LowIncluded && root.Equal != null && !root.Equal.IsEmpty)
                     foreach (var interval in root.Equal)
                         yield return interval;
 
@@ -1048,8 +1094,9 @@ namespace C5.intervals
             if (compareTo < 0)
             {
                 // Add all intersecting intervals from left list
-                foreach (var interval in root.Less)
-                    yield return interval;
+                if (root.Less != null && !root.Less.IsEmpty)
+                    foreach (var interval in root.Less)
+                        yield return interval;
 
                 // Otherwise Recursively travese left subtree
                 foreach (var interval in findRight(root.Left, query))
@@ -1060,12 +1107,15 @@ namespace C5.intervals
             {
                 // As our query interval contains the interval [root.Key:splitNode]
                 // all intervals in root can be returned without any checks
-                foreach (var interval in root.Less)
-                    yield return interval;
-                foreach (var interval in root.Equal)
-                    yield return interval;
-                foreach (var interval in root.Greater)
-                    yield return interval;
+                if (root.Less != null && !root.Less.IsEmpty)
+                    foreach (var interval in root.Less)
+                        yield return interval;
+                if (root.Equal != null && !root.Equal.IsEmpty)
+                    foreach (var interval in root.Equal)
+                        yield return interval;
+                if (root.Greater != null && !root.Greater.IsEmpty)
+                    foreach (var interval in root.Greater)
+                        yield return interval;
 
                 // Recursively add all intervals in right subtree as they must be
                 // contained by [root.Key:splitNode]
@@ -1080,10 +1130,11 @@ namespace C5.intervals
             else
             {
                 // Add all intersecting intervals from left list
-                foreach (var interval in root.Less)
-                    yield return interval;
+                if (root.Less != null && !root.Less.IsEmpty)
+                    foreach (var interval in root.Less)
+                        yield return interval;
 
-                if (query.HighIncluded)
+                if (query.HighIncluded && root.Equal != null && !root.Equal.IsEmpty)
                     foreach (var interval in root.Equal)
                         yield return interval;
 
@@ -1231,11 +1282,20 @@ namespace C5.intervals
             {
                 // Everything in the right subtree of root will lie within the interval
                 if (right != null && right.Key.CompareTo(interval.High) <= 0)
+                {
+                    if (root.Greater == null)
+                        root.Greater = new IntervalSet();
                     intervalWasAdded |= root.Greater.Add(interval);
+                }
 
                 // root key is between interval.low and interval.high
                 if (root.Key.CompareTo(interval.High) < 0)
+                {
+                    if (root.Equal == null)
+                        root.Equal = new IntervalSet();
+
                     intervalWasAdded |= root.Equal.Add(interval);
+                }
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
                 root.Left = addLow(root.Left, root, interval, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
@@ -1248,10 +1308,20 @@ namespace C5.intervals
             {
                 // If everything in the right subtree of root will lie within the interval
                 if (right != null && right.Key.CompareTo(interval.High) <= 0)
+                {
+                    if (root.Greater == null)
+                        root.Greater = new IntervalSet();
+
                     intervalWasAdded |= root.Greater.Add(interval);
+                }
 
                 if (interval.LowIncluded)
+                {
+                    if (root.Equal == null)
+                        root.Equal = new IntervalSet();
+
                     intervalWasAdded |= root.Equal.Add(interval);
+                }
 
                 // Save reference to endpoint node
                 lowNode = root;
@@ -1292,11 +1362,21 @@ namespace C5.intervals
             {
                 // Everything in the right subtree of root will lie within the interval
                 if (left != null && left.Key.CompareTo(interval.Low) >= 0)
+                {
+                    if (root.Less == null)
+                        root.Less = new IntervalSet();
+
                     intervalWasAdded |= root.Less.Add(interval);
+                }
 
                 // root key is between interval.low and interval.high
                 if (root.Key.CompareTo(interval.Low) > 0)
+                {
+                    if (root.Equal == null)
+                        root.Equal = new IntervalSet();
+
                     intervalWasAdded |= root.Equal.Add(interval);
+                }
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
                 root.Right = addHigh(root.Right, root, interval, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
@@ -1309,10 +1389,20 @@ namespace C5.intervals
             {
                 // If everything in the right subtree of root will lie within the interval
                 if (left != null && left.Key.CompareTo(interval.Low) >= 0)
+                {
+                    if (root.Less == null)
+                        root.Less = new IntervalSet();
+
                     intervalWasAdded |= root.Less.Add(interval);
+                }
 
                 if (interval.HighIncluded)
+                {
+                    if (root.Equal == null)
+                        root.Equal = new IntervalSet();
+
                     intervalWasAdded |= root.Equal.Add(interval);
+                }
 
                 // Save reference to endpoint node
                 highNode = root;
@@ -1651,9 +1741,12 @@ namespace C5.intervals
                 cell.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Key.ToString() });
                 // Add Less, Equal and Greater set in bottom cell
                 var bottom = new GraphvizRecordCell();
-                bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Less.ToString() });
-                bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Equal.ToString() });
-                bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Greater.ToString() });
+                if (e.Vertex.Less != null)
+                    bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Less.ToString() });
+                if (e.Vertex.Equal != null)
+                    bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Equal.ToString() });
+                if (e.Vertex.Greater != null)
+                    bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Greater.ToString() });
                 cell.Cells.Add(bottom);
                 // Add cell to record
                 e.VertexFormatter.Record.Cells.Add(cell);
