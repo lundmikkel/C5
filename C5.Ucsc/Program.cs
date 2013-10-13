@@ -9,7 +9,7 @@ namespace C5.Ucsc
 {
     class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             var genes = UcscHumanGenomeParser.ParseFile("../../Data/ucsc-human-default.txt");
             Console.Out.WriteLine("Creating LCList");
