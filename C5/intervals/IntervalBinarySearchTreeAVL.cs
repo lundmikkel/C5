@@ -164,14 +164,14 @@ namespace C5.intervals
             var intervalUV = leftAncestor ? new IntervalBase<T>(u.Key, v.Key, false) : new IntervalBase<T>(v.Key, u.Key, false);
 
             // Get the "<" or ">" set depending of the direction we are searching.
-            var set = leftAncestor ? v.Less : v.Greater;
+            var set = (leftAncestor ? v.Less : v.Greater) ?? new IntervalSet();
 
             // Containment invariant.
             if (!set.All(i => i.Contains(intervalUV)))
                 return false;
 
             // "=" Invariant part 1.
-            if (v.Equal.Exists(i => !i.Overlaps(v.Key)))
+            if (v.Equal != null && v.Equal.Exists(i => !i.Overlaps(v.Key)))
                 return false;
 
             // Maximality and "=" invariant while loop.
@@ -190,8 +190,9 @@ namespace C5.intervals
                     return false;
 
                 // "=" Invariant part 2.
-                var ancestorSet = compare < 0 ? ancestor.Less : ancestor.Greater;
-                if (v.Equal.Exists(i => ancestorSet.Exists(i2 => i.Equals(i2))))
+                var ancestorSet = (compare < 0 ? ancestor.Less : ancestor.Greater) ?? new IntervalSet();
+
+                if (v.Equal != null && v.Equal.Exists(i => ancestorSet.Exists(i2 => i.Equals(i2))))
                     return false;
 
                 // Set the child to the current ancestor and search upwards.
