@@ -905,7 +905,9 @@ namespace C5.intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
-            return findOverlaps(_root, query);
+            // TODO: Figure out why we need to check for duplicates
+            var set = new IntervalSet();
+            return findOverlaps(_root, query).Where(set.Add);
         }
 
         /// <inheritdoc/>
