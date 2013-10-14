@@ -922,18 +922,19 @@ namespace C5.intervals
 
             var splitNode = _root;
             // Use a lambda instead of out, as out or ref isn't allowed for itorators
-            set.AddAll(findSplitNode(_root, query, n => { splitNode = n; }));
+            foreach (var interval in findSplitNode(_root, query, n => { splitNode = n; }).Where(set.Add))
+                yield return interval;
 
             // Find all intersecting intervals in left subtree
             if (query.Low.CompareTo(splitNode.Key) < 0)
-                set.AddAll(findLeft(splitNode.Left, query));
+                foreach (var interval in findLeft(splitNode.Left, query).Where(set.Add))
+                    yield return interval;
+
 
             // Find all intersecting intervals in right subtree
             if (splitNode.Key.CompareTo(query.High) < 0)
-                set.AddAll(findRight(splitNode.Right, query));
-
-            foreach (var interval in set)
-                yield return interval;
+                foreach (var interval in findRight(splitNode.Right, query).Where(set.Add))
+                    yield return interval;
         }
 
         private static IEnumerable<I> findOverlaps(Node root, T query)
@@ -1036,8 +1037,9 @@ namespace C5.intervals
             //
             if (compareTo > 0)
             {
-                foreach (var interval in root.Greater)
-                    yield return interval;
+                if (root.Greater != null && !root.Greater.IsEmpty)
+                    foreach (var interval in root.Greater)
+                        yield return interval;
 
                 // Recursively travese right subtree
                 foreach (var interval in findLeft(root.Right, query))
