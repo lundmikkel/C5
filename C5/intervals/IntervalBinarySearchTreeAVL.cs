@@ -918,7 +918,7 @@ namespace C5.intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
-            if (ReferenceEquals(query, null))
+            if (query == null)
                 yield break;
 
             // Break if collection is empty or the query is outside the collections span
@@ -993,8 +993,9 @@ namespace C5.intervals
         /// </summary>
         private static IEnumerable<I> findSplitNode(Node root, IInterval<T> query, Action<Node> setSplitNode)
         {
-            if (root == null) yield break;
-
+            while (root != null)
+            {
+                // Update split node
             setSplitNode(root);
 
             // Interval is lower than root, go left
@@ -1004,9 +1005,8 @@ namespace C5.intervals
                     foreach (var interval in root.Less)
                         yield return interval;
 
-                // Recursively travese left subtree
-                foreach (var interval in findSplitNode(root.Left, query, setSplitNode))
-                    yield return interval;
+                    // Update root to left node
+                    root = root.Left;
             }
             // Interval is higher than root, go right
             else if (root.Key.CompareTo(query.Low) < 0)
@@ -1015,9 +1015,8 @@ namespace C5.intervals
                     foreach (var interval in root.Greater)
                         yield return interval;
 
-                // Recursively travese right subtree
-                foreach (var interval in findSplitNode(root.Right, query, setSplitNode))
-                    yield return interval;
+                    // Update root to right node
+                    root = root.Right;
             }
             // Otherwise add overlapping nodes in split node
             else
@@ -1031,6 +1030,9 @@ namespace C5.intervals
                 if (root.Greater != null && !root.Greater.IsEmpty)
                     foreach (var interval in root.Greater.Where(i => query.Overlaps(i)))
                         yield return interval;
+
+                    yield break;
+                }
             }
         }
 
