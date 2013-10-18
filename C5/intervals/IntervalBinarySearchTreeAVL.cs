@@ -204,7 +204,7 @@ namespace C5.intervals
 
         #region Inner Classes
 
-        class Node
+        class Node : IComparable<Node>
         {
             #region Code Contracts
 
@@ -312,6 +312,11 @@ namespace C5.intervals
 
                 // Return true if either Max or Sum changed
                 return oldMax != Max || oldSum != Sum;
+            }
+
+            public int CompareTo(Node other)
+            {
+                return Key.CompareTo(other.Key);
             }
 
             public override string ToString()
