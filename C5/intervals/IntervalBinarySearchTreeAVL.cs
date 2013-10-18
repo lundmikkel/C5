@@ -895,9 +895,7 @@ namespace C5.intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
-            // TODO: Figure out why we need to check for duplicates
-            var set = new IntervalSet();
-            return findOverlaps(_root, query).Where(set.Add);
+            return findOverlaps(_root, query);
         }
 
         /// <inheritdoc/>
@@ -981,40 +979,40 @@ namespace C5.intervals
             while (root != null)
             {
                 // Update split node
-            setSplitNode(root);
+                setSplitNode(root);
 
-            // Interval is lower than root, go left
-            if (query.High.CompareTo(root.Key) < 0)
-            {
-                if (root.Less != null && !root.Less.IsEmpty)
-                    foreach (var interval in root.Less)
-                        yield return interval;
+                // Interval is lower than root, go left
+                if (query.High.CompareTo(root.Key) < 0)
+                {
+                    if (root.Less != null && !root.Less.IsEmpty)
+                        foreach (var interval in root.Less)
+                            yield return interval;
 
                     // Update root to left node
                     root = root.Left;
-            }
-            // Interval is higher than root, go right
-            else if (root.Key.CompareTo(query.Low) < 0)
-            {
-                if (root.Greater != null && !root.Greater.IsEmpty)
-                    foreach (var interval in root.Greater)
-                        yield return interval;
+                }
+                // Interval is higher than root, go right
+                else if (root.Key.CompareTo(query.Low) < 0)
+                {
+                    if (root.Greater != null && !root.Greater.IsEmpty)
+                        foreach (var interval in root.Greater)
+                            yield return interval;
 
                     // Update root to right node
                     root = root.Right;
-            }
-            // Otherwise add overlapping nodes in split node
-            else
-            {
-                if (root.Less != null && !root.Less.IsEmpty)
-                    foreach (var interval in root.Less.Where(i => query.Overlaps(i)))
-                        yield return interval;
-                if (root.Equal != null && !root.Equal.IsEmpty)
-                    foreach (var interval in root.Equal.Where(i => query.Overlaps(i)))
-                        yield return interval;
-                if (root.Greater != null && !root.Greater.IsEmpty)
-                    foreach (var interval in root.Greater.Where(i => query.Overlaps(i)))
-                        yield return interval;
+                }
+                // Otherwise add overlapping nodes in split node
+                else
+                {
+                    if (root.Less != null && !root.Less.IsEmpty)
+                        foreach (var interval in root.Less.Where(i => query.Overlaps(i)))
+                            yield return interval;
+                    if (root.Equal != null && !root.Equal.IsEmpty)
+                        foreach (var interval in root.Equal.Where(i => query.Overlaps(i)))
+                            yield return interval;
+                    if (root.Greater != null && !root.Greater.IsEmpty)
+                        foreach (var interval in root.Greater.Where(i => query.Overlaps(i)))
+                            yield return interval;
 
                     yield break;
                 }
