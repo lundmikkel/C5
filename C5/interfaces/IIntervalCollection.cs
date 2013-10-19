@@ -196,7 +196,7 @@ namespace C5
             // All intervals in collect that overlap query must be in the result
             Contract.Ensures(Contract.ForAll(this.Where(i => i.Overlaps(query)), i => Contract.Result<IEnumerable<I>>().Any(j => ReferenceEquals(i, j))));
             // All intervals in the collection that do not overlap cannot by in the result
-            Contract.Ensures(Contract.ForAll(this.Where(i => i.Overlaps(query)), i => Contract.Result<IEnumerable<I>>().Any(j => ReferenceEquals(i, j))));
+            Contract.Ensures(Contract.ForAll(this.Where(i => !i.Overlaps(query)), i => Contract.ForAll(Contract.Result<IEnumerable<I>>(), j => !ReferenceEquals(i, j))));
             // The number of intervals in the collection that overlap the query must be equal to the result size
             Contract.Ensures(this.Count(i => i.Overlaps(query)) == Contract.Result<IEnumerable<I>>().Count());
 
@@ -209,7 +209,7 @@ namespace C5
             // All intervals in collect that overlap query must be in the result
             Contract.Ensures(Contract.ForAll(this.Where(i => i.Overlaps(query)), i => Contract.Result<IEnumerable<I>>().Any(j => ReferenceEquals(i, j))));
             // All intervals in the collection that do not overlap cannot by in the result
-            Contract.Ensures(Contract.ForAll(this.Where(i => i.Overlaps(query)), i => Contract.Result<IEnumerable<I>>().Any(j => ReferenceEquals(i, j))));
+            Contract.Ensures(Contract.ForAll(this.Where(i => !i.Overlaps(query)), i => Contract.ForAll(Contract.Result<IEnumerable<I>>(), j => !ReferenceEquals(i, j))));
             // The number of intervals in the collection that overlap the query must be equal to the result size
             Contract.Ensures(this.Count(i => i.Overlaps(query)) == Contract.Result<IEnumerable<I>>().Count());
 
