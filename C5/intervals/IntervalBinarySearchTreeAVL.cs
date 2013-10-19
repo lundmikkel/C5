@@ -26,6 +26,8 @@ namespace C5.intervals
 
         #endregion
 
+        public string GraphViz { get { return QuickGraph(); } }
+
         #region Code Contracts
 
         [ContractInvariantMethod]
@@ -221,6 +223,8 @@ namespace C5.intervals
             // Balance - between -2 and +2
             public sbyte Balance { get; internal set; }
 
+            public bool Dummy { get; private set; }
+
             #endregion
 
             #region Properties
@@ -236,6 +240,11 @@ namespace C5.intervals
             public Node(T key)
             {
                 Key = key;
+            }
+
+            public Node()
+            {
+                Dummy = true;
             }
 
             #endregion
@@ -324,10 +333,10 @@ namespace C5.intervals
 
         private sealed class IntervalSet : HashSet<I>
         {
-            private IntervalSet(IEnumerable<I> intervals)
-                : base(Comparer)
+
+            public IntervalSet(IntervalSet set)
             {
-                AddAll(intervals);
+                AddAll(set);
             }
 
             public IntervalSet()
@@ -1700,7 +1709,7 @@ namespace C5.intervals
 
             if (_root != null)
             {
-                var node = new Node(default(T));
+                var node = new Node();
                 graph.AddVertex(node);
                 graph.AddEdge(new Edge<Node>(node, _root));
             }
@@ -1714,11 +1723,23 @@ namespace C5.intervals
                     graph.AddVertex(node.Left);
                     graph.AddEdge(new Edge<Node>(node, node.Left));
                 }
+                else
+                {
+                    var dummy = new Node();
+                    graph.AddVertex(dummy);
+                    graph.AddEdge(new Edge<Node>(node, dummy));
+                }
 
                 if (node.Right != null)
                 {
                     graph.AddVertex(node.Right);
                     graph.AddEdge(new Edge<Node>(node, node.Right));
+                }
+                else
+                {
+                    var dummy = new Node();
+                    graph.AddVertex(dummy);
+                    graph.AddEdge(new Edge<Node>(node, dummy));
                 }
             }
 
@@ -1726,6 +1747,12 @@ namespace C5.intervals
 
             gw.FormatVertex += delegate(object sender, FormatVertexEventArgs<Node> e)
             {
+                if (e.Vertex.Dummy)
+                {
+                    e.VertexFormatter.Shape = GraphvizVertexShape.Point;
+                }
+                else
+                {
                 e.VertexFormatter.Shape = GraphvizVertexShape.Record;
                 e.VertexFormatter.Style = GraphvizVertexStyle.Rounded;
                 e.VertexFormatter.Font = new GraphvizFont("consola", 12);
@@ -1736,15 +1763,24 @@ namespace C5.intervals
                 cell.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Key.ToString() });
                 // Add Less, Equal and Greater set in bottom cell
                 var bottom = new GraphvizRecordCell();
-                if (e.Vertex.Less != null)
-                    bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Less.ToString() });
-                if (e.Vertex.Equal != null)
-                    bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Equal.ToString() });
-                if (e.Vertex.Greater != null)
-                    bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Greater.ToString() });
+
+                    bottom.Cells.Add(new GraphvizRecordCell
+                        {
+                            Text = e.Vertex.Less != null && !e.Vertex.Less.IsEmpty ? e.Vertex.Less.ToString() : "Ø"
+                        });
+                    bottom.Cells.Add(new GraphvizRecordCell
+                        {
+                            Text = e.Vertex.Equal != null && !e.Vertex.Equal.IsEmpty ? e.Vertex.Equal.ToString() : "Ø"
+                        });
+                    bottom.Cells.Add(new GraphvizRecordCell
+                        {
+                            Text = e.Vertex.Greater != null && !e.Vertex.Greater.IsEmpty ? e.Vertex.Greater.ToString() : "Ø"
+                        });
+
                 cell.Cells.Add(bottom);
                 // Add cell to record
                 e.VertexFormatter.Record.Cells.Add(cell);
+                }
             };
             gw.FormatEdge += delegate(object sender, FormatEdgeEventArgs<Node, Edge<Node>> e)
             {
@@ -1755,9 +1791,7 @@ namespace C5.intervals
             };
 
 
-            var graphviz = gw.Generate();
-
-            return graphviz.Replace("GraphvizColor", "color");
+            return gw.Generate();
         }
 
         /// <summary>
