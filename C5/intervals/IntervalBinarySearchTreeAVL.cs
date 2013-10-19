@@ -535,42 +535,56 @@ namespace C5.intervals
             root.Left = node.Right;
             node.Right = root;
 
-
-            // 1
             if (root.Less != null && !root.Less.IsEmpty)
             {
+                // node.Less = node.Less U root.Less
                 if (node.Less == null)
-                    node.Less = new IntervalSet();
+                    node.Less = new IntervalSet(root.Less);
+                else
+                    node.Less.AddAll(root.Less);
 
-                node.Less.AddAll(root.Less);
-
+                // node.Equal = node.Less U root.Less
                 if (node.Equal == null)
-                    node.Equal = new IntervalSet();
-
-                node.Equal.AddAll(root.Less);
+                    node.Equal = new IntervalSet(root.Less);
+                else
+                    node.Equal.AddAll(root.Less);
             }
 
-            // 2
             if (node.Greater != null && !node.Greater.IsEmpty)
             {
-                var between = root.Greater != null ? node.Greater - root.Greater : node.Greater;
-                if (root.Less == null)
-                    root.Less = new IntervalSet();
+                var rootGreaterIsEmpty = root.Greater == null || root.Greater.IsEmpty;
+                // unique = node.Greater - root.Greater
+                var uniqueInNodeGreater = rootGreaterIsEmpty
+                    ? node.Greater
+                    : node.Greater - root.Greater;
 
-                root.Less.AddAll(between);
+                // root.Less = root.Less U unique
+                if (root.Less != null)
+                    root.Less.AddAll(uniqueInNodeGreater);
+                else
+                {
+                    // If root.Greater is empty, uniqueInNodeGreater is a pointer to the set node.Greater
+                    // We don't want root.Less and node.Greater to be the same IntervalSet object, so we duplicate it
+                    root.Less = rootGreaterIsEmpty ? new IntervalSet(uniqueInNodeGreater) : uniqueInNodeGreater;
+                }
 
-                node.Greater.RemoveAll(between);
+                // node.Greater = node.Greater - unique
+                if (rootGreaterIsEmpty)
+                    node.Greater = null;
+                else
+                    node.Greater.RemoveAll(uniqueInNodeGreater);
             }
 
-            // 3
             if (node.Greater != null && !node.Greater.IsEmpty)
             {
-                if (root.Equal != null && !root.Equal.IsEmpty)
-                    root.Equal.RemoveAll(node.Greater);
-                if (root.Greater != null && !root.Greater.IsEmpty)
+                // root.Greater = root.Greater - node.Greater
+                if (root.Greater != null)
                     root.Greater.RemoveAll(node.Greater);
-            }
 
+                // root.Equal = root.Equal - node.Greater
+                if (root.Equal != null)
+                    root.Equal.RemoveAll(node.Greater);
+            }
 
             // Update MNO
             root.UpdateMaximumOverlap();
@@ -590,41 +604,54 @@ namespace C5.intervals
             node.Left = root;
 
             // TODO: Look into if these operations can be optimised
-            // 1
             if (root.Greater != null && !root.Greater.IsEmpty)
             {
+                // node.Greater = node.Greater U root.Greater
                 if (node.Greater == null)
-                    node.Greater = new IntervalSet();
+                    node.Greater = new IntervalSet(root.Greater);
+                else
+                    node.Greater.AddAll(root.Greater);
 
-                node.Greater.AddAll(root.Greater);
-
+                // node.Equal = node.Greater U root.Greater
                 if (node.Equal == null)
-                    node.Equal = new IntervalSet();
-
-                node.Equal.AddAll(root.Greater);
+                    node.Equal = new IntervalSet(root.Greater);
+                else
+                    node.Equal.AddAll(root.Greater);
             }
 
-            // 2
             if (node.Less != null && !node.Less.IsEmpty)
             {
-                var between = root.Less != null ? node.Less - root.Less : node.Less;
-                if (root.Greater == null)
-                    root.Greater = new IntervalSet();
+                var rootLessIsEmpty = root.Less == null || root.Less.IsEmpty;
+                // unique = node.Less - root.Less
+                var uniqueInNodeLess = rootLessIsEmpty ? node.Less : node.Less - root.Less;
 
-                root.Greater.AddAll(between);
+                // root.Greater = root.Greater U unique
+                if (root.Greater != null)
+                    root.Greater.AddAll(uniqueInNodeLess);
+                else
+                {
+                    // If root.Less is empty, uniqueInNodeLess is a pointer to the set node.Less
+                    // We don't want root.Greater and node.Less to be the same IntervalSet object, so we duplicate it
+                    root.Greater = rootLessIsEmpty ? new IntervalSet(uniqueInNodeLess) : uniqueInNodeLess;
+                }
 
-                node.Less.RemoveAll(between);
+                // node.Less = node.Less - unique
+                if (rootLessIsEmpty)
+                    node.Less = null;
+                else
+                    node.Less.RemoveAll(uniqueInNodeLess);
             }
 
-            // 3
-            if (node.Less != null && node.Less.IsEmpty)
+            if (node.Less != null && !node.Less.IsEmpty)
             {
-                if (root.Equal != null && !root.Equal.IsEmpty)
-                    root.Equal.RemoveAll(node.Less);
-                if (root.Less != null && !root.Less.IsEmpty)
+                // root.Less = root.Less - node.Less
+                if (root.Less != null)
                     root.Less.RemoveAll(node.Less);
-            }
 
+                // root.Equal = root.Equal - node.Less
+                if (root.Equal != null)
+                    root.Equal.RemoveAll(node.Less);
+            }
 
             // Update MNO
             root.UpdateMaximumOverlap();
@@ -1753,16 +1780,16 @@ namespace C5.intervals
                 }
                 else
                 {
-                e.VertexFormatter.Shape = GraphvizVertexShape.Record;
-                e.VertexFormatter.Style = GraphvizVertexStyle.Rounded;
-                e.VertexFormatter.Font = new GraphvizFont("consola", 12);
+                    e.VertexFormatter.Shape = GraphvizVertexShape.Record;
+                    e.VertexFormatter.Style = GraphvizVertexStyle.Rounded;
+                    e.VertexFormatter.Font = new GraphvizFont("consola", 12);
 
-                // Generate main cell
-                var cell = new GraphvizRecordCell();
-                // Add Key in top cell
-                cell.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Key.ToString() });
-                // Add Less, Equal and Greater set in bottom cell
-                var bottom = new GraphvizRecordCell();
+                    // Generate main cell
+                    var cell = new GraphvizRecordCell();
+                    // Add Key in top cell
+                    cell.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Key.ToString() });
+                    // Add Less, Equal and Greater set in bottom cell
+                    var bottom = new GraphvizRecordCell();
 
                     bottom.Cells.Add(new GraphvizRecordCell
                         {
@@ -1777,9 +1804,9 @@ namespace C5.intervals
                             Text = e.Vertex.Greater != null && !e.Vertex.Greater.IsEmpty ? e.Vertex.Greater.ToString() : "Ø"
                         });
 
-                cell.Cells.Add(bottom);
-                // Add cell to record
-                e.VertexFormatter.Record.Cells.Add(cell);
+                    cell.Cells.Add(bottom);
+                    // Add cell to record
+                    e.VertexFormatter.Record.Cells.Add(cell);
                 }
             };
             gw.FormatEdge += delegate(object sender, FormatEdgeEventArgs<Node, Edge<Node>> e)
