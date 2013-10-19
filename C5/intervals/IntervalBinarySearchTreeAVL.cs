@@ -22,11 +22,10 @@ namespace C5.intervals
 
         private Node _root;
         private int _count;
+
         private static readonly IEqualityComparer<I> Comparer = ComparerFactory<I>.CreateEqualityComparer((x, y) => ReferenceEquals(x, y), x => x.GetHashCode());
 
         #endregion
-
-        public string GraphViz { get { return QuickGraph(); } }
 
         #region Code Contracts
 
