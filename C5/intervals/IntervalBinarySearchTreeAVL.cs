@@ -334,7 +334,7 @@ namespace C5.intervals
         private sealed class IntervalSet : HashSet<I>
         {
 
-            public IntervalSet(IntervalSet set)
+            public IntervalSet(IEnumerable<I> set)
             {
                 AddAll(set);
             }
