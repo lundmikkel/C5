@@ -1620,29 +1620,6 @@ namespace C5.intervals
         }
 
         /// <summary>
-        /// Find the node containing the search key.
-        /// </summary>
-        /// <param name="node">The root node which subtree should be searched.</param>
-        /// <param name="searchKey">The key being searched.</param>
-        /// <returns>The node containing the key if it exists, otherwise null.</returns>
-        private static Node findNode(Node node, T searchKey)
-        {
-            while (node != null)
-            {
-                var compare = node.Key.CompareTo(searchKey);
-
-                if (compare > 0)
-                    node = node.Right;
-                else if (compare < 0)
-                    node = node.Left;
-                else
-                    break;
-            }
-
-            return node;
-        }
-
-        /// <summary>
         /// Find the current least node in the interval tree.
         /// </summary>
         /// <returns>The least node. Null if the tree is empty.</returns>
