@@ -1554,18 +1554,11 @@ namespace C5.intervals
 
         private void removeNodeWithKey(T key)
         {
-            // TODO: Implement
-            var node = findNode(_root, key);
-
-            // We only remove nodes that exist
-            Contract.Assert(node != null);
-
-            if (node.Left == null && node.Right == null)
-            { }
         }
 
         private static Node removeNodeWithKey(Node root, T key, ref bool updateBalanace)
         {
+            // TODO: Implement
             if (root == null)
                 return null;
 
