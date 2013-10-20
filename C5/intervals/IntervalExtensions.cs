@@ -296,7 +296,7 @@ namespace C5.intervals
         public static bool HasEndpoint<T>(this IInterval<T> x, T endpoint) where T : IComparable<T>
         {
             Contract.Requires(x != null);
-            Contract.Requires(ReferenceEquals(endpoint, null));
+            Contract.Requires(!ReferenceEquals(endpoint, null));
 
             return x.Low.CompareTo(endpoint) == 0 || x.High.CompareTo(endpoint) == 0;
         }
