@@ -37,7 +37,7 @@ namespace C5.intervals
             Contract.Invariant(confirmBalance());
 
             // Check that the IBS tree invariants from the Hanson article holds.
-            Contract.Invariant(Contract.ForAll(getNodeEnumerator(_root), checkIbsInvariants));
+            Contract.Invariant(Contract.ForAll(nodes(_root), checkIbsInvariants));
         }
 
         /// <summary>
@@ -169,21 +169,6 @@ namespace C5.intervals
             if (node.Balance != heightRight - heightLeft)
                 result = false;
             return Math.Max(heightLeft, heightRight) + 1;
-        }
-
-        [Pure]
-        private static IEnumerable<Node> getNodeEnumerator(Node root)
-        {
-            if (root == null)
-                yield break;
-
-            foreach (var node in getNodeEnumerator(root.Left))
-                yield return node;
-
-            yield return root;
-
-            foreach (var node in getNodeEnumerator(root.Right))
-                yield return node;
         }
 
         #endregion
@@ -747,7 +732,7 @@ namespace C5.intervals
         /// <returns>An enumerable of intervals</returns>
         private static IEnumerable<I> intervals(Node root)
         {
-            foreach (var node in getNodeEnumerator(root))
+            foreach (var node in nodes(root))
             {
                 // Go through all intervals in the node
                 if (node.Less != null && !node.Less.IsEmpty)
@@ -762,6 +747,7 @@ namespace C5.intervals
             }
         }
 
+        [Pure]
         private static IEnumerable<Node> nodes(Node root)
         {
             if (root == null)
