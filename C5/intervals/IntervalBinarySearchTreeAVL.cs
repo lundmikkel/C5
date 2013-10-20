@@ -50,6 +50,8 @@ namespace C5.intervals
         [Pure]
         private bool checkIbsInvariants(Node v)
         {
+            Contract.Requires(v != null);
+
             Node rightParent = null;
             Node leftParent = null;
 
@@ -104,6 +106,8 @@ namespace C5.intervals
         [Pure]
         private IEnumerable<IInterval<T>> findJs(Node v, ref Node leftParent, ref Node rightParent)
         {
+            Contract.Requires(v != null);
+
             var set = new ArrayList<IInterval<T>>();
             var root = _root;
 

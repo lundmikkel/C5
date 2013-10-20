@@ -12,8 +12,6 @@ namespace C5.interfaces
     {
         public IEnumerator<T> GetEnumerator()
         {
-            Contract.Ensures(Contract.Result<IEnumerator<T>>() != null);
-
             throw new NotImplementedException();
         }
         IEnumerator IEnumerable.GetEnumerator()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 
 namespace C5.intervals
 {
@@ -84,6 +85,8 @@ namespace C5.intervals
         /// <param name="i"><see cref="IInterval&lt;T&gt;"/> to copy the information from</param>
         public IntervalBase(IInterval<T> i)
         {
+            Contract.Requires(i != null);
+
             _low = i.Low;
             _high = i.High;
             _lowIncluded = i.LowIncluded;
@@ -97,8 +100,8 @@ namespace C5.intervals
         /// <param name="high">The interval from which the high endpoint should be used</param>
         public IntervalBase(IInterval<T> low, IInterval<T> high)
         {
-            if (low.CompareLowHigh(high) > 0)
-                throw new ArgumentException("Low must be smaller than high. If low and high are equal, both lowIncluded and highIncluded should be true!");
+            Contract.Requires(low != null);
+            Contract.Requires(high != null);
 
             _low = low.Low;
             _lowIncluded = low.LowIncluded;

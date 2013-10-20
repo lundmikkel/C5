@@ -271,9 +271,9 @@ namespace C5
             Contract.Requires(!ReferenceEquals(interval, null));
             // If the interval is added the count goes up by one
             Contract.Ensures(!Contract.Result<bool>() || Count == Contract.OldValue(Count) + 1);
-            Contract.Ensures(Contract.Result<bool>() != Contract.OldValue(this.Exists(i => ReferenceEquals(i, interval))));
+            Contract.Ensures(Contract.Result<bool>() != Contract.OldValue(this.Any(i => ReferenceEquals(i, interval))));
             // The collection contains the interval
-            Contract.Ensures(Exists(i => ReferenceEquals(i, interval)));
+            Contract.Ensures(this.Any(i => ReferenceEquals(i, interval)));
 
             throw new NotImplementedException();
         }
@@ -282,7 +282,7 @@ namespace C5
         {
             Contract.Requires(intervals != null);
             // The collection contains all intervals
-            Contract.Ensures(Contract.ForAll(intervals, i => Exists(j => ReferenceEquals(i, j))));
+            Contract.Ensures(Contract.ForAll(intervals, i => this.Any(j => ReferenceEquals(i, j))));
         }
 
         public bool Remove(I interval)
@@ -290,9 +290,9 @@ namespace C5
             Contract.Requires(!ReferenceEquals(interval, null));
             // If the interval is removed the count goes down by one
             Contract.Ensures(!Contract.Result<bool>() || Count == Contract.OldValue(Count) - 1);
-            Contract.Ensures(Contract.Result<bool>() == Contract.OldValue(this.Exists(i => ReferenceEquals(i, interval))));
+            Contract.Ensures(Contract.Result<bool>() == Contract.OldValue(this.Any(i => ReferenceEquals(i, interval))));
             // The collection contains the interval
-            Contract.Ensures(Exists(i => !ReferenceEquals(i, interval)));
+            Contract.Ensures(this.Any(i => !ReferenceEquals(i, interval)));
 
             throw new NotImplementedException();
         }
