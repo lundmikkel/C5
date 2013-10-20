@@ -1698,7 +1698,9 @@ namespace C5.intervals
         /// Get a string representation of the tree in GraphViz dot format using QuickGraph.
         /// </summary>
         /// <returns>GraphViz string.</returns>
-        public string QuickGraph()
+        public string QuickGraph
+        {
+            get
         {
             var graph = new AdjacencyGraph<Node, Edge<Node>>();
 
@@ -1761,15 +1763,22 @@ namespace C5.intervals
 
                     bottom.Cells.Add(new GraphvizRecordCell
                         {
-                            Text = e.Vertex.Less != null && !e.Vertex.Less.IsEmpty ? e.Vertex.Less.ToString() : "Ø"
+                                    Text =
+                                        e.Vertex.Less != null && !e.Vertex.Less.IsEmpty ? e.Vertex.Less.ToString() : "Ø"
                         });
                     bottom.Cells.Add(new GraphvizRecordCell
                         {
-                            Text = e.Vertex.Equal != null && !e.Vertex.Equal.IsEmpty ? e.Vertex.Equal.ToString() : "Ø"
+                                    Text =
+                                        e.Vertex.Equal != null && !e.Vertex.Equal.IsEmpty
+                                            ? e.Vertex.Equal.ToString()
+                                            : "Ø"
                         });
                     bottom.Cells.Add(new GraphvizRecordCell
                         {
-                            Text = e.Vertex.Greater != null && !e.Vertex.Greater.IsEmpty ? e.Vertex.Greater.ToString() : "Ø"
+                                    Text =
+                                        e.Vertex.Greater != null && !e.Vertex.Greater.IsEmpty
+                                            ? e.Vertex.Greater.ToString()
+                                            : "Ø"
                         });
 
                     cell.Cells.Add(bottom);
@@ -1781,12 +1790,15 @@ namespace C5.intervals
             {
                 e.EdgeFormatter.Label = new GraphvizEdgeLabel
                 {
-                    Value = (e.Edge.Target.Balance > 0 ? "+" : "") + e.Edge.Target.Balance + " / " + e.Edge.Target.IntervalsEndingInNode
+                                Value = !e.Edge.Target.Dummy
+                                    ? ((e.Edge.Target.Balance > 0 ? "+" : "") + e.Edge.Target.Balance + " / " + e.Edge.Target.IntervalsEndingInNode)
+                                    : ""
                 };
             };
 
 
             return gw.Generate();
+        }
         }
 
         /// <summary>
