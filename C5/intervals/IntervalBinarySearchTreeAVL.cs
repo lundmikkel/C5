@@ -736,58 +736,43 @@ namespace C5.intervals
         {
             var set = new IntervalSet();
 
-            var enumerator = getEnumerator(_root);
-            while (enumerator.MoveNext())
-                if (set.Add(enumerator.Current))
-                    yield return enumerator.Current;
+            return intervals(_root).Where(set.Add).GetEnumerator();
         }
 
-        private static IEnumerator<I> getEnumerator(Node root)
+        /// <summary>
+        /// Enumerates nodes in the tree of root and returns each interval in each interval set.
+        /// </summary>
+        /// <param name="root">The root of the subtree to traverse</param>
+        /// <remarks>Is very likely to contain duplicates, as intervals are returned without any filtering!</remarks>
+        /// <returns>An enumerable of intervals</returns>
+        private static IEnumerable<I> intervals(Node root)
         {
-            // Just return if tree is empty
-            if (root == null) yield break;
-
-            // Recursively retrieve intervals in left subtree
-            if (root.Left != null)
+            foreach (var node in getNodeEnumerator(root))
             {
-                var child = getEnumerator(root.Left);
-
-                while (child.MoveNext())
-                    yield return child.Current;
-            }
-
-            // Go through all intervals in the node
-            if (root.Less != null && !root.Less.IsEmpty)
-                foreach (var interval in root.Less)
-                    yield return interval;
-            if (root.Equal != null && !root.Equal.IsEmpty)
-                foreach (var interval in root.Equal)
-                    yield return interval;
-            if (root.Greater != null && !root.Greater.IsEmpty)
-                foreach (var interval in root.Greater)
-                    yield return interval;
-
-            // Recursively retrieve intervals in right subtree
-            if (root.Right != null)
-            {
-                var child = getEnumerator(root.Right);
-
-                while (child.MoveNext())
-                    yield return child.Current;
+                // Go through all intervals in the node
+                if (node.Less != null && !node.Less.IsEmpty)
+                    foreach (var interval in node.Less)
+                        yield return interval;
+                if (node.Equal != null && !node.Equal.IsEmpty)
+                    foreach (var interval in node.Equal)
+                        yield return interval;
+                if (node.Greater != null && !node.Greater.IsEmpty)
+                    foreach (var interval in node.Greater)
+                        yield return interval;
             }
         }
 
-        private static IEnumerable<Node> nodeEnumerator(Node root)
+        private static IEnumerable<Node> nodes(Node root)
         {
             if (root == null)
                 yield break;
 
-            foreach (var node in nodeEnumerator(root.Left))
+            foreach (var node in nodes(root.Left))
                 yield return node;
 
             yield return root;
 
-            foreach (var node in nodeEnumerator(root.Right))
+            foreach (var node in nodes(root.Right))
                 yield return node;
         }
 
@@ -930,7 +915,7 @@ namespace C5.intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
-            return findOverlaps(_root, query);
+            return IsEmpty ? Enumerable.Empty<I>() : findOverlaps(_root, query);
         }
 
         /// <inheritdoc/>
@@ -982,7 +967,7 @@ namespace C5.intervals
                     root = root.Left;
                 }
                 // Query is to the right of the current node
-                else if (0 < compareTo)
+                else if (compareTo > 0)
                 {
                     // Return all intervals in Greater
                     if (root.Greater != null && !root.Greater.IsEmpty)
@@ -1056,122 +1041,123 @@ namespace C5.intervals
 
         private static IEnumerable<I> findLeft(Node root, IInterval<T> query)
         {
-            // If root is null we have reached the end
-            if (root == null) yield break;
-
-            var compareTo = query.Low.CompareTo(root.Key);
-
-            //
-            if (compareTo > 0)
+            while (root != null)
             {
-                if (root.Greater != null && !root.Greater.IsEmpty)
-                    foreach (var interval in root.Greater)
+                var compareTo = query.Low.CompareTo(root.Key);
+
+                // Search in right subtree
+                if (compareTo > 0)
+                {
+                    if (root.Greater != null && !root.Greater.IsEmpty)
+                        foreach (var interval in root.Greater)
+                            yield return interval;
+
+                    // Iteratively travese right subtree
+                    root = root.Right;
+                }
+                // Search in left subtree
+                else if (compareTo < 0)
+                {
+                    if (root.Less != null && !root.Less.IsEmpty)
+                        foreach (var interval in root.Less)
+                            yield return interval;
+
+                    if (root.Equal != null && !root.Equal.IsEmpty)
+                        foreach (var interval in root.Equal)
+                            yield return interval;
+
+                    if (root.Greater != null && !root.Greater.IsEmpty)
+                        foreach (var interval in root.Greater)
+                            yield return interval;
+
+                    // Recursively add all intervals in right subtree as they must be
+                    // contained by [root.Key:splitNode]
+                    foreach (var interval in intervals(root.Right))
                         yield return interval;
 
-                // Recursively travese right subtree
-                foreach (var interval in findLeft(root.Right, query))
-                    yield return interval;
-            }
-            //
-            else if (compareTo < 0)
-            {
-                if (root.Less != null && !root.Less.IsEmpty)
-                    foreach (var interval in root.Less)
-                        yield return interval;
-                if (root.Equal != null && !root.Equal.IsEmpty)
-                    foreach (var interval in root.Equal)
-                        yield return interval;
-                if (root.Greater != null && !root.Greater.IsEmpty)
-                    foreach (var interval in root.Greater)
+                    // Iteratively travese left subtree
+                    root = root.Left;
+                }
+                else
+                {
+                    // Add all intersecting intervals from right list
+                    if (root.Greater != null && !root.Greater.IsEmpty)
+                        foreach (var interval in root.Greater)
+                            yield return interval;
+
+                    if (query.LowIncluded && root.Equal != null && !root.Equal.IsEmpty)
+                        foreach (var interval in root.Equal)
+                            yield return interval;
+
+                    // If we find the matching node, we can add everything in the left subtree
+                    foreach (var interval in intervals(root.Right))
                         yield return interval;
 
-                // Recursively add all intervals in right subtree as they must be
-                // contained by [root.Key:splitNode]
-                var child = getEnumerator(root.Right);
-                while (child.MoveNext())
-                    yield return child.Current;
-
-                // Recursively travese left subtree
-                foreach (var interval in findLeft(root.Left, query))
-                    yield return interval;
-            }
-            else
-            {
-                // Add all intersecting intervals from right list
-                if (root.Greater != null && !root.Greater.IsEmpty)
-                    foreach (var interval in root.Greater)
-                        yield return interval;
-
-                if (query.LowIncluded && root.Equal != null && !root.Equal.IsEmpty)
-                    foreach (var interval in root.Equal)
-                        yield return interval;
-
-                // If we find the matching node, we can add everything in the left subtree
-                var child = getEnumerator(root.Right);
-                while (child.MoveNext())
-                    yield return child.Current;
+                    yield break;
+                }
             }
         }
 
         private static IEnumerable<I> findRight(Node root, IInterval<T> query)
         {
             // If root is null we have reached the end
-            if (root == null) yield break;
-
-            var compareTo = query.High.CompareTo(root.Key);
-
-            //
-            if (compareTo < 0)
+            while (root != null)
             {
-                // Add all intersecting intervals from left list
-                if (root.Less != null && !root.Less.IsEmpty)
-                    foreach (var interval in root.Less)
+                var compareTo = query.High.CompareTo(root.Key);
+
+                //
+                if (compareTo < 0)
+                {
+                    // Add all intersecting intervals from left list
+                    if (root.Less != null && !root.Less.IsEmpty)
+                        foreach (var interval in root.Less)
+                            yield return interval;
+
+                    // Otherwise Recursively travese left subtree
+                    root = root.Left;
+                }
+                //
+                else if (compareTo > 0)
+                {
+                    // As our query interval contains the interval [root.Key:splitNode]
+                    // all intervals in root can be returned without any checks
+                    if (root.Less != null && !root.Less.IsEmpty)
+                        foreach (var interval in root.Less)
+                            yield return interval;
+
+                    if (root.Equal != null && !root.Equal.IsEmpty)
+                        foreach (var interval in root.Equal)
+                            yield return interval;
+
+                    if (root.Greater != null && !root.Greater.IsEmpty)
+                        foreach (var interval in root.Greater)
+                            yield return interval;
+
+                    // Recursively add all intervals in right subtree as they must be
+                    // contained by [root.Key:splitNode]
+                    foreach (var interval in intervals(root.Left))
                         yield return interval;
 
-                // Otherwise Recursively travese left subtree
-                foreach (var interval in findRight(root.Left, query))
-                    yield return interval;
-            }
-            //
-            else if (compareTo > 0)
-            {
-                // As our query interval contains the interval [root.Key:splitNode]
-                // all intervals in root can be returned without any checks
-                if (root.Less != null && !root.Less.IsEmpty)
-                    foreach (var interval in root.Less)
-                        yield return interval;
-                if (root.Equal != null && !root.Equal.IsEmpty)
-                    foreach (var interval in root.Equal)
-                        yield return interval;
-                if (root.Greater != null && !root.Greater.IsEmpty)
-                    foreach (var interval in root.Greater)
+                    // Recursively travese left subtree
+                    root = root.Right;
+                }
+                else
+                {
+                    // Add all intersecting intervals from left list
+                    if (root.Less != null && !root.Less.IsEmpty)
+                        foreach (var interval in root.Less)
+                            yield return interval;
+
+                    if (query.HighIncluded && root.Equal != null && !root.Equal.IsEmpty)
+                        foreach (var interval in root.Equal)
+                            yield return interval;
+
+                    // If we find the matching node, we can add everything in the left subtree
+                    foreach (var interval in intervals(root.Left))
                         yield return interval;
 
-                // Recursively add all intervals in right subtree as they must be
-                // contained by [root.Key:splitNode]
-                var child = getEnumerator(root.Left);
-                while (child.MoveNext())
-                    yield return child.Current;
-
-                // Recursively travese left subtree
-                foreach (var interval in findRight(root.Right, query))
-                    yield return interval;
-            }
-            else
-            {
-                // Add all intersecting intervals from left list
-                if (root.Less != null && !root.Less.IsEmpty)
-                    foreach (var interval in root.Less)
-                        yield return interval;
-
-                if (query.HighIncluded && root.Equal != null && !root.Equal.IsEmpty)
-                    foreach (var interval in root.Equal)
-                        yield return interval;
-
-                // If we find the matching node, we can add everything in the left subtree
-                var child = getEnumerator(root.Left);
-                while (child.MoveNext())
-                    yield return child.Current;
+                    yield break;
+                }
             }
         }
 
@@ -1740,7 +1726,7 @@ namespace C5.intervals
                 graph.AddEdge(new Edge<Node>(node, _root));
             }
 
-            foreach (var node in nodeEnumerator(_root))
+            foreach (var node in nodes(_root))
             {
                 graph.AddVertex(node);
 
