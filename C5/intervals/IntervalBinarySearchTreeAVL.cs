@@ -168,10 +168,13 @@ namespace C5.intervals
         {
             if (node == null)
                 return 0;
+
             var heightLeft = height(node.Left, ref result);
             var heightRight = height(node.Right, ref result);
+
             if (node.Balance != heightRight - heightLeft)
                 result = false;
+
             return Math.Max(heightLeft, heightRight) + 1;
         }
 
@@ -186,7 +189,9 @@ namespace C5.intervals
             [ContractInvariantMethod]
             private void invariant()
             {
+                // The key cannot be null
                 Contract.Invariant(!ReferenceEquals(Key, null));
+                // The variable should be non-negative
                 Contract.Invariant(IntervalsEndingInNode >= 0);
             }
 

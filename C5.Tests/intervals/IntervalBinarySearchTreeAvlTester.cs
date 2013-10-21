@@ -38,7 +38,7 @@ namespace C5.Tests.intervals
             internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
             {
                 var avl = new IntervalBinarySearchTreeAvl<IInterval<int>, int>(intervals);
-                Console.Out.WriteLine(avl.QuickGraph());
+                Console.Out.WriteLine(avl.QuickGraph);
                 return avl;
             }
         }
@@ -183,19 +183,29 @@ namespace C5.Tests.intervals
             [SetUp]
             public void Init()
             {
-                _intervales = new IntervalBinarySearchTreeAvl<IInterval<int>, int>()
+                _intervales = new IntervalBinarySearchTreeAvl<IInterval<int>, int>
                     {
-                        A, B, C, D, E1, E2, F, G, H
+                        A,
+                        B,
+                        C,
+                        D,
+                        E1,
+                        E2,
+                        F,
+                        G,
+                        H,
+                        A1
                     };
 
-                //_intervales.Add(A1);
-                //_intervales.Remove(A1);
-                //_intervales.Add(A2);
-                //_intervales.Remove(A2);
-                //_intervales.Add(A3);
-                //_intervales.Remove(A3);
-                //_intervales.Add(A4);
-                //_intervales.Remove(A4);
+                _intervales.Remove(A1);
+                _intervales.Add(A2);
+                _intervales.Remove(A2);
+                _intervales.Add(A3);
+                _intervales.Remove(A3);
+                _intervales.Add(A4);
+                _intervales.Remove(A4);
+
+                Print();
             }
 
             [Test]

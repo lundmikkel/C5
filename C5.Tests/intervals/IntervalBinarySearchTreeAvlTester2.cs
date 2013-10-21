@@ -59,9 +59,9 @@ namespace C5.Tests.intervals
         [TearDown]
         public void TearDown()
         {
-            Console.WriteLine(intervals.QuickGraph());
+            Console.WriteLine(intervals.QuickGraph);
 
-            File.WriteAllText(@"../../intervals/data/avl/avl-" + intervals.Count + ".gv", intervals.QuickGraph());
+            File.WriteAllText(@"../../intervals/data/avl/avl-" + intervals.Count + ".gv", intervals.QuickGraph);
         }
     }
 }
