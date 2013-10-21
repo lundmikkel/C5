@@ -1745,15 +1745,14 @@ namespace C5.intervals
 
         private static Node removeNodeWithKey(Node root, T key, ref Node left, ref Node right, ref bool updateBalance)
         {
-            // TODO: Implement
-            if (root == null)
-                return null;
+            Contract.Requires(root != null);
 
             var compare = key.CompareTo(root.Key);
 
             // Remove node from right subtree
             if (compare > 0)
             {
+                // Update left parent
                 left = root;
                 root.Right = removeNodeWithKey(root.Right, key, ref left, ref right, ref updateBalance);
 
@@ -1777,8 +1776,6 @@ namespace C5.intervals
                 // Replace node with successor
                 if (root.Left != null && root.Right != null)
                 {
-                    // TODO: maintain IBS invariant
-
                     var successor = findMinNode(root.Right);
 
                     // Get intervals in successor
@@ -1799,8 +1796,8 @@ namespace C5.intervals
                     // Swap keys, so we can search for
                     root.Swap(successor);
 
+                    // Remove the successor node
                     updateBalance = false;
-
                     root.Right = removeNodeWithKey(root.Right, successor.Key, ref left, ref right, ref updateBalance);
 
                     if (updateBalance)
@@ -1845,6 +1842,7 @@ namespace C5.intervals
         {
             Contract.Requires(node != null);
             Contract.Ensures(Contract.Result<Node>() != null);
+            Contract.Ensures(Contract.Result<Node>() == nodes(Contract.OldValue(node)).First());
 
             while (node.Left != null)
                 node = node.Left;

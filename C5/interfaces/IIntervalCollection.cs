@@ -300,7 +300,6 @@ namespace C5
         public void Clear()
         {
             Contract.Ensures(IsEmpty);
-            Contract.Ensures(Count == 0);
 
             throw new NotImplementedException();
         }
