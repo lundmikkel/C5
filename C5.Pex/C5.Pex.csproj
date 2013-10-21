@@ -82,6 +82,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Factories\IntervalBaseFactory.cs" />
+    <Compile Include="PexIntervals.Overlap2Tester.g.cs">
+      <DependentUpon>PexIntervals.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PexIntervals.OverlapTester.g.cs">
+      <DependentUpon>PexIntervals.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PexIntervals.cs" />
   </ItemGroup>
