@@ -5,7 +5,7 @@ namespace C5.Performance.Wpf.Benchmarks
 {
     class LCListEnumeratorSorted : Benchmarkable
     {
-        private LayeredContainmentList2<IInterval<int>, int> _lclist;
+        private LayeredContainmentList<IInterval<int>, int> _lclist;
 
         public override string BenchMarkName()
         {
@@ -14,7 +14,7 @@ namespace C5.Performance.Wpf.Benchmarks
 
         public override void CollectionSetup()
         {
-            _lclist = new LayeredContainmentList2<IInterval<int>, int>(BenchmarkTestCases.DataSetA(CollectionSize));
+            _lclist = new LayeredContainmentList<IInterval<int>, int>(BenchmarkTestCases.DataSetA(CollectionSize));
         }
 
         public override void Setup()

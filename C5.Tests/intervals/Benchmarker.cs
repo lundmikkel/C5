@@ -88,12 +88,12 @@ namespace C5.Tests.intervals
     [TestFixture, Ignore]
     public class enumeratorBenchmarker
     {
-        private LayeredContainmentList2<IntervalOfInt, int> intervals;
+        private LayeredContainmentList<IntervalOfInt, int> intervals;
 
         [SetUp]
         public void SetUp()
         {
-            intervals = new LayeredContainmentList2<IntervalOfInt, int>(BenchmarkTestCases.DataSetC(1000000));
+            intervals = new LayeredContainmentList<IntervalOfInt, int>(BenchmarkTestCases.DataSetC(1000000));
         }
 
         [Test]
@@ -502,13 +502,13 @@ namespace C5.Tests.intervals
         }
     }
 
-    class LayeredContainmentList2_Benchmarker : DataSetTester
+    class LayeredContainmentList_Benchmarker : DataSetTester
     {
         protected override IIntervalCollection<IntervalOfInt, int> Factory(IEnumerable<IInterval<int>> intervals)
         {
-            return new LayeredContainmentList2<IntervalOfInt, int>(intervals);
+            return new LayeredContainmentList<IntervalOfInt, int>(intervals);
         }
-        public override string Name { get { return "Layered2"; } }
+        public override string Name { get { return "Layered"; } }
     }
 
     class NestedContainmentList_Benchmarker : DataSetTester

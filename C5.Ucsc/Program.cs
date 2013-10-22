@@ -13,7 +13,7 @@ namespace C5.Ucsc
         {
             var genes = UcscHumanGenomeParser.ParseFile("../../Data/ucsc-human-default.txt");
             Console.Out.WriteLine("Creating LCList");
-            var lclist = new LayeredContainmentList2<UcscHumanGene, GenomePosition>(genes);
+            var lclist = new LayeredContainmentList<UcscHumanGene, GenomePosition>(genes);
             Console.Out.WriteLine("Done creating LCList");
             Console.Out.WriteLine(lclist.Count);
             Console.ReadLine();

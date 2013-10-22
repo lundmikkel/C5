@@ -159,7 +159,7 @@
     <Compile Include="intervals\IntervalBinarySearchTreeAvl.cs" />
     <Compile Include="intervals\IntervalRelations.cs" />
     <Compile Include="intervals\IntervalType.cs" />
-    <Compile Include="intervals\LayeredContainmentList2.cs" />
+    <Compile Include="intervals\LayeredContainmentList.cs" />
     <Compile Include="intervals\IntervalBase.cs" />
     <Compile Include="intervals\IntervalBinarySearchTree.cs" />
     <Compile Include="intervals\IntervalExtensions.cs" />
