@@ -502,15 +502,6 @@ namespace C5.Tests.intervals
         }
     }
 
-    class LayeredContainmentList_Benchmarker : DataSetTester
-    {
-        protected override IIntervalCollection<IntervalOfInt, int> Factory(IEnumerable<IInterval<int>> intervals)
-        {
-            return new LayeredContainmentList<IntervalOfInt, int>(intervals);
-        }
-        public override string Name { get { return "Layered"; } }
-    }
-
     class LayeredContainmentList2_Benchmarker : DataSetTester
     {
         protected override IIntervalCollection<IntervalOfInt, int> Factory(IEnumerable<IInterval<int>> intervals)

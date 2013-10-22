@@ -127,7 +127,6 @@
     <Compile Include="intervals\IntervalRelationsTester.cs" />
     <Compile Include="intervals\LayeredContainmentList2Tester.cs" />
     <Compile Include="intervals\NestedContainmentList2Tester.cs" />
-    <Compile Include="intervals\LayeredContainmentListTester.cs" />
     <Compile Include="intervals\GenericIIntervaledTester.cs" />
     <Compile Include="intervals\IntervalBinarySearchTreeTester.cs" />
     <Compile Include="intervals\IntervalExtensionTester.cs" />
