@@ -1641,6 +1641,9 @@ namespace C5.intervals
                     Node right = null;
                     var updateBalanace = false;
                     removeNodeWithKey(_root, interval.Low, ref left, ref right, ref updateBalanace);
+
+                    // Check that the node does not exist anymore
+                    Contract.Assert(!Contract.Exists(nodes(_root), n => n.Key.Equals(interval.Low)));
                 }
 
                 if (highNode.IntervalsEndingInNode.IsEmpty)
@@ -1649,6 +1652,9 @@ namespace C5.intervals
                     Node right = null;
                     var updateBalanace = false;
                     removeNodeWithKey(_root, interval.High, ref left, ref right, ref updateBalanace);
+
+                    // Check that the node does not exist anymore
+                    Contract.Assert(!Contract.Exists(nodes(_root), n => n.Key.Equals(interval.High)));
                 }
 
                 _count--;
@@ -1757,6 +1763,7 @@ namespace C5.intervals
         private static Node removeNodeWithKey(Node root, T key, ref Node left, ref Node right, ref bool updateBalance)
         {
             Contract.Requires(root != null);
+            Contract.Requires(Contract.Exists(nodes(root), n => n.Key.Equals(key)));
 
             var compare = key.CompareTo(root.Key);
 
