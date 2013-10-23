@@ -34,7 +34,7 @@ namespace C5.intervals
         private void invariants()
         {
             // Check the balance invariant holds.
-            Contract.Invariant(confirmBalance());
+            Contract.Invariant(confirmBalance(_root));
 
             // Check that the IBS tree invariants from the Hanson article holds.
             Contract.Invariant(Contract.ForAll(nodes(_root), checkIbsInvariants));
@@ -46,7 +46,7 @@ namespace C5.intervals
             Contract.Invariant(checkMnoAndIntervalsEndingInNodeForEachNode(_root));
 
             // Check that the intervals are correctly placed
-            Contract.Invariant(confirmIntervalPlacement());
+            Contract.Invariant(confirmIntervalPlacement(_root));
         }
 
         [Pure]
@@ -320,10 +320,10 @@ namespace C5.intervals
         /// </summary>
         /// <returns>True if the tree is balanced, else false.</returns>
         [Pure]
-        private bool confirmBalance()
+        private bool confirmBalance(Node root)
         {
             var result = true;
-            height(_root, ref result);
+            height(root, ref result);
             return result;
         }
 
@@ -350,13 +350,13 @@ namespace C5.intervals
         }
 
         [Pure]
-        private bool confirmIntervalPlacement()
+        private bool confirmIntervalPlacement(Node root)
         {
             foreach (var interval in this)
             {
-                if (!confirmLowPlacement(interval, _root))
+                if (!confirmLowPlacement(interval, root))
                     return false;
-                if (!confirmHighPlacement(interval, _root))
+                if (!confirmHighPlacement(interval, root))
                     return false;
             }
             return true;
