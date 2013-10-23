@@ -1869,7 +1869,7 @@ namespace C5.intervals
 
         #endregion
 
-        #region GraphViz
+        #region QuickGraph
 
         /// <summary>
         /// Get a string representation of the tree in GraphViz dot format using QuickGraph.
@@ -1984,48 +1984,6 @@ namespace C5.intervals
 
                 return gw.Generate();
             }
-        }
-
-        /// <summary>
-        /// Print the tree structure in Graphviz format
-        /// </summary>
-        /// <returns></returns>
-        public string Graphviz()
-        {
-            return "digraph IntervalBinarySearchTree {\n"
-                + "\tnode [shape=record, style=rounded];\n"
-                + graphviz(_root, "root", null)
-                + "}\n";
-        }
-
-        private int _nodeCounter;
-        private int _nullCounter;
-
-        private string graphviz(Node root, string parent, string direction)
-        {
-            int id;
-            if (root == null)
-            {
-                id = _nullCounter++;
-                return String.Format("\tleaf{0} [shape=point];\n", id) +
-                    String.Format("\t{0}:{1} -> leaf{2};\n", parent, direction, id);
-            }
-
-            id = _nodeCounter++;
-            var rootString = direction == null ? "" : String.Format("\t{0} -> struct{1}:n;\n", parent, id);
-
-            return
-                // Creates the structid: structid [label="<key> keyValue|{lessSet|equalSet|greaterSet}|{<idleft> leftChild|<idright> rightChild}"];
-                String.Format("\tstruct{0} [fontname=consola, label=\"{{<key> {1}|{{{2}|{3}|{4}}}}}\"];\n", id, root.Key, root.Less, root.Equal, root.Greater)
-
-                // Links the parents leftChild to nodeid: parent:left -> structid:key;
-                + rootString
-
-                // Calls graphviz() recursively on leftChild
-                + graphviz(root.Left, "struct" + id, "left")
-
-                // Calls graphviz() recursively on rightChild
-                + graphviz(root.Right, "struct" + id, "right");
         }
 
         #endregion
