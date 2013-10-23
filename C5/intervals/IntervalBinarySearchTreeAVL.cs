@@ -1482,8 +1482,8 @@ namespace C5.intervals
         {
             var nodeWasAdded = false;
             var intervalWasAdded = false;
-            Node node = null;
-            addLow(interval, root, rightUp, ref nodeWasAdded, ref intervalWasAdded, ref node, false);
+            Node lowNode = null;
+            addLow(interval, root, rightUp, ref nodeWasAdded, ref intervalWasAdded, ref lowNode, false);
         }
 
         // TODO: Make iterative?
@@ -1571,8 +1571,8 @@ namespace C5.intervals
         {
             var nodeWasAdded = false;
             var intervalWasAdded = false;
-            Node node = null;
-            addHigh(interval, root, leftUp, ref nodeWasAdded, ref intervalWasAdded, ref node, false);
+            Node highNode = null;
+            addHigh(interval, root, leftUp, ref nodeWasAdded, ref intervalWasAdded, ref highNode, false);
         }
 
         private static Node addHigh(I interval, Node root, Node leftUp, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node highNode, bool addNewNode = true)
@@ -1731,8 +1731,8 @@ namespace C5.intervals
         private static void removeLow(I interval, Node root, Node rightUp)
         {
             var intervalWasRemoved = false;
-            Node node = null;
-            removeLow(interval, root, rightUp, ref intervalWasRemoved, ref node);
+            Node lowNode = null;
+            removeLow(interval, root, rightUp, ref intervalWasRemoved, ref lowNode);
         }
 
         private static void removeLow(I interval, Node root, Node rightUp, ref bool intervalWasRemoved, ref Node lowNode)
@@ -1777,8 +1777,8 @@ namespace C5.intervals
         private static void removeHigh(I interval, Node root, Node leftUp)
         {
             var intervalWasRemoved = false;
-            Node node = null;
-            removeLow(interval, root, leftUp, ref intervalWasRemoved, ref node);
+            Node highNode = null;
+            removeHigh(interval, root, leftUp, ref intervalWasRemoved, ref highNode);
         }
 
         private static void removeHigh(I interval, Node root, Node leftUp, ref bool intervalWasRemoved, ref Node highNode)
