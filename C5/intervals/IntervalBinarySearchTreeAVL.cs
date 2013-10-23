@@ -1675,10 +1675,10 @@ namespace C5.intervals
             var intervalWasRemoved = false;
 
             // Remove low endpoint
-            removeLow(_root, null, interval, ref intervalWasRemoved, ref lowNode);
+            removeLow(interval, _root, null, ref intervalWasRemoved, ref lowNode);
 
             // Remove high endpoint
-            removeHigh(_root, null, interval, ref intervalWasRemoved, ref highNode);
+            removeHigh(interval, _root, null, ref intervalWasRemoved, ref highNode);
 
             // Increase counters and raise event if interval was added
             if (intervalWasRemoved)
@@ -1728,14 +1728,14 @@ namespace C5.intervals
             return intervalWasRemoved;
         }
 
-        private static void removeLow(Node root, Node right, I interval)
+        private static void removeLow(I interval, Node root, Node rightUp)
         {
             var intervalWasRemoved = false;
             Node node = null;
-            removeLow(root, right, interval, ref intervalWasRemoved, ref node);
+            removeLow(interval, root, rightUp, ref intervalWasRemoved, ref node);
         }
 
-        private static void removeLow(Node root, Node right, I interval, ref bool intervalWasRemoved, ref Node lowNode)
+        private static void removeLow(I interval, Node root, Node rightUp, ref bool intervalWasRemoved, ref Node lowNode)
         {
             Contract.Requires(!ReferenceEquals(interval, null));
 
@@ -1746,11 +1746,11 @@ namespace C5.intervals
             var compare = interval.Low.CompareTo(root.Key);
 
             if (compare > 0)
-                removeLow(root.Right, right, interval, ref intervalWasRemoved, ref lowNode);
+                removeLow(interval, root.Right, rightUp, ref intervalWasRemoved, ref lowNode);
             else if (compare < 0)
             {
                 // Everything in the right subtree of root will lie within the interval
-                if (right != null && right.Key.CompareTo(interval.High) <= 0)
+                if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0)
                     intervalWasRemoved |= root.Greater.Remove(interval);
 
                 // root key is between interval.low and interval.high
@@ -1758,12 +1758,12 @@ namespace C5.intervals
                     intervalWasRemoved |= root.Equal.Remove(interval);
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
-                removeLow(root.Left, root, interval, ref intervalWasRemoved, ref lowNode);
+                removeLow(interval, root.Left, root, ref intervalWasRemoved, ref lowNode);
             }
             else
             {
                 // If everything in the right subtree of root will lie within the interval
-                if (right != null && right.Key.CompareTo(interval.High) <= 0)
+                if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0)
                     intervalWasRemoved |= root.Greater.Remove(interval);
 
                 if (interval.LowIncluded)
@@ -1774,14 +1774,14 @@ namespace C5.intervals
             }
         }
 
-        private static void removeHigh(Node root, Node left, I interval)
+        private static void removeHigh(I interval, Node root, Node leftUp)
         {
             var intervalWasRemoved = false;
             Node node = null;
-            removeLow(root, left, interval, ref intervalWasRemoved, ref node);
+            removeLow(interval, root, leftUp, ref intervalWasRemoved, ref node);
         }
 
-        private static void removeHigh(Node root, Node left, I interval, ref bool intervalWasRemoved, ref Node highNode)
+        private static void removeHigh(I interval, Node root, Node leftUp, ref bool intervalWasRemoved, ref Node highNode)
         {
             // No node existed for the high endpoint
             if (root == null)
@@ -1790,11 +1790,11 @@ namespace C5.intervals
             var compare = interval.High.CompareTo(root.Key);
 
             if (compare < 0)
-                removeHigh(root.Left, left, interval, ref intervalWasRemoved, ref highNode);
+                removeHigh(interval, root.Left, leftUp, ref intervalWasRemoved, ref highNode);
             else if (compare > 0)
             {
                 // Everything in the right subtree of root will lie within the interval
-                if (left != null && left.Key.CompareTo(interval.Low) >= 0)
+                if (leftUp != null && leftUp.Key.CompareTo(interval.Low) >= 0)
                     intervalWasRemoved |= root.Less.Remove(interval);
 
                 // root key is between interval.low and interval.high
@@ -1802,12 +1802,12 @@ namespace C5.intervals
                     intervalWasRemoved |= root.Equal.Remove(interval);
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
-                removeHigh(root.Right, root, interval, ref intervalWasRemoved, ref highNode);
+                removeHigh(interval, root.Right, root, ref intervalWasRemoved, ref highNode);
             }
             else
             {
                 // If everything in the right subtree of root will lie within the interval
-                if (left != null && left.Key.CompareTo(interval.Low) >= 0)
+                if (leftUp != null && leftUp.Key.CompareTo(interval.Low) >= 0)
                     intervalWasRemoved |= root.Less.Remove(interval);
 
                 if (interval.HighIncluded)
@@ -1860,8 +1860,8 @@ namespace C5.intervals
                     // Remove marks for intervals in successor
                     foreach (var interval in intervalsNeedingReinsertion)
                     {
-                        removeLow(root, right, interval);
-                        removeHigh(root, left, interval);
+                        removeLow(interval, root, right);
+                        removeHigh(interval, root, left);
                     }
 
                     // Swap root and successor nodes
