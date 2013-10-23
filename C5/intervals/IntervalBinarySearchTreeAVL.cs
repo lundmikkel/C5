@@ -1771,8 +1771,7 @@ namespace C5.intervals
             if (compare > 0)
             {
                 // Update left parent
-                left = root;
-                root.Right = removeNodeWithKey(root.Right, key, ref left, ref right, ref updateBalance);
+                root.Right = removeNodeWithKey(root.Right, key, ref root, ref right, ref updateBalance);
 
                 if (updateBalance)
                     root.Balance--;
@@ -1780,8 +1779,7 @@ namespace C5.intervals
             // Remove node from left subtree
             else if (compare < 0)
             {
-                right = root;
-                root.Left = removeNodeWithKey(root.Left, key, ref left, ref right, ref updateBalance);
+                root.Left = removeNodeWithKey(root.Left, key, ref left, ref root, ref updateBalance);
 
                 if (updateBalance)
                     root.Balance++;
@@ -1789,12 +1787,10 @@ namespace C5.intervals
             // Node found
             else
             {
-                updateBalance = true;
-
                 // Replace node with successor
                 if (root.Left != null && root.Right != null)
                 {
-                    var successor = findMinNode(root.Right);
+                    var successor = findSuccessor(root.Right);
 
                     // Get intervals in successor
                     var intervalsNeedingReinsertion = successor.IntervalsEndingInNode;
@@ -1806,7 +1802,7 @@ namespace C5.intervals
                         removeHigh(root, left, interval);
                     }
 
-                    // Swap keys, so we can search for
+                    // Swap root and successor nodes
                     root.Swap(successor);
 
                     // Remove the successor node
@@ -1825,13 +1821,13 @@ namespace C5.intervals
 
                     root.UpdateMaximumOverlap();
                 }
-                // Replace node with right child
-                else if (root.Left == null)
-                    // If no children root.Right is null too, so we just return null
-                    return root.Right;
-                // Replace node with left child
                 else
-                    return root.Left;
+                {
+                    updateBalance = true;
+
+                    // Return Left if not null, otherwise Right
+                    return root.Left ?? root.Right;
+                }
             }
 
             if (updateBalance)
@@ -1841,10 +1837,10 @@ namespace C5.intervals
         }
 
         /// <summary>
-        /// Find the current least node in the interval tree.
+        /// Find the successor node.
         /// </summary>
-        /// <returns>The least node. Null if the tree is empty.</returns>
-        private static Node findMinNode(Node node)
+        /// <returns>The successor node.</returns>
+        private static Node findSuccessor(Node node)
         {
             Contract.Requires(node != null);
             Contract.Ensures(Contract.Result<Node>() != null);
