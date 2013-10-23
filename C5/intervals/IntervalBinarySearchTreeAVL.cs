@@ -1433,11 +1433,11 @@ namespace C5.intervals
 
             // Insert low endpoint
             var nodeWasAdded = false;
-            _root = addLow(_root, null, interval, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
+            _root = addLow(interval, _root, null, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
 
             // Insert high endpoint
             nodeWasAdded = false;
-            _root = addHigh(_root, null, interval, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
+            _root = addHigh(interval, _root, null, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
 
             // Increase counters and raise event if interval was added
             if (intervalWasAdded)
@@ -1477,16 +1477,16 @@ namespace C5.intervals
                 Add(interval);
         }
 
-        private static void addLow(Node root, Node right, I interval)
+        private static void addLow(I interval, Node root, Node rightUp)
         {
             var nodeWasAdded = false;
             var intervalWasAdded = false;
             Node node = null;
-            addLow(root, right, interval, ref nodeWasAdded, ref intervalWasAdded, ref node, false);
+            addLow(interval, root, rightUp, ref nodeWasAdded, ref intervalWasAdded, ref node, false);
         }
 
         // TODO: Make iterative?
-        private static Node addLow(Node root, Node right, I interval, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node lowNode, bool addNewNode = true)
+        private static Node addLow(I interval, Node root, Node rightUp, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node lowNode, bool addNewNode = true)
         {
             Contract.Requires(!ReferenceEquals(interval, null));
 
@@ -1504,7 +1504,7 @@ namespace C5.intervals
 
             if (compare > 0)
             {
-                root.Right = addLow(root.Right, right, interval, ref nodeWasAdded, ref intervalWasAdded, ref lowNode, addNewNode);
+                root.Right = addLow(interval, root.Right, rightUp, ref nodeWasAdded, ref intervalWasAdded, ref lowNode, addNewNode);
 
                 // Adjust node balance, if node was added
                 if (nodeWasAdded)
@@ -1513,7 +1513,7 @@ namespace C5.intervals
             else if (compare < 0)
             {
                 // Everything in the right subtree of root will lie within the interval
-                if (right != null && right.Key.CompareTo(interval.High) <= 0)
+                if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0)
                 {
                     if (root.Greater == null)
                         root.Greater = new IntervalSet();
@@ -1530,7 +1530,7 @@ namespace C5.intervals
                 }
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
-                root.Left = addLow(root.Left, root, interval, ref nodeWasAdded, ref intervalWasAdded, ref lowNode, addNewNode);
+                root.Left = addLow(interval, root.Left, root, ref nodeWasAdded, ref intervalWasAdded, ref lowNode, addNewNode);
 
                 // Adjust node balance, if node was added
                 if (nodeWasAdded)
@@ -1539,7 +1539,7 @@ namespace C5.intervals
             else
             {
                 // If everything in the right subtree of root will lie within the interval
-                if (right != null && right.Key.CompareTo(interval.High) <= 0)
+                if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0)
                 {
                     if (root.Greater == null)
                         root.Greater = new IntervalSet();
@@ -1566,15 +1566,15 @@ namespace C5.intervals
             return root;
         }
 
-        private static void addHigh(Node root, Node left, I interval)
+        private static void addHigh(I interval, Node root, Node leftUp)
         {
             var nodeWasAdded = false;
             var intervalWasAdded = false;
             Node node = null;
-            addHigh(root, left, interval, ref nodeWasAdded, ref intervalWasAdded, ref node, false);
+            addHigh(interval, root, leftUp, ref nodeWasAdded, ref intervalWasAdded, ref node, false);
         }
 
-        private static Node addHigh(Node root, Node left, I interval, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node highNode, bool addNewNode = true)
+        private static Node addHigh(I interval, Node root, Node leftUp, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node highNode, bool addNewNode = true)
         {
             Contract.Requires(!ReferenceEquals(interval, null));
 
@@ -1597,7 +1597,7 @@ namespace C5.intervals
 
             if (compare < 0)
             {
-                root.Left = addHigh(root.Left, left, interval, ref nodeWasAdded, ref intervalWasAdded, ref highNode, addNewNode);
+                root.Left = addHigh(interval, root.Left, leftUp, ref nodeWasAdded, ref intervalWasAdded, ref highNode, addNewNode);
 
                 // Adjust node balance, if node was added
                 if (nodeWasAdded)
@@ -1606,7 +1606,7 @@ namespace C5.intervals
             else if (compare > 0)
             {
                 // Everything in the right subtree of root will lie within the interval
-                if (left != null && left.Key.CompareTo(interval.Low) >= 0)
+                if (leftUp != null && leftUp.Key.CompareTo(interval.Low) >= 0)
                 {
                     if (root.Less == null)
                         root.Less = new IntervalSet();
@@ -1624,7 +1624,7 @@ namespace C5.intervals
                 }
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
-                root.Right = addHigh(root.Right, root, interval, ref nodeWasAdded, ref intervalWasAdded, ref highNode, addNewNode);
+                root.Right = addHigh(interval, root.Right, root, ref nodeWasAdded, ref intervalWasAdded, ref highNode, addNewNode);
 
                 // Adjust node balance, if node was added
                 if (nodeWasAdded)
@@ -1633,7 +1633,7 @@ namespace C5.intervals
             else
             {
                 // If everything in the right subtree of root will lie within the interval
-                if (left != null && left.Key.CompareTo(interval.Low) >= 0)
+                if (leftUp != null && leftUp.Key.CompareTo(interval.Low) >= 0)
                 {
                     if (root.Less == null)
                         root.Less = new IntervalSet();
@@ -1880,8 +1880,8 @@ namespace C5.intervals
                     // Reinsert marks for intervals in successor
                     foreach (var interval in intervalsNeedingReinsertion)
                     {
-                        addLow(root, right, interval);
-                        addHigh(root, left, interval);
+                        addLow(interval, root, right);
+                        addHigh(interval, root, left);
                     }
 
                     root.UpdateMaximumOverlap();
