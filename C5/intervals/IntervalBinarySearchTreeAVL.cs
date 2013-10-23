@@ -44,6 +44,9 @@ namespace C5.intervals
 
             // Check that the MNO variables are correct for all nodes
             Contract.Invariant(checkMnoAndIntervalsEndingInNodeForEachNode(_root));
+
+            // Check that the intervals are correctly placed
+            Contract.Invariant(confirmIntervalPlacement());
         }
 
         [Pure]
@@ -270,6 +273,7 @@ namespace C5.intervals
         }
 
         [Pure]
+        // TODO er det ok at have en pure metode med ref parametre
         private IEnumerable<IInterval<T>> findJs(Node v, ref Node leftParent, ref Node rightParent)
         {
             Contract.Requires(v != null);
@@ -330,6 +334,7 @@ namespace C5.intervals
         /// <param name="result">Reference to a bool that will be set to false if an in-balance is discovered.</param>
         /// <returns>Height of the tree.</returns>
         [Pure]
+        // TODO skal ref eller Pure fjernes?
         private static int height(Node node, ref bool result)
         {
             if (node == null)
@@ -342,6 +347,66 @@ namespace C5.intervals
                 result = false;
 
             return Math.Max(heightLeft, heightRight) + 1;
+        }
+
+        [Pure]
+        private bool confirmIntervalPlacement()
+        {
+            var result = true;
+            foreach (var interval in this)
+            {
+                result &= confirmLowPlacement(interval, _root);
+                result &= confirmHighPlacement(interval, _root);
+            }
+            return result;
+        }
+
+        [Pure]
+        private bool confirmLowPlacement(I interval, Node root, Node rightUp = null, bool result = true)
+        {
+            var compare = root.Key.CompareTo(interval.Low);
+            if (compare == 0)
+            {
+                if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0)
+                    result &= root.Greater.Contains(interval);
+                if (interval.LowIncluded)
+                    result &= root.Equal.Contains(interval);
+            }
+            else if (compare < 0)
+                return confirmLowPlacement(interval, root.Right, rightUp, result);
+            else if (compare > 0)
+            {
+                if (root.Key.CompareTo(interval.High) < 0)
+                    result &= root.Equal.Contains(interval);
+                if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0)
+                    result &= root.Greater.Contains(interval);
+                return confirmLowPlacement(interval, root.Left, root, result);
+            }
+            return result;
+        }
+
+        [Pure]
+        private bool confirmHighPlacement(I interval, Node root, Node leftUp = null, bool result = true)
+        {
+            var compare = root.Key.CompareTo(interval.High);
+            if (compare == 0)
+            {
+                if (leftUp != null && leftUp.Key.CompareTo(interval.Low) >= 0)
+                    result &= root.Less.Contains(interval);
+                if (interval.HighIncluded)
+                    result &= root.Equal.Contains(interval);
+            }
+            else if (compare > 0)
+                return confirmHighPlacement(interval, root.Left, leftUp, result);
+            else if (compare < 0)
+            {
+                if (root.Key.CompareTo(interval.Low) > 0)
+                    result &= root.Equal.Contains(interval);
+                if (leftUp != null && leftUp.Key.CompareTo(interval.Low) >= 0)
+                    result &= root.Less.Contains(interval);
+                return confirmHighPlacement(interval, root.Right, root, result);
+            }
+            return result;
         }
 
         #endregion

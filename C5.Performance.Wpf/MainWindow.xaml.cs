@@ -34,7 +34,7 @@ namespace C5.Performance.Wpf
             var intervalsTestBenchmarks = new SimpleBenchmark();
             var b2 = new IbsAvlAddBenchmarker();
             var b3 = new IbsAddBenchmarker();
-            var thread = new Thread(() => runBenchmarks(intervalsTestBenchmarks));
+            var thread = new Thread(() => runBenchmarks(b2));
             thread.Start();
 //            _plotter.ExportPdf(PdfPath);
         }
