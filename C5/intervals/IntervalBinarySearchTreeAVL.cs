@@ -221,18 +221,18 @@ namespace C5.intervals
         {
             Contract.Requires(v != null);
 
-            Node rightParent = null;
-            Node leftParent = null;
+            Node rightUp = null;
+            Node leftUp = null;
 
             // Find j intervals and left and right parent
-            var js = findJs(v, ref leftParent, ref rightParent);
+            var js = findJs(v, ref leftUp, ref rightUp);
 
             // Interval represented by Less
-            var greaterInterval = rightParent != null ? new IntervalBase<T>(v.Key, rightParent.Key, IntervalType.Open) : null;
+            var greaterInterval = rightUp != null ? new IntervalBase<T>(v.Key, rightUp.Key, IntervalType.Open) : null;
             // Interval represented by Equal
             var equalInterval = new IntervalBase<T>(v.Key);
             // Interval represented by Greater
-            var lessInterval = leftParent != null ? new IntervalBase<T>(leftParent.Key, v.Key, IntervalType.Open) : null;
+            var lessInterval = leftUp != null ? new IntervalBase<T>(leftUp.Key, v.Key, IntervalType.Open) : null;
 
 
             // Check containment invariant
@@ -274,7 +274,7 @@ namespace C5.intervals
 
         [Pure]
         // TODO er det ok at have en pure metode med ref parametre
-        private IEnumerable<IInterval<T>> findJs(Node v, ref Node leftParent, ref Node rightParent)
+        private IEnumerable<IInterval<T>> findJs(Node v, ref Node leftUp, ref Node rightUp)
         {
             Contract.Requires(v != null);
 
@@ -292,7 +292,7 @@ namespace C5.intervals
                         set.Add(new IntervalBase<T>(root.Key, root.Right.Key, IntervalType.Open));
 
                     // Update left parent
-                    leftParent = root;
+                    leftUp = root;
 
                     root = root.Right;
                 }
@@ -303,7 +303,7 @@ namespace C5.intervals
                         set.Add(new IntervalBase<T>(root.Left.Key, root.Key, IntervalType.Open));
 
                     // Update right parent
-                    rightParent = root;
+                    rightUp = root;
 
                     root = root.Left;
                 }
