@@ -437,7 +437,6 @@ namespace C5.intervals
             // The intervals with an endpoint in the node
             private IntervalSet _intervalsEndingInNode;
 
-            // TODO: Make invariants for these
             // Fields for Maximum Number of Overlaps
             public int DeltaAt { get; internal set; }
             public int DeltaAfter { get; internal set; }
@@ -1816,10 +1815,6 @@ namespace C5.intervals
                 // Save reference to endpoint node
                 highNode = root;
             }
-
-            // Update MNO
-            if (intervalWasRemoved)
-                root.UpdateMaximumOverlap();
         }
 
         private static Node removeNodeWithKey(T key, Node root, ref bool updateBalance, Node left = null, Node right = null)
@@ -1847,49 +1842,46 @@ namespace C5.intervals
                     root.Balance++;
             }
             // Node found
+            // Replace node with successor
+            else if (root.Left != null && root.Right != null)
+            {
+                var successor = findSuccessor(root.Right);
+
+                // Get intervals in successor
+                var intervalsNeedingReinsertion = successor.IntervalsEndingInNode;
+
+                // Remove marks for intervals in successor
+                foreach (var interval in intervalsNeedingReinsertion)
+                {
+                    removeLow(interval, root, right);
+                    removeHigh(interval, root, left);
+                }
+
+                // Swap root and successor nodes
+                root.Swap(successor);
+
+                // Remove the successor node
+                updateBalance = false;
+                root.Right = removeNodeWithKey(successor.Key, root.Right, ref updateBalance, left, right);
+
+                if (updateBalance)
+                    root.Balance--;
+
+                // Reinsert marks for intervals in successor
+                foreach (var interval in intervalsNeedingReinsertion)
+                {
+                    addLow(interval, root, right);
+                    addHigh(interval, root, left);
+                }
+
+                root.UpdateMaximumOverlap();
+            }
             else
             {
-                // Replace node with successor
-                if (root.Left != null && root.Right != null)
-                {
-                    var successor = findSuccessor(root.Right);
+                updateBalance = true;
 
-                    // Get intervals in successor
-                    var intervalsNeedingReinsertion = successor.IntervalsEndingInNode;
-
-                    // Remove marks for intervals in successor
-                    foreach (var interval in intervalsNeedingReinsertion)
-                    {
-                        removeLow(interval, root, right);
-                        removeHigh(interval, root, left);
-                    }
-
-                    // Swap root and successor nodes
-                    root.Swap(successor);
-
-                    // Remove the successor node
-                    updateBalance = false;
-                    root.Right = removeNodeWithKey(successor.Key, root.Right, ref updateBalance, left, right);
-
-                    if (updateBalance)
-                        root.Balance--;
-
-                    // Reinsert marks for intervals in successor
-                    foreach (var interval in intervalsNeedingReinsertion)
-                    {
-                        addLow(interval, root, right);
-                        addHigh(interval, root, left);
-                    }
-
-                    root.UpdateMaximumOverlap();
-                }
-                else
-                {
-                    updateBalance = true;
-
-                    // Return Left if not null, otherwise Right
-                    return root.Left ?? root.Right;
-                }
+                // Return Left if not null, otherwise Right
+                return root.Left ?? root.Right;
             }
 
             if (updateBalance)
