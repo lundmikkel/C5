@@ -1703,10 +1703,8 @@ namespace C5.intervals
                 // Check for unnecessary endpoint nodes, if interval was actually removed
                 if (lowNode.IntervalsEndingInNode.IsEmpty)
                 {
-                    Node left = null;
-                    Node right = null;
                     var updateBalanace = false;
-                    removeNodeWithKey(_root, interval.Low, ref left, ref right, ref updateBalanace);
+                    removeNodeWithKey(interval.Low, _root, ref updateBalanace);
 
                     // Check that the node does not exist anymore
                     Contract.Assert(!Contract.Exists(nodes(_root), n => n.Key.Equals(interval.Low)));
@@ -1714,10 +1712,8 @@ namespace C5.intervals
 
                 if (highNode.IntervalsEndingInNode.IsEmpty)
                 {
-                    Node left = null;
-                    Node right = null;
                     var updateBalanace = false;
-                    removeNodeWithKey(_root, interval.High, ref left, ref right, ref updateBalanace);
+                    removeNodeWithKey(interval.High, _root, ref updateBalanace);
 
                     // Check that the node does not exist anymore
                     Contract.Assert(!Contract.Exists(nodes(_root), n => n.Key.Equals(interval.High)));
@@ -1826,7 +1822,7 @@ namespace C5.intervals
                 root.UpdateMaximumOverlap();
         }
 
-        private static Node removeNodeWithKey(Node root, T key, ref Node left, ref Node right, ref bool updateBalance)
+        private static Node removeNodeWithKey(T key, Node root, ref bool updateBalance, Node left = null, Node right = null)
         {
             Contract.Requires(root != null);
             Contract.Requires(Contract.Exists(nodes(root), n => n.Key.Equals(key)));
@@ -1837,7 +1833,7 @@ namespace C5.intervals
             if (compare > 0)
             {
                 // Update left parent
-                root.Right = removeNodeWithKey(root.Right, key, ref root, ref right, ref updateBalance);
+                root.Right = removeNodeWithKey(key, root.Right, ref updateBalance, root, right);
 
                 if (updateBalance)
                     root.Balance--;
@@ -1845,7 +1841,7 @@ namespace C5.intervals
             // Remove node from left subtree
             else if (compare < 0)
             {
-                root.Left = removeNodeWithKey(root.Left, key, ref left, ref root, ref updateBalance);
+                root.Left = removeNodeWithKey(key, root.Left, ref updateBalance, left, root);
 
                 if (updateBalance)
                     root.Balance++;
@@ -1873,7 +1869,7 @@ namespace C5.intervals
 
                     // Remove the successor node
                     updateBalance = false;
-                    root.Right = removeNodeWithKey(root.Right, successor.Key, ref left, ref right, ref updateBalance);
+                    root.Right = removeNodeWithKey(successor.Key, root.Right, ref updateBalance, left, right);
 
                     if (updateBalance)
                         root.Balance--;
