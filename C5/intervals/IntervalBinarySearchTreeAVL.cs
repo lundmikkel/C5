@@ -39,14 +39,14 @@ namespace C5.intervals
             // Check that the IBS tree invariants from the Hanson article holds.
             Contract.Invariant(Contract.ForAll(nodes(_root), checkIbsInvariants));
 
+            // Check that the intervals are correctly placed
+            Contract.Invariant(confirmIntervalPlacement(_root));
+
             // Check nodes are sorted
             Contract.Invariant(checkNodesAreSorted(_root));
 
             // Check that the MNO variables are correct for all nodes
             Contract.Invariant(checkMnoAndIntervalsEndingInNodeForEachNode(_root));
-
-            // Check that the intervals are correctly placed
-            Contract.Invariant(confirmIntervalPlacement(_root));
         }
 
         [Pure]
@@ -1703,7 +1703,7 @@ namespace C5.intervals
                 if (lowNode.IntervalsEndingInNode.IsEmpty)
                 {
                     var updateBalanace = false;
-                    removeNodeWithKey(interval.Low, _root, ref updateBalanace);
+                    _root = removeNodeWithKey(interval.Low, _root, ref updateBalanace);
 
                     // Check that the node does not exist anymore
                     Contract.Assert(!Contract.Exists(nodes(_root), n => n.Key.Equals(interval.Low)));
@@ -1712,7 +1712,7 @@ namespace C5.intervals
                 if (highNode.IntervalsEndingInNode.IsEmpty)
                 {
                     var updateBalanace = false;
-                    removeNodeWithKey(interval.High, _root, ref updateBalanace);
+                    _root = removeNodeWithKey(interval.High, _root, ref updateBalanace);
 
                     // Check that the node does not exist anymore
                     Contract.Assert(!Contract.Exists(nodes(_root), n => n.Key.Equals(interval.High)));
