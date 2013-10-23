@@ -81,14 +81,11 @@ namespace C5.intervals
 
                 var deltaAt = 0;
                 var deltaAfter = 0;
-                var intervalsEndingInNode = 0;
 
                 foreach (var interval in intervals)
                 {
                     if (interval.Low.CompareTo(key) == 0)
                     {
-                        intervalsEndingInNode++;
-
                         if (interval.LowIncluded)
                             deltaAt++;
                         else
@@ -97,8 +94,6 @@ namespace C5.intervals
 
                     if (interval.High.CompareTo(key) == 0)
                     {
-                        intervalsEndingInNode++;
-
                         if (interval.HighIncluded)
                             deltaAfter--;
                         else
@@ -121,7 +116,7 @@ namespace C5.intervals
                     return false;
 
                 // Check IntervalsEndingInNode
-                if (node.IntervalsEndingInNode != intervalsEndingInNode)
+                if (!Contract.ForAll(node.IntervalsEndingInNode, intervals.Contains) && node.IntervalsEndingInNode.Count() != intervals.Count)
                     return false;
             }
 
@@ -359,8 +354,6 @@ namespace C5.intervals
             {
                 // The key cannot be null
                 Contract.Invariant(!ReferenceEquals(Key, null));
-                // The variable should be non-negative
-                Contract.Invariant(IntervalsEndingInNode >= 0);
             }
 
             #endregion
@@ -372,8 +365,8 @@ namespace C5.intervals
             public Node Left { get; internal set; }
             public Node Right { get; internal set; }
 
-            // The number of intervals with an endpoint in one of the interval sets in the node
-            public int IntervalsEndingInNode;
+            // The intervals with an endpoint in the node
+            private IntervalSet _intervalsEndingInNode;
 
             // TODO: Make invariants for these
             // Fields for Maximum Number of Overlaps
@@ -394,6 +387,12 @@ namespace C5.intervals
             public IntervalSet Less { get; set; }
             public IntervalSet Equal { get; set; }
             public IntervalSet Greater { get; set; }
+
+            public IntervalSet IntervalsEndingInNode
+            {
+                get { return _intervalsEndingInNode ?? (_intervalsEndingInNode = new IntervalSet()); }
+                private set { _intervalsEndingInNode = value; }
+            }
 
             #endregion
 
@@ -429,19 +428,6 @@ namespace C5.intervals
                     if (Greater != null && !Greater.IsEmpty)
                         foreach (var interval in Greater)
                             yield return interval;
-                }
-            }
-
-            [Pure]
-            public IEnumerable<I> GetIntervalsEndingInNode()
-            {
-                Contract.Ensures(Contract.Result<IEnumerable<I>>().All(i => i.HasEndpoint(Key)));
-
-                var set = new IntervalSet();
-                foreach (var interval in Intervals)
-                {
-                    if (interval.HasEndpoint(Key) && set.Add(interval))
-                        yield return interval;
                 }
             }
 
@@ -1403,12 +1389,8 @@ namespace C5.intervals
                 // Update MNO
                 updateMaximumOverlap(_root, interval);
 
-                lowNode.IntervalsEndingInNode++;
-                highNode.IntervalsEndingInNode++;
-
-                // Invariants from the node
-                Contract.Assert(lowNode.IntervalsEndingInNode > 0 || !lowNode.GetIntervalsEndingInNode().Any());
-                Contract.Assert(highNode.IntervalsEndingInNode > 0 || !highNode.GetIntervalsEndingInNode().Any());
+                lowNode.IntervalsEndingInNode.Add(interval);
+                highNode.IntervalsEndingInNode.Add(interval);
 
                 _count++;
                 raiseForAdd(interval);
@@ -1630,15 +1612,11 @@ namespace C5.intervals
                 // Update MNO
                 updateMaximumOverlap(_root, interval);
 
-                --lowNode.IntervalsEndingInNode;
-                --highNode.IntervalsEndingInNode;
-
-                // Invariants from the node
-                Contract.Assert(lowNode.IntervalsEndingInNode > 0 || !lowNode.GetIntervalsEndingInNode().Any());
-                Contract.Assert(highNode.IntervalsEndingInNode > 0 || !highNode.GetIntervalsEndingInNode().Any());
+                lowNode.IntervalsEndingInNode.Remove(interval);
+                highNode.IntervalsEndingInNode.Remove(interval);
 
                 // Check for unnecessary endpoint nodes, if interval was actually removed
-                if (lowNode.IntervalsEndingInNode == 0)
+                if (lowNode.IntervalsEndingInNode.IsEmpty)
                 {
                     Node left = null;
                     Node right = null;
@@ -1646,7 +1624,7 @@ namespace C5.intervals
                     removeNodeWithKey(_root, interval.Low, ref left, ref right, ref updateBalanace);
                 }
 
-                if (highNode.IntervalsEndingInNode == 0)
+                if (highNode.IntervalsEndingInNode.IsEmpty)
                 {
                     Node left = null;
                     Node right = null;
@@ -1779,7 +1757,7 @@ namespace C5.intervals
                     var successor = findMinNode(root.Right);
 
                     // Get intervals in successor
-                    var intervalsNeedingReinsertion = successor.GetIntervalsEndingInNode().ToArray();
+                    var intervalsNeedingReinsertion = successor.IntervalsEndingInNode;
 
                     // Remove marks for intervals in successor
                     foreach (var interval in intervalsNeedingReinsertion)
