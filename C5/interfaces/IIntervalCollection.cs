@@ -288,11 +288,12 @@ namespace C5
         public bool Remove(I interval)
         {
             Contract.Requires(!ReferenceEquals(interval, null));
+            // The result is true if the collection contained the interval
+            Contract.Ensures(Contract.Result<bool>() == Contract.OldValue(this.Any(i => ReferenceEquals(i, interval))));
+            // The collection does not contain the interval
+            Contract.Ensures(!Contract.Exists(this, i => ReferenceEquals(i, interval)));
             // If the interval is removed the count goes down by one
             Contract.Ensures(!Contract.Result<bool>() || Count == Contract.OldValue(Count) - 1);
-            Contract.Ensures(Contract.Result<bool>() == Contract.OldValue(this.Any(i => ReferenceEquals(i, interval))));
-            // The collection contains the interval
-            Contract.Ensures(this.Any(i => !ReferenceEquals(i, interval)));
 
             throw new NotImplementedException();
         }
