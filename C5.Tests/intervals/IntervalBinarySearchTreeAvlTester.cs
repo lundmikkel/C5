@@ -107,6 +107,36 @@ namespace C5.Tests.intervals
         }
 
         [TestFixture]
+        public class RandomRemove
+        {
+            private IList<IInterval<int>> _intervals;
+            private readonly Random _random = new Random(0);
+
+            [SetUp]
+            public void SetUp()
+            {
+                const int count = 100;
+                _intervals = new ArrayList<IInterval<int>>(count);
+                _intervals.AddAll(BenchmarkTestCases.DataSetB(count));
+                _intervals.Shuffle(_random);
+            }
+
+            [Test]
+            public void AddAndRemove()
+            {
+                var intervalCollection = new IntervalBinarySearchTreeAvl<IInterval<int>, int>();
+
+                var graph = intervalCollection.QuickGraph.Split(',');
+
+                foreach (var interval in _intervals)
+                    intervalCollection.Add(interval);
+
+                foreach (var interval in _intervals)
+                    intervalCollection.Remove(interval);
+            }
+        }
+
+        [TestFixture]
         public class IBSRemove
         {
             //************************************
