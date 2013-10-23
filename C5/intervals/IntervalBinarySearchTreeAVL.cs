@@ -352,13 +352,14 @@ namespace C5.intervals
         [Pure]
         private bool confirmIntervalPlacement()
         {
-            var result = true;
             foreach (var interval in this)
             {
-                result &= confirmLowPlacement(interval, _root);
-                result &= confirmHighPlacement(interval, _root);
+                if (!confirmLowPlacement(interval, _root))
+                    return false;
+                if (!confirmHighPlacement(interval, _root))
+                    return false;
             }
-            return result;
+            return true;
         }
 
         [Pure]
