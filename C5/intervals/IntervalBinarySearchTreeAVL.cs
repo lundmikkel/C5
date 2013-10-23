@@ -151,7 +151,7 @@ namespace C5.intervals
         }
 
         [Pure]
-        private static ISortedDictionary<T, IntervalSet> getIntervalsByEndpoint(Node root)
+        private static IEnumerable<KeyValuePair<T, IntervalSet>> getIntervalsByEndpoint(Node root)
         {
             var dictionary = new TreeDictionary<T, IntervalSet>();
 
@@ -200,7 +200,10 @@ namespace C5.intervals
             if (sum > max)
                 max = sum;
 
-            return node.Max == max;
+            if (node.Max != max)
+                return false;
+
+            return true;
         }
 
         /// <summary>
@@ -1956,8 +1959,16 @@ namespace C5.intervals
                                 });
 
                             cell.Cells.Add(bottom);
+
+                            /*cell.Cells.Add(new GraphvizRecordCell
+                            {
+                                Text = String.Format("dAt: {0}, dAfter: {1}, Sum: {2}, Max: {3}", e.Vertex.DeltaAt, e.Vertex.DeltaAfter, e.Vertex.Sum, e.Vertex.Max)
+                            });*/
+
                             // Add cell to record
                             e.VertexFormatter.Record.Cells.Add(cell);
+
+
                         }
                     };
                 gw.FormatEdge += delegate(object sender, FormatEdgeEventArgs<Node, Edge<Node>> e)
