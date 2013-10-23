@@ -1412,6 +1412,14 @@ namespace C5.intervals
                 Add(interval);
         }
 
+        private static void addLow(Node root, Node right, I interval)
+        {
+            var nodeWasAdded = false;
+            var intervalWasAdded = false;
+            Node node = null;
+            addLow(root, right, interval, ref nodeWasAdded, ref intervalWasAdded, ref node, false);
+        }
+
         // TODO: Make iterative?
         private static Node addLow(Node root, Node right, I interval, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node lowNode, bool addNewNode = true)
         {
@@ -1491,6 +1499,14 @@ namespace C5.intervals
                 root = rotateForAdd(root, ref nodeWasAdded);
 
             return root;
+        }
+
+        private static void addHigh(Node root, Node left, I interval)
+        {
+            var nodeWasAdded = false;
+            var intervalWasAdded = false;
+            Node node = null;
+            addHigh(root, left, interval, ref nodeWasAdded, ref intervalWasAdded, ref node, false);
         }
 
         private static Node addHigh(Node root, Node left, I interval, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node highNode, bool addNewNode = true)
@@ -1644,6 +1660,13 @@ namespace C5.intervals
             return intervalWasRemoved;
         }
 
+        private static void removeLow(Node root, Node right, I interval)
+        {
+            var intervalWasRemoved = false;
+            Node node = null;
+            removeLow(root, right, interval, ref intervalWasRemoved, ref node);
+        }
+
         private static void removeLow(Node root, Node right, I interval, ref bool intervalWasRemoved, ref Node lowNode)
         {
             Contract.Requires(!ReferenceEquals(interval, null));
@@ -1681,6 +1704,13 @@ namespace C5.intervals
                 // Save reference to endpoint node
                 lowNode = root;
             }
+        }
+
+        private static void removeHigh(Node root, Node left, I interval)
+        {
+            var intervalWasRemoved = false;
+            Node node = null;
+            removeLow(root, left, interval, ref intervalWasRemoved, ref node);
         }
 
         private static void removeHigh(Node root, Node left, I interval, ref bool intervalWasRemoved, ref Node highNode)
@@ -1765,13 +1795,8 @@ namespace C5.intervals
                     // Remove marks for intervals in successor
                     foreach (var interval in intervalsNeedingReinsertion)
                     {
-                        var intervalWasRemoved = false;
-                        Node node = null;
-                        removeLow(root, right, interval, ref intervalWasRemoved, ref node);
-
-                        intervalWasRemoved = false;
-                        node = null;
-                        removeHigh(root, left, interval, ref intervalWasRemoved, ref node);
+                        removeLow(root, right, interval);
+                        removeHigh(root, left, interval);
                     }
 
                     // Swap keys, so we can search for
@@ -1787,15 +1812,8 @@ namespace C5.intervals
                     // Reinsert marks for intervals in successor
                     foreach (var interval in intervalsNeedingReinsertion)
                     {
-                        var nodeWasAdded = false;
-                        var intervalWasAdded = false;
-                        Node node = null;
-                        addLow(root, right, interval, ref nodeWasAdded, ref intervalWasAdded, ref node, false);
-
-                        nodeWasAdded = false;
-                        intervalWasAdded = false;
-                        node = null;
-                        addHigh(root, left, interval, ref nodeWasAdded, ref intervalWasAdded, ref node, false);
+                        addLow(root, right, interval);
+                        addHigh(root, left, interval);
                     }
 
                     root.UpdateMaximumOverlap();
