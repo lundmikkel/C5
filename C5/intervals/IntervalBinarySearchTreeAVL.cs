@@ -177,6 +177,8 @@ namespace C5.intervals
         [Pure]
         private static bool checkMno(Node node)
         {
+            Contract.Requires(node != null);
+
             // Check sum
             var sum = (node.Left != null ? node.Left.Sum : 0) + node.DeltaAt + node.DeltaAfter +
                       (node.Right != null ? node.Right.Sum : 0);
@@ -750,8 +752,8 @@ namespace C5.intervals
                             root = rotateLeft(root);
 
                             // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (sbyte) ((root.Balance == +1) ? -1 : 0);
-                            root.Right.Balance = (sbyte) ((root.Balance == -1) ? +1 : 0);
+                            root.Left.Balance = (sbyte) (root.Balance == +1 ? -1 : 0);
+                            root.Right.Balance = (sbyte) (root.Balance == -1 ? +1 : 0);
                             root.Balance = 0;
                             break;
                     }
@@ -973,7 +975,7 @@ namespace C5.intervals
         /// <inheritdoc/>
         public override I Choose()
         {
-            if (_root == null)
+            if (IsEmpty)
                 throw new NoSuchItemException();
 
             // At least one of Less, Equal, or Greater will contain at least one interval
@@ -1891,7 +1893,7 @@ namespace C5.intervals
 
                 // Remove the successor node
                 updateBalance = false;
-                root.Right = removeNodeWithKey(successor.Key, root.Right, ref updateBalance, leftUp: leftUp, rightUp: rightUp);
+                root.Right = removeNodeWithKey(successor.Key, root.Right, ref updateBalance, leftUp, rightUp);
 
                 if (updateBalance)
                     root.Balance--;
@@ -1946,10 +1948,10 @@ namespace C5.intervals
         /// </summary>  
         public void Clear()
         {
-            Contract.Ensures(_root == null);
+            Contract.Ensures(IsEmpty);
 
             // Return if tree is empty
-            if (_root == null)
+            if (IsEmpty)
                 return;
 
             // Save old count and reset all values
