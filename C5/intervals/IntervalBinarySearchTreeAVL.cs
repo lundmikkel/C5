@@ -1843,7 +1843,7 @@ namespace C5.intervals
             }
         }
 
-        private Node removeNodeWithKey(T key, Node root, ref bool updateBalance, Node leftUp = null, Node rightUp = null)
+        private static Node removeNodeWithKey(T key, Node root, ref bool updateBalance, Node leftUp = null, Node rightUp = null)
         {
             Contract.Requires(root != null);
             Contract.Requires(Contract.Exists(nodes(root), n => n.Key.Equals(key)));
@@ -1900,8 +1900,10 @@ namespace C5.intervals
                 // Reinsert marks for intervals in successor
                 foreach (var interval in intervalsNeedingReinsertion)
                 {
-                    addLow(interval, _root, null);
-                    addHigh(interval, _root, null);
+                    if (leftUp == null || leftUp.Key.CompareTo(interval.Low) < 0)
+                        addLow(interval, root, rightUp);
+                    if (rightUp == null || interval.High.CompareTo(rightUp.Key) < 0)
+                        addHigh(interval, root, leftUp);
                 }
 
                 root.UpdateMaximumOverlap();
