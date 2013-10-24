@@ -15,6 +15,8 @@ namespace C5.Pex
 //        [PexAllowedException(typeof(ContractException))]
         public bool OverlapTester([PexAssumeNotNull] IntervalBase<int> target, [PexAssumeNotNull] IntervalBase<int> y)
         {
+            Console.Out.WriteLine(target);
+            Console.Out.WriteLine(y);
             return target.Overlaps(y);
         }
         

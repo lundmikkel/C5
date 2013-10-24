@@ -81,15 +81,11 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Factories\IntervalBaseFactory.cs" />
-    <Compile Include="PexIntervals.Overlap2Tester.g.cs">
-      <DependentUpon>PexIntervals.cs</DependentUpon>
-    </Compile>
-    <Compile Include="PexIntervals.OverlapTester.g.cs">
-      <DependentUpon>PexIntervals.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Factories\IntervalFactory.cs" />
+    <Compile Include="IntervalCollectionPexTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PexIntervals.cs" />
+    <Compile Include="Properties\PexAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\C5\C5.csproj">

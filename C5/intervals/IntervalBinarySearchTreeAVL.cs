@@ -592,9 +592,9 @@ namespace C5.intervals
             {
                 Contract.Requires(s1 != null);
                 Contract.Requires(s2 != null);
-
-                var res = new IntervalSet(s1);
-                res.RemoveAll(s2);
+                var res = new IntervalSet();
+                foreach (var interval in s1.Where(interval => !s2.Contains(interval)))
+                    res.Add(interval);
                 return res;
             }
         }
@@ -797,26 +797,36 @@ namespace C5.intervals
                     root.Less.AddAll(uniqueInNodeGreater);
                 else
                 {
-                    // If root.Greater is empty, uniqueInNodeGreater is a pointer to the set node.Greater
-                    // We don't want root.Less and node.Greater to be the same IntervalSet object, so we duplicate it
-                    root.Less = rootGreaterIsEmpty ? new IntervalSet(uniqueInNodeGreater) : uniqueInNodeGreater;
+                    // If root.Greater is equal to uniqueInNodeGreater move the reference to root.Less
+                    if (uniqueInNodeGreater.Count == node.Greater.Count)
+                    {
+                        root.Less = node.Greater;
+                        node.Greater = null;
+                    }
+                    else
+                    {
+                        // If root.Greater is empty, uniqueInNodeGreater is a pointer to the set node.Greater
+                        // We don't want root.Less and node.Greater to be the same IntervalSet object, so we duplicate it
+                        // TODO Maybe we can optimize the new set operation with a .clone or similar
+                        root.Less = rootGreaterIsEmpty ? new IntervalSet(uniqueInNodeGreater) : uniqueInNodeGreater;
+                    }
                 }
 
                 // node.Greater = node.Greater - unique
                 if (rootGreaterIsEmpty)
                     node.Greater = null;
-                else
+                else if (node.Greater != null)
                     node.Greater.RemoveAll(uniqueInNodeGreater);
             }
 
             if (node.Greater != null && !node.Greater.IsEmpty)
             {
                 // root.Greater = root.Greater - node.Greater
-                if (root.Greater != null)
+                if (root.Greater != null && !root.Greater.IsEmpty)
                     root.Greater.RemoveAll(node.Greater);
 
                 // root.Equal = root.Equal - node.Greater
-                if (root.Equal != null)
+                if (root.Equal != null  && !root.Equal.IsEmpty)
                     root.Equal.RemoveAll(node.Greater);
             }
 
