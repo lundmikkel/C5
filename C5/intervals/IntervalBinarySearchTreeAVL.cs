@@ -850,7 +850,6 @@ namespace C5.intervals
             root.Right = node.Left;
             node.Left = root;
 
-            // TODO: Look into if these operations can be optimised
             if (root.Greater != null && !root.Greater.IsEmpty)
             {
                 // node.Greater = node.Greater U root.Greater
@@ -1508,16 +1507,15 @@ namespace C5.intervals
             var nodeWasAdded = false;
             var intervalWasAdded = false;
             Node lowNode = null;
-            addLow(interval, root, rightUp, ref nodeWasAdded, ref intervalWasAdded, ref lowNode, false);
+            addLow(interval, root, rightUp, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
         }
 
-        // TODO: Make iterative?
-        private static Node addLow(I interval, Node root, Node rightUp, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node lowNode, bool addNewNode = true)
+        private static Node addLow(I interval, Node root, Node rightUp, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node lowNode)
         {
             Contract.Requires(!ReferenceEquals(interval, null));
 
             // No node existed for the low endpoint
-            if (root == null && addNewNode)
+            if (root == null)
             {
                 root = new Node(interval.Low);
                 nodeWasAdded = true;
@@ -1530,7 +1528,7 @@ namespace C5.intervals
 
             if (compare > 0)
             {
-                root.Right = addLow(interval, root.Right, rightUp, ref nodeWasAdded, ref intervalWasAdded, ref lowNode, addNewNode);
+                root.Right = addLow(interval, root.Right, rightUp, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
 
                 // Adjust node balance, if node was added
                 if (nodeWasAdded)
@@ -1556,7 +1554,7 @@ namespace C5.intervals
                 }
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
-                root.Left = addLow(interval, root.Left, root, ref nodeWasAdded, ref intervalWasAdded, ref lowNode, addNewNode);
+                root.Left = addLow(interval, root.Left, root, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
 
                 // Adjust node balance, if node was added
                 if (nodeWasAdded)
@@ -1597,24 +1595,19 @@ namespace C5.intervals
             var nodeWasAdded = false;
             var intervalWasAdded = false;
             Node highNode = null;
-            addHigh(interval, root, leftUp, ref nodeWasAdded, ref intervalWasAdded, ref highNode, false);
+            addHigh(interval, root, leftUp, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
         }
 
-        private static Node addHigh(I interval, Node root, Node leftUp, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node highNode, bool addNewNode = true)
+        private static Node addHigh(I interval, Node root, Node leftUp, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node highNode)
         {
             Contract.Requires(!ReferenceEquals(interval, null));
 
             // No node existed for the high endpoint
             if (root == null)
             {
-                if (addNewNode)
-                {
-                    root = new Node(interval.High);
-                    nodeWasAdded = true;
-                    intervalWasAdded = true;
-                }
-                else
-                    return null;
+                root = new Node(interval.High);
+                nodeWasAdded = true;
+                intervalWasAdded = true;
             }
 
             Contract.Assert(root != null);
@@ -1623,7 +1616,7 @@ namespace C5.intervals
 
             if (compare < 0)
             {
-                root.Left = addHigh(interval, root.Left, leftUp, ref nodeWasAdded, ref intervalWasAdded, ref highNode, addNewNode);
+                root.Left = addHigh(interval, root.Left, leftUp, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
 
                 // Adjust node balance, if node was added
                 if (nodeWasAdded)
@@ -1650,7 +1643,7 @@ namespace C5.intervals
                 }
 
                 // TODO: Figure this one out: if (interval.low != -inf.)
-                root.Right = addHigh(interval, root.Right, root, ref nodeWasAdded, ref intervalWasAdded, ref highNode, addNewNode);
+                root.Right = addHigh(interval, root.Right, root, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
 
                 // Adjust node balance, if node was added
                 if (nodeWasAdded)
@@ -1766,35 +1759,35 @@ namespace C5.intervals
 
             while (root != null)
             {
-            var compare = interval.Low.CompareTo(root.Key);
+                var compare = interval.Low.CompareTo(root.Key);
 
-            if (compare > 0)
+                if (compare > 0)
                     root = root.Right;
-            else if (compare < 0)
-            {
-                // Everything in the right subtree of root will lie within the interval
-                if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0)
-                    intervalWasRemoved |= root.Greater.Remove(interval);
+                else if (compare < 0)
+                {
+                    // Everything in the right subtree of root will lie within the interval
+                    if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0)
+                        intervalWasRemoved |= root.Greater.Remove(interval);
 
-                // root key is between interval.low and interval.high
-                if (root.Key.CompareTo(interval.High) < 0)
-                    intervalWasRemoved |= root.Equal.Remove(interval);
+                    // root key is between interval.low and interval.high
+                    if (root.Key.CompareTo(interval.High) < 0)
+                        intervalWasRemoved |= root.Equal.Remove(interval);
 
-                // TODO: Figure this one out: if (interval.low != -inf.)
+                    // TODO: Figure this one out: if (interval.low != -inf.)
                     rightUp = root;
                     root = root.Left;
-            }
-            else
-            {
-                // If everything in the right subtree of root will lie within the interval
-                if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0)
-                    intervalWasRemoved |= root.Greater.Remove(interval);
+                }
+                else
+                {
+                    // If everything in the right subtree of root will lie within the interval
+                    if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0)
+                        intervalWasRemoved |= root.Greater.Remove(interval);
 
-                if (interval.LowIncluded)
-                    intervalWasRemoved |= root.Equal.Remove(interval);
+                    if (interval.LowIncluded)
+                        intervalWasRemoved |= root.Equal.Remove(interval);
 
-                // Save reference to endpoint node
-                lowNode = root;
+                    // Save reference to endpoint node
+                    lowNode = root;
 
                     break;
                 }
@@ -1814,35 +1807,35 @@ namespace C5.intervals
             while (root != null)
             {
 
-            var compare = interval.High.CompareTo(root.Key);
+                var compare = interval.High.CompareTo(root.Key);
 
-            if (compare < 0)
+                if (compare < 0)
                     root = root.Left;
-            else if (compare > 0)
-            {
-                // Everything in the right subtree of root will lie within the interval
-                if (leftUp != null && leftUp.Key.CompareTo(interval.Low) >= 0)
-                    intervalWasRemoved |= root.Less.Remove(interval);
+                else if (compare > 0)
+                {
+                    // Everything in the right subtree of root will lie within the interval
+                    if (leftUp != null && leftUp.Key.CompareTo(interval.Low) >= 0)
+                        intervalWasRemoved |= root.Less.Remove(interval);
 
-                // root key is between interval.low and interval.high
-                if (root.Key.CompareTo(interval.Low) > 0)
-                    intervalWasRemoved |= root.Equal.Remove(interval);
+                    // root key is between interval.low and interval.high
+                    if (root.Key.CompareTo(interval.Low) > 0)
+                        intervalWasRemoved |= root.Equal.Remove(interval);
 
-                // TODO: Figure this one out: if (interval.low != -inf.)
+                    // TODO: Figure this one out: if (interval.low != -inf.)
                     leftUp = root;
                     root = root.Right;
-            }
-            else
-            {
-                // If everything in the right subtree of root will lie within the interval
-                if (leftUp != null && leftUp.Key.CompareTo(interval.Low) >= 0)
-                    intervalWasRemoved |= root.Less.Remove(interval);
+                }
+                else
+                {
+                    // If everything in the right subtree of root will lie within the interval
+                    if (leftUp != null && leftUp.Key.CompareTo(interval.Low) >= 0)
+                        intervalWasRemoved |= root.Less.Remove(interval);
 
-                if (interval.HighIncluded)
-                    intervalWasRemoved |= root.Equal.Remove(interval);
+                    if (interval.HighIncluded)
+                        intervalWasRemoved |= root.Equal.Remove(interval);
 
-                // Save reference to endpoint node
-                highNode = root;
+                    // Save reference to endpoint node
+                    highNode = root;
 
                     break;
                 }
