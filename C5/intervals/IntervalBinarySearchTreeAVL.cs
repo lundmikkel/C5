@@ -591,9 +591,9 @@ namespace C5.intervals
             {
                 Contract.Requires(s1 != null);
                 Contract.Requires(s2 != null);
-
-                var res = new IntervalSet(s1);
-                res.RemoveAll(s2);
+                var res = new IntervalSet();
+                foreach (var interval in s1.Where(interval => !s2.Contains(interval)))
+                    res.Add(interval);
                 return res;
             }
         }
@@ -796,26 +796,37 @@ namespace C5.intervals
                     root.Less.AddAll(uniqueInNodeGreater);
                 else
                 {
-                    // If root.Greater is empty, uniqueInNodeGreater is a pointer to the set node.Greater
-                    // We don't want root.Less and node.Greater to be the same IntervalSet object, so we duplicate it
-                    root.Less = rootGreaterIsEmpty ? new IntervalSet(uniqueInNodeGreater) : uniqueInNodeGreater;
+                    // If root.Greater is all unique
+                    if (uniqueInNodeGreater.Count == node.Greater.Count)
+                    {
+                        // Swap references
+                        root.Less = node.Greater;
+                        node.Greater = null;
+                    }
+                    else
+                    {
+                        // If root.Greater is empty, uniqueInNodeGreater is a pointer to the set node.Greater
+                        // We don't want root.Less and node.Greater to be the same IntervalSet object, so we duplicate it
+                        // TODO Maybe we can optimize the new set operation with a .clone or similar
+                        root.Less = rootGreaterIsEmpty ? new IntervalSet(uniqueInNodeGreater) : uniqueInNodeGreater;
+                    }
                 }
 
                 // node.Greater = node.Greater - unique
                 if (rootGreaterIsEmpty)
                     node.Greater = null;
-                else
+                else if (node.Greater != null)
                     node.Greater.RemoveAll(uniqueInNodeGreater);
             }
 
             if (node.Greater != null && !node.Greater.IsEmpty)
             {
                 // root.Greater = root.Greater - node.Greater
-                if (root.Greater != null)
+                if (root.Greater != null && !root.Greater.IsEmpty)
                     root.Greater.RemoveAll(node.Greater);
 
                 // root.Equal = root.Equal - node.Greater
-                if (root.Equal != null)
+                if (root.Equal != null  && !root.Equal.IsEmpty)
                     root.Equal.RemoveAll(node.Greater);
             }
 
@@ -856,33 +867,45 @@ namespace C5.intervals
             {
                 var rootLessIsEmpty = root.Less == null || root.Less.IsEmpty;
                 // unique = node.Less - root.Less
-                var uniqueInNodeLess = rootLessIsEmpty ? node.Less : node.Less - root.Less;
+                var uniqueInNodeLess = rootLessIsEmpty
+                    ? node.Less
+                    : node.Less - root.Less;
 
                 // root.Greater = root.Greater U unique
                 if (root.Greater != null)
                     root.Greater.AddAll(uniqueInNodeLess);
                 else
                 {
-                    // If root.Less is empty, uniqueInNodeLess is a pointer to the set node.Less
-                    // We don't want root.Greater and node.Less to be the same IntervalSet object, so we duplicate it
-                    root.Greater = rootLessIsEmpty ? new IntervalSet(uniqueInNodeLess) : uniqueInNodeLess;
+                    // If root.Less is all unique
+                    if (uniqueInNodeLess.Count == node.Less.Count)
+                    {
+                        // Swap references
+                        root.Greater = node.Less;
+                        node.Less = null;
+                    }
+                    else
+                    {
+                        // If root.Less is empty, uniqueInNodeLess is a pointer to the set node.Less
+                        // We don't want root.Greater and node.Less to be the same IntervalSet object, so we duplicate it
+                        root.Greater = rootLessIsEmpty ? new IntervalSet(uniqueInNodeLess) : uniqueInNodeLess;
+                    }
                 }
 
                 // node.Less = node.Less - unique
                 if (rootLessIsEmpty)
                     node.Less = null;
-                else
+                else if (node.Less != null)
                     node.Less.RemoveAll(uniqueInNodeLess);
             }
 
             if (node.Less != null && !node.Less.IsEmpty)
             {
                 // root.Less = root.Less - node.Less
-                if (root.Less != null)
+                if (root.Less != null && !root.Less.IsEmpty)
                     root.Less.RemoveAll(node.Less);
 
                 // root.Equal = root.Equal - node.Less
-                if (root.Equal != null)
+                if (root.Equal != null && !root.Equal.IsEmpty)
                     root.Equal.RemoveAll(node.Less);
             }
 
