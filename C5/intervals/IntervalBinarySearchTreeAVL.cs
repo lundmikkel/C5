@@ -560,7 +560,7 @@ namespace C5.intervals
                 DeltaAt = successor.DeltaAt;
 
                 // Reset all values in successor
-                successor.DeltaAt = successor.DeltaAfter = successor.Sum = successor.Max = 0;
+                successor.DeltaAt = successor.DeltaAfter = 0;
             }
 
             #endregion
@@ -953,9 +953,8 @@ namespace C5.intervals
         {
             get
             {
-                //Contract.Ensures(Contract.Result<bool>() == (_root == null));
-                return _count == 0;
-                // return _root == null;
+                Contract.Ensures(Contract.Result<bool>() == (_root == null));
+                return _root == null;
             }
         }
 
@@ -1694,13 +1693,6 @@ namespace C5.intervals
         /// <inheritdoc/>
         public bool Remove(I interval)
         {
-
-            if (interval.Low.Equals(43) && interval.High.Equals(48))
-            {
-
-                var i = 0;
-            }
-
             // References to endpoint nodes needed when maintaining Interval
             Node lowNode = null, highNode = null;
 
@@ -1851,7 +1843,7 @@ namespace C5.intervals
             }
         }
 
-        private Node removeNodeWithKey(T key, Node root, ref bool updateBalance, Node left = null, Node right = null)
+        private Node removeNodeWithKey(T key, Node root, ref bool updateBalance, Node leftUp = null, Node rightUp = null)
         {
             Contract.Requires(root != null);
             Contract.Requires(Contract.Exists(nodes(root), n => n.Key.Equals(key)));
@@ -1862,7 +1854,7 @@ namespace C5.intervals
             if (compare > 0)
             {
                 // Update left parent
-                root.Right = removeNodeWithKey(key, root.Right, ref updateBalance, root, right);
+                root.Right = removeNodeWithKey(key, root.Right, ref updateBalance, leftUp: root, rightUp: rightUp);
 
                 if (updateBalance)
                     root.Balance--;
@@ -1870,7 +1862,7 @@ namespace C5.intervals
             // Remove node from left subtree
             else if (compare < 0)
             {
-                root.Left = removeNodeWithKey(key, root.Left, ref updateBalance, left, root);
+                root.Left = removeNodeWithKey(key, root.Left, ref updateBalance, leftUp: leftUp, rightUp: root);
 
                 if (updateBalance)
                     root.Balance++;
@@ -1887,8 +1879,10 @@ namespace C5.intervals
                 // Remove marks for intervals in successor
                 foreach (var interval in intervalsNeedingReinsertion)
                 {
-                    removeLow(interval, _root, null);
-                    removeHigh(interval, _root, null);
+                    if (leftUp == null || leftUp.Key.CompareTo(interval.Low) < 0)
+                        removeLow(interval, root, rightUp);
+                    if (rightUp == null || interval.High.CompareTo(rightUp.Key) < 0)
+                        removeHigh(interval, root, leftUp);
                 }
 
                 // Swap root and successor nodes
@@ -1898,7 +1892,7 @@ namespace C5.intervals
 
                 // Remove the successor node
                 updateBalance = false;
-                root.Right = removeNodeWithKey(successor.Key, root.Right, ref updateBalance, left, right);
+                root.Right = removeNodeWithKey(successor.Key, root.Right, ref updateBalance, leftUp: leftUp, rightUp: rightUp);
 
                 if (updateBalance)
                     root.Balance--;
