@@ -927,8 +927,9 @@ namespace C5.intervals
         {
             get
             {
-                Contract.Ensures(Contract.Result<bool>() == (_root == null));
-                return _root == null;
+                //Contract.Ensures(Contract.Result<bool>() == (_root == null));
+                return _count == 0;
+                // return _root == null;
             }
         }
 
@@ -1088,7 +1089,7 @@ namespace C5.intervals
                 return updateMaximumOverlap(root.Left, interval) && root.UpdateMaximumOverlap();
 
             // Search right for split node and update MNO if necessary
-            if (root.Key.CompareTo(interval.Low) < 0)
+            if (interval.Low.CompareTo(root.Key) > 0)
                 return updateMaximumOverlap(root.Right, interval) && root.UpdateMaximumOverlap();
 
             // Return true if MNO has changed for either endpoint
@@ -1667,6 +1668,13 @@ namespace C5.intervals
         /// <inheritdoc/>
         public bool Remove(I interval)
         {
+
+            if (interval.Low.Equals(43) && interval.High.Equals(48))
+            {
+
+                var i = 0;
+            }
+
             // References to endpoint nodes needed when maintaining Interval
             Node lowNode = null, highNode = null;
 
@@ -1817,7 +1825,7 @@ namespace C5.intervals
             }
         }
 
-        private static Node removeNodeWithKey(T key, Node root, ref bool updateBalance, Node left = null, Node right = null)
+        private Node removeNodeWithKey(T key, Node root, ref bool updateBalance, Node left = null, Node right = null)
         {
             Contract.Requires(root != null);
             Contract.Requires(Contract.Exists(nodes(root), n => n.Key.Equals(key)));
@@ -1853,8 +1861,8 @@ namespace C5.intervals
                 // Remove marks for intervals in successor
                 foreach (var interval in intervalsNeedingReinsertion)
                 {
-                    removeLow(interval, root, right);
-                    removeHigh(interval, root, left);
+                    removeLow(interval, _root, null);
+                    removeHigh(interval, _root, null);
                 }
 
                 // Swap root and successor nodes
@@ -1870,8 +1878,8 @@ namespace C5.intervals
                 // Reinsert marks for intervals in successor
                 foreach (var interval in intervalsNeedingReinsertion)
                 {
-                    addLow(interval, root, right);
-                    addHigh(interval, root, left);
+                    addLow(interval, _root, null);
+                    addHigh(interval, _root, null);
                 }
 
                 root.UpdateMaximumOverlap();
@@ -2035,10 +2043,12 @@ namespace C5.intervals
 
                             cell.Cells.Add(bottom);
 
-                            /*cell.Cells.Add(new GraphvizRecordCell
+                            //*
+                            cell.Cells.Add(new GraphvizRecordCell
                             {
                                 Text = String.Format("dAt: {0}, dAfter: {1}, Sum: {2}, Max: {3}", e.Vertex.DeltaAt, e.Vertex.DeltaAfter, e.Vertex.Sum, e.Vertex.Max)
-                            });*/
+                            });
+                            //*/
 
                             // Add cell to record
                             e.VertexFormatter.Record.Cells.Add(cell);
