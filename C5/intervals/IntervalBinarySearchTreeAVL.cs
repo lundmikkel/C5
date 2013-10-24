@@ -1053,7 +1053,7 @@ namespace C5.intervals
         {
             get
             {
-                if (_root == null)
+                if (IsEmpty)
                     throw new InvalidOperationException("An empty collection has no span");
 
                 return new IntervalBase<T>(getLowest(_root), getHighest(_root));
@@ -1727,11 +1727,11 @@ namespace C5.intervals
                 else
                     highNode.DeltaAfter++;
 
-                // Update MNO
-                updateMaximumOverlap(_root, interval);
-
                 lowNode.IntervalsEndingInNode.Remove(interval);
                 highNode.IntervalsEndingInNode.Remove(interval);
+
+                // Update MNO
+                updateMaximumOverlap(_root, interval);
 
                 // Check for unnecessary endpoint nodes, if interval was actually removed
                 if (lowNode.IntervalsEndingInNode.IsEmpty)
