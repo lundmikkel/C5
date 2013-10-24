@@ -558,6 +558,9 @@ namespace C5.intervals
                 IntervalsEndingInNode = successor.IntervalsEndingInNode;
                 DeltaAfter = successor.DeltaAfter;
                 DeltaAt = successor.DeltaAt;
+
+                // Reset all values in successor
+                successor.DeltaAt = successor.DeltaAfter = successor.Sum = successor.Max = 0;
             }
 
             #endregion
@@ -826,7 +829,7 @@ namespace C5.intervals
                     root.Greater.RemoveAll(node.Greater);
 
                 // root.Equal = root.Equal - node.Greater
-                if (root.Equal != null  && !root.Equal.IsEmpty)
+                if (root.Equal != null && !root.Equal.IsEmpty)
                     root.Equal.RemoveAll(node.Greater);
             }
 
@@ -1890,6 +1893,8 @@ namespace C5.intervals
 
                 // Swap root and successor nodes
                 root.Swap(successor);
+
+                updateMaximumOverlap(root.Right, successor.Key);
 
                 // Remove the successor node
                 updateBalance = false;
