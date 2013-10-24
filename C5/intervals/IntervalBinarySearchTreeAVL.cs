@@ -2067,7 +2067,7 @@ namespace C5.intervals
 
                             cell.Cells.Add(bottom);
 
-                            //*
+                            /*
                             cell.Cells.Add(new GraphvizRecordCell
                             {
                                 Text = String.Format("dAt: {0}, dAfter: {1}, Sum: {2}, Max: {3}", e.Vertex.DeltaAt, e.Vertex.DeltaAfter, e.Vertex.Sum, e.Vertex.Max)
