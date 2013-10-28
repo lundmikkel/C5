@@ -1561,7 +1561,6 @@ namespace C5.intervals
                     intervalWasAdded |= root.Equal.Add(interval);
                 }
 
-                // TODO: Figure this one out: if (interval.low != -inf.)
                 root.Left = addLow(interval, root.Left, root, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
 
                 // Adjust node balance, if node was added
@@ -1650,7 +1649,6 @@ namespace C5.intervals
                     intervalWasAdded |= root.Equal.Add(interval);
                 }
 
-                // TODO: Figure this one out: if (interval.low != -inf.)
                 root.Right = addHigh(interval, root.Right, root, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
 
                 // Adjust node balance, if node was added
@@ -1776,7 +1774,6 @@ namespace C5.intervals
                         if (root.Equal == null || !(intervalWasRemoved |= root.Equal.Remove(interval)))
                             return;
 
-                    // TODO: Figure this one out: if (interval.low != -inf.)
                     rightUp = root;
                     root = root.Left;
                 }
@@ -1821,7 +1818,6 @@ namespace C5.intervals
                         if (root.Equal == null || !(intervalWasRemoved |= root.Equal.Remove(interval)))
                             return;
 
-                    // TODO: Figure this one out: if (interval.low != -inf.)
                     leftUp = root;
                     root = root.Right;
                 }
@@ -1855,7 +1851,7 @@ namespace C5.intervals
             if (compare > 0)
             {
                 // Update left parent
-                root.Right = removeNodeWithKey(key, root.Right, ref updateBalance, leftUp: root, rightUp: rightUp);
+                root.Right = removeNodeWithKey(key, root.Right, ref updateBalance, root, rightUp);
 
                 if (updateBalance)
                     root.Balance--;
@@ -1863,7 +1859,7 @@ namespace C5.intervals
             // Remove node from left subtree
             else if (compare < 0)
             {
-                root.Left = removeNodeWithKey(key, root.Left, ref updateBalance, leftUp: leftUp, rightUp: root);
+                root.Left = removeNodeWithKey(key, root.Left, ref updateBalance, leftUp, root);
 
                 if (updateBalance)
                     root.Balance++;
