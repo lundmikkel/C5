@@ -280,7 +280,7 @@ namespace C5.intervals
         {
             Contract.Requires(v != null);
 
-            var set = new ArrayList<IInterval<T>>();
+            var set = new HashSet<IInterval<T>>();
             var root = _root;
 
             while (root != null)
@@ -290,8 +290,10 @@ namespace C5.intervals
                 if (compare > 0)
                 {
                     // Add a new j interval to the set
-                    if (root.Right != null && v.CompareTo(root.Right) < 0)
+                    if (v.CompareTo(root.Right) < 0)
                         set.Add(new IntervalBase<T>(root.Key, root.Right.Key, IntervalType.Open));
+                    else if (rightUp != null)
+                        set.Add(new IntervalBase<T>(root.Key, rightUp.Key, IntervalType.Open));
 
                     // Update left parent
                     leftUp = root;
@@ -301,8 +303,10 @@ namespace C5.intervals
                 else if (compare < 0)
                 {
                     // Add a new j interval to the set
-                    if (root.Left != null && v.CompareTo(root.Left) > 0)
+                    if (v.CompareTo(root.Left) > 0)
                         set.Add(new IntervalBase<T>(root.Left.Key, root.Key, IntervalType.Open));
+                    else if (leftUp != null)
+                        set.Add(new IntervalBase<T>(leftUp.Key, root.Key, IntervalType.Open));
 
                     // Update right parent
                     rightUp = root;
