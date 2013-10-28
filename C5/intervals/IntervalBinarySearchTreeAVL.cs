@@ -452,6 +452,7 @@ namespace C5.intervals
             // Balance - between -2 and +2
             public sbyte Balance { get; internal set; }
 
+            // Used for printing
             public bool Dummy { get; private set; }
 
             #endregion
@@ -474,6 +475,7 @@ namespace C5.intervals
 
             public Node(T key)
             {
+                Contract.Requires(key != null);
                 Key = key;
             }
 
