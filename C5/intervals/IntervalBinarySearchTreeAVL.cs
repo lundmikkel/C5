@@ -8,10 +8,10 @@ using QuickGraph.Graphviz.Dot;
 
 namespace C5.intervals
 {
-    // TODO: Document reference equality duplicates
     /// <summary>
     /// An implementation of the Interval Binary Search Tree as described by Hanson et. al in "The IBS-Tree: A Data Structure for Finding All Intervals That Overlap a Point" using an AVL tree balancing scheme.
     /// </summary>
+    /// <remarks>The collection will not contain duplicate intervals based on reference equality. Two intervals in the collection are allowed to contain the same interval data, but an object can only be added to the collection once.</remarks>
     /// <typeparam name="I">The interval type.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
     public class IntervalBinarySearchTreeAvl<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
