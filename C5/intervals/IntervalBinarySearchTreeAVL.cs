@@ -1752,13 +1752,6 @@ namespace C5.intervals
             return intervalWasRemoved;
         }
 
-        private static void removeLow(I interval, Node root, Node rightUp)
-        {
-            var intervalWasRemoved = false;
-            Node lowNode = null;
-            removeLow(interval, root, rightUp, ref intervalWasRemoved, ref lowNode);
-        }
-
         private static void removeLow(I interval, Node root, Node rightUp, ref bool intervalWasRemoved, ref Node lowNode)
         {
             Contract.Requires(!ReferenceEquals(interval, null));
@@ -1773,11 +1766,13 @@ namespace C5.intervals
                 {
                     // Everything in the right subtree of root will lie within the interval
                     if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0)
-                        intervalWasRemoved |= root.Greater.Remove(interval);
+                        if (root.Greater == null || !(intervalWasRemoved |= root.Greater.Remove(interval)))
+                            return;
 
                     // root key is between interval.low and interval.high
                     if (root.Key.CompareTo(interval.High) < 0)
-                        intervalWasRemoved |= root.Equal.Remove(interval);
+                        if (root.Equal == null || !(intervalWasRemoved |= root.Equal.Remove(interval)))
+                            return;
 
                     // TODO: Figure this one out: if (interval.low != -inf.)
                     rightUp = root;
@@ -1787,10 +1782,12 @@ namespace C5.intervals
                 {
                     // If everything in the right subtree of root will lie within the interval
                     if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0)
-                        intervalWasRemoved |= root.Greater.Remove(interval);
+                        if (root.Greater == null || !(intervalWasRemoved |= root.Greater.Remove(interval)))
+                            return;
 
                     if (interval.LowIncluded)
-                        intervalWasRemoved |= root.Equal.Remove(interval);
+                        if (root.Equal == null || !(intervalWasRemoved |= root.Equal.Remove(interval)))
+                            return;
 
                     // Save reference to endpoint node
                     lowNode = root;
@@ -1798,13 +1795,6 @@ namespace C5.intervals
                     break;
                 }
             }
-        }
-
-        private static void removeHigh(I interval, Node root, Node leftUp)
-        {
-            var intervalWasRemoved = false;
-            Node highNode = null;
-            removeHigh(interval, root, leftUp, ref intervalWasRemoved, ref highNode);
         }
 
         private static void removeHigh(I interval, Node root, Node leftUp, ref bool intervalWasRemoved, ref Node highNode)
@@ -1821,11 +1811,13 @@ namespace C5.intervals
                 {
                     // Everything in the right subtree of root will lie within the interval
                     if (leftUp != null && leftUp.Key.CompareTo(interval.Low) >= 0)
-                        intervalWasRemoved |= root.Less.Remove(interval);
+                        if (root.Less == null || !(intervalWasRemoved |= root.Less.Remove(interval)))
+                            return;
 
                     // root key is between interval.low and interval.high
                     if (root.Key.CompareTo(interval.Low) > 0)
-                        intervalWasRemoved |= root.Equal.Remove(interval);
+                        if (root.Equal == null || !(intervalWasRemoved |= root.Equal.Remove(interval)))
+                            return;
 
                     // TODO: Figure this one out: if (interval.low != -inf.)
                     leftUp = root;
@@ -1835,10 +1827,12 @@ namespace C5.intervals
                 {
                     // If everything in the right subtree of root will lie within the interval
                     if (leftUp != null && leftUp.Key.CompareTo(interval.Low) >= 0)
-                        intervalWasRemoved |= root.Less.Remove(interval);
+                        if (root.Less == null || !(intervalWasRemoved |= root.Less.Remove(interval)))
+                            return;
 
                     if (interval.HighIncluded)
-                        intervalWasRemoved |= root.Equal.Remove(interval);
+                        if (root.Equal == null || !(intervalWasRemoved |= root.Equal.Remove(interval)))
+                            return;
 
                     // Save reference to endpoint node
                     highNode = root;
@@ -1884,10 +1878,14 @@ namespace C5.intervals
                 // Remove marks for intervals in successor
                 foreach (var interval in intervalsNeedingReinsertion)
                 {
+                    var intervalWasRemoved = false;
+                    Node node = null;
+
                     if (leftUp == null || leftUp.Key.CompareTo(interval.Low) < 0)
-                        removeLow(interval, root, rightUp);
+                        removeLow(interval, root, rightUp, ref intervalWasRemoved, ref node);
+
                     if (rightUp == null || interval.High.CompareTo(rightUp.Key) < 0)
-                        removeHigh(interval, root, leftUp);
+                        removeHigh(interval, root, leftUp, ref intervalWasRemoved, ref node);
                 }
 
                 // Swap root and successor nodes
