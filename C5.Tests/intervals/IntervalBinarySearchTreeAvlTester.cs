@@ -126,13 +126,14 @@ namespace C5.Tests.intervals
             {
                 var intervalCollection = new IntervalBinarySearchTreeAvl<IInterval<int>, int>();
 
-                var graph = intervalCollection.QuickGraph.Split(',');
-
                 foreach (var interval in _intervals)
                     intervalCollection.Add(interval);
 
                 foreach (var interval in _intervals)
-                    intervalCollection.Remove(interval);
+                {
+                    Assert.True(intervalCollection.Remove(interval));
+                    Assert.False(intervalCollection.Remove(interval));
+                }
             }
         }
 
