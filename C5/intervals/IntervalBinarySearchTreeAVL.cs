@@ -938,10 +938,64 @@ namespace C5.intervals
         {
             Contract.Requires(intervals != null);
 
-            // TODO: Pre-generate balanced tree based on endpoints and insert intervals afterwards
+            var intervalArray = intervals as I[] ?? intervals.ToArray();
 
-            foreach (var interval in intervals)
+            // TODO: Pre-generate balanced tree based on endpoints and insert intervals afterwards
+            // preconstructNodeStructure(intervalArray);
+
+            foreach (var interval in intervalArray)
                 Add(interval);
+        }
+
+        private void preconstructNodeStructure(I[] intervals)
+        {
+
+            var intervalCount = intervals.Count();
+
+            // Save all endpoints to array
+            var endpoints = new T[intervalCount * 2];
+            for (var i = 0; i < intervalCount; i++)
+            {
+                var interval = intervals[i];
+
+                endpoints[i * 2] = interval.Low;
+                endpoints[i * 2 + 1] = interval.High;
+            }
+
+            // Sort endpoints
+            Sorting.IntroSort(endpoints);
+
+            // Remove duplicate endpoints
+            var uniqueEndpoints = new T[intervalCount * 2];
+            var endpointCount = 0;
+
+            foreach (var endpoint in endpoints)
+                if (endpointCount == 0 || uniqueEndpoints[endpointCount - 1].CompareTo(endpoint) < 0)
+                    uniqueEndpoints[endpointCount++] = endpoint;
+
+            var height = 0;
+            _root = createNodes(ref uniqueEndpoints, 0, endpointCount - 1, ref height);
+        }
+
+        private Node createNodes(ref T[] endpoints, int lower, int upper, ref int height)
+        {
+            if (lower > upper)
+                return null;
+
+            var mid = lower + ((upper - lower) >> 1);
+
+            var node = new Node(endpoints[mid]);
+            var leftHeight = 0;
+            var rightHeight = 0;
+
+            node.Left = createNodes(ref endpoints, lower, mid - 1, ref leftHeight);
+            node.Right = createNodes(ref endpoints, mid + 1, upper, ref rightHeight);
+
+            node.Balance = (sbyte) (rightHeight - leftHeight);
+
+            height = Math.Max(leftHeight, rightHeight) + 1;
+
+            return node;
         }
 
         /// <summary>
@@ -960,8 +1014,8 @@ namespace C5.intervals
         {
             get
             {
-                Contract.Ensures(Contract.Result<bool>() == (_root == null));
-                return _root == null;
+                Contract.Ensures(Contract.Result<bool>() == (_count == 0));
+                return _count == 0;
             }
         }
 
