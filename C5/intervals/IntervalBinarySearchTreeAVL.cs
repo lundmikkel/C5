@@ -326,7 +326,7 @@ namespace C5.intervals
         /// </summary>
         /// <returns>True if the tree is balanced, else false.</returns>
         [Pure]
-        private bool confirmBalance(Node root)
+        private static bool confirmBalance(Node root)
         {
             var result = true;
             height(root, ref result);
@@ -369,7 +369,7 @@ namespace C5.intervals
         }
 
         [Pure]
-        private bool confirmLowPlacement(I interval, Node root, Node rightUp = null, bool result = true)
+        private static bool confirmLowPlacement(I interval, Node root, Node rightUp = null, bool result = true)
         {
             var compare = root.Key.CompareTo(interval.Low);
             if (compare == 0)
@@ -393,7 +393,7 @@ namespace C5.intervals
         }
 
         [Pure]
-        private bool confirmHighPlacement(I interval, Node root, Node leftUp = null, bool result = true)
+        private static bool confirmHighPlacement(I interval, Node root, Node leftUp = null, bool result = true)
         {
             var compare = root.Key.CompareTo(interval.High);
             if (compare == 0)
