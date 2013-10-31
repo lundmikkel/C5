@@ -357,6 +357,31 @@ namespace C5.Tests.intervals
 
             return intervals;
         }
+
+        public static IInterval<int>[] RandomSet(int count)
+        {
+            var intervals = new IInterval<int>[count];
+            for (var i = 0; i < count; i++)
+            {
+                var low = randomInt();
+                var high = randomInt();
+                while (low >= high)
+                    high = randomInt();
+                var lowIncluded = randomInt() > 0;
+                var highIncluded = randomInt() > 0;
+                intervals[i] = new IntervalBase<int>(low, high,lowIncluded,highIncluded);
+            }
+            return intervals;
+        }
+
+        private static int randomInt()
+        {
+            var r = System.Security.Cryptography.RandomNumberGenerator.Create();
+            var randomBytes = new byte[4];
+            r.GetBytes(randomBytes);
+            var rndInt = BitConverter.ToInt32(randomBytes, 0);
+            return rndInt;
+        }
     }
 
     abstract class DataSetTester
