@@ -1226,7 +1226,7 @@ namespace C5.intervals
             var set = new IntervalSet();
 
             var splitNode = _root;
-            // Use a lambda instead of out, as out or ref isn't allowed for itorators
+            // Use a lambda instead of out, as out or ref isn't allowed for iterators
             foreach (var interval in findSplitNode(_root, query, n => { splitNode = n; }).Where(set.Add))
                 yield return interval;
 
