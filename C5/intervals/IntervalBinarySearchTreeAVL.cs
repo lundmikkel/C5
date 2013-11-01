@@ -36,17 +36,17 @@ namespace C5.intervals
             // Check the balance invariant holds.
             Contract.Invariant(confirmBalance(_root));
 
-            // Check that the IBS tree invariants from the Hanson article holds.
-            Contract.Invariant(Contract.ForAll(nodes(_root), checkIbsInvariants));
-
-            // Check that the intervals are correctly placed
-            Contract.Invariant(confirmIntervalPlacement(_root));
-
             // Check nodes are sorted
             Contract.Invariant(checkNodesAreSorted(_root));
 
             // Check that the MNO variables are correct for all nodes
             Contract.Invariant(checkMnoAndIntervalsEndingInNodeForEachNode(_root));
+
+            // Check that the IBS tree invariants from the Hanson article holds.
+            Contract.Invariant(Contract.ForAll(nodes(_root), checkIbsInvariants));
+
+            // Check that the intervals are correctly placed
+            Contract.Invariant(confirmIntervalPlacement(_root));
         }
 
         [Pure]
@@ -340,7 +340,7 @@ namespace C5.intervals
         /// <param name="result">Reference to a bool that will be set to false if an in-balance is discovered.</param>
         /// <returns>Height of the tree.</returns>
         [Pure]
-        // TODO skal ref eller Pure fjernes?
+        // TODO Can we use ref in pure methods?
         private static int height(Node node, ref bool result)
         {
             if (node == null)
@@ -1746,6 +1746,9 @@ namespace C5.intervals
         /// <inheritdoc/>
         public bool Remove(I interval)
         {
+            if (IsEmpty)
+                return false;
+
             // References to endpoint nodes needed when maintaining Interval
             Node lowNode = null, highNode = null;
 
@@ -1997,13 +2000,9 @@ namespace C5.intervals
 
         #region Clear
 
-        /// <summary>
-        /// Remove all intervals from this collection.
-        /// </summary>  
+        /// <inheritdoc/>
         public void Clear()
         {
-            Contract.Ensures(IsEmpty);
-
             // Return if tree is empty
             if (IsEmpty)
                 return;
