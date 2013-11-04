@@ -385,6 +385,8 @@ namespace C5.intervals
 
         private class Node : IComparable<Node>
         {
+            private bool _delete = false;
+
             #region Code Contracts
 
             [ContractInvariantMethod]
@@ -482,8 +484,10 @@ namespace C5.intervals
             {
                 get
                 {
-                    return IncludedList == null && ExcludedList == null && DeltaAt == 0 && DeltaAfter == 0;
+                    return _delete || IncludedList == null && ExcludedList == null && DeltaAt == 0 && DeltaAfter == 0;
                 }
+
+                set { _delete = value; }
             }
 
             public void UpdateSpan()
@@ -719,8 +723,7 @@ namespace C5.intervals
                 DeltaAfter = successor.DeltaAfter;
                 DeltaAt = successor.DeltaAt;
 
-                // Reset all values in successor
-                successor.DeltaAt = successor.DeltaAfter = 0;
+                successor.IsEmpty = true;
             }
 
             public int CompareTo(Node other)
@@ -1182,7 +1185,7 @@ namespace C5.intervals
         /// <inheritdoc/>
         public bool IsReadOnly { get { return false; } }
 
-        #region AddHigh
+        #region Add
 
         /// <summary>
         /// Adds the specified Key.
@@ -1317,7 +1320,7 @@ namespace C5.intervals
 
         #endregion
 
-        #region RemoveLow
+        #region Remove
 
         /// <summary>
         /// Deletes the specified Key.
