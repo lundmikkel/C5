@@ -122,6 +122,7 @@
     </Compile>
     <Compile Include="InterfacesTest.cs" />
     <Compile Include="intervals\Benchmarker.cs" />
+    <Compile Include="intervals\DynamicIntervalTreeTester.cs" />
     <Compile Include="intervals\IntervalBinarySearchTreeAvlTester.cs" />
     <Compile Include="intervals\IntervalBinarySearchTreeAvlTester2.cs" />
     <Compile Include="intervals\IntervalRelationsTester.cs" />

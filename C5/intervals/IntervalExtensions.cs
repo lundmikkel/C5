@@ -247,7 +247,7 @@ namespace C5.intervals
         /// <param name="y">Second interval.</param>
         /// <returns>True if both endpoints are equal.</returns>
         [Pure]
-        public static bool Equals<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        public static bool IntervalEquals<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             Contract.Requires(x != null);
             Contract.Requires(y != null);
@@ -283,6 +283,41 @@ namespace C5.intervals
                 throw new ArgumentException("The intervals must overlap to find the intersection.");
 
             return new IntervalBase<T>(low, high);
+        }
+
+        public static IInterval<T> JoinedSpan<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            // The intersection will be contained in both intervals
+            Contract.Ensures(Contract.Result<IInterval<T>>().Contains(x));
+            Contract.Ensures(Contract.Result<IInterval<T>>().Contains(y));
+
+            return new IntervalBase<T>(x.LowestLow(y), x.HighestHigh(y));
+        }
+
+        /// <summary>
+        /// Returns the interval with the highest high endpoint. If equal the first interval is favored.
+        /// </summary>
+        /// <param name="x">First interval.</param>
+        /// <param name="y">Second interval.</param>
+        /// <typeparam name="T">Endpoint value type</typeparam>
+        /// <returns>The interval with the highest high endpoint.</returns>
+        public static IInterval<T> HighestHigh<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            return x.CompareHigh(y) >= 0 ? x : y;
+        }
+
+        /// <summary>
+        /// Returns the interval with the lowest low endpoint. If equal the first interval is favored.
+        /// </summary>
+        /// <param name="x">First interval.</param>
+        /// <param name="y">Second interval.</param>
+        /// <typeparam name="T">Endpoint value type</typeparam>
+        /// <returns>The interval with the lowest low endpoint.</returns>
+        public static IInterval<T> LowestLow<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            return x.CompareLow(y) <= 0 ? x : y;
         }
 
         /// <summary>

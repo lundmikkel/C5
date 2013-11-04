@@ -178,7 +178,7 @@ namespace C5.Tests.intervals
                 Console.WriteLine(IntervalCollection.FindOverlaps(query).Count());
                 Console.WriteLine(IntervalCollection.CountOverlaps(query));
 
-                var comparer = ComparerFactory<IInterval<int>>.CreateEqualityComparer(IntervalExtensions.Equals, IntervalExtensions.GetHashCode);
+                var comparer = ComparerFactory<IInterval<int>>.CreateEqualityComparer(IntervalExtensions.IntervalEquals, IntervalExtensions.GetHashCode);
 
                 var set = new HashSet<IInterval<int>>(comparer);
 

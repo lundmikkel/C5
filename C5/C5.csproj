@@ -165,6 +165,7 @@
     <Compile Include="intervals\IntervalExtensions.cs" />
     <Compile Include="intervals\NestedContainmentList.cs" />
     <Compile Include="intervals\NestedContainmentList2.cs" />
+    <Compile Include="intervals\DynamicIntervalTree.cs" />
     <Compile Include="intervals\StaticIntervalTree.cs" />
     <Compile Include="linkedlists\HashedLinkedList.cs" />
     <Compile Include="linkedlists\LinkedList.cs" />

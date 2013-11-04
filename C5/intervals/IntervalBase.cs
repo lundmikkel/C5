@@ -121,7 +121,7 @@ namespace C5.intervals
             if (ReferenceEquals(null, that)) return false;
             if (ReferenceEquals(this, that)) return true;
             if (GetType() != that.GetType()) return false;
-            return IntervalExtensions.Equals(this, (IInterval<T>) that);
+            return IntervalExtensions.IntervalEquals(this, (IInterval<T>) that);
         }
 
         /// <inheritdoc/>

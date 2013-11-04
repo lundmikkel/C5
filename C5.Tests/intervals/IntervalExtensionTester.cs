@@ -875,7 +875,7 @@ namespace C5.Tests.intervals
             sw.Stop();
 
             Console.WriteLine("Time for {0}: {1} ms",
-                "Equals",
+                "IntervalEquals",
                 sw.ElapsedMilliseconds
             );
         }
