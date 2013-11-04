@@ -165,21 +165,23 @@ namespace C5.intervals
         }
 
         [Pure]
-        private IEnumerable<KeyValuePair<T, IntervalList>> getIntervalsByEndpoint()
+        private IEnumerable<KeyValuePair<T, ArrayList<I>>> getIntervalsByEndpoint()
         {
-            var dictionary = new TreeDictionary<T, IntervalList>();
+            var dictionary = new TreeDictionary<T, ArrayList<I>>();
 
             foreach (var interval in this)
             {
                 // Make sure the sets exist
                 if (!dictionary.Contains(interval.Low))
-                    dictionary.Add(interval.Low, new IntervalList());
+                    dictionary.Add(interval.Low, new ArrayList<I>());
                 if (!dictionary.Contains(interval.High))
-                    dictionary.Add(interval.High, new IntervalList());
+                    dictionary.Add(interval.High, new ArrayList<I>());
 
-                // Add interval for low and high
+                // AddHigh interval for low and high
                 dictionary[interval.Low].Add(interval);
-                dictionary[interval.High].Add(interval);
+
+                if (!interval.IsPoint())
+                    dictionary[interval.High].Add(interval);
             }
 
             return dictionary;
@@ -461,7 +463,7 @@ namespace C5.intervals
                 Key = interval.Low;
 
                 // Insert the interval into a list
-                Add(interval);
+                AddHigh(interval);
 
                 UpdateSpan();
                 UpdateMaximumOverlap();
@@ -491,21 +493,6 @@ namespace C5.intervals
                 // No children
                 if (Left == null && Right == null)
                     Span = LocalSpan;
-                // No left child with a span
-                else if (Left == null || Left.Span == null)
-                {
-                    // Right node is an endpoint node
-                    if (Right == null || Right.Span == null)
-                        Span = LocalSpan;
-                    // This node is an endpoint node
-                    else if (LocalSpan == null)
-                        Span = Right.Span;
-                    // Neither is an endpoint node
-                    else
-                        Span = (Right.Span.CompareHigh(LocalSpan) > 0)
-                             ? new IntervalBase<T>(LocalSpan, Right.Span)
-                             : LocalSpan;
-                }
                 // No right child with a span
                 else if (Right == null || Right.Span == null)
                 {
@@ -521,13 +508,25 @@ namespace C5.intervals
                              ? Left.Span
                              : new IntervalBase<T>(Left.Span, LocalSpan);
                 }
+                // No left child with a span
+                else if (Left == null || Left.Span == null)
+                {
+                    // This node is an endpoint node
+                    if (LocalSpan == null)
+                        Span = Right.Span;
+                    // Neither is an endpoint node
+                    else
+                        Span = (Right.Span.CompareHigh(LocalSpan) > 0)
+                             ? new IntervalBase<T>(LocalSpan, Right.Span)
+                             : LocalSpan;
+                }
                 // Both children have a span
                 else
                 {
                     // Right span has higher high than left span
                     if (Right.Span.CompareHigh(Left.Span) > 0)
                         Span = (LocalSpan == null)
-                             ? Right.Span
+                             ? new IntervalBase<T>(Left.Span, Right.Span)
                              : new IntervalBase<T>(Left.Span, Right.Span.HighestHigh(LocalSpan));
                     else
                         Span = (LocalSpan == null)
@@ -559,7 +558,7 @@ namespace C5.intervals
                 if (value > Max)
                     Max = value;
 
-                // Add DeltaAfter and check for new max
+                // AddHigh DeltaAfter and check for new max
                 value += DeltaAfter;
                 if (value > Max)
                     Max = value;
@@ -567,7 +566,7 @@ namespace C5.intervals
                 // Save the sum value using the previous calculations
                 Sum = value + (Right != null ? Right.Sum : 0);
 
-                // Add Right's max and check for new max
+                // AddHigh Right's max and check for new max
                 value += Right != null ? Right.Max : 0;
                 if (value > Max)
                     Max = value;
@@ -576,7 +575,7 @@ namespace C5.intervals
                 return oldMax != Max || oldSum != Sum;
             }
 
-            public bool Add(I interval)
+            public bool AddHigh(I interval)
             {
                 Contract.Requires(interval != null);
                 Contract.Ensures(LocalSpan != null);
@@ -629,9 +628,9 @@ namespace C5.intervals
             /// Deletes the specified Key from this root. 
             /// If the Key tree is used with unique intervals, this method removes the Key specified as an argument.
             /// If multiple identical intervals (starting at the same time and also ending at the same time) are allowed, this function will delete one of them. 
-            /// In this case, it is easy enough to either specify the (Key, query) pair to be deleted or enforce uniqueness by changing the Add procedure.
+            /// In this case, it is easy enough to either specify the (Key, query) pair to be deleted or enforce uniqueness by changing the AddHigh procedure.
             /// </summary>
-            public bool Remove(I interval)
+            public bool RemoveLow(I interval)
             {
                 Contract.Requires(interval != null);
 
@@ -647,7 +646,7 @@ namespace C5.intervals
                         if (intervalWasRemoved)
                             DeltaAt--;
 
-                        // Remove list if empty
+                        // RemoveLow list if empty
                         if (IncludedList.IsEmpty)
                             IncludedList = null;
                     }
@@ -661,7 +660,7 @@ namespace C5.intervals
                         if (intervalWasRemoved)
                             DeltaAfter--;
 
-                        // Remove list if empty
+                        // RemoveLow list if empty
                         if (ExcludedList.IsEmpty)
                             ExcludedList = null;
                     }
@@ -691,6 +690,14 @@ namespace C5.intervals
                 }
 
                 return intervalWasRemoved;
+            }
+
+            public void RemoveHigh(bool highIncluded)
+            {
+                if (highIncluded)
+                    DeltaAfter++;
+                else
+                    DeltaAt++;
             }
 
             public void Swap(Node successor)
@@ -992,7 +999,7 @@ namespace C5.intervals
 
                 // The successor might represent a high endpoint for MNO, so search left for a low endpoint
                 // The left most successor will always contain at least one interval!
-                // TODO: Add comment above as invariant
+                // TODO: AddHigh comment above as invariant
                 root = root.Left;
             }
         }
@@ -1175,7 +1182,7 @@ namespace C5.intervals
         /// <inheritdoc/>
         public bool IsReadOnly { get { return false; } }
 
-        #region Add
+        #region AddHigh
 
         /// <summary>
         /// Adds the specified Key.
@@ -1188,7 +1195,7 @@ namespace C5.intervals
             var nodeWasAdded = false;
             var intervalWasAdded = false;
 
-            _root = add(interval, _root, ref nodeWasAdded, ref intervalWasAdded);
+            _root = addLow(interval, _root, ref nodeWasAdded, ref intervalWasAdded);
 
             if (intervalWasAdded)
             {
@@ -1206,7 +1213,7 @@ namespace C5.intervals
                 Add(interval);
         }
 
-        private static Node add(I interval, Node root, ref bool nodeWasAdded, ref bool intervalWasAdded)
+        private static Node addLow(I interval, Node root, ref bool nodeWasAdded, ref bool intervalWasAdded)
         {
             Contract.Requires(interval != null);
 
@@ -1222,7 +1229,7 @@ namespace C5.intervals
 
             if (compare > 0)
             {
-                root.Right = add(interval, root.Right, ref nodeWasAdded, ref intervalWasAdded);
+                root.Right = addLow(interval, root.Right, ref nodeWasAdded, ref intervalWasAdded);
 
                 Contract.Assert(root.Right != null);
 
@@ -1231,7 +1238,7 @@ namespace C5.intervals
             }
             else if (compare < 0)
             {
-                root.Left = add(interval, root.Left, ref nodeWasAdded, ref intervalWasAdded);
+                root.Left = addLow(interval, root.Left, ref nodeWasAdded, ref intervalWasAdded);
 
                 Contract.Assert(root.Left != null);
 
@@ -1248,7 +1255,7 @@ namespace C5.intervals
                 //       /query is not a frequent occurrence, however you can use other query
                 //       structure for better performance depending on your problem needs
 
-                intervalWasAdded = root.Add(interval);
+                intervalWasAdded = root.AddHigh(interval);
 
 
             if (intervalWasAdded)
@@ -1297,8 +1304,8 @@ namespace C5.intervals
             else
                 root.AddHigh(interval.HighIncluded);
 
-
-            root.UpdateSpan();
+            // Span won't change, as we don't change local span anywhere
+            // root.UpdateSpan();
             root.UpdateMaximumOverlap();
 
             // Tree might be unbalanced after root was added, so we rotate
@@ -1310,13 +1317,13 @@ namespace C5.intervals
 
         #endregion
 
-        #region Remove
+        #region RemoveLow
 
         /// <summary>
         /// Deletes the specified Key.
         /// If the Key tree is used with unique intervals, this method removes the Key specified as an argument.
-        /// If multiple identical intervals (starting at the same time and also ending at the same time) are allowed, this function will delete one of them( see procedure Remove for details)
-        /// In this case, it is easy enough to either specify the (Key, query) pair to be deleted or enforce uniqueness by changing the Add procedure.
+        /// If multiple identical intervals (starting at the same time and also ending at the same time) are allowed, this function will delete one of them( see procedure RemoveLow for details)
+        /// In this case, it is easy enough to either specify the (Key, query) pair to be deleted or enforce uniqueness by changing the AddHigh procedure.
         /// </summary>
         public bool Remove(I interval)
         {
@@ -1326,15 +1333,19 @@ namespace C5.intervals
             var nodeWasDeleted = false;
             var intervalWasRemoved = false;
 
-            _root = remove(interval, _root, ref nodeWasDeleted, ref intervalWasRemoved);
+            _root = removeLow(interval, _root, ref nodeWasDeleted, ref intervalWasRemoved);
 
             if (intervalWasRemoved)
+            {
+                _root = removeHigh(interval, _root, ref nodeWasDeleted);
+
                 _count--;
+            }
 
             return intervalWasRemoved;
         }
 
-        private static Node remove(I interval, Node root, ref bool nodeWasDeleted, ref bool intervalWasRemoved)
+        private static Node removeLow(I interval, Node root, ref bool nodeWasDeleted, ref bool intervalWasRemoved)
         {
             Contract.Requires(interval != null);
             Contract.Requires(root != null);
@@ -1348,7 +1359,7 @@ namespace C5.intervals
                 if (root.Right == null)
                     return root;
 
-                root.Right = remove(interval, root.Right, ref nodeWasDeleted, ref intervalWasRemoved);
+                root.Right = removeLow(interval, root.Right, ref nodeWasDeleted, ref intervalWasRemoved);
 
                 // Adjust balance if necessary
                 if (nodeWasDeleted)
@@ -1361,7 +1372,7 @@ namespace C5.intervals
                 if (root.Left == null)
                     return root;
 
-                root.Left = remove(interval, root.Left, ref nodeWasDeleted, ref intervalWasRemoved);
+                root.Left = removeLow(interval, root.Left, ref nodeWasDeleted, ref intervalWasRemoved);
 
                 // Adjust balance if necessary
                 if (nodeWasDeleted)
@@ -1369,10 +1380,10 @@ namespace C5.intervals
             }
             else
             {
-                // Remove interval from node
-                intervalWasRemoved = root.Remove(interval);
+                // RemoveLow interval from node
+                intervalWasRemoved = root.RemoveLow(interval);
 
-                // If the interval was removed, we might be able to remove the node as well
+                // If the interval was removed, we might be able to removeLow the node as well
                 if (intervalWasRemoved && root.IsEmpty)
                 {
                     // The root has two children
@@ -1381,9 +1392,9 @@ namespace C5.intervals
                         // Swap the root and successor
                         root.Swap(findSuccessor(root.Right));
 
-                        // Remove the successor node from the right subtree
+                        // RemoveLow the successor node from the right subtree
                         nodeWasDeleted = false;
-                        root.Right = remove(interval, root.Right, ref nodeWasDeleted, ref intervalWasRemoved);
+                        root.Right = removeLow(interval, root.Right, ref nodeWasDeleted, ref intervalWasRemoved);
 
                         // Adjust balance if necessary
                         if (nodeWasDeleted)
@@ -1394,7 +1405,7 @@ namespace C5.intervals
                     {
                         nodeWasDeleted = true;
 
-                        // We simply remove the node by returning a reference to its child
+                        // We simply removeLow the node by returning a reference to its child
                         return root.Left ?? root.Right;
                     }
                 }
@@ -1402,7 +1413,76 @@ namespace C5.intervals
 
             // If the interval was removed the span might have changed
             if (intervalWasRemoved)
+            {
                 root.UpdateSpan();
+                root.UpdateMaximumOverlap();
+            }
+
+            // Rotate if necessary
+            if (nodeWasDeleted)
+                root = rotateForRemove(root, ref nodeWasDeleted);
+
+            return root;
+        }
+        private static Node removeHigh(I interval, Node root, ref bool nodeWasDeleted)
+        {
+            Contract.Requires(interval != null);
+            Contract.Requires(root != null);
+
+            var compare = interval.High.CompareTo(root.Key);
+
+            // Search right
+            if (compare > 0)
+            {
+                root.Right = removeHigh(interval, root.Right, ref nodeWasDeleted);
+
+                // Adjust balance if necessary
+                if (nodeWasDeleted)
+                    root.Balance--;
+            }
+            // Search left
+            else if (compare < 0)
+            {
+                root.Left = removeHigh(interval, root.Left, ref nodeWasDeleted);
+
+                // Adjust balance if necessary
+                if (nodeWasDeleted)
+                    root.Balance++;
+            }
+            else
+            {
+                // RemoveLow interval from node
+                root.RemoveHigh(interval.HighIncluded);
+
+                // If the interval was removed, we might be able to removeLow the node as well
+                if (root.IsEmpty)
+                {
+                    // The root has two children
+                    if (root.Left != null && root.Right != null)
+                    {
+                        // Swap the root and successor
+                        root.Swap(findSuccessor(root.Right));
+
+                        // RemoveLow the successor node from the right subtree
+                        nodeWasDeleted = false;
+                        root.Right = removeHigh(interval, root.Right, ref nodeWasDeleted);
+
+                        // Adjust balance if necessary
+                        if (nodeWasDeleted)
+                            root.Balance--;
+                    }
+                    // At least one child is null
+                    else
+                    {
+                        nodeWasDeleted = true;
+
+                        // We simply removeLow the node by returning a reference to its child
+                        return root.Left ?? root.Right;
+                    }
+                }
+            }
+
+            root.UpdateMaximumOverlap();
 
             // Rotate if necessary
             if (nodeWasDeleted)
@@ -1529,19 +1609,19 @@ namespace C5.intervals
                         // Generate main cell
                         var cell = new GraphvizRecordCell();
 
-                        // Add Key in top cell
+                        // AddHigh Key in top cell
                         cell.Cells.Add(new GraphvizRecordCell
                             {
                                 Text = e.Vertex.Key.ToString()
                             });
 
-                        // Add Span in middle cell
+                        // AddHigh Span in middle cell
                         cell.Cells.Add(new GraphvizRecordCell
                             {
                                 Text = String.Format("LS: {0} - S: {1}", e.Vertex.LocalSpan, e.Vertex.Span)
                             });
 
-                        // Add IncludedList in bottom cell
+                        // AddHigh IncludedList in bottom cell
                         cell.Cells.Add(new GraphvizRecordCell
                         {
                             Text = String.Format("Inc: {0} - Ex: {1}", e.Vertex.IncludedList == null ? "Ø" : e.Vertex.IncludedList.ToString(), e.Vertex.ExcludedList == null ? "Ø" : e.Vertex.ExcludedList.ToString())
@@ -1554,7 +1634,7 @@ namespace C5.intervals
                         });
                         //*/
 
-                        // Add cell to record
+                        // AddHigh cell to record
                         e.VertexFormatter.Record.Cells.Add(cell);
                     }
                 };

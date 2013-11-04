@@ -336,6 +336,14 @@ namespace C5.intervals
             return x.Low.CompareTo(endpoint) == 0 || x.High.CompareTo(endpoint) == 0;
         }
 
+        [Pure]
+        public static bool IsPoint<T>(this IInterval<T> x) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+
+            return x.Low.CompareTo(x.High) == 0 && x.LowIncluded && x.HighIncluded;
+        }
+
         /// <summary>
         /// Get the hashcode for an interval.
         /// Uses the low and high endpoints as well as endpoint inclusion.
