@@ -6,10 +6,12 @@ namespace C5.Profiling
     {
         static void Main(string[] args)
         {
-            // TODO Crasher uden Code Contracts!
             var test = new C5.Tests.intervals.IntervalBinarySearchTreeAVL.RandomRemove();
             test.SetUp();
             test.AddAndRemove();
+
+//            var test = new C5.Tests.intervals.IntervalBinarySearchTreeAVL.BensTest();
+//            test.MaximumOverlap_BensCollection_Returns2();
         }
     }
 }

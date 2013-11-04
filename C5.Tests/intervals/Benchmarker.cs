@@ -357,6 +357,24 @@ namespace C5.Tests.intervals
 
             return intervals;
         }
+
+        public static IInterval<int>[] RandomSet(int count)
+        {
+            const int seed = 0;
+            var r = new Random(seed);
+            var intervals = new IInterval<int>[count];
+            for (var i = 0; i < count; i++)
+            {
+                var low = r.Next(Int32.MinValue, Int32.MaxValue);
+                var high = r.Next(low, Int32.MaxValue);
+                var lowIncluded = r.Next(Int32.MinValue, Int32.MaxValue) > 0;
+                var highIncluded = r.Next(Int32.MinValue, Int32.MaxValue) > 0;
+                if (low == high)
+                    lowIncluded = highIncluded = true;
+                intervals[i] = new IntervalBase<int>(low, high,lowIncluded,highIncluded);
+            }
+            return intervals;
+        }
     }
 
     abstract class DataSetTester
