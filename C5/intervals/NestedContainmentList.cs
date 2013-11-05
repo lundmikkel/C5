@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections;
-using SCG = System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace C5.intervals
 {
     /// <summary>
     /// An in-place implementation of Nested Containment List as described by Aleskeyenko et. al in "Nested
-    /// Containment List (NCList): a new algorithm for accelerating interval query of genome
-    /// alignment and interval databases"
+    /// Containment List (NCList): a new algorithm for accelerating interval query of genome alignment and interval databases"
     /// </summary>
     /// <typeparam name="I">The interval type.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
@@ -16,47 +15,77 @@ namespace C5.intervals
         where I : IInterval<T>
         where T : IComparable<T>
     {
+        #region Fields
+
         private readonly Node[] _list;
         private readonly IInterval<T> _span;
-        private readonly Section _section;
+        private readonly Sublist _mainList;
         private readonly int _count;
 
-        struct Section
+        #endregion
+
+        #region Inner Classes
+
+        private struct Sublist
         {
-            public Section(int offset, int length)
+            public Sublist(int start, int length)
                 : this()
             {
-                Offset = offset;
+                Start = start;
                 Length = length;
             }
 
-            public int Offset { get; private set; }
+            public int Start { get; private set; }
             public int Length { get; private set; }
+            public int End { get { return Start + Length; } }
         }
 
-        #region Node nested classes
-
-        struct Node
+        private struct Node
         {
             internal I Interval { get; private set; }
-            internal Section Sublist { get; private set; }
+            internal Sublist Sublist { get; private set; }
 
-            internal Node(I interval, Section section)
+            internal Node(I interval, Sublist sublist)
                 : this()
             {
                 Interval = interval;
-                Sublist = section;
+                Sublist = sublist;
             }
 
             public override string ToString()
             {
-                return String.Format("{0} - {1}/{2}", Interval, Sublist.Length, Sublist.Offset);
+                return String.Format("{0} - {1}/{2}", Interval, Sublist.Length, Sublist.Start);
             }
         }
 
         #endregion
 
-        #region constructors
+        #region Constructors
+
+        /// <summary>
+        /// Create a Nested Containment List with a enumerable of intervals
+        /// </summary>
+        /// <param name="intervals">A collection of intervals in arbitrary order</param>
+        public NestedContainmentList(IEnumerable<I> intervals)
+        {
+            var intervalsArray = intervals as I[] ?? intervals.ToArray();
+
+            if (intervalsArray.Any())
+            {
+                _count = intervalsArray.Count();
+
+                Sorting.IntroSort(intervalsArray, 0, _count, ComparerFactory<I>.CreateComparer((x, y) => x.CompareTo(y)));
+
+                var totalSection = new Sublist(0, intervalsArray.Count());
+                _list = new Node[totalSection.Length];
+
+                // Build nested containment list recursively and save the upper-most list in the class
+                _mainList = new Sublist(0, createList(intervalsArray, totalSection, totalSection));
+
+                // Save span to allow for constant speeds on later requests
+                _span = new IntervalBase<T>(_list[_mainList.Start].Interval, _list[_mainList.Length + _mainList.Start - 1].Interval);
+            }
+        }
 
         /// <summary>
         /// A sorted list of IInterval&lt;T&gt; sorted with IntervalComparer&lt;T&gt;
@@ -65,19 +94,19 @@ namespace C5.intervals
         /// <param name="source"></param>
         /// <param name="target"></param>
         /// <returns>A list of nodes</returns>
-        private int createList(I[] intervals, Section source, Section target)
+        private int createList(I[] intervals, Sublist source, Sublist target)
         {
-            var end = target.Offset + target.Length;
-            var t = target.Offset;
+            var end = target.End;
+            var t = target.Start;
 
-            for (var s = source.Offset; s < source.Offset + source.Length; s++)
+            for (var s = source.Start; s < source.End; s++)
             {
                 var interval = intervals[s];
                 var contained = 0;
                 var length = 0;
 
                 // Continue as long as we have more intervals
-                while (s + 1 < source.Offset + source.Length)
+                while (s + 1 < source.End)
                 {
                     var nextInterval = intervals[s + 1];
 
@@ -91,58 +120,43 @@ namespace C5.intervals
                 if (contained > 0)
                 {
                     end -= contained;
-                    length = createList(intervals, new Section(s - contained + 1, contained), new Section(end, contained));
+                    length = createList(intervals, new Sublist(s - contained + 1, contained), new Sublist(end, contained));
                 }
 
-                _list[t++] = new Node(interval, new Section(end, length));
+                _list[t++] = new Node(interval, new Sublist(end, length));
             }
 
-            return t - target.Offset;
-        }
-
-        /// <summary>
-        /// Create a Nested Containment List with a enumerable of intervals
-        /// </summary>
-        /// <param name="intervals">A collection of intervals in arbitrary order</param>
-        public NestedContainmentList(SCG.IEnumerable<I> intervals)
-        {
-            var intervalsArray = intervals as I[] ?? intervals.ToArray();
-
-            if (intervalsArray.Any())
-            {
-                _count = intervalsArray.Count();
-
-                Sorting.IntroSort(intervalsArray, 0, _count, ComparerFactory<I>.CreateComparer((x, y) => x.CompareTo(y)));
-
-                var totalSection = new Section(0, intervalsArray.Count());
-                _list = new Node[totalSection.Length];
-
-                // Build nested containment list recursively and save the upper-most list in the class
-                _section = new Section(0, createList(intervalsArray, totalSection, totalSection));
-
-                // Save span to allow for constant speeds on later requests
-                _span = new IntervalBase<T>(_list[_section.Offset].Interval, _list[_section.Length + _section.Offset - 1].Interval);
-            }
+            return t - target.Start;
         }
 
         #endregion
 
-        #region IEnumerable
+        #region Enumerable
 
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
 
+        /// <summary>
+        /// Create an enumerator, enumerating the intervals in sorted order - sorted on low endpoint with shortest intervals first
+        /// </summary>
+        /// <returns>Enumerator</returns>
+        // TODO: Test the order is still the same as when sorted with IntervalComparer. This should be that case!
+        public override IEnumerator<I> GetEnumerator()
+        {
+            return getEnumerator(_mainList);
+        }
+
         // TODO: Test the order is still the same as when sorted with IntervalComparer. This should be that case!
 
-        private SCG.IEnumerator<I> getEnumerator(Section section)
+        private IEnumerator<I> getEnumerator(Sublist sublist)
         {
             // Just for good measures
-            if (_list == null || section.Length == 0)
+            if (_list == null || sublist.Length == 0)
                 yield break;
 
-            for (var i = section.Offset; i < section.Offset + section.Length; i++)
+            for (var i = sublist.Start; i < sublist.End; i++)
             {
                 var node = _list[i];
 
@@ -161,20 +175,10 @@ namespace C5.intervals
 
         #endregion
 
-        /// <summary>
-        /// Create an enumerator, enumerating the intervals in sorted order - sorted on low endpoint with shortest intervals first
-        /// </summary>
-        /// <returns>Enumerator</returns>
-        // TODO: Test the order is still the same as when sorted with IntervalComparer. This should be that case!
-        public override SCG.IEnumerator<I> GetEnumerator()
-        {
-            return getEnumerator(_section);
-        }
-
-        #region ICollectionValue
+        #region Collection Value
 
         /// <inheritdoc/>
-        public override bool IsEmpty { get { return Count == 0; } }
+        public override bool IsEmpty { get { return _count == 0; } }
         /// <inheritdoc/>
         public override int Count { get { return _count; } }
         /// <inheritdoc/>
@@ -183,15 +187,17 @@ namespace C5.intervals
         /// <inheritdoc/>
         public override I Choose()
         {
-            if (Count > 0)
-                return _list[_section.Offset].Interval;
+            if (IsEmpty)
+                throw new NoSuchItemException();
 
-            throw new NoSuchItemException();
+            return _list.First().Interval;
         }
 
         #endregion
 
-        #region IIntervaled
+        #region Interval Collection
+
+        #region Properties
 
         /// <inheritdoc/>
         public IInterval<T> Span
@@ -211,28 +217,41 @@ namespace C5.intervals
             get { throw new NotSupportedException(); }
         }
 
+        #endregion
+
+        #region Find Overlaps
+
         /// <inheritdoc/>
-        public SCG.IEnumerable<I> FindOverlaps(T query)
+        public IEnumerable<I> FindOverlaps(T query)
         {
             if (ReferenceEquals(query, null))
                 return Enumerable.Empty<I>();
 
-            return findOverlap(_section, new IntervalBase<T>(query));
+            return findOverlaps(_mainList, new IntervalBase<T>(query));
         }
 
-        private SCG.IEnumerable<I> findOverlap(Section section, IInterval<T> query)
+        /// <inheritdoc/>
+        public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
-            if (_list == null || section.Length == 0)
+            if (query == null)
+                return Enumerable.Empty<I>();
+
+            return findOverlaps(_mainList, query);
+        }
+
+        private IEnumerable<I> findOverlaps(Sublist sublist, IInterval<T> query)
+        {
+            if (_list == null || sublist.Length == 0)
                 yield break;
 
             // Find first overlapping interval
-            var first = findFirst(section, query);
+            var first = findFirst(sublist, query);
 
             // If index is out of bound, or interval doesn't overlap, we can just stop our search
-            if (first < section.Offset || section.Offset + section.Length - 1 < first || !_list[first].Interval.Overlaps(query))
+            if (first < sublist.Start || sublist.End - 1 < first || !_list[first].Interval.Overlaps(query))
                 yield break;
 
-            var last = searchLowInHighs(section, query);
+            var last = findLast(sublist, query);
 
             while (first <= last)
             {
@@ -242,7 +261,7 @@ namespace C5.intervals
 
                 if (node.Sublist.Length > 0)
                     // If the interval is contained in the query, all intervals in the sublist must overlap the query
-                    foreach (var interval in findOverlap(node.Sublist, query))
+                    foreach (var interval in findOverlaps(node.Sublist, query))
                         yield return interval;
             }
         }
@@ -250,16 +269,16 @@ namespace C5.intervals
         /// <summary>
         /// Get the index of the first node with an interval the overlaps the query
         /// </summary>
-        private int findFirst(Section section, IInterval<T> query)
+        private int findFirst(Sublist sublist, IInterval<T> query)
         {
-            if (query == null || section.Length == 0)
+            if (query == null || sublist.Length == 0)
                 return -1;
 
-            int min = section.Offset - 1, max = section.Offset + section.Length;
+            int min = sublist.Start - 1, max = sublist.End;
 
-            while (max - min > 1)
+            while (min + 1 < max)
             {
-                var middle = min + ((max - min) >> 1); // Shift one is the same as dividing by 2
+                var middle = min + (max - min >> 1);
 
                 var interval = _list[middle].Interval;
 
@@ -278,16 +297,16 @@ namespace C5.intervals
         /// <summary>
         /// Get the index of the last node with an interval the overlaps the query
         /// </summary>
-        private int searchLowInHighs(Section section, IInterval<T> query)
+        private int findLast(Sublist sublist, IInterval<T> query)
         {
-            if (query == null || section.Length == 0)
+            if (query == null || sublist.Length == 0)
                 return -1;
 
-            int min = section.Offset - 1, max = section.Offset + section.Length;
+            int min = sublist.Start - 1, max = sublist.End;
 
-            while (max - min > 1)
+            while (min + 1 < max)
             {
-                var middle = min + ((max - min) >> 1); // Shift one is the same as dividing by 2
+                var middle = min + (max - min >> 1); // Shift one is the same as dividing by 2
 
                 var interval = _list[middle].Interval;
 
@@ -302,13 +321,14 @@ namespace C5.intervals
             return min;
         }
 
-        /// <inheritdoc/>
-        public SCG.IEnumerable<I> FindOverlaps(IInterval<T> query)
-        {
-            if (query == null)
-                return Enumerable.Empty<I>();
+        #endregion
 
-            return findOverlap(_section, query);
+        #region Find Overlap
+
+        /// <inheritdoc/>
+        public bool FindOverlap(T query, ref I overlap)
+        {
+            return FindOverlap(new IntervalBase<T>(query), ref overlap);
         }
 
         /// <inheritdoc/>
@@ -319,10 +339,10 @@ namespace C5.intervals
                 return false;
 
             // Find first overlap
-            var i = findFirst(_section, query);
+            var i = findFirst(_mainList, query);
 
             // Check if index is in bound and if the interval overlaps the query
-            var result = _section.Offset <= i && i < _section.Offset + _section.Length && _list[i].Interval.Overlaps(query);
+            var result = _mainList.Start <= i && i < _mainList.End && _list[i].Interval.Overlaps(query);
 
             if (result)
                 overlap = _list[i].Interval;
@@ -330,11 +350,9 @@ namespace C5.intervals
             return result;
         }
 
-        /// <inheritdoc/>
-        public bool FindOverlap(T query, ref I overlap)
-        {
-            return FindOverlap(new IntervalBase<T>(query), ref overlap);
-        }
+        #endregion
+
+        #region Count Overlaps
 
         /// <inheritdoc/>
         public int CountOverlaps(T query)
@@ -361,7 +379,7 @@ namespace C5.intervals
         }
 
         /// <inheritdoc/>
-        public void AddAll(SCG.IEnumerable<I> intervals)
+        public void AddAll(IEnumerable<I> intervals)
         {
             throw new ReadOnlyCollectionException();
         }
@@ -377,6 +395,8 @@ namespace C5.intervals
         {
             throw new ReadOnlyCollectionException();
         }
+
+        #endregion
 
         #endregion
     }
