@@ -507,7 +507,7 @@ namespace C5.intervals
                 if (!currentLayer[first].Overlaps(query))
                 {
                     // We know first doesn't overlap so we can increment it before searching
-                    first = findFirst(layer, ++first, upper, query);
+                    first = findFirst(query, layer, ++first, upper);
 
                     // If index is out of bound, or found interval doesn't overlap, then the list won't contain any overlaps
                     if (upper <= first || !currentLayer[first].Overlaps(query))
@@ -515,7 +515,7 @@ namespace C5.intervals
                 }
 
                 // We can use first as lower to minimize search area
-                var last = findLast(layer, first, upper, query);
+                var last = findLast(query, layer, first, upper);
 
                 // Save values for next iteration
                 lower = _pointerLayers[layer][first];
@@ -528,7 +528,7 @@ namespace C5.intervals
         }
 
         // TODO: Decide on using either start/end or lower/upper.
-        private int findFirst(int layer, int lower, int upper, IInterval<T> query)
+        private int findFirst(IInterval<T> query, int layer, int lower, int upper)
         {
             Contract.Requires(0 <= layer && layer < _intervalLayers.Length);
             Contract.Requires(0 <= lower && lower <= _intervalLayers[layer].Length);
@@ -544,7 +544,7 @@ namespace C5.intervals
 
             var intervalLayer = _intervalLayers[layer];
 
-            while (max - min > 1)
+            while (min + 1 < max)
             {
                 var middle = min + ((max - min) >> 1); // Shift one is the same as dividing by 2
 
@@ -561,7 +561,7 @@ namespace C5.intervals
             return max;
         }
 
-        private int findLast(int layer, int lower, int upper, IInterval<T> query)
+        private int findLast(IInterval<T> query, int layer, int lower, int upper)
         {
             Contract.Requires(0 <= layer && layer < _intervalLayers.Length);
             Contract.Requires(0 <= lower && lower < _intervalLayers[layer].Length);
@@ -576,7 +576,7 @@ namespace C5.intervals
             int min = lower - 1, max = upper;
             var intervalLayer = _intervalLayers[layer];
 
-            while (max - min > 1)
+            while (min + 1 < max)
             {
                 var middle = min + ((max - min) >> 1); // Shift one is the same as dividing by 2
 
@@ -657,7 +657,7 @@ namespace C5.intervals
                 var pointerLayer = _pointerLayers[layer];
 
                 if (firstOverlaps[layer] < 0)
-                    firstOverlaps[layer] = findFirst(layer, start, end, query);
+                    firstOverlaps[layer] = findFirst(query, layer, start, end);
 
                 if (firstOverlaps[layer] >= end)
                     continue;
@@ -690,7 +690,7 @@ namespace C5.intervals
         {
             if (layer > highestVisitedLayer)
             {
-                start = findFirst(layer, start, end, query);
+                start = findFirst(query, layer, start, end);
                 highestVisitedLayer++;
             }
 
@@ -733,7 +733,7 @@ namespace C5.intervals
                 return false;
 
             // Find first overlap
-            var i = findFirst(0, 0, _firstLayerCount, query);
+            var i = findFirst(query, 0, 0, _firstLayerCount);
 
             // Check if index is in bound and if the interval overlaps the query
             var result = 0 <= i && i < _firstLayerCount && _intervalLayers[0][i].Overlaps(query);
@@ -773,7 +773,7 @@ namespace C5.intervals
                 if (!_intervalLayers[layer][lower].Overlaps(query))
                 {
                     // We know first doesn't overlap so we can increment it before searching
-                    lower = findFirst(layer, ++lower, upper, query);
+                    lower = findFirst(query, layer, ++lower, upper);
 
                     // If index is out of bound, or found interval doesn't overlap, then the layer won't contain any overlaps
                     // TODO: Can we tighten the check here? Like i.low < q.high...
@@ -782,7 +782,7 @@ namespace C5.intervals
                 }
 
                 // We can use first as lower to speed up the search
-                upper = findLast(layer, lower, upper, query);
+                upper = findLast(query, layer, lower, upper);
 
                 count += upper - lower;
 
