@@ -707,11 +707,17 @@ namespace C5.Tests.intervals
         public class FindOverlapsSortedTester
         {
             private IInterval<int>[] _intervals;
+            private readonly IComparer<IInterval<int>> _comparer = ComparerFactory<IInterval<int>>.CreateComparer(IntervalExtensions.CompareTo);
 
             [SetUp]
             public void SetUp()
             {
-                _intervals = BenchmarkTestCases.DataSetC(100);
+                const int count = 100;
+                var intervals = BenchmarkTestCases.DataSetC(count);
+                _intervals = new IInterval<int>[count * 2];
+
+                for (var i = 0; i < count; i++)
+                    _intervals[i] = _intervals[i + count] = intervals[i];
             }
 
             [Test]
@@ -719,20 +725,47 @@ namespace C5.Tests.intervals
             {
                 var intervaled = new LayeredContainmentList<IInterval<int>, int>(_intervals);
 
-
                 foreach (var query in _intervals)
                 {
                     var results = intervaled.FindOverlapsSorted(query);
 
-                    var lastInterval = results.First();
-                    foreach (var interval in results)
-                    {
-                        Assert.True(lastInterval.CompareTo(interval) <= 0);
-                        lastInterval = interval;
-                    }
-
+                    Assert.True(results.IsSorted(_comparer));
                     CollectionAssert.AreEquivalent(intervaled.FindOverlaps(query), results);
                 }
+            }
+
+            [Test]
+            public void SortedFindOverlaps()
+            {
+                /* 0    5    10   Layer
+                 *          ||    1
+                 *         ||     1
+                 *        |--|    0
+                 *      ||        1
+                 *    ||          1
+                 *   |-------|    0
+                 *  ||            1
+                 * |---------|    0
+                 * 
+                 *      |q-|
+                 */
+                var intervals = new[]
+                    {
+                        new IntervalBase<int>(9, 10, IntervalType.Closed),
+                        new IntervalBase<int>(8, 9, IntervalType.Closed),
+                        new IntervalBase<int>(7, 10, IntervalType.Closed),
+                        new IntervalBase<int>(5, 6, IntervalType.Closed),
+                        new IntervalBase<int>(3, 4, IntervalType.Closed),
+                        new IntervalBase<int>(2, 10, IntervalType.Closed),
+                        new IntervalBase<int>(1, 3, IntervalType.Closed),
+                        new IntervalBase<int>(0, 10, IntervalType.Closed),
+                    };
+
+                var query = new IntervalBase<int>(5, 8, IntervalType.Closed);
+
+                var lclist = new LayeredContainmentList<IInterval<int>, int>(intervals);
+
+                lclist.FindOverlapsSorted(query).IsSorted(_comparer);
             }
         }
 

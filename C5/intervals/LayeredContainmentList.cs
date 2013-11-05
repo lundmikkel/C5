@@ -536,7 +536,7 @@ namespace C5.intervals
             Contract.Requires(query != null);
 
             // Either the interval at index result overlaps or no intervals in the layer overlap
-            Contract.Ensures(Contract.Result<int>() < 0 || _intervalLayers[layer].Length <= Contract.Result<int>() || _intervalLayers[layer][Contract.Result<int>()].Overlaps(query) || Contract.ForAll(_intervalLayers[layer], x => !x.Overlaps(query)));
+            Contract.Ensures(Contract.Result<int>() < lower || upper <= Contract.Result<int>() || _intervalLayers[layer][Contract.Result<int>()].Overlaps(query) || Contract.ForAll(lower, upper, i => !_intervalLayers[layer][i].Overlaps(query)));
             // All intervals before index result do not overlap the query
             Contract.Ensures(Contract.ForAll(0, Contract.Result<int>(), i => !_intervalLayers[layer][i].Overlaps(query)));
 
@@ -610,7 +610,7 @@ namespace C5.intervals
             if (IsEmpty || !queryInterval.Overlaps(Span))
                 return Enumerable.Empty<I>();
 
-            return findOverlapsSorted(queryInterval, 0, _firstLayerCount);
+            return findOverlapsSorted(queryInterval);
         }
 
         /// <summary>
@@ -626,38 +626,43 @@ namespace C5.intervals
             if (IsEmpty || !query.Overlaps(Span))
                 return Enumerable.Empty<I>();
 
-            return findOverlapsSorted(query, 0, _firstLayerCount);
+            return findOverlapsSorted(query);
         }
 
-        private IEnumerable<I> findOverlapsSorted(IInterval<T> query, int start, int end)
+        private IEnumerable<I> findOverlapsSorted(IInterval<T> query)
         {
             // Create our own stack to avoid stack overflow and to speed up the enumerator
             var stack = new int[_layerCount << 1];
             var i = 0;
-            // Keeps track of when we need to search for first overlap
-            var highestVisitedLayer = -1;
+
+            // Keeps track of the index of the first overlap in each layer
+            var firstOverlaps = new int[_layerCount];
+            for (var l = 0; l < _layerCount; l++)
+                firstOverlaps[l] = -1;
 
             // We stack both values consecutively instead of stacking pairs
-            stack[i++] = start;
-            stack[i++] = end;
+            stack[i++] = 0;
+            stack[i++] = _firstLayerCount;
 
             // Continue as long as we still have values on the stack
             while (i > 0)
             {
                 // Get start and end from stack
-                end = stack[--i];
-                start = stack[--i];
+                var end = stack[--i];
+                var start = stack[--i];
                 var layer = i >> 1;
 
                 // Cache layers for speed
                 var intervalLayer = _intervalLayers[layer];
                 var pointerLayer = _pointerLayers[layer];
 
-                if (layer > highestVisitedLayer)
-                {
-                    start = findFirst(layer, start, end, query);
-                    highestVisitedLayer++;
-                }
+                if (firstOverlaps[layer] < 0)
+                    firstOverlaps[layer] = findFirst(layer, start, end, query);
+
+                if (firstOverlaps[layer] >= end)
+                    continue;
+                if (start < firstOverlaps[layer])
+                    start = firstOverlaps[layer];
 
                 // Iterate through all overlaps
                 while (start < end && intervalLayer[start].CompareLowHigh(query) <= 0)
