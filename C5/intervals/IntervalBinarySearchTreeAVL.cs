@@ -52,24 +52,7 @@ namespace C5.intervals
         [Pure]
         private static bool checkNodesAreSorted(Node root)
         {
-            var enumerator = nodes(root).GetEnumerator();
-
-            if (enumerator.MoveNext())
-            {
-                var lastNode = enumerator.Current;
-
-                while (enumerator.MoveNext())
-                {
-                    var current = enumerator.Current;
-
-                    if (lastNode.CompareTo(current) >= 0)
-                        return false;
-
-                    lastNode = current;
-                }
-            }
-
-            return true;
+            return nodes(root).IsSorted();
         }
 
         [Pure]

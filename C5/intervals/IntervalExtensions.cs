@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
 namespace C5.intervals
@@ -382,6 +383,77 @@ namespace C5.intervals
                 x.Low,
                 x.High,
                 x.HighIncluded ? "]" : ")");
+        }
+    }
+
+    /// <summary>
+    /// Convenient extensions.
+    /// </summary>
+    // TODO: Find the proper file for the extension class
+    public static class C5Extensions
+    {
+        /// <summary>
+        /// Check if an IEnumerable is sorted in non-descending order.
+        /// </summary>
+        /// <param name="collection">The collection.</param>
+        /// <typeparam name="T">The element type.</typeparam>
+        /// <returns>True if sorted.</returns>
+        [Pure]
+        public static bool IsSorted<T>(this IEnumerable<T> collection) where T : IComparable<T>
+        {
+            Contract.Requires(collection != null);
+
+            var enumerator = collection.GetEnumerator();
+
+            if (enumerator.MoveNext())
+            {
+                var previous = enumerator.Current;
+
+                while (enumerator.MoveNext())
+                {
+                    var current = enumerator.Current;
+
+                    if (previous.CompareTo(current) > 0)
+                        return false;
+
+                    previous = current;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Check if an IEnumerable is sorted in non-descending order using a comparer.
+        /// </summary>
+        /// <param name="collection">The collection.</param>
+        /// <param name="comparer">The comparer for the collection.</param>
+        /// <typeparam name="T">The element type.</typeparam>
+        /// <returns>True if sorted.</returns>
+        [Pure]
+        public static bool IsSorted<T>(this IEnumerable<T> collection, IComparer<T> comparer)
+        {
+            Contract.Requires(collection != null);
+            Contract.Requires(comparer != null);
+
+            var enumerator = collection.GetEnumerator();
+
+            if (enumerator.MoveNext())
+            {
+                var previous = enumerator.Current;
+
+                while (enumerator.MoveNext())
+                {
+                    var current = enumerator.Current;
+
+                    if (comparer.Compare(previous, current) > 0)
+                        return false;
+
+                    previous = current;
+                }
+            }
+
+            return true;
         }
     }
 }
