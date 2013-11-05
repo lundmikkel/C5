@@ -252,7 +252,8 @@ namespace C5.Tests.intervals
             [TestCaseSource(typeof(IBS), "StabCases")]
             public void Overlap_StabbingAtKeyPoints_ReturnsSpecifiedIntervals_TestCase(int query, System.Collections.Generic.IEnumerable<IntervalOfInt> expected)
             {
-                CollectionAssert.AreEquivalent(expected, IntervalCollection.FindOverlaps(query));
+                var result = IntervalCollection.FindOverlaps(query);
+                CollectionAssert.AreEquivalent(expected, result);
             }
 
             public static object[] StabCases = new object[] {

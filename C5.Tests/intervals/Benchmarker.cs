@@ -227,11 +227,11 @@ namespace C5.Tests.intervals
         {
             get
             {
-                return Benchmarking ? 1000000 : 1;
+                return 1;// Benchmarking ? 1000000 : 1;
             }
         }
 
-        public static bool Benchmarking { get { return true; } }
+        public static bool Benchmarking { get { return false; } }
 
         public static object[] DataSets = new object[] { 
             "A",// "B", "C", 
@@ -384,7 +384,7 @@ namespace C5.Tests.intervals
 
         public abstract string Name { get; }
 
-        [Test, Combinatorial, Ignore]
+        [Test, Combinatorial]
         public void Constructor_ChangingCollectionSize(
             [ValueSource(typeof(BenchmarkTestCases), "DataSets")] string dataset,
             [ValueSource(typeof(BenchmarkTestCases), "ConstructorCounts")] int count
@@ -447,7 +447,7 @@ namespace C5.Tests.intervals
             [ValueSource(typeof(BenchmarkTestCases), "QueryLengths")] int length
         )
         {
-            IntervalCollection = Factory(BenchmarkTestCases.TestDataSet(dataset, 1000000));
+            IntervalCollection = Factory(BenchmarkTestCases.TestDataSet(dataset, 100));
 
             var repetitions = BenchmarkTestCases.QueryRepetitions;
             var span = IntervalCollection.Span;
