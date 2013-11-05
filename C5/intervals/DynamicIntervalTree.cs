@@ -38,7 +38,7 @@ namespace C5.intervals
             // Check nodes are sorted
             Contract.Invariant(checkNodesAreSorted(_root));
             // Check spans
-            //Contract.Invariant(checkNodeSpans(_root));
+            Contract.Invariant(checkNodeSpans(_root));
 
             // Check that the MNO variables are correct for all nodes
             Contract.Invariant(checkMnoForEachNode(_root));
