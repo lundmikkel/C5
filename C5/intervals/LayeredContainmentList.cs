@@ -217,9 +217,6 @@ namespace C5.intervals
         /// <returns>Enumerator of all intervals in the data structure in arbitrary order</returns>
         public override IEnumerator<I> GetEnumerator()
         {
-            if (IsEmpty)
-                return (new I[] { }).Cast<I>().GetEnumerator();
-
             return getEnumerator();
         }
 
