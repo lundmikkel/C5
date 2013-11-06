@@ -1542,6 +1542,7 @@ namespace C5.intervals
         /// <inheritdoc/>
         public void AddAll(IEnumerable<I> intervals)
         {
+            // TODO: Handle events properly. Only throw one event when done!
             // TODO: Any fancy things missing here?
             foreach (var interval in intervals)
                 Add(interval);
