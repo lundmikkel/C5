@@ -160,7 +160,7 @@ namespace C5.intervals
                 if (!dictionary.Contains(interval.High))
                     dictionary.Add(interval.High, new ArrayList<I>());
 
-                // AddHigh interval for low and high
+                // Add interval for low and high
                 dictionary[interval.Low].Add(interval);
 
                 if (!interval.IsPoint())
@@ -448,7 +448,7 @@ namespace C5.intervals
                 Key = interval.Low;
 
                 // Insert the interval into a list
-                AddHigh(interval);
+                AddLow(interval);
 
                 UpdateSpan();
                 UpdateMaximumOverlap();
@@ -545,7 +545,7 @@ namespace C5.intervals
                 if (value > Max)
                     Max = value;
 
-                // AddHigh DeltaAfter and check for new max
+                // Add DeltaAfter and check for new max
                 value += DeltaAfter;
                 if (value > Max)
                     Max = value;
@@ -553,7 +553,7 @@ namespace C5.intervals
                 // Save the sum value using the previous calculations
                 Sum = value + (Right != null ? Right.Sum : 0);
 
-                // AddHigh Right's max and check for new max
+                // Add Right's max and check for new max
                 value += Right != null ? Right.Max : 0;
                 if (value > Max)
                     Max = value;
@@ -562,12 +562,10 @@ namespace C5.intervals
                 return oldMax != Max || oldSum != Sum;
             }
 
-            public bool AddHigh(I interval)
+            public bool AddLow(I interval)
             {
                 Contract.Requires(interval != null);
                 Contract.Ensures(LocalSpan != null);
-
-                // TODO: Update span?
 
                 bool intervalWasAdded;
 
@@ -615,7 +613,7 @@ namespace C5.intervals
             /// Deletes the specified Key from this root. 
             /// If the Key tree is used with unique intervals, this method removes the Key specified as an argument.
             /// If multiple identical intervals (starting at the same time and also ending at the same time) are allowed, this function will delete one of them. 
-            /// In this case, it is easy enough to either specify the (Key, query) pair to be deleted or enforce uniqueness by changing the AddHigh procedure.
+            /// In this case, it is easy enough to either specify the (Key, query) pair to be deleted or enforce uniqueness by changing the Add procedure.
             /// </summary>
             public bool RemoveLow(I interval)
             {
@@ -985,7 +983,7 @@ namespace C5.intervals
 
                 // The successor might represent a high endpoint for MNO, so search left for a low endpoint
                 // The left most successor will always contain at least one interval!
-                // TODO: AddHigh comment above as invariant
+                // TODO: Add comment above as invariant
                 root = root.Left;
             }
         }
@@ -1241,7 +1239,7 @@ namespace C5.intervals
                 //       /query is not a frequent occurrence, however you can use other query
                 //       structure for better performance depending on your problem needs
 
-                intervalWasAdded = root.AddHigh(interval);
+                intervalWasAdded = root.AddLow(interval);
 
 
             if (intervalWasAdded)
@@ -1309,7 +1307,7 @@ namespace C5.intervals
         /// Deletes the specified Key.
         /// If the Key tree is used with unique intervals, this method removes the Key specified as an argument.
         /// If multiple identical intervals (starting at the same time and also ending at the same time) are allowed, this function will delete one of them( see procedure RemoveLow for details)
-        /// In this case, it is easy enough to either specify the (Key, query) pair to be deleted or enforce uniqueness by changing the AddHigh procedure.
+        /// In this case, it is easy enough to either specify the (Key, query) pair to be deleted or enforce uniqueness by changing the Add procedure.
         /// </summary>
         public bool Remove(I interval)
         {
@@ -1595,19 +1593,19 @@ namespace C5.intervals
                         // Generate main cell
                         var cell = new GraphvizRecordCell();
 
-                        // AddHigh Key in top cell
+                        // Add Key in top cell
                         cell.Cells.Add(new GraphvizRecordCell
                             {
                                 Text = e.Vertex.Key.ToString()
                             });
 
-                        // AddHigh Span in middle cell
+                        // Add Span in middle cell
                         cell.Cells.Add(new GraphvizRecordCell
                             {
                                 Text = String.Format("LS: {0} - S: {1}", e.Vertex.LocalSpan, e.Vertex.Span)
                             });
 
-                        // AddHigh IncludedList in bottom cell
+                        // Add IncludedList in bottom cell
                         cell.Cells.Add(new GraphvizRecordCell
                         {
                             Text = String.Format("Inc: {0} - Ex: {1}", e.Vertex.IncludedList == null ? "Ø" : e.Vertex.IncludedList.ToString(), e.Vertex.ExcludedList == null ? "Ø" : e.Vertex.ExcludedList.ToString())
@@ -1620,7 +1618,7 @@ namespace C5.intervals
                         });
                         //*/
 
-                        // AddHigh cell to record
+                        // Add cell to record
                         e.VertexFormatter.Record.Cells.Add(cell);
                     }
                 };
