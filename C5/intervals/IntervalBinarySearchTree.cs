@@ -1242,6 +1242,8 @@ namespace C5.intervals
             get { return _root != null ? _root.Max : 0; }
         }
 
+        public bool AllowsReferenceDuplicates { get { return false; } }
+
         #endregion
     }
 }

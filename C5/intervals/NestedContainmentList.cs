@@ -217,6 +217,8 @@ namespace C5.intervals
             get { throw new NotSupportedException(); }
         }
 
+        public bool AllowsReferenceDuplicates { get { return true; } }
+
         #endregion
 
         #region Find Overlaps

@@ -259,7 +259,6 @@ namespace C5.intervals
 
         #region Inner Classes
 
-        // TODO: Implement
         private class IntervalList
         {
             // A dictionary sorted on high with an accompanying sublist to handle equal intervals
@@ -1065,6 +1064,8 @@ namespace C5.intervals
                 return IsEmpty ? 0 : _root.Max;
             }
         }
+
+        public bool AllowsReferenceDuplicates { get { return true; } }
 
         #endregion
 

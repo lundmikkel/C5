@@ -395,6 +395,8 @@ namespace C5.intervals
             get { throw new NotSupportedException(); }
         }
 
+        public bool AllowsReferenceDuplicates { get { return true; } }
+
         /// <inheritdoc/>
         public SCG.IEnumerable<I> FindOverlaps(T query)
         {

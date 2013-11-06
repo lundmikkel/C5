@@ -49,14 +49,14 @@ namespace C5
     abstract class IntervalContract<T> : IInterval<T> where T : IComparable<T>
     {
         /// <summary>
-        /// The invariant has no effect for interface. The invariants are stated in the properties
+        /// The invariant has no effect for interfaces. The invariants are stated in the properties
         /// of the Low and High. They are left here to make them more readable.
         /// </summary>
         [ContractInvariantMethod]
         private void invariants()
         {
-            Contract.Invariant(ReferenceEquals(Low, null));
-            Contract.Invariant(ReferenceEquals(High, null));
+            Contract.Invariant(Low != null);
+            Contract.Invariant(High != null);
             // Low should be less that High. If equal, both endpoints should be included.
             Contract.Invariant(Low.CompareTo(High) < 0 || Low.CompareTo(High) == 0 && LowIncluded && HighIncluded);
         }
@@ -72,7 +72,7 @@ namespace C5
             }
             private set
             {
-                Contract.Requires(!ReferenceEquals(value, null));
+                Contract.Requires(value != null);
                 throw new NotImplementedException();
             }
         }
@@ -89,7 +89,7 @@ namespace C5
 
             private set
             {
-                Contract.Requires(!ReferenceEquals(value, null));
+                Contract.Requires(value != null);
                 throw new NotImplementedException();
             }
         }

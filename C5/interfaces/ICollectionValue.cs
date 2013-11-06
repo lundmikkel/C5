@@ -47,8 +47,8 @@ namespace C5.interfaces
         {
             get
             {
-                Contract.Ensures(0 <= Contract.Result<int>());
-                Contract.Ensures(IsEmpty || 0 < Contract.Result<int>());
+                Contract.Ensures(Contract.Result<int>() >= 0);
+                Contract.Ensures(IsEmpty || Contract.Result<int>() > 0);
                 Contract.Ensures(Enumerable.Count(this) == Contract.Result<int>());
 
                 throw new NotImplementedException();
@@ -90,7 +90,7 @@ namespace C5.interfaces
         [Pure]
         public T Choose()
         {
-            Contract.Ensures(IsEmpty || !ReferenceEquals(Contract.Result<T>(), null));
+            Contract.Ensures(IsEmpty || Contract.Result<T>() != null);
 
             throw new NotImplementedException();
         }

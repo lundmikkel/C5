@@ -199,6 +199,8 @@ namespace C5.intervals
             get { throw new NotSupportedException(); }
         }
 
+        public bool AllowsReferenceDuplicates { get { return true; } }
+
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {

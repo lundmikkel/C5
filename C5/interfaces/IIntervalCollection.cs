@@ -39,6 +39,13 @@ namespace C5
         [Pure]
         int MaximumOverlap { get; }
 
+        /// <summary>
+        /// Indicates if the collection supports object duplicates based on reference equality.
+        /// </summary>
+        /// <remarks>All collections support objects with duplicate intervals - that is the same endpoints and inclusions.</remarks>
+        /// <value>True if this collection allows reference duplicates.</value>
+        bool AllowsReferenceDuplicates { get; }
+
         #endregion
 
         #region Find Overlaps
@@ -163,13 +170,11 @@ namespace C5
             get
             {
                 // Span contains all intervals
-                Contract.Ensures(IsEmpty || Contract.ForAll(this, i => Contract.Result<IInterval<T>>().Contains(i)));
-                // Span has the lowest and highest endpoint of the collection
-                Contract.Ensures(IsEmpty || Contract.ForAll(this, i => Contract.Result<IInterval<T>>().CompareLow(i) <= 0 && Contract.Result<IInterval<T>>().CompareHigh(i) >= 0));
+                Contract.Ensures(IsEmpty || Contract.ForAll(this, x => Contract.Result<IInterval<T>>().Contains(x)));
                 // There is an interval that has the same low as span
-                Contract.Ensures(IsEmpty || Contract.Exists(this, i => Contract.Result<IInterval<T>>().CompareLow(i) == 0));
+                Contract.Ensures(IsEmpty || Contract.Exists(this, x => Contract.Result<IInterval<T>>().CompareLow(x) == 0));
                 // There is an interval that has the same high as span
-                Contract.Ensures(IsEmpty || Contract.Exists(this, i => Contract.Result<IInterval<T>>().CompareHigh(i) == 0));
+                Contract.Ensures(IsEmpty || Contract.Exists(this, x => Contract.Result<IInterval<T>>().CompareHigh(x) == 0));
 
                 throw new NotImplementedException();
             }
@@ -179,12 +184,20 @@ namespace C5
         {
             get
             {
+                // Result must be non-negative
                 Contract.Ensures(Contract.Result<int>() >= 0);
-                //Contract.Ensures(Contract.ForAll(this, i => CountOverlaps(i.Low) <= Contract.Result<int>() && CountOverlaps(i.High) <= Contract.Result<int>()));
+                // Must be at least one if collection is not empty
+                Contract.Ensures(IsEmpty || Contract.Result<int>() > 0);
+                // Result cannot be larger than collection size
+                Contract.Ensures(Contract.Result<int>() <= Count);
+                // Check MNO
+                Contract.Ensures(Contract.Result<int>() == IntervalCollectionContractHelper.MNO<I, T>(this));
 
                 throw new NotImplementedException();
             }
         }
+
+        public abstract bool AllowsReferenceDuplicates { get; }
 
         #endregion
 
@@ -192,26 +205,26 @@ namespace C5
 
         public IEnumerable<I> FindOverlaps(T query)
         {
-            Contract.Requires(!ReferenceEquals(query, null));
-            // All intervals in collect that overlap query must be in the result
-            Contract.Ensures(Contract.ForAll(this.Where(i => i.Overlaps(query)), i => Contract.Result<IEnumerable<I>>().Any(j => ReferenceEquals(i, j))));
+            // Stabbing value cannot be null
+            Contract.Requires(query != null);
+
+            // The collection of intervals that overlap the query must be equal to the result
+            Contract.Ensures(IntervalCollectionContractHelper.CollectionEquals(this.Where(x => x.Overlaps(query)), Contract.Result<IEnumerable<I>>()));
             // All intervals in the collection that do not overlap cannot by in the result
-            Contract.Ensures(Contract.ForAll(this.Where(i => !i.Overlaps(query)), i => Contract.ForAll(Contract.Result<IEnumerable<I>>(), j => !ReferenceEquals(i, j))));
-            // The number of intervals in the collection that overlap the query must be equal to the result size
-            Contract.Ensures(this.Count(i => i.Overlaps(query)) == Contract.Result<IEnumerable<I>>().Count());
+            Contract.Ensures(Contract.ForAll(this.Where(x => !x.Overlaps(query)), x => Contract.ForAll(Contract.Result<IEnumerable<I>>(), y => !ReferenceEquals(x, y))));
 
             throw new NotImplementedException();
         }
 
         public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
+            // Stabbing value cannot be null
             Contract.Requires(query != null);
-            // All intervals in collect that overlap query must be in the result
-            Contract.Ensures(Contract.ForAll(this.Where(i => i.Overlaps(query)), i => Contract.Result<IEnumerable<I>>().Any(j => ReferenceEquals(i, j))));
+
+            // The collection of intervals that overlap the query must be equal to the result
+            Contract.Ensures(IntervalCollectionContractHelper.CollectionEquals(this.Where(x => x.Overlaps(query)), Contract.Result<IEnumerable<I>>()));
             // All intervals in the collection that do not overlap cannot by in the result
-            Contract.Ensures(Contract.ForAll(this.Where(i => !i.Overlaps(query)), i => Contract.ForAll(Contract.Result<IEnumerable<I>>(), j => !ReferenceEquals(i, j))));
-            // The number of intervals in the collection that overlap the query must be equal to the result size
-            Contract.Ensures(this.Count(i => i.Overlaps(query)) == Contract.Result<IEnumerable<I>>().Count());
+            Contract.Ensures(Contract.ForAll(this.Where(x => !x.Overlaps(query)), x => Contract.ForAll(Contract.Result<IEnumerable<I>>(), y => !ReferenceEquals(x, y))));
 
             throw new NotImplementedException();
         }
@@ -222,9 +235,13 @@ namespace C5
 
         public bool FindOverlap(T query, ref I overlap)
         {
-            Contract.Requires(!ReferenceEquals(query, null));
+            Contract.Requires(query != null);
+
+            // Result is true if the collection contains an overlap
+            Contract.Ensures(Contract.Result<bool>() == Contract.Exists(this, x => x.Overlaps(query)));
+
             // A found overlap is not null and overlaps query
-            Contract.Ensures(!Contract.Result<bool>() || !ReferenceEquals(overlap, null) && overlap.Overlaps(query));
+            Contract.Ensures(!Contract.Result<bool>() || Contract.ValueAtReturn(out overlap) != null && Contract.ValueAtReturn(out overlap).Overlaps(query));
 
             throw new NotImplementedException();
         }
@@ -232,8 +249,12 @@ namespace C5
         public bool FindOverlap(IInterval<T> query, ref I overlap)
         {
             Contract.Requires(query != null);
+
+            // Result is true if the collection contains an overlap
+            Contract.Ensures(Contract.Result<bool>() == Contract.Exists(this, x => x.Overlaps(query)));
+
             // A found overlap is not null and overlaps query
-            Contract.Ensures(!Contract.Result<bool>() || !ReferenceEquals(overlap, null) && overlap.Overlaps(query));
+            Contract.Ensures(!Contract.Result<bool>() || Contract.ValueAtReturn(out overlap) != null && Contract.ValueAtReturn(out overlap).Overlaps(query));
 
             throw new NotImplementedException();
         }
@@ -244,18 +265,28 @@ namespace C5
 
         public int CountOverlaps(T query)
         {
-            Contract.Requires(!ReferenceEquals(query, null));
+            Contract.Requires(query != null);
+
+            // Result must be non-negative
             Contract.Ensures(Contract.Result<int>() >= 0);
-            Contract.Ensures(Contract.Result<int>() == this.Count(i => i.Overlaps(query)));
+            // Result cannot be larger than collection size
+            Contract.Ensures(Contract.Result<int>() <= Count);
+            // Result is equal to the number of intervals in the collection that overlap the query
+            Contract.Ensures(Contract.Result<int>() == Enumerable.Count(this, x => x.Overlaps(query)));
 
             throw new NotImplementedException();
         }
 
         public int CountOverlaps(IInterval<T> query)
         {
-            Contract.Requires(!ReferenceEquals(query, null));
+            Contract.Requires(query != null);
+
+            // Result must be non-negative
             Contract.Ensures(Contract.Result<int>() >= 0);
-            Contract.Ensures(Contract.Result<int>() == this.Count(i => i.Overlaps(query)));
+            // Result cannot be larger than collection size
+            Contract.Ensures(Contract.Result<int>() <= Count);
+            // Result is equal to the number of intervals in the collection that overlap the query
+            Contract.Ensures(Contract.Result<int>() == Enumerable.Count(this, x => x.Overlaps(query)));
 
             throw new NotImplementedException();
         }
@@ -268,12 +299,17 @@ namespace C5
 
         public bool Add(I interval)
         {
-            Contract.Requires(!ReferenceEquals(interval, null));
+            Contract.Requires(interval != null);
+
+            // Throws exception if it is read only
+            Contract.EnsuresOnThrow<ReadOnlyCollectionException>(IsReadOnly);
+
+            // The collection contains the interval
+            Contract.Ensures(Contract.Exists(this, x => ReferenceEquals(x, interval)));
             // If the interval is added the count goes up by one
             Contract.Ensures(!Contract.Result<bool>() || Count == Contract.OldValue(Count) + 1);
-            Contract.Ensures(Contract.Result<bool>() != Contract.OldValue(this.Any(i => ReferenceEquals(i, interval))));
-            // The collection contains the interval
-            Contract.Ensures(this.Any(i => ReferenceEquals(i, interval)));
+            // If the interval is not added the count stays the same
+            Contract.Ensures(Contract.Result<bool>() || Count == Contract.OldValue(Count));
 
             throw new NotImplementedException();
         }
@@ -281,25 +317,47 @@ namespace C5
         public void AddAll(IEnumerable<I> intervals)
         {
             Contract.Requires(intervals != null);
+
+            // Throws exception if it is read only
+            Contract.EnsuresOnThrow<ReadOnlyCollectionException>(IsReadOnly);
+
             // The collection contains all intervals
-            Contract.Ensures(Contract.ForAll(intervals, i => this.Any(j => ReferenceEquals(i, j))));
+            Contract.Ensures(Contract.ForAll(intervals, x => Contract.Exists(this, y => ReferenceEquals(x, y))));
+            // If it allows reference duplicates the count increases with the number of intervals added
+            Contract.Ensures(!AllowsReferenceDuplicates || Count == Contract.OldValue(Count) + intervals.Count());
+            // If it doesn't allow reference duplicates the count increases with the number of distinct intervals added
+            Contract.Ensures(AllowsReferenceDuplicates || Count == Contract.OldValue(Count) + intervals.Distinct(ComparerFactory<I>.CreateEqualityComparer((x, y) => ReferenceEquals(x, y), x => x.GetHashCode())).Count(x => !Contract.OldValue(this).Contains(x)));
+            // If intervals is empty, the count is unchanged
+            Contract.Ensures(intervals.Any() || Count == Contract.OldValue(Count));
+
+            throw new NotImplementedException();
         }
 
         public bool Remove(I interval)
         {
-            Contract.Requires(!ReferenceEquals(interval, null));
-            // The result is true if the collection contained the interval
-            Contract.Ensures(Contract.Result<bool>() == Contract.OldValue(this.Any(i => ReferenceEquals(i, interval))));
-            // The collection does not contain the interval
-            Contract.Ensures(!Contract.Exists(this, i => ReferenceEquals(i, interval)));
+            Contract.Requires(interval != null);
+
+            // Throws exception if it is read only
+            Contract.EnsuresOnThrow<ReadOnlyCollectionException>(IsReadOnly);
+
             // If the interval is removed the count goes down by one
             Contract.Ensures(!Contract.Result<bool>() || Count == Contract.OldValue(Count) - 1);
+            // If the interval isn't removed the count stays the same
+            Contract.Ensures(Contract.Result<bool>() || Count == Contract.OldValue(Count));
+            // The result is true if the collection contained the interval
+            Contract.Ensures(Contract.Result<bool>() == Contract.OldValue(Contract.Exists(this, x => ReferenceEquals(x, interval))));
+            // If the collection doesn't allow reference duplicates, the interval cannot be in the collection afterwards
+            Contract.Ensures(AllowsReferenceDuplicates || !Contract.Exists(this, x => ReferenceEquals(x, interval)));
 
             throw new NotImplementedException();
         }
 
         public void Clear()
         {
+            // Throws exception if it is read only
+            Contract.EnsuresOnThrow<ReadOnlyCollectionException>(IsReadOnly);
+
+            // The collection must be empty afterwards
             Contract.Ensures(IsEmpty);
 
             throw new NotImplementedException();
@@ -334,5 +392,67 @@ namespace C5
         public abstract IEnumerable<I> Filter(Func<I, bool> filter);
 
         #endregion
+    }
+
+    internal static class IntervalCollectionContractHelper
+    {
+        public static bool CollectionEquals<I>(IEnumerable<I> expected, IEnumerable<I> actual)
+        {
+            // Copy to list
+            var expectedList = new ArrayList<I>();
+            expectedList.AddAll(expected);
+
+            // Copy to list
+            var comparer = ComparerFactory<I>.CreateEqualityComparer((x, y) => ReferenceEquals(x, y), x => x.GetHashCode());
+            var actualList = new ArrayList<I>(comparer);
+            actualList.AddAll(actual);
+
+            // They must be of equal length
+            if (expectedList.Count != actualList.Count)
+                return false;
+
+            foreach (var interval in expectedList)
+                if (!actualList.Remove(interval))
+                    return false;
+
+            return actualList.IsEmpty;
+        }
+
+        [Pure]
+        public static int MNO<I, T>(IEnumerable<I> intervals)
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            Contract.Requires(intervals != null);
+
+            // Check MNO is correct
+            var max = 0;
+
+            // Get intervals and sort them by low, then high, endpoint
+            var sortedIntervals = intervals.ToArray();
+            var intervalComparer = ComparerFactory<I>.CreateComparer((x, y) => x.CompareTo(y));
+            Sorting.IntroSort(sortedIntervals, 0, sortedIntervals.Length, intervalComparer);
+
+            // Create queue sorted on high intervals
+            var highComparer = ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareHigh);
+            var queue = new IntervalHeap<IInterval<T>>(highComparer);
+
+            // Loop through intervals in sorted order
+            foreach (var interval in sortedIntervals)
+            {
+                // Remove all intervals from the queue not overlapping the current interval
+                while (!queue.IsEmpty && interval.CompareLowHigh(queue.FindMin()) > 0)
+                    queue.DeleteMin();
+
+                queue.Add(interval);
+
+                if (queue.Count > max)
+                {
+                    max = queue.Count;
+                }
+            }
+
+            return max;
+        }
     }
 }

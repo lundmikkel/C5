@@ -1186,6 +1186,8 @@ namespace C5.intervals
 
         #endregion
 
+        public bool AllowsReferenceDuplicates { get { return false; } }
+
         #endregion
 
         #region Find Overlaps
