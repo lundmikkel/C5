@@ -25,6 +25,9 @@ namespace C5.intervals
 
         private static readonly IComparer<IInterval<T>> Comparer = ComparerFactory<IInterval<T>>.CreateComparer((x, y) => y.CompareHigh(x));
 
+        private static readonly IEqualityComparer<IInterval<T>> EqualityComparer =
+            ComparerFactory<IInterval<T>>.CreateEqualityComparer(ReferenceEquals, x => 0);
+
         #endregion
 
         #region Code Contracts
@@ -257,27 +260,10 @@ namespace C5.intervals
         #region Inner Classes
 
         // TODO: Implement
-        private class IntervalList // : TreeBag<I>
+        private class IntervalList
         {
-            /*
-            public IntervalList()
-                : base((IComparer<I>) DynamicIntervalTree<I, T>.Comparer)
-            {
-            }
-
-            public I Highest
-            {
-                get { return this.FirstOrDefault(); }
-            }
-
-            public IEnumerable<I> FindOverlaps(IInterval<T> query)
-            {
-                return this.Where(i => i.Overlaps(query));
-            }
-
-            /*/
+            // A dictionary sorted on high with an accompanying sublist to handle equal intervals
             private readonly IDictionary<I, ArrayList<I>> _dictionary;
-
 
             public IntervalList()
             {
@@ -286,25 +272,52 @@ namespace C5.intervals
 
             public bool Add(I interval)
             {
+                // An interval with the same high endpoint is not in the list
                 if (!_dictionary.Contains(interval))
-                    _dictionary.Add(interval, new ArrayList<I>());
+                {
+                    // We add a null sublist as we only have the one interval
+                    _dictionary.Add(interval, null);
+                    return true;
+                }
 
-                return _dictionary[interval].Add(interval);
+                // More than one interval with the same low and high
+                // Add the interval to the sublist - create a new sublist, if one doesn't already exist
+                return (_dictionary[interval] ?? (_dictionary[interval] = new ArrayList<I>((IEqualityComparer<I>) EqualityComparer))).Add(interval);
             }
 
             public bool Remove(I interval)
             {
+                // Check if the list contains the interval
                 if (!_dictionary.Contains(interval))
                     return false;
 
-                var list = _dictionary[interval];
+                var key = interval;
+                ArrayList<I> list;
 
-                var result = list.Remove(interval);
+                if (!_dictionary.Find(ref key, out list))
+                    return false;
 
-                if (list.IsEmpty)
-                    _dictionary.Remove(interval);
+                // Check if the interval is used as the key
+                if (ReferenceEquals(key, interval))
+                {
+                    // The list is empty
+                    if (list == null || list.IsEmpty)
+                        return _dictionary.Remove(interval);
+                    else
+                    {
+                        var newKey = list.RemoveLast();
+                        _dictionary.Remove(interval);
+                        _dictionary.Add(newKey, (list.IsEmpty ? null : list));
+                        return true;
+                    }
+                }
 
-                return result;
+                // The list doesn't contain interval
+                if (list == null || list.IsEmpty)
+                    return false;
+
+                // Otherwise just remove it from the list
+                return list.Remove(interval);
             }
 
             public bool IsEmpty
@@ -317,7 +330,7 @@ namespace C5.intervals
                 if (IsEmpty)
                     throw new NoSuchItemException();
 
-                return _dictionary.Keys.First();
+                return _dictionary.First().Key;
             }
 
             public I Highest
@@ -336,10 +349,17 @@ namespace C5.intervals
                 foreach (var keyValuePair in _dictionary)
                 {
                     if (keyValuePair.Key.Overlaps(query))
-                        foreach (var interval in keyValuePair.Value)
-                        {
-                            yield return interval;
-                        }
+                    {
+                        // Return indexed interval
+                        yield return keyValuePair.Key;
+
+                        // Return intervals with duplicate endpoints
+                        if (keyValuePair.Value != null && !keyValuePair.Value.IsEmpty)
+                            foreach (var interval in keyValuePair.Value)
+                                yield return interval;
+                    }
+                    else
+                        break;
                 }
             }
 
@@ -347,14 +367,13 @@ namespace C5.intervals
             {
                 foreach (var keyValuePair in _dictionary)
                 {
-                    foreach (var interval in keyValuePair.Value)
-                    {
-                        yield return interval;
-                    }
-                }
-                //return _dictionary.SelectMany(keyValuePair => keyValuePair.Value).GetEnumerator();
-            }
+                    yield return keyValuePair.Key;
 
+                    if (keyValuePair.Value != null && !keyValuePair.Value.IsEmpty)
+                        foreach (var interval in keyValuePair.Value)
+                            yield return interval;
+                }
+            }
 
             public override string ToString()
             {
@@ -363,7 +382,6 @@ namespace C5.intervals
                     sb.Append(list);
                 return sb.ToString();
             }
-            //*/
         }
 
         private class Node : IComparable<Node>
