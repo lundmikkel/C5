@@ -1203,11 +1203,15 @@ namespace C5.intervals
         /// <inheritdoc/>
         public bool FindOverlap(IInterval<T> query, ref I overlap)
         {
-            var enumerator = FindOverlaps(query).GetEnumerator();
-            var result = enumerator.MoveNext();
+            bool result;
 
-            if (result)
-                overlap = enumerator.Current;
+            using (var enumerator = FindOverlaps(query).GetEnumerator())
+            {
+                result = enumerator.MoveNext();
+
+                if (result)
+                    overlap = enumerator.Current;
+            }
 
             return result;
         }
@@ -1215,11 +1219,15 @@ namespace C5.intervals
         /// <inheritdoc/>
         public bool FindOverlap(T query, ref I overlap)
         {
-            var enumerator = FindOverlaps(query).GetEnumerator();
-            var result = enumerator.MoveNext();
+            bool result;
 
-            if (result)
-                overlap = enumerator.Current;
+            using (var enumerator = FindOverlaps(query).GetEnumerator())
+            {
+                result = enumerator.MoveNext();
+
+                if (result)
+                    overlap = enumerator.Current;
+            }
 
             return result;
         }

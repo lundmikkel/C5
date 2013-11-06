@@ -403,7 +403,8 @@ namespace C5.intervals
         {
             Contract.Requires(collection != null);
 
-            var enumerator = collection.GetEnumerator();
+            using (var enumerator = collection.GetEnumerator())
+            {
 
             if (enumerator.MoveNext())
             {
@@ -418,6 +419,7 @@ namespace C5.intervals
 
                     previous = current;
                 }
+            }
             }
 
             return true;

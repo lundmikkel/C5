@@ -55,36 +55,38 @@ namespace C5.intervals
             IList<Node> list = new ArrayList<Node>();
 
             // Iterate through the intervals to build the list
-            var enumerator = intervals.GetEnumerator();
-            if (enumerator.MoveNext())
+            using (var enumerator = intervals.GetEnumerator())
             {
-                // Remember the previous node so we can check if the next nodes are contained in it
-                var previous = enumerator.Current;
-                var sublist = new ArrayList<I>();
-
-                // Loop through intervals
-                while (enumerator.MoveNext())
+                if (enumerator.MoveNext())
                 {
-                    var current = enumerator.Current;
+                    // Remember the previous node so we can check if the next nodes are contained in it
+                    var previous = enumerator.Current;
+                    var sublist = new ArrayList<I>();
 
-                    if (previous.StrictlyContains(current))
-                        // Add contained intervals to sublist for previous node
-                        sublist.Add(current);
-                    else
+                    // Loop through intervals
+                    while (enumerator.MoveNext())
                     {
-                        // The current interval wasn't contained in the prevoius node, so we can finally add the previous to the list
-                        list.Add(new Node(previous, (sublist.IsEmpty ? null : createList(sublist))));
+                        var current = enumerator.Current;
 
-                        // Reset the looped values
-                        if (!sublist.IsEmpty)
-                            sublist = new ArrayList<I>();
+                        if (previous.StrictlyContains(current))
+                            // Add contained intervals to sublist for previous node
+                            sublist.Add(current);
+                        else
+                        {
+                            // The current interval wasn't contained in the prevoius node, so we can finally add the previous to the list
+                            list.Add(new Node(previous, (sublist.IsEmpty ? null : createList(sublist))));
 
-                        previous = current;
+                            // Reset the looped values
+                            if (!sublist.IsEmpty)
+                                sublist = new ArrayList<I>();
+
+                            previous = current;
+                        }
                     }
-                }
 
-                // Add the last node to the list when we are done looping through them
-                list.Add(new Node(previous, createList(sublist.ToArray())));
+                    // Add the last node to the list when we are done looping through them
+                    list.Add(new Node(previous, createList(sublist.ToArray())));
+                }
             }
 
             return list.ToArray();

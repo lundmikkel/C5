@@ -256,7 +256,7 @@ namespace C5.intervals
         public IEnumerator<I> GetEnumeratorSorted()
         {
             if (IsEmpty)
-                return (new I[] { }).Cast<I>().GetEnumerator();
+                return Enumerable.Empty<I>().GetEnumerator();
 
             return getEnumeratorSorted(0, _firstLayerCount);
         }
