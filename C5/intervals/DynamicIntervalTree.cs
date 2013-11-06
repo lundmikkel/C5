@@ -1204,6 +1204,7 @@ namespace C5.intervals
                 _root = addHigh(interval, _root, ref nodeWasAdded);
 
                 _count++;
+                raiseForAdd(interval);
             }
 
             return intervalWasAdded;
@@ -1343,6 +1344,7 @@ namespace C5.intervals
                 _root = removeHigh(interval, _root, ref nodeWasDeleted);
 
                 _count--;
+                raiseForRemove(interval);
             }
 
             return intervalWasRemoved;
