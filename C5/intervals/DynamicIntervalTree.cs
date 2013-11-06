@@ -1339,6 +1339,7 @@ namespace C5.intervals
 
             if (intervalWasRemoved)
             {
+                nodeWasDeleted = false;
                 _root = removeHigh(interval, _root, ref nodeWasDeleted);
 
                 _count--;
@@ -1383,7 +1384,7 @@ namespace C5.intervals
             else
             {
                 // RemoveLow interval from node
-                intervalWasRemoved = root.RemoveLow(interval);
+                intervalWasRemoved |= root.RemoveLow(interval);
 
                 // If the interval was removed, we might be able to removeLow the node as well
                 if (intervalWasRemoved && root.IsEmpty)
