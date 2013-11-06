@@ -214,7 +214,7 @@ namespace C5.intervals
         /// <summary>
         /// Fast enumeration of intervals in arbitrary order, not sorted. For sorted enumerator see <see cref="GetEnumeratorSorted"/> or better <see cref="Sorted"/>.
         /// </summary>
-        /// <returns>Enumerator of all intervals in the data structure in arbitrary order</returns>
+        /// <returns>Enumerator of all intervals in the data structure in arbitrary order.</returns>
         public override IEnumerator<I> GetEnumerator()
         {
             return getEnumerator();
@@ -229,6 +229,7 @@ namespace C5.intervals
             for (var i = 0; i < _layerCount; i++)
             {
                 var intervalCount = _intervalLayers[i].Count();
+
                 for (var j = 0; j < intervalCount; j++)
                     yield return _intervalLayers[i][j];
             }
