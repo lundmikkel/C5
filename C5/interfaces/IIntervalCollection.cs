@@ -306,10 +306,19 @@ namespace C5
 
             // The collection contains the interval
             Contract.Ensures(Contract.Exists(this, x => ReferenceEquals(x, interval)));
+            // If the interval was added, the number of object with the same reference goes up by one
+            Contract.Ensures(!Contract.Result<bool>() || this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval))) + 1);
+            // If the interval wasn't added, the number of object with the same reference stays the same
+            Contract.Ensures(Contract.Result<bool>() || this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval))));
             // If the interval is added the count goes up by one
             Contract.Ensures(!Contract.Result<bool>() || Count == Contract.OldValue(Count) + 1);
             // If the interval is not added the count stays the same
             Contract.Ensures(Contract.Result<bool>() || Count == Contract.OldValue(Count));
+
+            // If the collection allows reference duplicates, the object will always be added
+            Contract.Ensures(!AllowsReferenceDuplicates || Contract.Result<bool>());
+            // If the collection doesn't allow reference duplicates, the object should only be added if it didn't contain the object
+            Contract.Ensures(AllowsReferenceDuplicates || Contract.Result<bool>() != Contract.OldValue(Contract.Exists(this, x => ReferenceEquals(x, interval))));
 
             throw new NotImplementedException();
         }
@@ -321,6 +330,8 @@ namespace C5
             // Throws exception if it is read only
             Contract.EnsuresOnThrow<ReadOnlyCollectionException>(IsReadOnly);
 
+            Contract.Ensures(IntervalCollectionContractHelper.ConfirmAddAll<I, T>(Contract.OldValue(this.ToArray()), this.ToArray(), intervals, AllowsReferenceDuplicates));
+
             // The collection contains all intervals
             Contract.Ensures(Contract.ForAll(intervals, x => Contract.Exists(this, y => ReferenceEquals(x, y))));
             // If it allows reference duplicates the count increases with the number of intervals added
@@ -329,6 +340,7 @@ namespace C5
             Contract.Ensures(AllowsReferenceDuplicates || Count == Contract.OldValue(Count) + intervals.Distinct(ComparerFactory<I>.CreateEqualityComparer((x, y) => ReferenceEquals(x, y), x => x.GetHashCode())).Count(x => !Contract.OldValue(this).Contains(x)));
             // If intervals is empty, the count is unchanged
             Contract.Ensures(intervals.Any() || Count == Contract.OldValue(Count));
+
 
             throw new NotImplementedException();
         }
@@ -344,10 +356,19 @@ namespace C5
             Contract.Ensures(!Contract.Result<bool>() || Count == Contract.OldValue(Count) - 1);
             // If the interval isn't removed the count stays the same
             Contract.Ensures(Contract.Result<bool>() || Count == Contract.OldValue(Count));
+            // If the interval was removed, the number of object with the same reference goes down by one
+            Contract.Ensures(!Contract.Result<bool>() || this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval))) - 1);
+            // If the interval wasn't removed, the number of object with the same reference stays the same
+            Contract.Ensures(Contract.Result<bool>() || this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval))));
+
             // The result is true if the collection contained the interval
             Contract.Ensures(Contract.Result<bool>() == Contract.OldValue(Contract.Exists(this, x => ReferenceEquals(x, interval))));
             // If the collection doesn't allow reference duplicates, the interval cannot be in the collection afterwards
             Contract.Ensures(AllowsReferenceDuplicates || !Contract.Exists(this, x => ReferenceEquals(x, interval)));
+
+            // If we don't allow reference duplicates, then the interval cannot be in the collection afterwards
+            Contract.Ensures(AllowsReferenceDuplicates || !Contract.Exists(this, x => ReferenceEquals(x, interval)));
+            // 
 
             throw new NotImplementedException();
         }
@@ -416,6 +437,59 @@ namespace C5
                     return false;
 
             return actualList.IsEmpty;
+        }
+
+
+        public static bool ConfirmAddAll<I, T>(I[] oldCollection, I[] newCollection, IEnumerable<I> intervalsAdded, bool allowsReferenceDuplicates)
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            var comparer = ComparerFactory<I>.CreateEqualityComparer((x, y) => ReferenceEquals(x, y), x => x.GetHashCode());
+            var counter = new HashDictionary<I, int>(comparer);
+
+            if (allowsReferenceDuplicates)
+            {
+
+                foreach (var interval in intervalsAdded)
+                {
+                    if (!counter.Contains(interval))
+                        counter[interval] = 0;
+
+                    counter[interval]++;
+
+                }
+                foreach (var interval in oldCollection)
+                {
+                    if (!counter.Contains(interval))
+                        counter[interval] = 0;
+
+                    counter[interval]++;
+                }
+
+                foreach (var interval in newCollection)
+                    counter[interval]--;
+
+                if (counter.Any(keyValuePair => keyValuePair.Value != 0))
+                    return false;
+            }
+            else
+            {
+                foreach (var interval in newCollection)
+                {
+                    if (!counter.Contains(interval))
+                        counter[interval] = 0;
+
+                    counter[interval]++;
+                }
+
+                if (intervalsAdded.Any(x => counter[x] != 1))
+                    return false;
+
+                if (counter.Any(keyValuePair => keyValuePair.Value != 1))
+                    return false;
+            }
+
+            return true;
         }
 
         [Pure]

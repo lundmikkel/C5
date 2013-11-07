@@ -23,10 +23,12 @@ namespace C5.intervals
         private Node _root;
         private int _count;
 
+        // Comparer for IntervalList (sorting on high in non-ascending order)
         private static readonly IComparer<IInterval<T>> Comparer = ComparerFactory<IInterval<T>>.CreateComparer((x, y) => y.CompareHigh(x));
-
+        // Comparer for sublists in IntervalList
         private static readonly IEqualityComparer<IInterval<T>> EqualityComparer =
             ComparerFactory<IInterval<T>>.CreateEqualityComparer(ReferenceEquals, x => 0);
+        // TODO: Check benchmarks to see if actual hashcode is better than just 0
 
         #endregion
 
@@ -261,31 +263,88 @@ namespace C5.intervals
 
         private class IntervalList
         {
-            // A dictionary sorted on high with an accompanying sublist to handle equal intervals
+            // A dictionary sorted on high with an accompanying sublist to handle objects with duplicate intervals
             private readonly IDictionary<I, ArrayList<I>> _dictionary;
 
+            #region Code Contracts
+
+            [ContractInvariantMethod]
+            private void invariant()
+            {
+                // Dictionary should never be null
+                Contract.Invariant(_dictionary != null);
+                // TODO: Confirm placement invariant
+            }
+
+            private int count { get { return _dictionary.Sum(keyValuePair => 1 + (keyValuePair.Value == null ? 0 : keyValuePair.Value.Count)); } }
+
+            #endregion
+
+            /// <summary>
+            /// Create a new empty IntervalList.
+            /// </summary>
             public IntervalList()
             {
+                Contract.Ensures(_dictionary != null);
+                Contract.Ensures(_dictionary.IsEmpty);
+
                 _dictionary = new SortedArrayDictionary<I, ArrayList<I>>((IComparer<I>) Comparer);
             }
 
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="interval"></param>
+            /// <returns></returns>
             public bool Add(I interval)
             {
-                // An interval with the same high endpoint is not in the list
-                if (!_dictionary.Contains(interval))
+                Contract.Requires(interval != null);
+
+                // The dictionary contains a key equal to the interval
+                Contract.Ensures(_dictionary.Contains(interval));
+                // The dictionary contains the interval
+                Contract.Ensures(Contract.Exists(_dictionary, keyValuePair => ReferenceEquals(keyValuePair.Key, interval) || keyValuePair.Value == null || Contract.Exists(keyValuePair.Value, x => ReferenceEquals(x, interval))));
+
+                // If the interval is added the count goes up by one
+                Contract.Ensures(!Contract.Result<bool>() || count == Contract.OldValue(count) + 1);
+                // If the interval is not added the count stays the same
+                Contract.Ensures(Contract.Result<bool>() || count == Contract.OldValue(count));
+
+                // If the list didn't contain an interval with the same high, then the sublist is null
+                Contract.Ensures(Contract.OldValue(_dictionary.Contains(interval)) || _dictionary[interval] == null);
+
+                var key = interval;
+                ArrayList<I> list;
+                if (_dictionary.Find(ref key, out list))
+                {
+                    if (list == null)
+                    {
+                        _dictionary[key] = new ArrayList<I> { interval };
+                        return true;
+                    }
+                    else
+                    {
+                        return list.Add(interval);
+                    }
+                }
+                else
                 {
                     // We add a null sublist as we only have the one interval
                     _dictionary.Add(interval, null);
                     return true;
                 }
-
-                // More than one interval with the same low and high
-                // Add the interval to the sublist - create a new sublist, if one doesn't already exist
-                return (_dictionary[interval] ?? (_dictionary[interval] = new ArrayList<I>((IEqualityComparer<I>) EqualityComparer))).Add(interval);
             }
 
             public bool Remove(I interval)
             {
+                Contract.Requires(interval != null);
+
+                // If the interval is removed the count goes down by one
+                Contract.Ensures(!Contract.Result<bool>() || count == Contract.OldValue(count) - 1);
+                // If the interval isn't removed the count stays the same
+                Contract.Ensures(Contract.Result<bool>() || count == Contract.OldValue(count));
+
+
                 // Check if the list contains the interval
                 if (!_dictionary.Contains(interval))
                     return false;
@@ -1203,6 +1262,8 @@ namespace C5.intervals
         /// </summary>
         public bool Add(I interval)
         {
+            // TODO: Contract using AllowsReferenceDuplicates
+
             var nodeWasAdded = false;
             var intervalWasAdded = false;
 

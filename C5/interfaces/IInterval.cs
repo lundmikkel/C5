@@ -63,6 +63,7 @@ namespace C5
 
         public T Low
         {
+            // TODO: Check these actually work
             get
             {
                 Contract.Ensures(Contract.Result<T>() != null);
