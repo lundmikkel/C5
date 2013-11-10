@@ -118,7 +118,7 @@ namespace C5.Performance.Wpf
         {
             var dlg = new Microsoft.Win32.SaveFileDialog
             {
-                FileName = "Benchmark",
+                FileName = benchmarks()[0].BenchMarkName(),
                 DefaultExt = ".pdf",
                 Filter = "PDF documents (.pdf)|*.pdf"
             };
