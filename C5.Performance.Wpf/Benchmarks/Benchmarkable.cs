@@ -17,17 +17,26 @@ namespace C5.Performance.Wpf.Benchmarks
 
         public abstract double Call(int i);
 
-        public Benchmark Benchmark(int maxCount, int repeats, double maxExecutionTimeInSeconds, MainWindow caller, int warmups = 1000)
+        public Benchmark Benchmark(int maxCount, int repeats, double maxExecutionTimeInSeconds, MainWindow caller, bool runWarmup = true)
         {
             CollectionSetup();
             var count = 1;
             double dummy = 0.0, runningTimeInSeconds = 0.0, elapsedTime, elapsedSquaredTime;
-            // Warmup the JIT-compiler
-            for (var i = 0; i < warmups; i++)
+            if (runWarmup)
             {
-                Setup();
-                caller.UpdateRunningLabel("Warmup run " + i + " of " + warmups);
-                dummy += Call(ItemsArray[i % CollectionSize]);
+                const int warmups = 1000;
+                // Warmup the JIT-compiler
+                var warmupTimer = new Timer();
+                warmupTimer.Play();
+                var i1 = 0;
+                while (i1 < warmups && warmupTimer.Check() < 2)
+                {
+                    Setup();
+                    caller.UpdateRunningLabel("Warmup run " + i1);
+                    dummy += Call(ItemsArray[i1 % CollectionSize]);
+                    i1++;
+                }
+                warmupTimer.Pause();
             }
             dummy = 0.0;
             do

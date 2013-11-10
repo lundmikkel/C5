@@ -107,7 +107,7 @@ namespace C5.Tests.intervals
             [SetUp]
             public void SetUp()
             {
-                const int count = 100;
+                const int count = 100000;
                 _intervals = new ArrayList<IInterval<int>>(count);
                 _intervals.AddAll(BenchmarkTestCases.DataSetB(count));
                 _intervals.Shuffle(_random);

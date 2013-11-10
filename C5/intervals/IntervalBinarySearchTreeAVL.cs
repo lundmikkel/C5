@@ -924,7 +924,7 @@ namespace C5.intervals
             var intervalArray = intervals as I[] ?? intervals.ToArray();
 
             // TODO: Pre-generate balanced tree based on endpoints and insert intervals afterwards
-            // preconstructNodeStructure(intervalArray);
+            preconstructNodeStructure(intervalArray);
 
             foreach (var interval in intervalArray)
                 Add(interval);
