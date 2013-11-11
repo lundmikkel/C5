@@ -27,7 +27,7 @@ namespace C5.Performance.Wpf
         /// <param name="path">The file path where the pdf should be created</param>
         /// <param name="width">Width in pixels of the generated pfd</param>
         /// <param name="height">Height in pixels of the generated pfd</param>
-        public void ExportPdf(String path = "plot.pdf", int width = 4960, int height = 7016)
+        public void ExportPdf(String path, double width, double height)
         {
             PdfExporter.Export(PlotModel, path, width, height);
         }
@@ -37,12 +37,12 @@ namespace C5.Performance.Wpf
         /// </summary>
         private void setUpModel()
         {
-            PlotModel.Title = "Interval Plotter";
-            PlotModel.LegendTitle = "Legend";
-            PlotModel.LegendPosition = LegendPosition.RightTop;
+            //PlotModel.Title = "Interval Plotter";
+            //PlotModel.LegendTitle = "Legend";
+            PlotModel.LegendPosition = LegendPosition.BottomRight;
             PlotModel.LegendBackground = OxyColors.White;
             PlotModel.LegendBorder = OxyColors.Black;
-            PlotModel.LegendPlacement = LegendPlacement.Outside;
+            PlotModel.LegendPlacement = LegendPlacement.Inside;
 
             var sizeAxis = new LinearAxis(AxisPosition.Bottom)
             {
@@ -55,10 +55,12 @@ namespace C5.Performance.Wpf
             var valueAxis = new LinearAxis(AxisPosition.Left)
             {
                 AxisTitleDistance = 10,
-                Title = "Execution Time in nano seconds",
+                Title = "Execution Time in seconds",
                 MajorGridlineStyle = LineStyle.Solid,
                 MinorGridlineStyle = LineStyle.Dot
             };
+            sizeAxis.AbsoluteMinimum = 0;
+            valueAxis.AbsoluteMinimum = 0;
             PlotModel.Axes.Add(sizeAxis);
             PlotModel.Axes.Add(valueAxis);
         }
@@ -74,9 +76,9 @@ namespace C5.Performance.Wpf
             if (areaSeries != null)
             {
                 areaSeries.Points.Add(new DataPoint(benchmark.CollectionSize,
-                    benchmark.MeanTime + benchmark.StandardDeviation));
+                    (benchmark.MeanTime + benchmark.StandardDeviation) / 10e8));
                 areaSeries.Points2.Add(new DataPoint(benchmark.CollectionSize,
-                    benchmark.MeanTime - benchmark.StandardDeviation));
+                    (benchmark.MeanTime - benchmark.StandardDeviation)/ 10e8));
             }
             PlotModel.RefreshPlot(true);
 
