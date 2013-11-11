@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Linq;
+using C5.intervals;
 using Microsoft.VisualBasic.FileIO;
 
 namespace C5.Ucsc
@@ -10,6 +14,94 @@ namespace C5.Ucsc
 
     class UcscHumanGenomeParser
     {
+        public static void ParseMaf(string source, string target)
+        {
+            //var genes = new ArrayList<UcscAlignmentGene>();
+
+            using (var sr = new StreamReader(source))
+            {
+                using (var sw = new StreamWriter(target))
+                {
+                    var lineNumber = 0;
+                    var sequenceNumber = 0;
+                    var alignments = new ArrayList<int>();
+                    var start = 0;
+                    var length = 0;
+
+
+                    while (!sr.EndOfStream)
+                    {
+                        var line = sr.ReadLine();
+                        lineNumber++;
+
+                        // Skip comments
+                        if (line.StartsWith("#"))
+                            continue;
+
+                        // Skip blank lines and comments
+                        if (String.IsNullOrWhiteSpace(line))
+                        {
+                            var gene = new UcscAlignmentGene(start, length, alignments);
+                            //genes.Add(gene);
+                            sw.WriteLine(gene.CompactFormat());
+                            sw.Flush();
+                            continue;
+                        }
+
+                        if (line.StartsWith("a"))
+                        {
+                            sequenceNumber++;
+                            alignments = new ArrayList<int>();
+                            continue;
+                        }
+
+                        if (line.StartsWith("s"))
+                        {
+                            var parts = line.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
+
+                            // Reference 
+                            if (parts[1].Equals("hg19.chr1"))
+                            {
+                                start = Int32.Parse(parts[2]);
+                                length = Int32.Parse(parts[3]);
+                            }
+                            else
+                            {
+                                alignments.Add(lineNumber);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        struct UcscAlignmentGene : IInterval<int>
+        {
+            public UcscAlignmentGene(int start, int length, IEnumerable<int> alignments)
+                : this()
+            {
+                Low = start;
+                High = start + length - 1;
+                Alignments = alignments;
+            }
+
+            public int Low { get; private set; }
+            public int High { get; private set; }
+            public bool LowIncluded { get { return true; } }
+            public bool HighIncluded { get { return true; } }
+            public IEnumerable<int> Alignments { get; private set; }
+
+            public override string ToString()
+            {
+                return String.Format("{0} - {1}", IntervalExtensions.ToString(this), Alignments);
+            }
+
+            public string CompactFormat()
+            {
+                return String.Format("{0} {1} {2}", Low, High, string.Join(",", Alignments.Select(i => i.ToString())));
+            }
+        }
+
         public static IEnumerable<UcscHumanGene> ParseFile(string filepath, bool headerRow = true)
         {
             var list = new ArrayList<UcscHumanGene>();
