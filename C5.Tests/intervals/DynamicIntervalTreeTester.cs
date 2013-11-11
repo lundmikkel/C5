@@ -340,6 +340,21 @@ namespace C5.Tests.intervals
                 for (var i = 0; i < count; i++)
                     intervalCollection.Add(new IntervalBase<int>(0, random.Next(10) + 1));
             }
+
+            [Test]
+            public void AddAll()
+            {
+                var random = new Random(0);
+                const int count = 15;
+
+                var intervals = new ArrayList<IntervalBase<int>>();
+                for (var i = 0; i < count; i++)
+                {
+                    var interval = new IntervalBase<int>(0, random.Next(10) + 1);
+                    intervals.Add(interval);
+                }
+                intervalCollection.AddAll(intervals);
+            }
         }
     }
 }
