@@ -35,6 +35,25 @@ namespace C5.intervals
 
         #endregion
 
+        #region Properties
+
+        /// <summary>
+        /// The degree of containment for a collection. This is the length of the longest chain of
+        /// intervals strictly contained in each other.
+        /// </summary>
+        public int ContainmentDegree
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<int>() >= 0);
+                Contract.Ensures(IsEmpty || Contract.Result<int>() > 0);
+
+                return _layerCount;
+            }
+        }
+
+        #endregion
+
         #region Code Contracts
 
         [ContractInvariantMethod]
@@ -46,11 +65,14 @@ namespace C5.intervals
             // The first layer's count is non-negative and at most as big as count
             Contract.Invariant(0 <= _firstLayerCount && _firstLayerCount <= _count);
             // Either the collection is empty or there are one layer or more
-            Contract.Invariant(IsEmpty || 1 <= _layerCount);
+            Contract.Invariant(IsEmpty || _layerCount >= 1);
             // Either all intervals are in the first layer, or there are more than one layer
-            Contract.Invariant(_count == _firstLayerCount || 1 < _layerCount);
-            Contract.Invariant(IsEmpty || _intervalLayers != null && _pointerLayers != null);
+            Contract.Invariant(_count == _firstLayerCount || _layerCount > 1);
+            // The layers are null if empty
+            Contract.Invariant(!IsEmpty || _intervalLayers == null && _pointerLayers == null);
 
+            // No layer is empty
+            Contract.Invariant(IsEmpty || Contract.ForAll(_intervalLayers, layer => layer.Length > 0));
             // Each layer is sorted
             Contract.Invariant(IsEmpty || Contract.ForAll(0, _layerCount, l => Contract.ForAll(0, _intervalLayers[l].Length - 1, i => _intervalLayers[l][i].CompareTo(_intervalLayers[l][i + 1]) <= 0)));
             // Each layer is sorted on both low and high endpoint
@@ -97,11 +119,14 @@ namespace C5.intervals
         /// <param name="intervalEnumerable">The collection of intervals.</param>
         public LayeredContainmentList(IEnumerable<I> intervalEnumerable)
         {
+            Contract.Ensures(intervalEnumerable.Count() == Count);
+
             // Make intervals to array to allow fast sorting and counting
             var intervals = intervalEnumerable as I[] ?? intervalEnumerable.ToArray();
 
             // Stop if we have no intervals
-            if (!intervals.Any()) return;
+            if (!intervals.Any())
+                return;
 
             _count = intervals.Length;
 
@@ -114,7 +139,7 @@ namespace C5.intervals
             _intervalLayers = new I[_layerCount][];
             _pointerLayers = new int[_layerCount][];
 
-            // Remember the count from the layer above
+            // Store the count from the layer above
             var previousCount = 0;
             // Create each layer starting at the last layer
             for (var i = _layerCount - 1; i >= 0; i--)
@@ -140,22 +165,28 @@ namespace C5.intervals
         {
             Contract.Requires(intervals != null);
 
-            // Used for tracking current layer
-            var layer = 0;
-            var layers = new ArrayList<ArrayList<Node>> { new ArrayList<Node>(), new ArrayList<Node>() };
+            var count = intervals.Length;
 
             // Sort intervals
             var comparer = ComparerFactory<I>.CreateComparer((x, y) => x.CompareTo(y));
-            Sorting.IntroSort(intervals, 0, intervals.Length, comparer);
+            Sorting.IntroSort(intervals, 0, count, comparer);
 
-            foreach (var interval in intervals)
+            // Initialize layers with two empty layers
+            var layers = new ArrayList<ArrayList<Node>> { new ArrayList<Node>(), new ArrayList<Node>() };
+
+            // Add the first interval to the first layer to avoid empty layers in the binary search
+            if (count > 0)
+                layers[0].Add(new Node(intervals[0], 0));
+
+            var layer = 0;
+
+            // Insert the rest of the intervals
+            for (var i = 1; i < count; i++)
             {
-                while (layer > 0 && layers[layer - 1].Last.Interval.CompareHigh(interval) <= 0)
-                    layer--;
+                var interval = intervals[i];
 
-                // Check if interval will be contained in the next layer
-                while (!layers[layer].IsEmpty && interval.CompareHigh(layers[layer].Last.Interval) < 0)
-                    layer++;
+                // Search for the layer to insert the interval based on the last layer insert into
+                layer = binaryLayerSearch(layers, interval, layer);
 
                 // Add extra layer if needed
                 if (layers.Count == layer + 1)
@@ -169,6 +200,44 @@ namespace C5.intervals
             layers.Remove();
 
             return layers;
+        }
+
+        private static int binaryLayerSearch(ArrayList<ArrayList<Node>> layers, I interval, int layer)
+        {
+            Contract.Requires(layers != null);
+            Contract.Requires(interval != null);
+            Contract.Requires(layers.Last.IsEmpty);
+            // The high endpoints of the last interval in each layer is sorted
+            Contract.Requires(Contract.ForAll(1, layers.Count - 1, l => layers[l].Last.Interval.CompareHigh(layers[l - 1].Last.Interval) < 0));
+            // Layer is non-negative and less than layer count
+            Contract.Ensures(0 <= Contract.Result<int>() && Contract.Result<int>() < layers.Count);
+            // The last interval in the layer has a high less than or equal to interval's high
+            Contract.Ensures(layers[Contract.Result<int>()].IsEmpty || layers[Contract.Result<int>()].Last.Interval.CompareHigh(interval) <= 0);
+            // The last interval in the layer below has a high greater than interval's high
+            Contract.Ensures(Contract.Result<int>() == 0 || layers[Contract.Result<int>() - 1].Last.Interval.CompareHigh(interval) > 0);
+
+            var low = 0;
+            var high = layers.Count - 1;
+
+            do
+            {
+                var compare = layers[layer].Last.Interval.CompareHigh(interval);
+
+                // interval contains the last interval
+                if (compare < 0)
+                    high = layer;
+                // The last interval contains interval
+                else if (compare > 0)
+                    low = layer + 1;
+                // We have found an interval with the same high
+                else
+                    return layer;
+
+                // Binarily pick the next layer to check
+                layer = low + (high - low >> 2);
+            } while (low < high);
+
+            return low;
         }
 
         #endregion
@@ -835,9 +904,12 @@ namespace C5.intervals
         /// Get a string representation of the tree in GraphViz dot format.
         /// </summary>
         /// <returns>GraphViz string.</returns>
-        public string Graphviz()
+        public string Graphviz
         {
-            return String.Format("digraph LayeredContainmentList {{\n\trankdir=BT;\n\tnode [shape=record];\n\n{0}\n}}", graphviz());
+            get
+            {
+                return String.Format("digraph LayeredContainmentList {{\n\trankdir=BT;\n\tnode [shape=record];\n\n{0}\n}}", graphviz());
+            }
         }
 
         private string graphviz()
