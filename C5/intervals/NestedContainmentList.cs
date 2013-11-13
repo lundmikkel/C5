@@ -217,6 +217,7 @@ namespace C5.intervals
             get { throw new NotSupportedException(); }
         }
 
+        /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get { return true; } }
 
         #endregion

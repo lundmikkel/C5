@@ -1186,6 +1186,7 @@ namespace C5.intervals
 
         #endregion
 
+        /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get { return false; } }
 
         #endregion

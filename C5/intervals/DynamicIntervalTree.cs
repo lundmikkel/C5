@@ -1022,6 +1022,7 @@ namespace C5.intervals
 
         #region Collection Value
 
+        /// <inheritdoc/>
         public override bool IsEmpty
         {
             get
@@ -1031,6 +1032,7 @@ namespace C5.intervals
             }
         }
 
+        /// <inheritdoc/>
         public override int Count
         {
             get
@@ -1040,8 +1042,10 @@ namespace C5.intervals
             }
         }
 
+        /// <inheritdoc/>
         public override Speed CountSpeed { get { return Speed.Constant; } }
 
+        /// <inheritdoc/>
         public override I Choose()
         {
             if (IsEmpty)
@@ -1068,6 +1072,7 @@ namespace C5.intervals
 
         #region Enumerable
 
+        /// <inheritdoc/>
         public override IEnumerator<I> GetEnumerator()
         {
             foreach (var node in nodes(_root))
@@ -1124,6 +1129,7 @@ namespace C5.intervals
             }
         }
 
+        /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get { return true; } }
 
         #endregion
@@ -1185,6 +1191,7 @@ namespace C5.intervals
             }
         }
 
+        /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
             if (query == null)
@@ -1280,6 +1287,7 @@ namespace C5.intervals
             return intervalWasAdded;
         }
 
+        /// <inheritdoc/>
         public void AddAll(IEnumerable<I> intervals)
         {
             foreach (var interval in intervals)

@@ -382,6 +382,7 @@ namespace C5.intervals
             return root;
         }
 
+        /// <inheritdoc/>
         public bool IsReadOnly { get { return false; } }
 
         /// <inheritdoc/>
@@ -1250,6 +1251,7 @@ namespace C5.intervals
             get { return _root != null ? _root.Max : 0; }
         }
 
+        /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get { return false; } }
 
         #endregion
