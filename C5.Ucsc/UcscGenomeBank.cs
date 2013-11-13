@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Linq;
@@ -14,10 +15,32 @@ namespace C5.Ucsc
 
     class UcscHumanGenomeParser
     {
+        public static IEnumerable<UcscHumanAlignmentGene> ParseCompressedMaf(string source)
+        {
+            var intervals = new ArrayList<UcscHumanAlignmentGene>(3000000);
+
+            using (var sr = new StreamReader(source))
+            {
+                while (!sr.EndOfStream)
+                {
+                    var parts = sr.ReadLine().Split(' ');
+
+                    var low = Int32.Parse(parts[0]);
+                    var high = Int32.Parse(parts[1]);
+                    //var alignments = parts[2].Split(',').Select(Int32.Parse);
+
+                    intervals.Add(new UcscHumanAlignmentGene(low, high));
+
+                    if (intervals.Count % 100000 == 0)
+                        Console.Out.WriteLine(intervals.Count);
+                }
+            }
+
+            return intervals;
+        }
+
         public static void ParseMaf(string source, string target)
         {
-            //var genes = new ArrayList<UcscAlignmentGene>();
-
             using (var sr = new StreamReader(source))
             {
                 using (var sw = new StreamWriter(target))
@@ -41,10 +64,8 @@ namespace C5.Ucsc
                         // Skip blank lines and comments
                         if (String.IsNullOrWhiteSpace(line))
                         {
-                            var gene = new UcscAlignmentGene(start, length, alignments);
-                            //genes.Add(gene);
+                            var gene = new UcscHumanAlignmentGene(start, length, alignments);
                             sw.WriteLine(gene.CompactFormat());
-                            sw.Flush();
                             continue;
                         }
 
@@ -75,14 +96,101 @@ namespace C5.Ucsc
             }
         }
 
-        struct UcscAlignmentGene : IInterval<int>
+        public static void ParseMafToAlignments(string source, string target)
         {
-            public UcscAlignmentGene(int start, int length, IEnumerable<int> alignments)
+            using (var sr = new StreamReader(source))
+            {
+                using (var sw = new StreamWriter(target))
+                {
+                    IInterval<int> humanGene = null;
+
+                    while (!sr.EndOfStream)
+                    {
+                        var line = sr.ReadLine();
+
+                        // Skip comments
+                        if (line.StartsWith("#"))
+                            continue;
+
+                        // Skip blank lines and comments
+                        if (String.IsNullOrWhiteSpace(line))
+                            continue;
+
+                        if (line.StartsWith("a"))
+                            continue;
+
+                        if (line.StartsWith("s"))
+                        {
+                            var parts = line.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
+
+                            // Reference 
+                            if (parts[1].Equals("hg19.chr1"))
+                            {
+                                var start = Int32.Parse(parts[2]);
+                                var length = Int32.Parse(parts[3]);
+                                humanGene = new IntervalBase<int>(start, start + length - 1, IntervalType.Closed);
+                            }
+                            else
+                            {
+                                var chromosome = parts[1].Split('.');
+                                var type = Animal.Human;
+                                var match = true;
+
+                                switch (chromosome[0])
+                                {
+                                    case "panTro2":
+                                        type = Animal.Chimp;
+                                        break;
+                                    case "papHam1":
+                                        type = Animal.Baboon;
+                                        break;
+                                    case "mm9":
+                                        type = Animal.Mouse;
+                                        break;
+                                    case "rn4":
+                                        type = Animal.Rat;
+                                        break;
+                                    case "bosTau4":
+                                        type = Animal.Cow;
+                                        break;
+                                    case "felCat3":
+                                        type = Animal.Cat;
+                                        break;
+                                    case "canFam2":
+                                        type = Animal.Dog;
+                                        break;
+                                    default:
+                                        match = false;
+                                        break;
+                                }
+
+                                if (match)
+                                {
+                                    var gene = new UcscAlignmentGene(Int32.Parse(parts[2]), Int32.Parse(parts[3]), type, chromosome[1], humanGene);
+                                    sw.WriteLine(gene.CompactFormat());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        internal struct UcscHumanAlignmentGene : IInterval<int>
+        {
+            public UcscHumanAlignmentGene(int start, int length, IEnumerable<int> alignments)
                 : this()
             {
                 Low = start;
                 High = start + length - 1;
                 Alignments = alignments;
+            }
+
+            public UcscHumanAlignmentGene(int low, int high)
+                : this()
+            {
+                Low = low;
+                High = high;
             }
 
             public int Low { get; private set; }
@@ -99,6 +207,67 @@ namespace C5.Ucsc
             public string CompactFormat()
             {
                 return String.Format("{0} {1} {2}", Low, High, string.Join(",", Alignments.Select(i => i.ToString())));
+            }
+        }
+
+        internal enum Animal
+        {
+            [Description("Human")]
+            Human,
+
+            [Description("Chimp")]
+            Chimp,
+
+            [Description("Baboon")]
+            Baboon,
+
+            [Description("Mouse")]
+            Mouse,
+
+            [Description("Rat")]
+            Rat,
+
+            [Description("Cat")]
+            Cat,
+
+            [Description("Dog")]
+            Dog,
+
+            [Description("Cow")]
+            Cow,
+
+            [Description("Pig")]
+            Pig
+        }
+
+        internal struct UcscAlignmentGene : IInterval<int>
+        {
+            public UcscAlignmentGene(int start, int length, Animal type, string chromosome, IInterval<int> humanGene)
+                : this()
+            {
+                Low = start;
+                High = start + length - 1;
+                Type = type;
+                Chromosome = chromosome;
+                HumanGene = humanGene;
+            }
+
+            public int Low { get; private set; }
+            public int High { get; private set; }
+            public bool LowIncluded { get { return true; } }
+            public bool HighIncluded { get { return true; } }
+            public Animal Type { get; private set; }
+            public string Chromosome { get; private set; }
+            public IInterval<int> HumanGene { get; private set; }
+
+            public override string ToString()
+            {
+                return String.Format("{0}: {1} - Human: {2}", Type, IntervalExtensions.ToString(this), IntervalExtensions.ToString(HumanGene));
+            }
+
+            public string CompactFormat()
+            {
+                return String.Format("{0,-8} {1,-8} {2,10} {3,10} {4}", Type, Chromosome, Low, High, HumanGene);
             }
         }
 
