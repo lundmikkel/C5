@@ -276,7 +276,13 @@ namespace C5.intervals
                 // TODO: Confirm placement invariant
             }
 
-            private int count { get { return _dictionary.Sum(keyValuePair => 1 + (keyValuePair.Value == null ? 0 : keyValuePair.Value.Count)); } }
+            private int count
+            {
+                get
+                {
+                    return _dictionary.Sum(keyValuePair => 1 + (keyValuePair.Value == null ? 0 : keyValuePair.Value.Count));
+                }
+            }
 
             #endregion
 
@@ -319,7 +325,7 @@ namespace C5.intervals
                 {
                     if (list == null)
                     {
-                        _dictionary[key] = new ArrayList<I> { interval };
+                        _dictionary[key] = new ArrayList<I>((IEqualityComparer<I>) EqualityComparer) { interval };
                         return true;
                     }
                     else
