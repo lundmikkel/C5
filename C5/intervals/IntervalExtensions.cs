@@ -304,6 +304,7 @@ namespace C5.intervals
         /// <param name="y">Second interval.</param>
         /// <typeparam name="T">Endpoint value type</typeparam>
         /// <returns>The interval with the highest high endpoint.</returns>
+        [Pure]
         public static IInterval<T> HighestHigh<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             return x.CompareHigh(y) >= 0 ? x : y;
@@ -316,6 +317,7 @@ namespace C5.intervals
         /// <param name="y">Second interval.</param>
         /// <typeparam name="T">Endpoint value type</typeparam>
         /// <returns>The interval with the lowest low endpoint.</returns>
+        [Pure]
         public static IInterval<T> LowestLow<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             return x.CompareLow(y) <= 0 ? x : y;
