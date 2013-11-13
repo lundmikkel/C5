@@ -242,6 +242,7 @@ namespace C5.intervals
             return node;
         }
 
+        [Pure]
         private static bool confirmIntervalPlacement(Node root)
         {
             foreach (var node in nodes(root))
@@ -335,7 +336,7 @@ namespace C5.intervals
                     }
                     return list.Add(interval);
                 }
-                
+
                 // We add a null sublist as we only have the one interval
                 _dictionary.Add(interval, null);
                 return true;
@@ -463,16 +464,16 @@ namespace C5.intervals
             {
                 // Check that there is a reference equal interval in the collection
                 Contract.Ensures(Contract.Result<bool>() == Contract.Exists(_dictionary, keyValuePair => ReferenceEquals(keyValuePair.Key, interval) || keyValuePair.Value != null && Contract.Exists(keyValuePair.Value, x => ReferenceEquals(x, interval))));
-                
+
                 if (IsEmpty)
                     return false;
-                
+
                 var key = interval;
                 ArrayList<I> list;
                 if (_dictionary.Find(ref key, out list))
                     return ReferenceEquals(key, interval) ||
                            list != null && list.Any(i => ReferenceEquals(i, interval));
-                
+
                 return false;
             }
         }
@@ -679,7 +680,7 @@ namespace C5.intervals
                 Contract.Ensures(LocalSpan != null);
 
                 bool intervalWasAdded;
-                
+
                 // Make copy if no span exists, otherwise join with current span
                 LocalSpan = LocalSpan == null ? new IntervalBase<T>(interval) : LocalSpan.JoinedSpan(interval);
 
@@ -1130,6 +1131,7 @@ namespace C5.intervals
             }
         }
 
+        [Pure]
         private static IEnumerable<Node> nodes(Node root)
         {
             if (root == null)
