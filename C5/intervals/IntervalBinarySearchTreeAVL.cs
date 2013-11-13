@@ -58,7 +58,7 @@ namespace C5.intervals
         [Pure]
         private static bool checkMnoAndIntervalsEndingInNodeForEachNode(Node root)
         {
-            if (root.Sum != 0)
+            if (root != null && root.Sum != 0)
                 return false;
 
             var intervalsByEndpoint = getIntervalsByEndpoint(root);

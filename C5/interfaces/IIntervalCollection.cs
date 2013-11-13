@@ -337,7 +337,7 @@ namespace C5
             // If it allows reference duplicates the count increases with the number of intervals added
             Contract.Ensures(!AllowsReferenceDuplicates || Count == Contract.OldValue(Count) + intervals.Count());
             // If it doesn't allow reference duplicates the count increases with the number of distinct intervals added
-            Contract.Ensures(AllowsReferenceDuplicates || Count == Contract.OldValue(Count) + intervals.Distinct(ComparerFactory<I>.CreateEqualityComparer((x, y) => ReferenceEquals(x, y), x => x.GetHashCode())).Count(x => !Contract.OldValue(this).Contains(x)));
+            Contract.Ensures(AllowsReferenceDuplicates || Count == Contract.OldValue(Count) + intervals.Distinct(ComparerFactory<I>.CreateEqualityComparer((x, y) => ReferenceEquals(x, y), x => x.GetHashCode())).Count(x => !Contract.OldValue(this.Contains(x))));
             // If intervals is empty, the count is unchanged
             Contract.Ensures(intervals.Any() || Count == Contract.OldValue(Count));
 
