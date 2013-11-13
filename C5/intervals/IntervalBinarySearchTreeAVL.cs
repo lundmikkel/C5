@@ -24,6 +24,7 @@ namespace C5.intervals
         private int _count;
 
         private static readonly IEqualityComparer<I> Comparer = ComparerFactory<I>.CreateEqualityComparer((x, y) => ReferenceEquals(x, y), x => x.GetHashCode());
+        private IInterval<T> _span;
 
         #endregion
 
@@ -1096,7 +1097,10 @@ namespace C5.intervals
                 if (IsEmpty)
                     throw new InvalidOperationException("An empty collection has no span");
 
-                return new IntervalBase<T>(getLowest(_root), getHighest(_root));
+                if (_span == null)
+                    _span = new IntervalBase<T>(getLowest(_root), getHighest(_root));
+
+                return new IntervalBase<T>(_span);
             }
         }
 
@@ -1110,7 +1114,18 @@ namespace C5.intervals
             if (root.Left != null)
                 return getLowest(root.Left);
 
-            return root.Equal != null && !root.Equal.IsEmpty ? root.Equal.Choose() : root.Greater.Choose();
+            if (root.Equal != null && !root.Equal.IsEmpty)
+                return root.Equal.Choose();
+            else if (root.Greater != null && !root.Greater.IsEmpty)
+                return root.Greater.Choose();
+            else
+            {
+                // TODO: Is there a better way to find the lowest low?
+                foreach (var interval in root.IntervalsEndingInNode.Where(interval => interval.LowIncluded))
+                    return interval;
+
+                return root.IntervalsEndingInNode.First();
+            }
         }
 
         private static IInterval<T> getHighest(Node root)
@@ -1123,9 +1138,18 @@ namespace C5.intervals
             if (root.Right != null)
                 return getHighest(root.Right);
 
-            return root.Equal != null && !root.Equal.IsEmpty
-                ? root.Equal.Choose()
-                : root.Less.Choose();
+            if (root.Equal != null && !root.Equal.IsEmpty)
+                return root.Equal.Choose();
+            else if (root.Less != null && !root.Less.IsEmpty)
+                return root.Less.Choose();
+            else
+            {
+                // TODO: Is there a better way to find the highest high?
+                foreach (var interval in root.IntervalsEndingInNode.Where(interval => interval.HighIncluded))
+                    return interval;
+
+                return root.IntervalsEndingInNode.First();
+            }
         }
 
         #endregion
@@ -1520,6 +1544,12 @@ namespace C5.intervals
             // Increase counters and raise event if interval was added
             if (intervalWasAdded)
             {
+                // Update span if necessary
+                if (_span == null)
+                    _span = interval;
+                else if (!_span.Contains(interval))
+                    _span = _span.JoinedSpan(interval);
+
                 // Update MNO delta for low
                 if (interval.LowIncluded)
                     lowNode.DeltaAt++;
@@ -1757,6 +1787,10 @@ namespace C5.intervals
             // Increase counters and raise event if interval was added
             if (intervalWasRemoved)
             {
+                // Invalidate span if necessary
+                if (!_span.StrictlyContains(interval))
+                    _span = null;
+
                 // Update MNO delta for low
                 if (interval.LowIncluded)
                     lowNode.DeltaAt--;
