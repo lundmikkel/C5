@@ -51,6 +51,10 @@ namespace C5.intervals
 
             // Check that the intervals are correctly placed
             Contract.Invariant(confirmIntervalPlacement(_root));
+
+            // TODO Confirm all local spans
+            // Contract.Invariant(LocalSpan == null || LocalSpan.Low.Equals(Key));
+
         }
 
         /// <summary>
@@ -283,6 +287,9 @@ namespace C5.intervals
             {
                 get
                 {
+                    Contract.Ensures(Contract.Result<int>() == Enumerable.Count(this));
+                    Contract.Ensures(Contract.Result<int>() >= 0);
+                    Contract.Ensures(IsEmpty || Contract.Result<int>() > 0);
                     return _dictionary.Sum(keyValuePair => 1 + (keyValuePair.Value == null ? 0 : keyValuePair.Value.Count));
                 }
             }
@@ -374,13 +381,11 @@ namespace C5.intervals
                     // The list is empty
                     if (list == null || list.IsEmpty)
                         return _dictionary.Remove(interval);
-                    else
-                    {
-                        var newKey = list.RemoveLast();
-                        _dictionary.Remove(interval);
-                        _dictionary.Add(newKey, (list.IsEmpty ? null : list));
-                        return true;
-                    }
+                    
+                    var newKey = list.RemoveLast();
+                    _dictionary.Remove(interval);
+                    _dictionary.Add(newKey, (list.IsEmpty ? null : list));
+                    return true;
                 }
 
                 // The list doesn't contain interval
@@ -393,11 +398,17 @@ namespace C5.intervals
 
             public bool IsEmpty
             {
-                get { return _dictionary.IsEmpty; }
+                get
+                {
+                    Contract.Ensures(Contract.Result<bool>() == _dictionary.IsEmpty);
+                    return _dictionary.IsEmpty;
+                }
             }
 
             public I Choose()
             {
+                Contract.EnsuresOnThrow<NoSuchItemException>(IsEmpty);
+                Contract.Ensures(IsEmpty || Contract.Result<I>() != null && Contract.Exists(this, x => ReferenceEquals(x, Contract.Result<I>())));
                 if (IsEmpty)
                     throw new NoSuchItemException();
 
@@ -408,15 +419,23 @@ namespace C5.intervals
             {
                 get
                 {
-                    if (IsEmpty)
-                        return default(I);
-
+                    Contract.Ensures(IsEmpty || Contract.ForAll(this, x => x.CompareHigh(Contract.Result<I>()) <= 0));
+                    Contract.Ensures(IsEmpty || Contract.Exists(this, x => ReferenceEquals(x, Contract.Result<I>())));
                     return _dictionary.First().Key;
                 }
             }
 
             public IEnumerable<I> FindOverlaps(IInterval<T> query)
             {
+                // Stabbing value cannot be null
+                Contract.Requires(query != null);
+
+                // The collection of intervals that overlap the query must be equal to the result
+                Contract.Ensures(IntervalCollectionContractHelper.CollectionEquals(this.Where(x => x.Overlaps(query)), Contract.Result<IEnumerable<I>>()));
+
+                // All intervals in the collection that do not overlap cannot by in the result
+                Contract.Ensures(Contract.ForAll(this.Where(x => !x.Overlaps(query)), x => Contract.ForAll(Contract.Result<IEnumerable<I>>(), y => !ReferenceEquals(x, y))));
+
                 foreach (var keyValuePair in _dictionary)
                 {
                     if (keyValuePair.Key.Overlaps(query))
@@ -432,6 +451,11 @@ namespace C5.intervals
                     else
                         break;
                 }
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
             }
 
             public IEnumerator<I> GetEnumerator()
@@ -454,13 +478,9 @@ namespace C5.intervals
                 return sb.ToString();
             }
 
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
-
             public bool ContainsReferenceEqualInterval(I interval)
             {
+                Contract.Requires(interval != null);
                 // Check that there is a reference equal interval in the collection
                 Contract.Ensures(Contract.Result<bool>() == Contract.Exists(_dictionary, keyValuePair => ReferenceEquals(keyValuePair.Key, interval) || keyValuePair.Value != null && Contract.Exists(keyValuePair.Value, x => ReferenceEquals(x, interval))));
                 
@@ -470,8 +490,7 @@ namespace C5.intervals
                 var key = interval;
                 ArrayList<I> list;
                 if (_dictionary.Find(ref key, out list))
-                    return ReferenceEquals(key, interval) ||
-                           list != null && list.Any(i => ReferenceEquals(i, interval));
+                    return ReferenceEquals(key, interval) || list != null && list.Any(i => ReferenceEquals(i, interval));
                 
                 return false;
             }
@@ -487,18 +506,30 @@ namespace C5.intervals
             private void invariant()
             {
                 Contract.Invariant(Dummy || Key != null);
-                //Contract.Invariant(LocalSpan == null || (!IncludedList.IsEmpty || !ExcludedList.IsEmpty));
+                
+                Contract.Invariant(LocalSpan == null || !((IncludedList == null || IncludedList.IsEmpty) && (ExcludedList == null || ExcludedList.IsEmpty)));
 
-                /*
                 // Span contains all intervals
-                Contract.Invariant(LocalSpan == null || (IncludedList == null || Contract.ForAll(IncludedList, i => LocalSpan.Contains(i))));
-                // Span has the lowest and highest endpoint of the collection
-                Contract.Ensures(IsEmpty || Contract.ForAll(this, i => Contract.Result<IInterval<T>>().CompareLow(i) <= 0 && Contract.Result<IInterval<T>>().CompareHigh(i) >= 0));
+                Contract.Invariant(LocalSpan == null || IncludedList == null || Contract.ForAll(IncludedList, i => LocalSpan.Contains(i)));
+                Contract.Invariant(LocalSpan == null || ExcludedList == null || Contract.ForAll(ExcludedList, i => LocalSpan.Contains(i)));
+
+                Contract.Invariant(LocalSpan == null || 
+                    (IncludedList != null && ExcludedList != null && IncludedList.Highest.HighestHigh(ExcludedList.Highest).CompareHigh(LocalSpan) == 0) ||
+                    (IncludedList == null && ExcludedList.Highest.CompareHigh(LocalSpan) == 0) ||
+                    (ExcludedList == null && IncludedList.Highest.CompareHigh(LocalSpan) == 0));
+
+                Contract.Invariant(LocalSpan == null || !LocalSpan.LowIncluded || IncludedList != null && !IncludedList.IsEmpty);
+                Contract.Invariant(LocalSpan == null || LocalSpan.LowIncluded || ExcludedList != null && !ExcludedList.IsEmpty);
+
+                // TODO Confirm placement of intervals here and in intervallists
+                //Contract.Ensures(IsEmpty || IncludedList == null || ExcludedList == null || Contract.ForAll(IncludedList.Concat(ExcludedList), i => Contract.Result<IInterval<T>>().CompareLow(i) <= 0 && Contract.Result<IInterval<T>>().CompareHigh(i) >= 0));
+
                 // There is an interval that has the same low as span
-                Contract.Ensures(IsEmpty || Contract.Exists(this, i => Contract.Result<IInterval<T>>().CompareLow(i) == 0));
+                //Contract.Ensures(IsEmpty || Contract.Exists(this, i => Contract.Result<IInterval<T>>().CompareLow(i) == 0));
+                 
                 // There is an interval that has the same high as span
-                Contract.Ensures(IsEmpty || Contract.Exists(this, i => Contract.Result<IInterval<T>>().CompareHigh(i) == 0));
-                */
+                //Contract.Ensures(IsEmpty || Contract.Exists(this, i => Contract.Result<IInterval<T>>().CompareHigh(i) == 0));
+
             }
 
             #endregion
