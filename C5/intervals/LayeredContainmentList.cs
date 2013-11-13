@@ -99,6 +99,9 @@ namespace C5.intervals
             internal Node(I interval, int pointer)
                 : this()
             {
+                Contract.Requires(interval != null);
+                Contract.Requires(pointer >= 0);
+
                 Interval = interval;
                 Pointer = pointer;
             }
