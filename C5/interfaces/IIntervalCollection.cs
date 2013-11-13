@@ -169,6 +169,10 @@ namespace C5
         {
             get
             {
+                Contract.EnsuresOnThrow<InvalidOperationException>(IsEmpty);
+
+                // Span is not null
+                Contract.Ensures(Contract.Result<IInterval<T>>() != null);
                 // Span contains all intervals
                 Contract.Ensures(IsEmpty || Contract.ForAll(this, x => Contract.Result<IInterval<T>>().Contains(x)));
                 // There is an interval that has the same low as span
@@ -304,6 +308,9 @@ namespace C5
             // Throws exception if it is read only
             Contract.EnsuresOnThrow<ReadOnlyCollectionException>(IsReadOnly);
 
+            // The collection cannot be empty afterwards
+            Contract.Ensures(!IsEmpty);
+
             // The collection contains the interval
             Contract.Ensures(Contract.Exists(this, x => ReferenceEquals(x, interval)));
             // If the interval was added, the number of object with the same reference goes up by one
@@ -352,6 +359,9 @@ namespace C5
             // Throws exception if it is read only
             Contract.EnsuresOnThrow<ReadOnlyCollectionException>(IsReadOnly);
 
+            // Nothing to remove if the collection is empty
+            Contract.Ensures(!Contract.OldValue(IsEmpty) || !Contract.Result<bool>());
+
             // If the interval is removed the count goes down by one
             Contract.Ensures(!Contract.Result<bool>() || Count == Contract.OldValue(Count) - 1);
             // If the interval isn't removed the count stays the same
@@ -368,7 +378,6 @@ namespace C5
 
             // If we don't allow reference duplicates, then the interval cannot be in the collection afterwards
             Contract.Ensures(AllowsReferenceDuplicates || !Contract.Exists(this, x => ReferenceEquals(x, interval)));
-            // 
 
             throw new NotImplementedException();
         }
