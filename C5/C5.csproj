@@ -152,6 +152,7 @@
     <Compile Include="heaps\IntervalHeap.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="interfaces\ICollectionValue.cs" />
+    <Compile Include="interfaces\IDictionary.cs" />
     <Compile Include="interfaces\IInterval.cs" />
     <Compile Include="interfaces\IIntervalCollection.cs" />
     <Compile Include="interfaces\IList.cs" />

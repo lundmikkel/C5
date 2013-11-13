@@ -1566,6 +1566,7 @@ namespace C5
     /// A dictionary with keys of type K and values of type V. Equivalent to a
     /// finite partial map from K to V.
     /// </summary>
+    [ContractClass(typeof(DictionaryContract<,>))]
     public interface IDictionary<K, V> : ICollectionValue<KeyValuePair<K, V>>
     {
         /// <summary>
