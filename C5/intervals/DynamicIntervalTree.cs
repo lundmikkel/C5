@@ -42,6 +42,7 @@ namespace C5.intervals
 
             // Check nodes are sorted
             Contract.Invariant(checkNodesAreSorted(_root));
+
             // Check spans
             Contract.Invariant(checkNodeSpans(_root));
 
@@ -71,7 +72,6 @@ namespace C5.intervals
         /// <param name="result">Reference to a bool that will be set to false if an in-balance is discovered.</param>
         /// <returns>Height of the tree.</returns>
         [Pure]
-        // TODO Can we use ref in pure methods?
         private static int height(Node node, ref bool result)
         {
             if (node == null)
@@ -105,6 +105,9 @@ namespace C5.intervals
         [Pure]
         private bool checkMnoForEachNode(Node root)
         {
+            if (root.Sum != 0)
+                return false;
+
             var intervalsByEndpoint = getIntervalsByEndpoint();
 
             foreach (var keyValuePair in intervalsByEndpoint)
@@ -261,7 +264,7 @@ namespace C5.intervals
 
         #region Inner Classes
 
-        private class IntervalList
+        private class IntervalList : IEnumerable<I>
         {
             // A dictionary sorted on high with an accompanying sublist to handle objects with duplicate intervals
             private readonly IDictionary<I, ArrayList<I>> _dictionary;
@@ -302,11 +305,13 @@ namespace C5.intervals
 
                 // The dictionary contains a key equal to the interval
                 Contract.Ensures(_dictionary.Contains(interval));
+
                 // The dictionary contains the interval
-                Contract.Ensures(Contract.Exists(_dictionary, keyValuePair => ReferenceEquals(keyValuePair.Key, interval) || keyValuePair.Value == null || Contract.Exists(keyValuePair.Value, x => ReferenceEquals(x, interval))));
+                Contract.Ensures(Contract.Exists(_dictionary, keyValuePair => ReferenceEquals(keyValuePair.Key, interval) || keyValuePair.Value != null && Contract.Exists(keyValuePair.Value, x => ReferenceEquals(x, interval))));
 
                 // If the interval is added the count goes up by one
                 Contract.Ensures(!Contract.Result<bool>() || count == Contract.OldValue(count) + 1);
+
                 // If the interval is not added the count stays the same
                 Contract.Ensures(Contract.Result<bool>() || count == Contract.OldValue(count));
 
@@ -322,17 +327,12 @@ namespace C5.intervals
                         _dictionary[key] = new ArrayList<I> { interval };
                         return true;
                     }
-                    else
-                    {
-                        return list.Add(interval);
-                    }
+                    return list.Add(interval);
                 }
-                else
-                {
-                    // We add a null sublist as we only have the one interval
-                    _dictionary.Add(interval, null);
-                    return true;
-                }
+                
+                // We add a null sublist as we only have the one interval
+                _dictionary.Add(interval, null);
+                return true;
             }
 
             public bool Remove(I interval)
@@ -341,9 +341,16 @@ namespace C5.intervals
 
                 // If the interval is removed the count goes down by one
                 Contract.Ensures(!Contract.Result<bool>() || count == Contract.OldValue(count) - 1);
+
                 // If the interval isn't removed the count stays the same
                 Contract.Ensures(Contract.Result<bool>() || count == Contract.OldValue(count));
 
+                // The result is true if the collection contained the interval before remove was called
+                Contract.Ensures(Contract.Result<bool>() == Contract.OldValue(Contract.Exists(_dictionary, keyValuePair => ReferenceEquals(keyValuePair.Key, interval) || keyValuePair.Value != null && Contract.Exists(keyValuePair.Value, x => ReferenceEquals(x, interval)))));
+
+                // Check that it was the correct interval that was removed
+                Contract.Ensures(!Contract.Result<bool>() || this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval))) - 1);
+                Contract.Ensures(Contract.Result<bool>() || this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval))));
 
                 // Check if the list contains the interval
                 if (!_dictionary.Contains(interval))
@@ -439,6 +446,28 @@ namespace C5.intervals
                 foreach (var list in this)
                     sb.Append(list);
                 return sb.ToString();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            public bool ContainsReferenceEqualInterval(I interval)
+            {
+                // Check that there is a reference equal interval in the collection
+                Contract.Ensures(Contract.Result<bool>() == Contract.Exists(_dictionary, keyValuePair => ReferenceEquals(keyValuePair.Key, interval) || keyValuePair.Value != null && Contract.Exists(keyValuePair.Value, x => ReferenceEquals(x, interval))));
+                
+                if (IsEmpty)
+                    return false;
+                
+                var key = interval;
+                ArrayList<I> list;
+                if (_dictionary.Find(ref key, out list))
+                    return ReferenceEquals(key, interval) ||
+                           list != null && list.Any(i => ReferenceEquals(i, interval));
+                
+                return false;
             }
         }
 
@@ -644,7 +673,7 @@ namespace C5.intervals
                 Contract.Ensures(LocalSpan != null);
 
                 bool intervalWasAdded;
-
+                
                 // Make copy if no span exists, otherwise join with current span
                 LocalSpan = LocalSpan == null ? new IntervalBase<T>(interval) : LocalSpan.JoinedSpan(interval);
 
@@ -794,6 +823,13 @@ namespace C5.intervals
             }
 
             #endregion
+
+            public bool ContainsReferenceEqualInterval(I interval)
+            {
+                if (interval.LowIncluded)
+                    return IncludedList != null && IncludedList.ContainsReferenceEqualInterval(interval);
+                return ExcludedList != null && ExcludedList.ContainsReferenceEqualInterval(interval);
+            }
         }
 
         #endregion
@@ -1004,16 +1040,17 @@ namespace C5.intervals
 
         /// <summary>
         /// </summary>
-        public DynamicIntervalTree()
+        public DynamicIntervalTree(bool allowReferenceDuplicates = false)
         {
+            AllowsReferenceDuplicates = allowReferenceDuplicates;
         }
 
         /// <summary>
         /// </summary>
-        public DynamicIntervalTree(IEnumerable<I> intervals)
+        public DynamicIntervalTree(IEnumerable<I> intervals, bool allowReferenceDuplicates = false)
         {
             Contract.Requires(intervals != null);
-
+            AllowsReferenceDuplicates = allowReferenceDuplicates;
             foreach (var interval in intervals)
                 Add(interval);
         }
@@ -1130,7 +1167,11 @@ namespace C5.intervals
         }
 
         /// <inheritdoc/>
-        public bool AllowsReferenceDuplicates { get { return true; } }
+        public bool AllowsReferenceDuplicates
+        {
+            get;
+            private set;
+        }
 
         #endregion
 
@@ -1269,8 +1310,6 @@ namespace C5.intervals
         /// </summary>
         public bool Add(I interval)
         {
-            // TODO: Contract using AllowsReferenceDuplicates
-
             var nodeWasAdded = false;
             var intervalWasAdded = false;
 
@@ -1294,7 +1333,7 @@ namespace C5.intervals
                 Add(interval);
         }
 
-        private static Node addLow(I interval, Node root, ref bool nodeWasAdded, ref bool intervalWasAdded)
+        private Node addLow(I interval, Node root, ref bool nodeWasAdded, ref bool intervalWasAdded)
         {
             Contract.Requires(interval != null);
 
@@ -1335,9 +1374,8 @@ namespace C5.intervals
                 // note: this is ok for problems where intervals starting at the same time
                 //       /query is not a frequent occurrence, however you can use other query
                 //       structure for better performance depending on your problem needs
-
-                intervalWasAdded = root.AddLow(interval);
-
+                if (AllowsReferenceDuplicates || !root.ContainsReferenceEqualInterval(interval))
+                    intervalWasAdded = root.AddLow(interval);
 
             if (intervalWasAdded)
             {
