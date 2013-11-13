@@ -61,9 +61,7 @@ namespace C5.intervals
             if (root != null && root.Sum != 0)
                 return false;
 
-            var intervalsByEndpoint = getIntervalsByEndpoint(root);
-
-            foreach (var keyValuePair in intervalsByEndpoint)
+            foreach (var keyValuePair in getIntervalsByEndpoint(root))
             {
                 var key = keyValuePair.Key;
                 var intervals = keyValuePair.Value;
@@ -92,12 +90,8 @@ namespace C5.intervals
 
                 var node = findNode(root, key);
 
-                // Check DeltaAt
-                if (node.DeltaAt != deltaAt)
-                    return false;
-
-                // Check DeltaAfter
-                if (node.DeltaAfter != deltaAfter)
+                // Check DeltaAt and DeltaAfter
+                if (node.DeltaAt != deltaAt || node.DeltaAfter != deltaAfter)
                     return false;
 
                 // Check Sum and Max
@@ -1209,7 +1203,7 @@ namespace C5.intervals
                 yield break;
 
             // Break if collection is empty or the query is outside the collections span
-            if (IsEmpty)// || !Span.Overlaps(query))
+            if (IsEmpty || !Span.Overlaps(query))
                 yield break;
 
             var set = new IntervalSet();
@@ -1744,7 +1738,8 @@ namespace C5.intervals
         /// <inheritdoc/>
         public bool Remove(I interval)
         {
-            if (IsEmpty)
+            // Nothing to remove is the collection is empty or the interval doesn't overlap the span
+            if (IsEmpty || !interval.Overlaps(Span))
                 return false;
 
             // References to endpoint nodes needed when maintaining Interval
