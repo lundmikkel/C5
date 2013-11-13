@@ -963,7 +963,7 @@ namespace C5.intervals
             if (lower > upper)
                 return null;
 
-            var mid = lower + ((upper - lower) >> 1);
+            var mid = lower + (upper - lower >> 1);
 
             var node = new Node(endpoints[mid]);
             var leftHeight = 0;
