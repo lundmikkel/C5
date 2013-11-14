@@ -79,15 +79,11 @@ namespace C5.intervals
             Contract.Requires(y != null);
             Contract.Ensures(Contract.Result<bool>() == (x.CompareLow(y) <= 0 && y.CompareHigh(x) <= 0));
 
-            // TODO: Fix the implementation to match StrictlyContains.s
             // Save compare values to avoid comparing twice in case CompareTo() should be expensive
-            //            int lowCompare = x.Low.CompareTo(y.Low), highCompare = y.High.CompareTo(x.High);
-            //            return
-            //                (lowCompare < 0 || (lowCompare == 0 && x.LowIncluded && !y.LowIncluded))
-            //                && (highCompare < 0 || (highCompare == 0 && !y.HighIncluded && x.HighIncluded));
-
-            // The same as (but faster than)
-            return x.CompareLow(y) <= 0 && y.CompareHigh(x) <= 0;
+            int lowCompare = x.Low.CompareTo(y.Low), highCompare = y.High.CompareTo(x.High);
+            return
+                (lowCompare < 0 || lowCompare == 0 && (x.LowIncluded || !y.LowIncluded))
+                && (highCompare < 0 || highCompare == 0 && (!y.HighIncluded || x.HighIncluded));
         }
 
         /// <summary>
@@ -279,13 +275,16 @@ namespace C5.intervals
             var low = x.CompareLow(y) > 0 ? x : y;
             var high = x.CompareHigh(y) < 0 ? x : y;
 
-            // TODO: Returnér null, da intersection ikke findes
-            if (low.CompareLowHigh(high) > 0)
-                throw new ArgumentException("The intervals must overlap to find the intersection.");
-
             return new IntervalBase<T>(low, high);
         }
 
+        /// <summary>
+        /// Creates an interval from the lowest low and the highest high of the two intervals. The joined span contains both intervals.
+        /// </summary>
+        /// <param name="x">The first interval.</param>
+        /// <param name="y">The second interval.</param>
+        /// <typeparam name="T">The endpoint type.</typeparam>
+        /// <returns>The joined span.</returns>
         public static IInterval<T> JoinedSpan<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             Contract.Requires(x != null);
@@ -293,6 +292,9 @@ namespace C5.intervals
             // The intersection will be contained in both intervals
             Contract.Ensures(Contract.Result<IInterval<T>>().Contains(x));
             Contract.Ensures(Contract.Result<IInterval<T>>().Contains(y));
+            // The endpoints of the joined span is each equal to one of the endpoints of the two intervals
+            Contract.Ensures(x.CompareLow(Contract.Result<IInterval<T>>()) == 0 || y.CompareLow(Contract.Result<IInterval<T>>()) == 0);
+            Contract.Ensures(x.CompareHigh(Contract.Result<IInterval<T>>()) == 0 || y.CompareHigh(Contract.Result<IInterval<T>>()) == 0);
 
             return new IntervalBase<T>(x.LowestLow(y), x.HighestHigh(y));
         }
@@ -339,6 +341,12 @@ namespace C5.intervals
             return x.Low.CompareTo(endpoint) == 0 || x.High.CompareTo(endpoint) == 0;
         }
 
+        /// <summary>
+        /// Check if an interval is a point.
+        /// </summary>
+        /// <param name="x">The interval.</param>
+        /// <typeparam name="T">The endpoint type.</typeparam>
+        /// <returns>True if Low and High are equal and both endpoints are included, false otherwise.</returns>
         [Pure]
         public static bool IsPoint<T>(this IInterval<T> x) where T : IComparable<T>
         {
@@ -348,24 +356,24 @@ namespace C5.intervals
         }
 
         /// <summary>
-        /// Get the hashcode for an interval.
-        /// Uses the low and high endpoints as well as endpoint inclusion.
+        /// Get the hashcode for an interval based on endpoints.
         /// </summary>
-        /// <param name="x">The interval</param>
-        /// <typeparam name="T">The generic endpoint type</typeparam>
-        /// <returns>The hashcode based on the interval</returns>
+        /// <param name="x">The interval.</param>
+        /// <typeparam name="T">The endpoint type.</typeparam>
+        /// <returns>The hashcode based on the interval.</returns>
         [Pure]
         public static int GetHashCode<T>(this IInterval<T> x) where T : IComparable<T>
         {
             Contract.Requires(x != null);
 
-            // TODO: Check implement
-            var hash = 17;
-            hash = hash * 31 + x.Low.GetHashCode();
-            hash = hash * 31 + x.High.GetHashCode();
-            hash = hash * 31 + x.LowIncluded.GetHashCode();
-            hash = hash * 31 + x.HighIncluded.GetHashCode();
-            return hash;
+            unchecked
+            {
+                return (((527
+                    + x.Low.GetHashCode()) * 31
+                    + x.LowIncluded.GetHashCode()) * 31
+                    + x.High.GetHashCode()) * 31
+                    + x.HighIncluded.GetHashCode();
+            }
         }
 
         /// <summary>
