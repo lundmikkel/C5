@@ -147,40 +147,4 @@ namespace C5.Tests.intervals
 
         #endregion
     }
-
-    class DynamicIntervalTreeTesterReferenceDuplicatesFalse : IntervalCollectionTester
-    {
-        protected override Type GetCollectionType()
-        {
-            return typeof(DynamicIntervalTree<,>);
-        }
-
-        // DIT's standard behavior where we set the ReferenceDuplicates to false
-        protected new object[] AdditionalParameters()
-        {
-            return new object[] { false };
-        }
-    }
-
-    class DynamicIntervalTreeTesterReferenceDuplicatesTrue : IntervalCollectionTester
-    {
-        protected override Type GetCollectionType()
-        {
-            return typeof(DynamicIntervalTree<,>);
-        }
-
-        // DIT where we set the ReferenceDuplicates to true
-        protected new object[] AdditionalParameters()
-        {
-            return new object[] { true };
-        }
-    }
-
-    class IntervalBinarySearchTreeTester : IntervalCollectionTester
-    {
-        protected override Type GetCollectionType()
-        {
-            return typeof(IntervalBinarySearchTreeAvl<,>);
-        }
-    }
 }
