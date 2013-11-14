@@ -1078,7 +1078,7 @@ namespace C5.intervals
         /// </summary>
         /// <param name="intervals">A collection of intervals.</param>
         /// <param name="allowReferenceDuplicates">Set how reference duplicates should be handled.</param>
-        public DynamicIntervalTree(IEnumerable<I> intervals, bool allowReferenceDuplicates = false)
+        public DynamicIntervalTree(IEnumerable<I> intervals, bool allowReferenceDuplicates)
         {
             Contract.Requires(intervals != null);
 
