@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using C5.intervals;
 using NUnit.Framework;
 
@@ -14,12 +11,25 @@ namespace C5.Tests.intervals
     {
         protected abstract Type GetCollectionType();
 
+        // Override to add additional parameters to constructors
+        protected object[] AdditionalParameters()
+        {
+            return new object[0];
+        }
+
         protected IntervalCollection Factory(params MyInterval[] intervals)
         {
             var type = GetCollectionType();
             Type[] typeArgs = { typeof(MyInterval), typeof(int) };
             var genericType = type.MakeGenericType(typeArgs);
-            return (IntervalCollection) Activator.CreateInstance(genericType, new object[] { intervals });
+
+            var additionalParameters = AdditionalParameters();
+            var parameters = new object[1 + additionalParameters.Length];
+            parameters[0] = intervals;
+            for (var i = 0; i < additionalParameters.Length; i++)
+                parameters[i + 1] = additionalParameters[i];
+
+            return (IntervalCollection)Activator.CreateInstance(genericType, parameters);
         }
 
 
@@ -35,11 +45,31 @@ namespace C5.Tests.intervals
         }
     }
 
-    class DynamicIntervalTreeTester : IIntervalCollectionTester
+    class DynamicIntervalTreeTesterReferenceDuplicatesFalse : IIntervalCollectionTester
     {
         protected override Type GetCollectionType()
         {
             return typeof(DynamicIntervalTree<,>);
+        }
+
+        // DIT's standard behavior where we set the ReferenceDuplicates to false
+        protected object[] AdditionalParameters()
+        {
+            return new object[] { false };
+        }
+    }
+
+    class DynamicIntervalTreeTesterReferenceDuplicatesTrue : IIntervalCollectionTester
+    {
+        protected override Type GetCollectionType()
+        {
+            return typeof(DynamicIntervalTree<,>);
+        }
+        
+        // DIT where we set the ReferenceDuplicates to true
+        protected object[] AdditionalParameters()
+        {
+            return new object[] { true };
         }
     }
 
@@ -51,7 +81,7 @@ namespace C5.Tests.intervals
         }
     }
 
-    internal class MyInterval : IntervalBase<int>, IInterval<int>
+    internal class MyInterval : IntervalBase<int>
     {
         public MyInterval(int query)
             : base(query)
@@ -77,10 +107,5 @@ namespace C5.Tests.intervals
             : base(low, high)
         {
         }
-
-        public int Low { get; private set; }
-        public int High { get; private set; }
-        public bool LowIncluded { get; private set; }
-        public bool HighIncluded { get; private set; }
     }
 }
