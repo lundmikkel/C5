@@ -3,11 +3,11 @@ using C5.Tests.intervals;
 using C5.intervals;
 using NUnit.Framework;
 
-namespace C5.Tests.intervals_new
+namespace C5.Tests.intervals_new.IntervalBinarySearchTree
 {
     #region Black-box
 
-    class IntervalBinarySearchTreeBlackBoxTester : IntervalCollectionTester
+    class IntervalBinarySearchTreeTester_BlackBox : IntervalCollectionTester
     {
         protected override Type GetCollectionType()
         {

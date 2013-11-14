@@ -3,11 +3,11 @@ using C5.Tests.intervals;
 using C5.intervals;
 using NUnit.Framework;
 
-namespace C5.Tests.intervals_new
+namespace C5.Tests.intervals_new.DynamicIntervalTree
 {
     #region Black-box
 
-    class DynamicIntervalTreeBlackBoxReferenceDuplicatesFalseTester : IntervalCollectionTester
+    class DynamicIntervalTreeTester_BlackBox_ReferenceDuplicatesFalse : IntervalCollectionTester
     {
         protected override Type GetCollectionType()
         {
@@ -21,7 +21,7 @@ namespace C5.Tests.intervals_new
         }
     }
 
-    class DynamicIntervalTreeBlackBoxReferenceDuplicatesTrueTester : IntervalCollectionTester
+    class DynamicIntervalTreeTester_BlackBox_ReferenceDuplicatesTrue : IntervalCollectionTester
     {
         protected override Type GetCollectionType()
         {
