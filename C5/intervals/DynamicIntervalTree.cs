@@ -36,7 +36,7 @@ namespace C5.intervals
         [ContractInvariantMethod]
         private void invariant()
         {
-            // Check the balance invariant holds.
+            // Check the balance invariant holds
             Contract.Invariant(confirmBalance(_root));
 
             // Check node spans
@@ -275,7 +275,7 @@ namespace C5.intervals
                 Contract.Invariant(_dictionary != null);
 
                 // Confirm high placement
-                Contract.Invariant(Contract.ForAll(_dictionary, pair => pair.Value == null || Contract.ForAll(pair.Value, x => pair.Key.CompareHigh(x) == 0)));
+                Contract.Invariant(Contract.ForAll(_dictionary, pair => pair.Value == null || Contract.ForAll(pair.Value, x => pair.Key.CompareTo(x) == 0)));
             }
 
             [Pure]
@@ -572,7 +572,7 @@ namespace C5.intervals
             {
                 Key = key;
 
-                AddHigh(highIncluded);
+                AddHighToDelta(highIncluded);
                 UpdateMaximumOverlap();
             }
 
@@ -590,7 +590,7 @@ namespace C5.intervals
                 Key = interval.Low;
 
                 // Insert the interval into a list
-                AddIntervalFromList(interval);
+                AddIntervalToList(interval);
 
                 UpdateSpan();
                 UpdateMaximumOverlap();
@@ -691,7 +691,7 @@ namespace C5.intervals
                     Max = value;
             }
 
-            public bool AddIntervalFromList(I interval)
+            public bool AddIntervalToList(I interval)
             {
                 Contract.Requires(interval != null);
 
@@ -729,14 +729,6 @@ namespace C5.intervals
 
                 // Should also return true, as elements added to a bag will always be added
                 return intervalWasAdded;
-            }
-
-            public void AddHigh(bool highIncluded)
-            {
-                if (highIncluded)
-                    DeltaAfter--;
-                else
-                    DeltaAt--;
             }
 
             public bool RemoveIntervalFromList(I interval)
@@ -780,7 +772,15 @@ namespace C5.intervals
                 return true;
             }
 
-            public void UpdateDeltaForHigh(bool highIncluded)
+            public void AddHighToDelta(bool highIncluded)
+            {
+                if (highIncluded)
+                    DeltaAfter--;
+                else
+                    DeltaAt--;
+            }
+
+            public void RemoveHighFromDelta(bool highIncluded)
             {
                 if (highIncluded)
                     DeltaAfter++;
@@ -1367,7 +1367,7 @@ namespace C5.intervals
             }
             // Add to node if we allow reference duplicates or if it doesn't already contain it 
             else if (AllowsReferenceDuplicates || !root.ContainsReferenceEqualInterval(interval))
-                intervalWasAdded = root.AddIntervalFromList(interval);
+                intervalWasAdded = root.AddIntervalToList(interval);
 
             if (intervalWasAdded)
             {
@@ -1413,7 +1413,7 @@ namespace C5.intervals
                     root.Balance--;
             }
             else
-                root.AddHigh(interval.HighIncluded);
+                root.AddHighToDelta(interval.HighIncluded);
 
             // Update MNO
             root.UpdateMaximumOverlap();
@@ -1564,7 +1564,7 @@ namespace C5.intervals
             else
             {
                 // Update delta for the interval's high
-                root.UpdateDeltaForHigh(interval.HighIncluded);
+                root.RemoveHighFromDelta(interval.HighIncluded);
 
                 // If the interval was removed, we might be able to removeLow the node as well
                 if (root.IsEmpty)
