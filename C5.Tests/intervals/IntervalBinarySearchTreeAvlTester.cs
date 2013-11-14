@@ -148,16 +148,39 @@ namespace C5.Tests.intervals
             [Test]
             public void AddAndRemove()
             {
+                IInterval<int> eventInterval = null;
                 var intervalCollection = new IntervalBinarySearchTreeAvl<IInterval<int>, int>();
+                intervalCollection.ItemsAdded += (c, args) => eventInterval = args.Item;
+                intervalCollection.ItemsRemoved += (c, args) => eventInterval = args.Item;
 
                 foreach (var interval in _intervals)
+                {
                     intervalCollection.Add(interval);
+
+                    Assert.AreSame(interval, eventInterval);
+                    eventInterval = null;
+                }
 
                 foreach (var interval in _intervals)
                 {
                     Assert.True(intervalCollection.Remove(interval));
+                    Assert.AreSame(interval, eventInterval);
+                    eventInterval = null;
+
                     Assert.False(intervalCollection.Remove(interval));
+                    Assert.IsNull(eventInterval);
                 }
+            }
+
+            [Test]
+            public void Clear()
+            {
+                var eventThrown = false;
+                var intervalCollection = new IntervalBinarySearchTreeAvl<IInterval<int>, int>(_intervals);
+                intervalCollection.CollectionCleared += (sender, args) => eventThrown = true;
+                intervalCollection.Clear();
+                Assert.True(eventThrown);
+                Assert.True(intervalCollection.IsEmpty);
             }
         }
 
@@ -268,7 +291,7 @@ namespace C5.Tests.intervals
                 CollectionAssert.AreEquivalent(expected, _intervales.FindOverlaps(query));
             }
 
-            [TestCaseSource(typeof (IBSRemove), "StabCases")]
+            [TestCaseSource(typeof(IBSRemove), "StabCases")]
             public void Overlap_StabbingAtKeyPoints_ReturnsSpecifiedIntervals_TestCase(int query,
                 IEnumerable<IInterval<int>> expected)
             {
@@ -305,7 +328,7 @@ namespace C5.Tests.intervals
             [Test]
             public void Overlap_Range_ReturnsSpecifiedIntervals()
             {
-                range(new IntervalBase<int>(0, 2, true, true), new[] {B, C, G});
+                range(new IntervalBase<int>(0, 2, true, true), new[] { B, C, G });
             }
 
             [Test]
