@@ -13,18 +13,6 @@ namespace C5.Tests.intervals
         [TestFixture]
         public class AndersTest
         {
-            private static readonly object[] DivideCases =
-            {
-                new object[] {12, 3, 4},
-                new object[] {12, 2, 6},
-                new object[] {12, 4, 3}
-            };
-
-            [Test, TestCaseSource("DivideCases")]
-            public void DivideTest(int n, int d, int q)
-            {
-                Assert.AreEqual(q, n/d);
-            }
 
             private static readonly IIntervalCollection<IInterval<int>, int>[] IntervalCases =
             {
@@ -35,7 +23,9 @@ namespace C5.Tests.intervals
             [Test, TestCaseSource("IntervalCases")]
             public void IntervalTest(IIntervalCollection<IInterval<int>, int> intervals)
             {
+                var i = new IBSRemove.Interval("A", 9, 19, true, true);
                 Assert.AreEqual(100, intervals.Count);
+                Assert.AreEqual(intervals.Remove(i), intervals.IsReadOnly);
             }
         }
 
