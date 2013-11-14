@@ -27,8 +27,7 @@ namespace C5.intervals
         private static readonly IComparer<IInterval<T>> Comparer = ComparerFactory<IInterval<T>>.CreateComparer((x, y) => y.CompareHigh(x));
         // Comparer for sublists in IntervalList
         private static readonly IEqualityComparer<IInterval<T>> EqualityComparer =
-            ComparerFactory<IInterval<T>>.CreateEqualityComparer(ReferenceEquals, x => 0);
-        // TODO: Check benchmarks to see if actual hashcode is better than just 0
+            ComparerFactory<IInterval<T>>.CreateEqualityComparer(ReferenceEquals, x => x.GetHashCode());
 
         #endregion
 
