@@ -11,26 +11,6 @@ namespace C5.Tests.intervals
     namespace IntervalBinarySearchTreeAVL
     {
         [TestFixture]
-        public class AndersTest
-        {
-
-            private static readonly IIntervalCollection<IInterval<int>, int>[] IntervalCases =
-            {
-                new IntervalBinarySearchTreeAvl<IInterval<int>, int>(BenchmarkTestCases.DataSetB(100)),
-                new DynamicIntervalTree<IInterval<int>, int>(BenchmarkTestCases.DataSetB(100))
-            };
-
-            [Test, TestCaseSource("IntervalCases")]
-            public void IntervalTest(IIntervalCollection<IInterval<int>, int> intervals)
-            {
-                var i = new IBSRemove.Interval("A", 9, 19, true, true);
-                Assert.AreEqual(100, intervals.Count);
-                Assert.AreEqual(intervals.Remove(i), intervals.IsReadOnly);
-            }
-        }
-
-
-        [TestFixture]
         public class IntervalBinarySearchTreeAVLIBS : IBS
         {
             internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
