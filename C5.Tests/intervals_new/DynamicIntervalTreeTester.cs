@@ -47,6 +47,9 @@ namespace C5.Tests.intervals_new
         {
 
         }
+
+        [Test]
+        public void Test() { }
     }
 
     #endregion
