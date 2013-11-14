@@ -4,7 +4,7 @@
 using System;
 
 class Benchmark {
-  public static void Main(String[] args) {
+  public static void MainObsolete(String[] args) {
     SystemInfo();
     // Mark0();
     // Mark1();
@@ -15,9 +15,9 @@ class Benchmark {
     // Mark6("multiply", Multiply);
     // Mark6("multiply", Multiply);
     // MathFunctionBenchmarks();
-    // Random rnd = new Random();
-    // int n = 1638400;
-    // Mark7("random_index", (int i) => (double)rnd.Next(n));
+    Random rnd = new Random();
+    int n = 1638400;
+    Mark7("random_index", (int i) => (double)rnd.Next(n));
     // SearchBenchmarks();
     // SearchScalabilityBenchmarks1();
     // SearchScalabilityBenchmarks2();
