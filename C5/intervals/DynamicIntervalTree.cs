@@ -1074,20 +1074,6 @@ namespace C5.intervals
                 Add(interval);
         }
 
-        public DynamicIntervalTree(IEnumerable<I> intervals)
-        {
-            Contract.Requires(intervals != null);
-
-            // Set reference duplicate behaviour
-            AllowsReferenceDuplicates = false;
-
-            // TODO: Prebuild the tree structure
-
-            // Insert all intervals
-            foreach (var interval in intervals)
-                Add(interval);
-        }
-
         #endregion
 
         #region Collection Value
