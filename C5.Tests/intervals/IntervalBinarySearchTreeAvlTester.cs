@@ -10,34 +10,6 @@ namespace C5.Tests.intervals
 {
     namespace IntervalBinarySearchTreeAVL
     {
-//        [TestFixture]
-//        public class AndersTest
-//        {
-
-//            private static IIntervalCollection<IInterval<T>, T>[] intervalCases<T>(IEnumerable<IInterval<T>> intervals) where T : IComparable<T>
-//            {
-//                return new IIntervalCollection<IInterval<int>, int>[]
-//                {
-//                    new IntervalBinarySearchTreeAvl<IInterval<int>, int>(intervals),
-//                    new DynamicIntervalTree<IInterval<int>, int>(BenchmarkTestCases.DataSetB(count))
-//                };
-//            }
-//
-//            [Test, TestCaseSource("intervalCases")]
-//            public void IntervalTest<T>(IIntervalCollection<IInterval<int>, int> intervals)
-//            {
-//                var i = new IBSRemove.Interval("A", 9, 19, true, true);
-//                
-//                var type;
-//                var intervals;
-//                var intervalCollection = type & intervals;
-//
-//                Assert.AreEqual(100, intervals.Count);
-//                Assert.AreEqual(intervals.Remove(i), intervals.IsReadOnly);
-//            }
-//        }
-
-
         [TestFixture]
         public class IntervalBinarySearchTreeAVLIBS : IBS
         {
