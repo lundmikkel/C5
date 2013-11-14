@@ -416,7 +416,7 @@ namespace C5.intervals
                 Contract.Ensures(Contract.Result<int>() >= _layerCount);
 
                 if (_maximumNumberOfOverlaps < 0)
-                    findMaximumOverlap(Sorted, true);
+                    _maximumNumberOfOverlaps = findMaximumOverlap(Sorted, true);
 
                 return _maximumNumberOfOverlaps;
             }
@@ -501,6 +501,11 @@ namespace C5.intervals
 
             var max = 0;
 
+            var intervals = sortedIntervals as I[] ?? sortedIntervals.ToArray();
+
+            if (!intervals.Any())
+                return 0;
+
             // Create queue sorted on high intervals
             var comparer = ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareHigh);
             var queue = new IntervalHeap<IInterval<T>>(comparer);
@@ -515,7 +520,7 @@ namespace C5.intervals
             }
 
             // Loop through intervals in sorted order
-            foreach (var interval in sortedIntervals)
+            foreach (var interval in intervals)
             {
                 // Remove all intervals from the queue not overlapping the current interval
                 while (!queue.IsEmpty && interval.CompareLowHigh(queue.FindMin()) > 0)
