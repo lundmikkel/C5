@@ -136,6 +136,7 @@
     <Compile Include="intervals\StaticIntervalTreeTester.cs" />
     <Compile Include="intervals_new\DynamicIntervalTreeTester.cs" />
     <Compile Include="intervals_new\IntervalBinarySearchTreeTester.cs" />
+    <Compile Include="intervals_new\IntervalTestHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Records.cs" />
     <Compile Include="Sorting.cs">
