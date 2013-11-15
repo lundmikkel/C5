@@ -32,6 +32,7 @@ namespace C5.intervals
         // MNO
         private int _maximumNumberOfOverlaps = -1;
         private IInterval<T> _intervalOfMaximumOverlap;
+        readonly IComparer<IInterval<T>> _comparer = ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareHigh);
 
         #endregion
 
@@ -416,7 +417,7 @@ namespace C5.intervals
                 Contract.Ensures(Contract.Result<int>() >= _layerCount);
 
                 if (_maximumNumberOfOverlaps < 0)
-                    _maximumNumberOfOverlaps = findMaximumOverlap(Sorted, true);
+                    _maximumNumberOfOverlaps = findMaximumOverlap(Sorted, ref _intervalOfMaximumOverlap, _layerCount);
 
                 return _maximumNumberOfOverlaps;
             }
@@ -432,11 +433,11 @@ namespace C5.intervals
             {
                 Contract.Ensures(_maximumNumberOfOverlaps >= _layerCount);
 
-                if (IsEmpty)
-                    throw new InvalidOperationException("An empty collection has no interval of maximum overlap");
+                // If the MNO is below 0, then the interval of maximum overlap has not been set yet
+                Contract.Assert(_maximumNumberOfOverlaps >= 0 || _intervalOfMaximumOverlap == null);
 
-                if (_intervalOfMaximumOverlap == null)
-                    findMaximumOverlap(Sorted, true);
+                if (_maximumNumberOfOverlaps < 0)
+                    _maximumNumberOfOverlaps = findMaximumOverlap(Sorted, ref _intervalOfMaximumOverlap, _layerCount);
 
                 return _intervalOfMaximumOverlap;
             }
@@ -454,7 +455,8 @@ namespace C5.intervals
             Contract.Requires(query != null);
             Contract.Ensures(Contract.Result<int>() >= 0);
 
-            return findMaximumOverlap(FindOverlapsSorted(query));
+            IInterval<T> intervalOfMaximumOverlap = null;
+            return findMaximumOverlap(FindOverlapsSorted(query), ref intervalOfMaximumOverlap);
         }
 
         /// <summary>
@@ -471,7 +473,8 @@ namespace C5.intervals
             Contract.Requires(filter != null);
             Contract.Ensures(Contract.Result<int>() >= 0);
 
-            return findMaximumOverlap(FindOverlapsSorted(query).Where(filter));
+            IInterval<T> intervalOfMaximumOverlap = null;
+            return findMaximumOverlap(FindOverlapsSorted(query).Where(filter), ref intervalOfMaximumOverlap);
         }
 
         /// <summary>
@@ -486,41 +489,21 @@ namespace C5.intervals
             Contract.Requires(filter != null);
             Contract.Ensures(Contract.Result<int>() >= 0);
 
-            return findMaximumOverlap(Sorted.Where(filter));
+            IInterval<T> intervalOfMaximumOverlap = null;
+            return findMaximumOverlap(Sorted.Where(filter), ref intervalOfMaximumOverlap);
         }
 
-        /// <summary>
-        /// Find the maximum number of overlaps and save the values in
-        /// <see cref="_maximumNumberOfOverlaps"/> and <see cref="_intervalOfMaximumOverlap"/>.
-        /// </summary>
-        private int findMaximumOverlap(IEnumerable<I> sortedIntervals, bool setIntervalOfMaximumOverlap = false)
+        private int findMaximumOverlap(IEnumerable<I> sortedIntervals, ref IInterval<T> intervalOfMaximumOverlap, int max = 0)
         {
             Contract.Requires(sortedIntervals != null);
+            Contract.Requires(_comparer != null);
             Contract.Ensures(Contract.Result<int>() >= 0);
-            Contract.Ensures(!setIntervalOfMaximumOverlap || !sortedIntervals.Any() || _intervalOfMaximumOverlap != null);
-
-            var max = 0;
-
-            var intervals = sortedIntervals as I[] ?? sortedIntervals.ToArray();
-
-            if (!intervals.Any())
-                return 0;
 
             // Create queue sorted on high intervals
-            var comparer = ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareHigh);
-            var queue = new IntervalHeap<IInterval<T>>(comparer);
-
-            // Set default values when we find MNO for the whole collection
-            if (setIntervalOfMaximumOverlap)
-            {
-                // Set running maximum to the number of layers as that is the minimum number of overlaps
-                max = _layerCount;
-                // Set interval of maximum overlap to default value of the first interval in the last layer
-                _intervalOfMaximumOverlap = new IntervalBase<T>(_intervalLayers.Last().First());
-            }
+            var queue = new IntervalHeap<IInterval<T>>(_comparer);
 
             // Loop through intervals in sorted order
-            foreach (var interval in intervals)
+            foreach (var interval in sortedIntervals)
             {
                 // Remove all intervals from the queue not overlapping the current interval
                 while (!queue.IsEmpty && interval.CompareLowHigh(queue.FindMin()) > 0)
@@ -531,16 +514,12 @@ namespace C5.intervals
                 if (queue.Count > max)
                 {
                     max = queue.Count;
-                    // Create a new interval when new maximum is found
-                    // The low is the current intervals low due to the intervals being sorted
-                    // The high is the smallest high in the queue
-                    if (setIntervalOfMaximumOverlap)
-                        _intervalOfMaximumOverlap = new IntervalBase<T>(interval, queue.FindMin());
+                    // Create a new interval when new maximum is found.
+                    // The low is the current intervals low due to the intervals being sorted.
+                    // The high is the smallest high in the queue.
+                    intervalOfMaximumOverlap = new IntervalBase<T>(interval, queue.FindMin());
                 }
             }
-
-            // Cache value for later requests
-            _maximumNumberOfOverlaps = max;
 
             return max;
         }
