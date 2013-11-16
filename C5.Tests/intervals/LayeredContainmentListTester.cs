@@ -13,30 +13,6 @@ namespace C5.Tests.intervals
     namespace LayeredContainmentList
     {
         #region generic tests
-        [TestFixture]
-        public class LCListEndpointInclusion : IntervaledEndpointInclusion
-        {
-            internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new LayeredContainmentList<IInterval<int>, int>(intervals);
-            }
-        }
-
-        [TestFixture]
-        public class LCListNullCollection : IntervaledNullCollection
-        {
-            internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new LayeredContainmentList<IInterval<int>, int>(intervals);
-            }
-
-            [Test, Ignore]
-            public void MaximumOverlap_EmptyCollection_Returns0()
-            {
-
-                Assert.AreEqual(0, ((LayeredContainmentList<IInterval<int>, int>) _intervalCollection).MaximumOverlap);
-            }
-        }
 
         [TestFixture]
         public class PmoTest

@@ -79,24 +79,6 @@ namespace C5.Tests.intervals
         }
     }*/
 
-
-
-    public class StaticIntervalTreeEndpointInclusion : IntervaledEndpointInclusion
-    {
-        internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-        {
-            return new StaticIntervalTree<IInterval<int>, int>(intervals);
-        }
-    }
-
-    public class StaticIntervalTreeNullCollection : IntervaledNullCollection
-    {
-        internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-        {
-            return new StaticIntervalTree<IInterval<int>, int>(intervals);
-        }
-    }
-
     public class StaticIntervalSample100 : Sample100
     {
         protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
