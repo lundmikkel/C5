@@ -12,6 +12,11 @@ namespace C5.Tests.intervals_new.LayeredContainmentList
         {
             return typeof(LayeredContainmentList<,>);
         }
+
+        protected override bool AllowsReferenceDuplicates()
+        {
+            return true;
+        }
     }
 
     #endregion

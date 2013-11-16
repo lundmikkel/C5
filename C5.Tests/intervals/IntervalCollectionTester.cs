@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using C5.Tests.intervals_new;
 using C5.intervals;
 using NUnit.Framework;
@@ -7,13 +6,19 @@ using NUnit.Framework;
 namespace C5.Tests.intervals
 {
     using Interval = IntervalBase<int>;
+    using ITH = IntervalTestHelper;
 
     [TestFixture]
     abstract class IntervalCollectionTester
     {
         #region Meta
 
-        private Random random = new Random(0);
+        private readonly Random _random = new Random(0);
+
+        private int randomInt()
+        {
+            return _random.Next(Int32.MinValue, Int32.MaxValue);
+        }
 
         protected abstract Type GetCollectionType();
 
@@ -21,42 +26,32 @@ namespace C5.Tests.intervals
         /// Override to add additional parameters to constructors.
         /// </summary>
         /// <returns>An object array of the extra parameters.</returns>
-        protected object[] AdditionalParameters()
+        protected virtual object[] AdditionalParameters()
         {
             return new object[0];
         }
 
-        protected IIntervalCollection<IInterval<T>, T> Factory<T>(params IInterval<T>[] intervals) where T : IComparable<T>
+        protected IIntervalCollection<IInterval<T>, T> CreateCollection<T>(params IInterval<T>[] intervals) where T : IComparable<T>
         {
-            var type = GetCollectionType();
-            Type[] typeArgs = { typeof(IInterval<T>), typeof(T) };
-            var genericType = type.MakeGenericType(typeArgs);
-
             var additionalParameters = AdditionalParameters();
             var parameters = new object[1 + additionalParameters.Length];
             parameters[0] = intervals;
             for (var i = 0; i < additionalParameters.Length; i++)
                 parameters[i + 1] = additionalParameters[i];
 
+            Type[] typeArgs = { typeof(IInterval<T>), typeof(T) };
+            var genericType = GetCollectionType().MakeGenericType(typeArgs);
             return (IIntervalCollection<IInterval<T>, T>) Activator.CreateInstance(genericType, parameters);
+        }
+
+        protected IIntervalCollection<IInterval<T>, T> CreateEmptyCollection<T>() where T : IComparable<T>
+        {
+            return CreateCollection(new IInterval<T>[0]);
         }
 
         #endregion
 
         #region Test Methods
-
-        [Test]
-        public void Test()
-        {
-            var collection = Factory(
-                new Interval(1, 2),
-                new Interval(2, 3)
-            );
-            Assert.AreEqual(collection.Count, 2);
-
-            var collection2 = Factory(new IntervalBase<bool>(true));
-            Assert.AreEqual(collection2.Count, 1);
-        }
 
         #region Properties
 
@@ -67,15 +62,15 @@ namespace C5.Tests.intervals
         [ExpectedException(typeof(InvalidOperationException))]
         public void Span_EmptyCollection_Exception()
         {
-            var span = Factory(new Interval[0]).Span;
+            var span = CreateEmptyCollection<int>().Span;
         }
 
         [Test]
         [Category("Span")]
         public void Span_SingleInterval_IntervalEqualsSpan()
         {
-            var interval = IntervalTestHelper.RandomIntInterval();
-            var span = Factory(interval).Span;
+            var interval = ITH.RandomIntInterval();
+            var span = CreateCollection(interval).Span;
             Assert.True(span.IntervalEquals(interval));
         }
 
@@ -87,11 +82,11 @@ namespace C5.Tests.intervals
 
             do
             {
-                interval1 = IntervalTestHelper.RandomIntInterval();
-                interval2 = IntervalTestHelper.RandomIntInterval();
+                interval1 = ITH.RandomIntInterval();
+                interval2 = ITH.RandomIntInterval();
             } while (interval1.Overlaps(interval2));
 
-            var span = Factory(
+            var span = CreateCollection(
                     interval1,
                     interval2
                 ).Span;
@@ -107,11 +102,11 @@ namespace C5.Tests.intervals
 
             do
             {
-                interval1 = IntervalTestHelper.RandomIntInterval();
-                interval2 = IntervalTestHelper.RandomIntInterval();
+                interval1 = ITH.RandomIntInterval();
+                interval2 = ITH.RandomIntInterval();
             } while (!interval1.StrictlyContains(interval2));
 
-            var span = Factory(
+            var span = CreateCollection(
                     interval1,
                     interval2
                 ).Span;
@@ -127,7 +122,7 @@ namespace C5.Tests.intervals
         [Category("Maximum Overlap")]
         public void MaximumOverlap_EmptyCollection_Zero()
         {
-            var mno = Factory(new Interval[0]).MaximumOverlap;
+            var mno = CreateEmptyCollection<int>().MaximumOverlap;
             Assert.AreEqual(mno, 0);
         }
 
@@ -135,8 +130,8 @@ namespace C5.Tests.intervals
         [Category("Maximum Overlap")]
         public void MaximumOverlap_SingleInterval_One()
         {
-            var interval = IntervalTestHelper.RandomIntInterval();
-            var mno = Factory(interval).MaximumOverlap;
+            var interval = ITH.RandomIntInterval();
+            var mno = CreateCollection(interval).MaximumOverlap;
             Assert.AreEqual(mno, 1);
         }
 
@@ -144,8 +139,8 @@ namespace C5.Tests.intervals
         [Category("Maximum Overlap")]
         public void MaximumOverlap_SingleReferenceObject_OneOrTwo()
         {
-            var interval = IntervalTestHelper.RandomIntInterval();
-            var coll = Factory(
+            var interval = ITH.RandomIntInterval();
+            var coll = CreateCollection(
                     interval,
                     interval
                 );
@@ -158,8 +153,8 @@ namespace C5.Tests.intervals
         [Category("Maximum Overlap")]
         public void MaximumOverlap_NonOverlappingIntervals_One()
         {
-            var mno = Factory(
-                IntervalTestHelper.NonOverlappingIntervals(random.Next(10, 20))
+            var mno = CreateCollection(
+                ITH.NonOverlappingIntervals(_random.Next(10, 20))
                 ).MaximumOverlap;
             Assert.AreEqual(mno, 1);
         }
@@ -183,7 +178,7 @@ namespace C5.Tests.intervals
             // |
             // [--------------]
 
-            var mno = Factory(
+            var mno = CreateCollection(
                     new Interval(12),
                     new Interval(9, 12, IntervalType.HighIncluded),
                     new Interval(9, 12, IntervalType.Open),
@@ -219,7 +214,7 @@ namespace C5.Tests.intervals
             //  [----------------]
             // [------------------]
 
-            var coll = Factory(
+            var coll = CreateCollection(
                     new Interval(9, 10, IntervalType.Closed),
                     new Interval(8, 11, IntervalType.Closed),
                     new Interval(7, 12, IntervalType.Closed),
@@ -238,6 +233,38 @@ namespace C5.Tests.intervals
         #endregion
 
         #region Allows Reference Duplicates
+
+        protected abstract bool AllowsReferenceDuplicates();
+
+        [Test]
+        [Category("Allows Reference Duplicates")]
+        public void AllowsReferenceDuplicates_EmptyCollection_DefinedResult()
+        {
+            var coll = CreateEmptyCollection<int>();
+
+            Assert.AreEqual(coll.AllowsReferenceDuplicates, AllowsReferenceDuplicates());
+        }
+
+        [Test]
+        [Category("Allows Reference Duplicates")]
+        public void AllowsReferenceDuplicates_SingleInterval_DefinedResult()
+        {
+            var interval = ITH.RandomIntInterval();
+            var coll = CreateCollection(interval);
+
+            Assert.AreEqual(coll.AllowsReferenceDuplicates, AllowsReferenceDuplicates());
+        }
+
+        [Test]
+        [Category("Allows Reference Duplicates")]
+        public void AllowsReferenceDuplicates_ManyIntervals_DefinedResult()
+        {
+            var interval = ITH.RandomIntIntervals(_random.Next(10, 20));
+            var coll = CreateCollection(interval);
+
+            Assert.AreEqual(coll.AllowsReferenceDuplicates, AllowsReferenceDuplicates());
+        }
+
         #endregion
 
         #endregion
@@ -250,8 +277,8 @@ namespace C5.Tests.intervals
         [Category("Find Overlaps Stabbing")]
         public void FindOverlapsStabbing_EmptyCollection_Empty()
         {
-            var query = random.Next(Int32.MinValue, Int32.MaxValue);
-            var coll = Factory(new Interval[0]);
+            var query = randomInt();
+            var coll = CreateEmptyCollection<int>();
 
             CollectionAssert.IsEmpty(coll.FindOverlaps(query));
         }
@@ -259,6 +286,17 @@ namespace C5.Tests.intervals
         #endregion
 
         #region Range
+
+        [Test]
+        [Category("Find Overlaps Range")]
+        public void FindOverlapsRange_EmptyCollection_Empty()
+        {
+            var query = ITH.RandomIntInterval();
+            var coll = CreateEmptyCollection<int>();
+
+            CollectionAssert.IsEmpty(coll.FindOverlaps(query));
+        }
+
         #endregion
 
         #endregion
@@ -266,9 +304,35 @@ namespace C5.Tests.intervals
         #region Find Overlap
 
         #region Stabbing
+
+        [Test]
+        [Category("Find Overlap Stabbing")]
+        public void FindOverlapStabbing_EmptyCollection_False()
+        {
+            var query = randomInt();
+            IInterval<int> interval = null;
+            var coll = CreateEmptyCollection<int>();
+
+            Assert.False(coll.FindOverlap(query, ref interval));
+            Assert.IsNull(interval);
+        }
+
         #endregion
 
         #region Range
+
+        [Test]
+        [Category("Find Overlap Range")]
+        public void FindOverlapRange_EmptyCollection_False()
+        {
+            var query = ITH.RandomIntInterval();
+            IInterval<int> interval = null;
+            var coll = CreateEmptyCollection<int>();
+
+            Assert.False(coll.FindOverlap(query, ref interval));
+            Assert.IsNull(interval);
+        }
+
         #endregion
 
         #endregion
@@ -276,9 +340,31 @@ namespace C5.Tests.intervals
         #region Count Overlaps
 
         #region Stabbing
+
+        [Test]
+        [Category("Count Overlaps Stabbing")]
+        public void CountOverlapsStabbing_EmptyCollection_Zero()
+        {
+            var query = randomInt();
+            var coll = CreateEmptyCollection<int>();
+
+            Assert.AreEqual(coll.CountOverlaps(query), 0);
+        }
+
         #endregion
 
         #region Range
+
+        [Test]
+        [Category("Count Overlaps Range")]
+        public void CountOverlapsRange_EmptyCollection_Zero()
+        {
+            var query = ITH.RandomIntInterval();
+            var coll = CreateEmptyCollection<int>();
+
+            Assert.AreEqual(coll.CountOverlaps(query), 0);
+        }
+
         #endregion
 
         #endregion
@@ -286,9 +372,45 @@ namespace C5.Tests.intervals
         #region Extensible
 
         #region Is Read Only
+
         #endregion
 
         #region Add
+
+        [Test]
+        [Category("Add")]
+        public void Add_IsReadOnly_Exception()
+        {
+            var interval = ITH.RandomIntInterval();
+            var coll = CreateEmptyCollection<int>();
+
+            if (coll.IsReadOnly)
+            {
+                try
+                {
+                    coll.Add(interval);
+                    Assert.Fail();
+                }
+                catch (ReadOnlyCollectionException)
+                {
+                    Assert.Pass();
+                }
+            }
+        }
+
+        [Test]
+        [Category("Add")]
+        public void Add_SingleReferenceObject_TrueFirst()
+        {
+            var interval = ITH.RandomIntInterval();
+            var coll = CreateEmptyCollection<int>();
+
+            if (!coll.IsReadOnly)
+            {
+                Assert.True(coll.Add(interval));
+                Assert.True(coll.Add(interval) == coll.AllowsReferenceDuplicates);
+            }
+        }
 
         #region Events
         #endregion
@@ -297,6 +419,27 @@ namespace C5.Tests.intervals
 
         #region Add All
 
+        [Test]
+        [Category("Add All")]
+        public void AddAll_IsReadOnly_Exception()
+        {
+            var intervals = new[] { ITH.RandomIntInterval() };
+            var coll = CreateEmptyCollection<int>();
+
+            if (coll.IsReadOnly)
+            {
+                try
+                {
+                    coll.AddAll(intervals);
+                    Assert.Fail();
+                }
+                catch (ReadOnlyCollectionException)
+                {
+                    Assert.Pass();
+                }
+            }
+        }
+
         #region Events
         #endregion
 
@@ -304,12 +447,79 @@ namespace C5.Tests.intervals
 
         #region Remove
 
+        [Test]
+        [Category("Remove")]
+        public void Remove_IsReadOnly_Exception()
+        {
+            var interval = ITH.RandomIntInterval();
+            var coll = CreateEmptyCollection<int>();
+
+            if (coll.IsReadOnly)
+            {
+                try
+                {
+                    coll.Remove(interval);
+                    Assert.Fail();
+                }
+                catch (ReadOnlyCollectionException)
+                {
+                    Assert.Pass();
+                }
+            }
+        }
+
+        [Test]
+        [Category("Remove")]
+        public void Remove_EmptyCollection_False()
+        {
+            var interval = ITH.RandomIntInterval();
+            var coll = CreateEmptyCollection<int>();
+
+            if (!coll.IsReadOnly)
+            {
+                Assert.False(coll.Remove(interval));
+            }
+        }
+
         #region Events
         #endregion
 
         #endregion
 
         #region Clear
+
+        [Test]
+        [Category("Clear")]
+        public void Clear_IsReadOnly_Exception()
+        {
+            var coll = CreateEmptyCollection<int>();
+
+            if (coll.IsReadOnly)
+            {
+                try
+                {
+                    coll.Clear();
+                    Assert.Fail();
+                }
+                catch (ReadOnlyCollectionException)
+                {
+                    Assert.Pass();
+                }
+            }
+        }
+
+        [Test]
+        [Category("Clear")]
+        public void Clear_EmptyCollection_IsEmpty()
+        {
+            var coll = CreateEmptyCollection<int>();
+
+            if (!coll.IsReadOnly)
+            {
+                coll.Clear();
+                Assert.True(coll.IsEmpty);
+            }
+        }
 
         #region Events
         #endregion

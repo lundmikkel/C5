@@ -15,9 +15,14 @@ namespace C5.Tests.intervals_new.DynamicIntervalTree
         }
 
         // DIT's standard behavior where we set the ReferenceDuplicates to false
-        protected new object[] AdditionalParameters()
+        protected override object[] AdditionalParameters()
         {
             return new object[] { false };
+        }
+
+        protected override bool AllowsReferenceDuplicates()
+        {
+            return false;
         }
     }
 
@@ -29,9 +34,14 @@ namespace C5.Tests.intervals_new.DynamicIntervalTree
         }
 
         // DIT where we set the ReferenceDuplicates to true
-        protected new object[] AdditionalParameters()
+        protected override object[] AdditionalParameters()
         {
             return new object[] { true };
+        }
+
+        protected override bool AllowsReferenceDuplicates()
+        {
+            return true;
         }
     }
 

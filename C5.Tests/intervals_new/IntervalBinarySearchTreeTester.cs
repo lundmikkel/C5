@@ -13,6 +13,11 @@ namespace C5.Tests.intervals_new.IntervalBinarySearchTree
         {
             return typeof(IntervalBinarySearchTreeAvl<,>);
         }
+
+        protected override bool AllowsReferenceDuplicates()
+        {
+            return false;
+        }
     }
 
     #endregion
