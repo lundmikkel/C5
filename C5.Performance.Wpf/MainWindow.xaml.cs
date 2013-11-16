@@ -15,7 +15,7 @@ namespace C5.Performance.Wpf
         private const int MaxCollectionSize = 500000;
         internal int MaxIterations;
         private const int CollectionMultiplier = 2;
-        private int _maxCount = Int32.MaxValue/10;
+        private int _maxCount = Int32.MaxValue / 10;
         private const int StandardRepeats = 10;
         private int _repeats = StandardRepeats;
         private bool _runWarmups = true;
@@ -49,13 +49,13 @@ namespace C5.Performance.Wpf
             var thread = _runSequential ?
                 new Thread(() => runBenchmarks(benchmarks())) :
                 new Thread(() => runBenchmarksParallel(benchmarks()));
-            CheckBox checkbox = (CheckBox)this.Controls.Find("checkBox" + input.toString())[0];
+            //CheckBox checkbox = (CheckBox)this.Controls.Find("checkBox" + input.toString())[0];
             thread.Start();
         }
 
         private void runBenchmarks(params Benchmarkable[] benchmarks)
         {
-            runSequential;
+            //runSequential;
             foreach (var b in benchmarks)
             {
                 _plotter.AddAreaSeries(b.BenchMarkName());
@@ -96,7 +96,7 @@ namespace C5.Performance.Wpf
                         _plotter.AddDataPoint(_lineSeriesIndex, benchmark)));
                     Thread.Sleep(100);
                     _lineSeriesIndex++;
-                    _currentCollectionSize = (collectionSize*1.0) / (MaxCollectionSize*1.0);
+                    _currentCollectionSize = (collectionSize * 1.0) / (MaxCollectionSize * 1.0);
                     updateProgressBar(benchmarks.Length);
                 }
                 collectionSize *= CollectionMultiplier;
@@ -110,7 +110,7 @@ namespace C5.Performance.Wpf
 
         private void updateProgressBar(int numberOfBenchmarks)
         {
-            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => progress.Value += (100.0 / MaxIterations)/numberOfBenchmarks));
+            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => progress.Value += (100.0 / MaxIterations) / numberOfBenchmarks));
         }
 
         private void updateStatusLabel(String s)
@@ -135,17 +135,17 @@ namespace C5.Performance.Wpf
             // Show save file dialog box
             var result = dlg.ShowDialog();
             if (result != true) return;
-            
+
             // Save document
             var path = dlg.FileName;
-            _plotter.ExportPdf(path,ActualWidth,ActualHeight);
+            _plotter.ExportPdf(path, ActualWidth, ActualHeight);
         }
 
         private void CheckBox_Checked_RunWarmups(object sender, RoutedEventArgs e)
         {
             _runWarmups = true;
         }
-        
+
         private void CheckBox_Unchecked_RunWarmups(object sender, RoutedEventArgs e)
         {
             _runWarmups = false;
@@ -154,13 +154,13 @@ namespace C5.Performance.Wpf
         private void CheckBox_Checked_RunQuick(object sender, RoutedEventArgs e)
         {
             _repeats = 1;
-            _maxCount = Int32.MaxValue/1000;
+            _maxCount = Int32.MaxValue / 1000;
         }
 
         private void CheckBox_Unchecked_RunQuick(object sender, RoutedEventArgs e)
         {
             _repeats = StandardRepeats;
-            _maxCount = Int32.MaxValue/10;
+            _maxCount = Int32.MaxValue / 10;
         }
 
         private void CheckBox_Checked_RunSequential(object sender, RoutedEventArgs e)
@@ -176,7 +176,7 @@ namespace C5.Performance.Wpf
 
         private void ProgressBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            
+
         }
     }
 }
