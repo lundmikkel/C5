@@ -11,28 +11,6 @@ namespace C5.Tests.intervals
 
     namespace IntervalBinarySearchTree
     {
-
-        [TestFixture]
-        public class IntervalBinarySearchTreeIBS : IBS
-        {
-            internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new IntervalBinarySearchTree<IInterval<int>, int>(intervals);
-            }
-
-            [Test]
-            public void Print()
-            {
-                File.WriteAllText(@"../../intervals/data/interval_binary_search_tree.gv", ((IntervalBinarySearchTree<IInterval<int>, int>) IntervalCollection).Graphviz());
-            }
-
-            [Test]
-            public void MaximumOverlap_IBS_Returns5()
-            {
-                Assert.AreEqual(5, ((IntervalBinarySearchTree<IInterval<int>, int>) IntervalCollection).MaximumOverlap);
-            }
-        }
-
         [TestFixture]
         public class EndpointInclusion : IntervaledEndpointInclusion
         {

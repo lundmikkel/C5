@@ -403,6 +403,43 @@ namespace C5.intervals
     public static class C5Extensions
     {
         /// <summary>
+        /// Create an enumerable, enumerating all unique endpoints in intervals.
+        /// </summary>
+        /// <param name="intervals">The intervals.</param>
+        /// <typeparam name="T">The endpoint type.</typeparam>
+        /// <returns>Unique endpoints from intervals.</returns>
+        [Pure]
+        public static IEnumerable<T> UniqueEndpoints<T>(this IEnumerable<IInterval<T>> intervals)
+            where T : IComparable<T>
+        {
+            var array = intervals as IInterval<T>[] ?? intervals.ToArray();
+            var intervalCount = array.Count();
+
+            // Save all endpoints to array
+            var endpoints = new T[intervalCount * 2];
+            for (var i = 0; i < intervalCount; i++)
+            {
+                var interval = array[i];
+
+                endpoints[i * 2] = interval.Low;
+                endpoints[i * 2 + 1] = interval.High;
+            }
+
+            // Sort endpoints
+            Sorting.IntroSort(endpoints);
+
+            // Remove duplicate endpoints
+            var uniqueEndpoints = new T[intervalCount * 2];
+            var endpointCount = 0;
+
+            foreach (var endpoint in endpoints)
+                if (endpointCount == 0 || uniqueEndpoints[endpointCount - 1].CompareTo(endpoint) < 0)
+                    uniqueEndpoints[endpointCount++] = endpoint;
+
+            return uniqueEndpoints.Take(endpointCount);
+        }
+
+        /// <summary>
         /// Check if an IEnumerable is sorted in non-descending order.
         /// </summary>
         /// <param name="collection">The collection.</param>

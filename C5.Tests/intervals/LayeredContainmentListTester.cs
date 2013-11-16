@@ -48,55 +48,6 @@ namespace C5.Tests.intervals
         }
 
         [TestFixture]
-        //************************************
-        //   0     5    10    15    20    25
-        //   |     |     |     |     |     |
-        //                        F*
-        //            E[----]   
-        //        H(-----)
-        //    B[-----]         
-        //   C[-)
-        //                      D(---]                 
-        //             A[----------]                
-        //...--------------------]G
-        //           
-        //************************************
-        public class LCListIbs : IBS
-        {
-            internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new LayeredContainmentList<IInterval<int>, int>(intervals);
-            }
-
-            [Test]
-            public void Print()
-            {
-                File.WriteAllText(@"../../intervals/data/layered_containment_list.gv", ((LayeredContainmentList<IInterval<int>, int>) IntervalCollection).Graphviz);
-            }
-
-            [Test]
-            public void MaximumOverlap_EmptyCollection_Returns5()
-            {
-                var sw = new Stopwatch();
-                sw.Start();
-                Assert.AreEqual(5, ((LayeredContainmentList<IInterval<int>, int>) IntervalCollection).MaximumOverlap);
-                sw.Stop();
-
-                Console.WriteLine("Time: {0}",
-                    (float) sw.ElapsedMilliseconds
-                );
-
-                sw.Restart();
-                Assert.AreEqual(5, ((LayeredContainmentList<IInterval<int>, int>) IntervalCollection).MaximumOverlap);
-                sw.Stop();
-
-                Console.WriteLine("Time (cached): {0}",
-                    (float) sw.ElapsedMilliseconds
-                );
-            }
-        }
-
-        [TestFixture]
         public class PmoTest
         {
             [Test]

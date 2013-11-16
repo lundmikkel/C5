@@ -40,15 +40,6 @@ namespace C5.Tests.intervals
         }
 
         [TestFixture]
-        public class IBS : intervals.Generic.IBS
-        {
-            internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new NestedContainmentList<IInterval<int>, int>(intervals);
-            }
-        }
-
-        [TestFixture]
         public class Sample100 : intervals.Generic.Sample100
         {
             protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)

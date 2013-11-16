@@ -15,7 +15,7 @@ namespace C5.Tests.intervals_new
         public static IInterval<int> RandomIntInterval()
         {
             var low = Random.Next(Int32.MinValue, Int32.MaxValue);
-            var high = Random.Next(low + 1, Int32.MaxValue);
+            var high = Random.Next(low + 2, Int32.MaxValue);
 
             return new IntervalBase<int>(low, high, (IntervalType) Random.Next(0, 4));
         }

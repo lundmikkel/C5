@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Linq;
-using C5.Tests.intervals_new;
 using C5.intervals;
 using NUnit.Framework;
 
-namespace C5.Tests.intervals
+namespace C5.Tests.intervals_new
 {
     using Interval = IntervalBase<int>;
     using ITH = IntervalTestHelper;
@@ -490,6 +489,23 @@ namespace C5.Tests.intervals
             CollectionAssert.IsEmpty(coll.FindOverlaps(query));
         }
 
+        #region Endpoint Inclusion
+
+        [Test]
+        [Category("Find Overlaps Stabbing")]
+        public void FindOverlapsStabbing_SingleIntervalAllEndpointCombinations_Overlaps()
+        {
+            var interval = ITH.RandomIntInterval();
+            var intervals = Enumerable.Range(0, 4).Select(i => new Interval(interval.Low, interval.High, (IntervalType) i)).ToArray();
+            var coll = CreateCollection(intervals);
+
+            CollectionAssert.AreEquivalent(intervals.Where(x => x.LowIncluded), coll.FindOverlaps(interval.Low));
+            CollectionAssert.AreEquivalent(intervals.Where(x => x.HighIncluded), coll.FindOverlaps(interval.High));
+            CollectionAssert.AreEquivalent(intervals, coll.FindOverlaps(interval.Low / 2 + interval.High / 2));
+        }
+
+        #endregion
+
         #endregion
 
         #region Range
@@ -794,6 +810,59 @@ namespace C5.Tests.intervals
         #endregion
 
         #endregion
+
+        #endregion
+
+        #endregion
+
+        #region Example Cases
+
+        #region IBS Article (Extended)
+
+        [Test]
+        [Category("Example Cases")]
+        public void Stabbing_IntervalBinarySearchTreeArticleExampleExtended_OverlapsAndSpan()
+        {
+            //*****************************
+            //   0     5    10    15    20
+            //   |     |     |     |     |
+            //             A[----------]
+            //    B[-----]
+            //   C[-)
+            //                      D(---]
+            //           E1[----]   
+            //           E2[----]   
+            //                        F|
+            //...--------------------]G
+            //        H(-----)
+            //           
+            //*****************************
+            var intervals = new[]
+                {
+                    new Interval(9, 19, IntervalType.Closed),                   // A
+                    new Interval(2, 7, IntervalType.Closed),                    // B
+                    new Interval(1, 3, IntervalType.LowIncluded),               // C
+                    new Interval(17, 20, IntervalType.HighIncluded),            // D
+                    new Interval(8, 12, IntervalType.Closed),                   // E1
+                    new Interval(8, 12, IntervalType.Closed),                   // E2
+                    new Interval(18),                                           // F
+                    new Interval(int.MinValue, 17, IntervalType.HighIncluded),  // G
+                    new Interval(5, 10, IntervalType.Open)                      // H
+                };
+
+            var coll = CreateCollection(intervals);
+
+            foreach (var point in intervals.UniqueEndpoints())
+            {
+                var expected = intervals.Where(x => x.Overlaps(point));
+                CollectionAssert.AreEquivalent(expected, coll.FindOverlaps(point));
+            }
+
+            var span = new Interval(int.MinValue, 20, false, true);
+            Assert.True(span.IntervalEquals(coll.Span));
+
+            Assert.AreEqual(5, coll.MaximumOverlap);
+        }
 
         #endregion
 

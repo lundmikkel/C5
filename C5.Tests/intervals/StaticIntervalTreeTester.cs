@@ -105,20 +105,6 @@ namespace C5.Tests.intervals
         }
     }
 
-    public class StaticIntervalTreeIBS : IBS
-    {
-        internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-        {
-            return new StaticIntervalTree<IInterval<int>, int>(intervals);
-        }
-
-        [Test]
-        public void Print()
-        {
-            File.WriteAllText(@"../../intervals/data/static_interval_tree.gv", ((StaticIntervalTree<IInterval<int>, int>) IntervalCollection).Graphviz());
-        }
-    }
-
     public class StaticIntervalSample100 : Sample100
     {
         protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)

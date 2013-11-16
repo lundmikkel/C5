@@ -10,22 +10,6 @@ namespace C5.Tests.intervals
 {
     namespace DynamicIntervalTree
     {
-
-        [TestFixture]
-        public class OrcompIntervalTreeIbs : IBS
-        {
-            internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new DynamicIntervalTree<IInterval<int>, int>(intervals);
-            }
-
-            [Test]
-            public void MaximumOverlap_IBS_Returns5()
-            {
-                Assert.AreEqual(5, ((DynamicIntervalTree<IInterval<int>, int>) IntervalCollection).MaximumOverlap);
-            }
-        }
-
         [TestFixture]
         public class EndpointInclusion : IntervaledEndpointInclusion
         {
