@@ -71,6 +71,27 @@ namespace C5.Tests.intervals_new
 
         #region Test Methods
 
+        [Test]
+        [Category("Contracts")]
+        public void Contracts_VerifyPreconditionsAreInAssembly()
+        {
+            const string contractExceptionName = "System.Diagnostics.Contracts.__ContractsRuntime+ContractException";
+            var coll = CreateEmptyCollection<int>();
+
+            try
+            {
+                var overlaps = coll.FindOverlaps(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                if (e.GetType().FullName != contractExceptionName)
+                    throw;
+
+                Assert.Pass();
+            }
+        }
+
         #region Collection Value
 
         #region IsEmpty
