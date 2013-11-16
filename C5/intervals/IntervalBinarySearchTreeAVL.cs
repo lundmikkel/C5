@@ -1019,14 +1019,7 @@ namespace C5.intervals
             if (IsEmpty)
                 throw new NoSuchItemException();
 
-            // At least one of Less, Equal, or Greater will contain at least one interval
-            if (!_root.Less.IsEmpty)
-                return _root.Less.Choose();
-
-            if (!_root.Equal.IsEmpty)
-                return _root.Equal.Choose();
-
-            return _root.Greater.Choose();
+            return _root.IntervalsEndingInNode.Choose();
         }
 
         #endregion
