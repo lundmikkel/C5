@@ -39,15 +39,6 @@ namespace C5.Tests.intervals
         }
 
         [TestFixture]
-        public class LCListEmptyCollection : IntervaledEmptyCollection
-        {
-            internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new LayeredContainmentList<IInterval<int>, int>(intervals);
-            }
-        }
-
-        [TestFixture]
         public class PmoTest
         {
             [Test]

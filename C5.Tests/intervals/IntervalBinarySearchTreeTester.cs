@@ -36,21 +36,6 @@ namespace C5.Tests.intervals
         }
 
         [TestFixture]
-        public class EmptyCollection : IntervaledEmptyCollection
-        {
-            internal override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new IntervalBinarySearchTree<IInterval<int>, int>(intervals);
-            }
-
-            [Test]
-            public void MaximumOverlap_EmptyCollection_Returns0()
-            {
-                Assert.AreEqual(0, ((IntervalBinarySearchTree<IInterval<int>, int>) _intervalCollection).MaximumOverlap);
-            }
-        }
-
-        [TestFixture]
         public class Sample100 : intervals.Generic.Sample100
         {
             protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)

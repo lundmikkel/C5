@@ -110,62 +110,6 @@ namespace C5.Tests.intervals
             }
         }
 
-        public abstract class IntervaledEmptyCollection
-        {
-            protected IIntervalCollection<IntervalOfInt, int> _intervalCollection;
-
-            internal abstract IIntervalCollection<IntervalOfInt, int> Factory(System.Collections.Generic.IEnumerable<IntervalOfInt> intervals);
-
-            [SetUp]
-            public void Init()
-            {
-                // Create Intervaled
-                _intervalCollection = Factory(Enumerable.Empty<IntervalOfInt>());
-            }
-
-            [Test]
-            public void Span_InvalidSpan_ThrowsException()
-            {
-                Assert.Throws<InvalidOperationException>(() => { var span = _intervalCollection.Span; });
-            }
-
-            [Test]
-            public void Overlap_StabMin0Max_ReturnsEmpty()
-            {
-                CollectionAssert.IsEmpty(_intervalCollection.FindOverlaps(int.MinValue));
-                CollectionAssert.IsEmpty(_intervalCollection.FindOverlaps(0));
-                CollectionAssert.IsEmpty(_intervalCollection.FindOverlaps(int.MaxValue));
-            }
-
-            [Test]
-            public void Overlap_InfiniteQuery_ReturnsEmpty()
-            {
-                CollectionAssert.IsEmpty(_intervalCollection.FindOverlaps(new IntervalBase<int>(int.MinValue, int.MaxValue, false, false)));
-            }
-
-            [Test]
-            public void Overlap_RandomQuery_ReturnsEmpty()
-            {
-                CollectionAssert.IsEmpty(_intervalCollection.FindOverlaps(new IntervalBase<int>(0, 5)));
-            }
-
-            // TODO: Test with bad interval? Like (8:8)
-
-            [Test]
-            public void OverlapExists_InfiniteQuery_ReturnsFalse()
-            {
-                IntervalOfInt overlap = null;
-                Assert.IsFalse(_intervalCollection.FindOverlap(new IntervalBase<int>(int.MinValue, int.MaxValue, false, false), ref overlap));
-            }
-
-            [Test]
-            public void OverlapExists_RandomQuery_ReturnsFalse()
-            {
-                IntervalOfInt overlap = null;
-                Assert.IsFalse(_intervalCollection.FindOverlap(new IntervalBase<int>(0, 5), ref overlap));
-            }
-        }
-
         // TODO: Fix naming
         [TestFixture]
         public abstract class Sample100
