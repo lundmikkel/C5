@@ -20,11 +20,23 @@ namespace C5.Tests.intervals_new
             return new IntervalBase<int>(low, high, (IntervalType) Random.Next(0, 4));
         }
 
-        public static IInterval<int>[] RandomIntIntervals(int count)
+        public static IInterval<int>[] ManyIntervals(int count)
         {
             Contract.Ensures(Contract.Result<IEnumerable<IInterval<int>>>().Count() == count);
 
             return Enumerable.Range(0, count).Select(i => RandomIntInterval()).ToArray();
+        }
+
+        public static IInterval<int>[] DuplicateIntervals(int count)
+        {
+            var interval = RandomIntInterval();
+            return Enumerable.Range(0, count).Select(i => new IntervalBase<int>(interval)).ToArray();
+        }
+
+        public static IInterval<int>[] SingleObject(int count)
+        {
+            var interval = RandomIntInterval();
+            return Enumerable.Range(0, count).Select(i => interval).ToArray();
         }
 
         public static IInterval<int> RandomIntPoint()
