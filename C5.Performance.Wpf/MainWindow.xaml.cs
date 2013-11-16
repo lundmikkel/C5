@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Threading;
 using C5.Performance.Wpf.Benchmarks;
 
@@ -18,10 +19,12 @@ namespace C5.Performance.Wpf
         private const int StandardRepeats = 10;
         private int _repeats = StandardRepeats;
         private bool _runWarmups = true;
+        private bool _runSequential = false;
         private const double MaxExecutionTimeInSeconds = 0.25;
         private readonly Plotter _plotter;
         // Every time we benchmark we count this up in order to get a new color for every benchmark
         private int _lineSeriesIndex;
+        private CheckBox runSequential = null;
 
         public MainWindow()
         {
@@ -43,12 +46,16 @@ namespace C5.Performance.Wpf
         private void benchmarkStart(object sender, RoutedEventArgs e)
         {
             // This benchmark is the one we use to compare with Sestoft's cmd line version of the tool
-            var thread = new Thread(() => runBenchmarksParallel(benchmarks()));
+            var thread = _runSequential ?
+                new Thread(() => runBenchmarks(benchmarks())) :
+                new Thread(() => runBenchmarksParallel(benchmarks()));
+            CheckBox checkbox = (CheckBox)this.Controls.Find("checkBox" + input.toString())[0];
             thread.Start();
         }
 
         private void runBenchmarks(params Benchmarkable[] benchmarks)
         {
+            runSequential;
             foreach (var b in benchmarks)
             {
                 _plotter.AddAreaSeries(b.BenchMarkName());
@@ -61,6 +68,8 @@ namespace C5.Performance.Wpf
                     Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
                         _plotter.AddDataPoint(_lineSeriesIndex, benchmark)));
                     Thread.Sleep(100);
+                    _currentCollectionSize = (b.CollectionSize * 1.0) / (MaxCollectionSize * 1.0);
+                    updateProgressBar(benchmarks.Length);
                 }
                 _lineSeriesIndex++;
             }
@@ -152,6 +161,17 @@ namespace C5.Performance.Wpf
         {
             _repeats = StandardRepeats;
             _maxCount = Int32.MaxValue/10;
+        }
+
+        private void CheckBox_Checked_RunSequential(object sender, RoutedEventArgs e)
+        {
+            runSequential = (CheckBox) sender;
+            _runSequential = true;
+        }
+
+        private void CheckBox_Unchecked_RunSequential(object sender, RoutedEventArgs e)
+        {
+            _runSequential = false;
         }
 
         private void ProgressBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

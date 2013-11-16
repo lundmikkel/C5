@@ -19,5 +19,6 @@
         <CheckBox Content="Quick" HorizontalAlignment="Right" Margin="0,0,230,62" VerticalAlignment="Bottom" Checked="CheckBox_Checked_RunQuick" Unchecked="CheckBox_Unchecked_RunQuick" BorderThickness="0" IsChecked="False"/>
         <CheckBox Content="Warmup" HorizontalAlignment="Right" Margin="0,0,215,48" VerticalAlignment="Bottom" Checked="CheckBox_Checked_RunWarmups" Unchecked="CheckBox_Unchecked_RunWarmups" BorderThickness="0" IsChecked="True"/>
         <ProgressBar x:Name="progress" HorizontalAlignment="Right" Height="25" Margin="0,0,305,50" VerticalAlignment="Bottom" Width="200" ValueChanged="ProgressBar_ValueChanged" BorderThickness="0"/>
+        <CheckBox Content="Sequential" HorizontalAlignment="Right" Margin="0,0,205,34" VerticalAlignment="Bottom" Checked="CheckBox_Checked_RunSequential" Unchecked="CheckBox_Unchecked_RunSequential" BorderThickness="0"/>
     </Grid>
 </Window>
