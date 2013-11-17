@@ -534,6 +534,15 @@ namespace C5
             return actualList.IsEmpty;
         }
 
+        [Pure]
+        public static int CountOverlaps<T>(IEnumerable<IInterval<T>> intervals, IInterval<T> query)
+            where T : IComparable<T>
+        {
+            Contract.Requires(query != null);
+            Contract.Requires(intervals != null);
+
+            return intervals.Count(x => x.Overlaps(query));
+        }
 
         public static bool ConfirmAddAll<I, T>(I[] oldCollection, I[] newCollection, IEnumerable<I> intervalsAdded, bool allowsReferenceDuplicates)
             where I : IInterval<T>
