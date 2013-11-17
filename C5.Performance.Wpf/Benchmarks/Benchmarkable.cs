@@ -17,7 +17,7 @@ namespace C5.Performance.Wpf.Benchmarks
 
         public abstract double Call(int i);
 
-        public Benchmark Benchmark(int maxCount, int repeats, double maxExecutionTimeInSeconds, MainWindow caller, bool runWarmup = true)
+        public Benchmark Benchmark(int maxCount, int repeats, double maxExecutionTimeInSeconds, Benchmarker caller, bool runWarmup = true)
         {
             CollectionSetup();
             var count = 1;
@@ -66,7 +66,7 @@ namespace C5.Performance.Wpf.Benchmarks
             var meanTime = elapsedTime/repeats;
             var standardDeviation = Math.Sqrt(elapsedSquaredTime/repeats - meanTime*meanTime)/meanTime*100;
             caller.UpdateRunningLabel("");
-            return new Benchmark(BenchMarkName(), CollectionSize, meanTime, standardDeviation);
+            return new Benchmark(BenchMarkName(), CollectionSize, meanTime, standardDeviation,count);
         }
 
         protected void SystemInfo()
