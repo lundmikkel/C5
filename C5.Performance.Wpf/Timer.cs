@@ -1,5 +1,4 @@
-﻿// Peter Sestoft
-namespace C5.Performance
+﻿namespace C5.Performance.Wpf
 {
     public class Timer
     {
