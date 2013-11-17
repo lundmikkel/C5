@@ -12,7 +12,6 @@ namespace C5.Tests.intervals
     {
         using IntervalOfInt = IInterval<int>;
 
-        // TODO: Fix naming
         [TestFixture]
         public abstract class Sample100
         {
@@ -122,93 +121,6 @@ namespace C5.Tests.intervals
             }
         }
 
-
-        [TestFixture]
-        public abstract class BensTest
-        {
-            // ****************************************
-            // | X axis:                              |
-            // | 0    5    10   15   20   25   30   35|
-            // | |    |    |    |    |    |    |    | |
-            // | Container intervals:                 |
-            // |                [C---]                |
-            // |            [B--]    [D--]            |
-            // |      [A--]                [E--]      |
-            // | Test intervals:                      |
-            // | [---]                                |
-            // | [----]                               |
-            // | [--------]                           |
-            // |      [---]                           |
-            // |       [-]                            |
-            // |          []                          |
-            // |          [-]                         |
-            // |      [---------)                     |
-            // |                                [---] |
-            // |                               [----] |
-            // |                           [--------] |
-            // |                           [---]      |
-            // |                            [-]       |
-            // |                          []          |
-            // |                         [-]          |
-            // |                     [---------]      |
-            // |          [----------------]          |
-            // |      [------------------------]      |
-            // | [----------------------------------]|
-            // | X axis:                              |
-            // | |    |    |    |    |    |    |    | |
-            // | 0    5    10   15   20   25   30   35|
-            // ****************************************
-
-            protected IIntervalCollection<IntervalOfInt, int> _intervalCollection;
-
-            // ReSharper disable InconsistentNaming
-            private static readonly IntervalOfInt A = new IntervalBase<int>(5, 9, true, true);
-            private static readonly IntervalOfInt B = new IntervalBase<int>(11, 15, true, true);
-            private static readonly IntervalOfInt C = new IntervalBase<int>(15, 20, true, true);
-            private static readonly IntervalOfInt D = new IntervalBase<int>(20, 24, true, true);
-            private static readonly IntervalOfInt E = new IntervalBase<int>(26, 30, true, true);
-            // ReSharper restore InconsistentNaming
-
-            protected abstract IIntervalCollection<IntervalOfInt, int> Factory(System.Collections.Generic.IEnumerable<IntervalOfInt> intervals);
-
-            [SetUp]
-            public void Init()
-            {
-                _intervalCollection = Factory(new[] { A, B, C, D, E });
-            }
-
-            [TestCaseSource(typeof(BensTest), "StabCases")]
-            public void Overlap_StabbingAtKeyRanges_ReturnsSpecifiedIntervals_TestCase(IntervalBase<int> range, System.Collections.Generic.IEnumerable<IntervalOfInt> expected)
-            {
-                CollectionAssert.AreEquivalent(expected, _intervalCollection.FindOverlaps(range));
-            }
-
-            public static object[] StabCases()
-            {
-                return new object[] {
-                    new object[] { new IntervalBase<int>(  0,  35, true, true), new[] { A, B, C, D, E }},
-                    new object[] { new IntervalBase<int>(  5,  30, true, true), new[] { A, B, C, D, E }},
-                    new object[] { new IntervalBase<int>(  9,  26, true, true), new[] { A, B, C, D, E }},
-                    new object[] { new IntervalBase<int>( 20,  30, true, true), new[] { C, D, E }},
-                    new object[] { new IntervalBase<int>( 24,  26, true, true), new[] { D, E }},
-                    new object[] { new IntervalBase<int>( 26,  26, true, true), new[] { E }},
-                    new object[] { new IntervalBase<int>( 27,  29, true, true), new[] { E }},
-                    new object[] { new IntervalBase<int>( 26,  30, true, true), new[] { E }},
-                    new object[] { new IntervalBase<int>( 26,  35, true, true), new[] { E }},
-                    new object[] { new IntervalBase<int>( 30,  35, true, true), new[] { E }},
-                    new object[] { new IntervalBase<int>( 31,  35, true, true), Enumerable.Empty<IntervalBase<int>>()},
-                    new object[] { new IntervalBase<int>(  0,   4, true, true), Enumerable.Empty<IntervalBase<int>>()},
-                    new object[] { new IntervalBase<int>(  0,   5, true, true), new[] { A }},
-                    new object[] { new IntervalBase<int>(  0,  10, true, true), new[] { A }},
-                    new object[] { new IntervalBase<int>(  5,   9, true, true), new[] { A }},
-                    new object[] { new IntervalBase<int>(  6,   8, true, true), new[] { A }},
-                    new object[] { new IntervalBase<int>( 10,  10, true, true), Enumerable.Empty<IntervalBase<int>>()},
-                    new object[] { new IntervalBase<int>( 10,  11, true, true), new[] { B }},
-                    new object[] { new IntervalBase<int>(  5,  15, true, false), new[] { A, B }}
-                };
-            }
-        }
-
         public abstract class Performance23333
         {
             protected IIntervalCollection<IntervalOfInt, int> IntervalCollection;
@@ -305,7 +217,6 @@ namespace C5.Tests.intervals
             }
         }
 
-
         public abstract class LargeTest_100000
         {
             protected IIntervalCollection<IntervalOfInt, int> IntervalCollection;
@@ -376,62 +287,5 @@ namespace C5.Tests.intervals
                 };
             }
         }
-
-        namespace Static
-        {
-
-            public abstract class StaticIntervaledEmptyCollection
-            {
-                private IIntervalCollection<IntervalOfInt, int> _intervalCollection;
-
-                protected abstract IIntervalCollection<IntervalOfInt, int> Factory(System.Collections.Generic.IEnumerable<IntervalOfInt> intervals);
-
-                [SetUp]
-                public void Init()
-                {
-                    _intervalCollection = Factory(Enumerable.Empty<IntervalOfInt>());
-                }
-
-                [Test]
-                public void OverlapCount_InfiniteQuery_ReturnsZero()
-                {
-                    Assert.AreEqual(0, _intervalCollection.CountOverlaps(new IntervalBase<int>(int.MinValue, int.MaxValue, false, false)));
-                }
-
-                [Test]
-                public void OverlapCount_RandomQuery_ReturnsZero()
-                {
-                    Assert.AreEqual(0, _intervalCollection.CountOverlaps(new IntervalBase<int>(0, 5)));
-                }
-            }
-        }
     }
-
-    class ExtentionOutputs
-    {
-        [Test]
-        public void Print()
-        {
-            var x = new IntervalBase<int>(1, 5);
-            var y = new IntervalBase<int>(2, 3, true, true);
-
-            x.Overlaps(y); // true
-            y.Overlaps(x); // true
-
-            x.StrictlyContains(y); // true
-            y.StrictlyContains(x); // false
-
-            x.CompareTo(y); // -1
-            y.CompareTo(x); // 1
-
-            x.Equals(y); // false
-
-            x.GetHashCode(); //15734484
-            y.GetHashCode(); //15762354
-
-            x.ToString(); // [1:5)
-            y.ToString(); // [2:3]
-        }
-    }
-
 }

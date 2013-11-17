@@ -123,6 +123,7 @@
     <Compile Include="InterfacesTest.cs" />
     <Compile Include="intervals\Benchmarker.cs" />
     <Compile Include="intervals\DynamicIntervalTreeTester.cs" />
+    <Compile Include="intervals_new\StaticIntervalTreeTester.cs" />
     <Compile Include="intervals_new\IntervalCollectionTester.cs" />
     <Compile Include="intervals\IntervalBinarySearchTreeAvlTester.cs" />
     <Compile Include="intervals\IntervalBinarySearchTreeAvlTester2.cs" />
@@ -133,11 +134,10 @@
     <Compile Include="intervals\IntervalBinarySearchTreeTester.cs" />
     <Compile Include="intervals\IntervalExtensionTester.cs" />
     <Compile Include="intervals\NestedContainmentListTester.cs" />
-    <Compile Include="intervals\StaticIntervalTreeTester.cs" />
     <Compile Include="intervals_new\DynamicIntervalTreeTester.cs" />
     <Compile Include="intervals_new\IntervalBinarySearchTreeTester.cs" />
     <Compile Include="intervals_new\IntervalTestHelper.cs" />
-    <Compile Include="intervals_new\LayeredContainmentList.cs" />
+    <Compile Include="intervals_new\LayeredContainmentListTester.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Records.cs" />
     <Compile Include="Sorting.cs">

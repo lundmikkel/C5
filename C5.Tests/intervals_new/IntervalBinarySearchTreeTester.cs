@@ -1,44 +1,46 @@
 ﻿using System;
-using C5.Tests.intervals;
 using C5.intervals;
 using NUnit.Framework;
 
-namespace C5.Tests.intervals_new.IntervalBinarySearchTree
+namespace C5.Tests.intervals_new
 {
-    #region Black-box
-
-    class IntervalBinarySearchTreeTester_BlackBox : IntervalCollectionTester
+    namespace IntervalBinarySearchTree
     {
-        protected override Type GetCollectionType()
+        #region Black-box
+
+        class IntervalBinarySearchTreeTester_BlackBox : IntervalCollectionTester
         {
-            return typeof(IntervalBinarySearchTreeAvl<,>);
+            protected override Type GetCollectionType()
+            {
+                return typeof(IntervalBinarySearchTreeAvl<,>);
+            }
+
+            protected override bool AllowsReferenceDuplicates()
+            {
+                return false;
+            }
         }
 
-        protected override bool AllowsReferenceDuplicates()
+        #endregion
+
+        #region White-box
+
+        [TestFixture]
+        class IntervalBinarySearchTree
         {
-            return false;
+            [SetUp]
+            public void SetUp()
+            {
+
+            }
+
+            [Test]
+            public void Test()
+            {
+
+            }
         }
+
+        #endregion
     }
-
-    #endregion
-
-    #region White-box
-
-    [TestFixture]
-    class IntervalBinarySearchTree
-    {
-        [SetUp]
-        public void SetUp()
-        {
-
-        }
-
-        [Test]
-        public void Test()
-        {
-
-        }
-    }
-
-    #endregion
 }

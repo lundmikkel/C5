@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Text;
-using C5.Tests.intervals.DynamicIntervalTree;
 using C5.intervals;
 
 namespace C5.Tests.intervals_new

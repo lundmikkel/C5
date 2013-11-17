@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using C5.intervals;
 using NUnit.Framework;
 
@@ -54,14 +51,6 @@ namespace C5.Tests.intervals
 
             foreach (var interval in ints)
                 Console.WriteLine(intervals.Add(interval) ? "Added" : "Not added");*/
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            Console.WriteLine(intervals.QuickGraph);
-
-            File.WriteAllText(@"../../intervals/data/avl/avl-" + intervals.Count + ".gv", intervals.QuickGraph);
         }
     }
 }

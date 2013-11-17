@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using C5.Tests.intervals.Generic;
-using C5.Tests.intervals.Generic.Static;
 using C5.intervals;
 using NUnit.Framework;
 
@@ -20,63 +19,15 @@ namespace C5.Tests.intervals
             [Test]
             public void MinimumCase()
             {
-                var intervaled = new LayeredContainmentList<IInterval<int>, int>(new IInterval<int>[] { new IntervalBase<int>(0, 2, false), new IntervalBase<int>(1, 3, false) });
+                var intervaled = new LayeredContainmentList<IInterval<int>, int>(
+                    new IInterval<int>[] {
+                        new IntervalBase<int>(0, 2, false),
+                        new IntervalBase<int>(1, 3, false)
+                    }
+                );
 
-                Assert.AreEqual(2, intervaled.MaximumOverlap);
                 var interval = new IntervalBase<int>(1, 2, false);
                 Assert.AreEqual(interval, intervaled.IntervalOfMaximumOverlap);
-                Assert.AreEqual(2, intervaled.FindOverlaps(interval).Count());
-            }
-        }
-
-        [TestFixture]
-        public class LCListSample100 : Sample100
-        {
-            protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new LayeredContainmentList<IInterval<int>, int>(intervals);
-            }
-        }
-
-        [TestFixture]
-        public class LCListBensTest : Generic.BensTest
-        {
-            protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new LayeredContainmentList<IInterval<int>, int>(intervals);
-            }
-
-            [Test]
-            public void MaximumOverlap_EmptyCollection_Returns2()
-            {
-                Assert.AreEqual(2, ((LayeredContainmentList<IInterval<int>, int>) _intervalCollection).MaximumOverlap);
-            }
-        }
-
-        [TestFixture]
-        public class LCListStaticEmptyCollection : StaticIntervaledEmptyCollection
-        {
-            protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new LayeredContainmentList<IInterval<int>, int>(intervals);
-            }
-        }
-
-        [TestFixture]
-        public class LCListPerfomance : Performance23333
-        {
-            protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new LayeredContainmentList<IInterval<int>, int>(intervals);
-            }
-        }
-
-        [TestFixture]
-        public class LayeredContainmentList_LargeTest : LargeTest_100000
-        {
-            protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new LayeredContainmentList<IInterval<int>, int>(intervals);
             }
         }
 
@@ -109,12 +60,6 @@ namespace C5.Tests.intervals
                 Console.WriteLine(set);
 
                 Assert.AreEqual(20931, IntervalCollection.FindOverlaps(query).Count());
-            }
-
-            [Test, Ignore]
-            public void Print()
-            {
-                File.WriteAllText(@"../../intervals/data/lclist100000.gv", ((LayeredContainmentList<IInterval<int>, int>) IntervalCollection).Graphviz);
             }
         }
 

@@ -1,66 +1,68 @@
 using System;
-using C5.Tests.intervals;
 using C5.intervals;
 using NUnit.Framework;
 
-namespace C5.Tests.intervals_new.DynamicIntervalTree
+namespace C5.Tests.intervals_new
 {
-    #region Black-box
-
-    class DynamicIntervalTreeTester_BlackBox_ReferenceDuplicatesFalse : IntervalCollectionTester
+    namespace DynamicIntervalTree
     {
-        protected override Type GetCollectionType()
+        #region Black-box
+
+        class DynamicIntervalTreeTester_BlackBox_ReferenceDuplicatesFalse : IntervalCollectionTester
         {
-            return typeof(DynamicIntervalTree<,>);
+            protected override Type GetCollectionType()
+            {
+                return typeof(DynamicIntervalTree<,>);
+            }
+
+            // DIT's standard behavior where we set the ReferenceDuplicates to false
+            protected override object[] AdditionalParameters()
+            {
+                return new object[] { false };
+            }
+
+            protected override bool AllowsReferenceDuplicates()
+            {
+                return false;
+            }
         }
 
-        // DIT's standard behavior where we set the ReferenceDuplicates to false
-        protected override object[] AdditionalParameters()
+        class DynamicIntervalTreeTester_BlackBox_ReferenceDuplicatesTrue : IntervalCollectionTester
         {
-            return new object[] { false };
+            protected override Type GetCollectionType()
+            {
+                return typeof(DynamicIntervalTree<,>);
+            }
+
+            // DIT where we set the ReferenceDuplicates to true
+            protected override object[] AdditionalParameters()
+            {
+                return new object[] { true };
+            }
+
+            protected override bool AllowsReferenceDuplicates()
+            {
+                return true;
+            }
         }
 
-        protected override bool AllowsReferenceDuplicates()
+        #endregion
+
+        #region White-box
+
+        [TestFixture]
+        class DynamicIntervalTreeTester
         {
-            return false;
+            [SetUp]
+            public void SetUp()
+            {
+
+            }
+
+            [Test]
+            public void Test() { }
         }
+
+        #endregion
     }
-
-    class DynamicIntervalTreeTester_BlackBox_ReferenceDuplicatesTrue : IntervalCollectionTester
-    {
-        protected override Type GetCollectionType()
-        {
-            return typeof(DynamicIntervalTree<,>);
-        }
-
-        // DIT where we set the ReferenceDuplicates to true
-        protected override object[] AdditionalParameters()
-        {
-            return new object[] { true };
-        }
-
-        protected override bool AllowsReferenceDuplicates()
-        {
-            return true;
-        }
-    }
-
-    #endregion
-
-    #region White-box
-
-    [TestFixture]
-    class DynamicIntervalTreeTester
-    {
-        [SetUp]
-        public void SetUp()
-        {
-
-        }
-
-        [Test]
-        public void Test() { }
-    }
-
-    #endregion
 }

@@ -71,9 +71,11 @@ namespace C5.Tests.intervals_new
 
         #region Test Methods
 
+        #region Code Contracts
+
         [Test]
-        [Category("Contracts")]
-        public void Contracts_VerifyPreconditionsAreInAssembly()
+        [Category("Code Contracts")]
+        public void CodeContracts_VerifyPreconditionsAreInAssembly()
         {
             const string contractExceptionName = "System.Diagnostics.Contracts.__ContractsRuntime+ContractException";
             var coll = CreateEmptyCollection<int>();
@@ -91,6 +93,8 @@ namespace C5.Tests.intervals_new
                 Assert.Pass();
             }
         }
+
+        #endregion
 
         #region Collection Value
 
@@ -296,19 +300,19 @@ namespace C5.Tests.intervals_new
         [Category("Span")]
         public void Span_NonOverlappingIntervals_JoinedSpan()
         {
+            // TODO: Refactor?
             IInterval<int> interval1, interval2;
-
             do
             {
                 interval1 = ITH.RandomIntInterval();
                 interval2 = ITH.RandomIntInterval();
             } while (interval1.Overlaps(interval2));
 
+            var joinedSpan = interval1.JoinedSpan(interval2);
             var span = CreateCollection(
                     interval1,
                     interval2
                 ).Span;
-            var joinedSpan = interval1.JoinedSpan(interval2);
 
             Assert.True(joinedSpan.IntervalEquals(span));
         }
@@ -317,8 +321,8 @@ namespace C5.Tests.intervals_new
         [Category("Span")]
         public void Span_ContainedInterval_ContainerEqualsSpan()
         {
+            // TODO: Refactor?
             IInterval<int> interval1, interval2;
-
             do
             {
                 interval1 = ITH.RandomIntInterval();
@@ -341,8 +345,9 @@ namespace C5.Tests.intervals_new
         [Category("Maximum Overlap")]
         public void MaximumOverlap_EmptyCollection_Zero()
         {
-            var mno = CreateEmptyCollection<int>().MaximumOverlap;
-            Assert.AreEqual(0, mno);
+            var coll = CreateEmptyCollection<int>();
+
+            Assert.AreEqual(0, coll.MaximumOverlap);
         }
 
         [Test]
@@ -350,8 +355,9 @@ namespace C5.Tests.intervals_new
         public void MaximumOverlap_SingleInterval_One()
         {
             var interval = ITH.RandomIntInterval();
-            var mno = CreateCollection(interval).MaximumOverlap;
-            Assert.AreEqual(1, mno);
+            var coll = CreateCollection(interval);
+
+            Assert.AreEqual(1, coll.MaximumOverlap);
         }
 
         [Test]
@@ -360,9 +366,8 @@ namespace C5.Tests.intervals_new
         {
             var intervals = ITH.SingleObject(Count);
             var coll = CreateCollection(intervals);
-            var mno = coll.MaximumOverlap;
 
-            Assert.AreEqual(coll.AllowsReferenceDuplicates ? Count : 1, mno);
+            Assert.AreEqual(coll.AllowsReferenceDuplicates ? Count : 1, coll.MaximumOverlap);
         }
 
         [Test]
@@ -371,19 +376,32 @@ namespace C5.Tests.intervals_new
         {
             var intervals = ITH.DuplicateIntervals(Count);
             var coll = CreateCollection(intervals);
-            var mno = coll.MaximumOverlap;
 
-            Assert.AreEqual(Count, mno);
+            Assert.AreEqual(Count, coll.MaximumOverlap);
         }
 
         [Test]
         [Category("Maximum Overlap")]
         public void MaximumOverlap_NonOverlappingIntervals_One()
         {
-            var mno = CreateCollection(
-                ITH.NonOverlappingIntervals(Count)
-                ).MaximumOverlap;
-            Assert.AreEqual(1, mno);
+            var intervals = ITH.NonOverlappingIntervals(Count);
+            var coll = CreateCollection(intervals);
+
+            Assert.AreEqual(1, coll.MaximumOverlap);
+        }
+
+        [Test]
+        [Category("Maximum Overlap")]
+        public void MaximumOverlap_BetweenDescreteValues_Two()
+        {
+            var intervals = new[]
+                {
+                    new Interval(1, 3, IntervalType.Open),
+                    new Interval(2, 4, IntervalType.Open)
+                };
+            var coll = CreateCollection(intervals);
+
+            Assert.AreEqual(2, coll.MaximumOverlap);
         }
 
         [Test]
@@ -404,8 +422,8 @@ namespace C5.Tests.intervals_new
             //  |
             // |
             // [--------------]
-
-            var mno = CreateCollection(
+            var intervals = new[]
+                {
                     new Interval(12),
                     new Interval(9, 12, IntervalType.HighIncluded),
                     new Interval(9, 12, IntervalType.Open),
@@ -419,14 +437,15 @@ namespace C5.Tests.intervals_new
                     new Interval(1),
                     new Interval(0),
                     new Interval(0, 15, IntervalType.Closed)
-                ).MaximumOverlap;
+                };
+            var coll = CreateCollection(intervals);
 
-            Assert.AreEqual(4, mno);
+            Assert.AreEqual(4, coll.MaximumOverlap);
         }
 
         [Test]
         [Category("Maximum Overlap")]
-        public void MaximumOverlap_AllContainedIntervals_Four()
+        public void MaximumOverlap_AllContainedIntervals_Count()
         {
             // 0    5   10   15   20
             // 
@@ -440,8 +459,8 @@ namespace C5.Tests.intervals_new
             //   [--------------]
             //  [----------------]
             // [------------------]
-
-            var coll = CreateCollection(
+            var intervals = new[]
+                {
                     new Interval(9, 10, IntervalType.Closed),
                     new Interval(8, 11, IntervalType.Closed),
                     new Interval(7, 12, IntervalType.Closed),
@@ -452,7 +471,8 @@ namespace C5.Tests.intervals_new
                     new Interval(2, 17, IntervalType.Closed),
                     new Interval(1, 18, IntervalType.Closed),
                     new Interval(0, 19, IntervalType.Closed)
-                );
+                };
+            var coll = CreateCollection(intervals);
 
             Assert.AreEqual(coll.Count, coll.MaximumOverlap);
         }
@@ -539,6 +559,78 @@ namespace C5.Tests.intervals_new
             var coll = CreateEmptyCollection<int>();
 
             CollectionAssert.IsEmpty(coll.FindOverlaps(query));
+        }
+
+        [Test]
+        [Category("Find Overlaps Range")]
+        public void BensTest()
+        {
+            // ****************************************
+            // | 0    5   10   15   20   25   30   35 |
+            // | |    |    |    |    |    |    |    | |
+            // | Container intervals:                 |
+            // |                           [E  ]      |
+            // |                     [D  ]            |
+            // |                [C   ]                |
+            // |            [B  ]                     |
+            // |      [A  ]                           |
+            // |                                      |
+            // |                                      |
+            // | Test intervals:                      |
+            // |                                [   ] |
+            // |                               [    ] |
+            // |                            [ ]       |
+            // |                           [        ] |
+            // |                           [   ]      |
+            // |                          []          |
+            // |                         [ ]          |
+            // |                     [         ]      |
+            // |          [                ]          |
+            // |          [ ]                         |
+            // |          []                          |
+            // |       [ ]                            |
+            // |      [                        ]      |
+            // |      [         )                     |
+            // |      [   ]                           |
+            // | [                                   ]|
+            // | [        ]                           |
+            // | [    ]                               |
+            // | [   ]                                |
+            // ****************************************
+            var intervals = new[] {
+                new IntervalBase<int>(5, 9, true, true),
+                new IntervalBase<int>(11, 15, true, true),
+                new IntervalBase<int>(15, 20, true, true),
+                new IntervalBase<int>(20, 24, true, true),
+                new IntervalBase<int>(26, 30, true, true)
+            };
+
+            var coll = CreateCollection(intervals);
+
+            var ranges = new[] {
+                    new Interval(  9,  26, IntervalType.Closed),
+                    new Interval(  5,  30, IntervalType.Closed),
+                    new Interval(  0,  35, IntervalType.Closed),
+                    new Interval( 27,  29, IntervalType.Closed),
+                    new Interval( 26,  30, IntervalType.Closed),
+                    new Interval( 26,  26, IntervalType.Closed),
+                    new Interval( 24,  26, IntervalType.Closed),
+                    new Interval( 20,  30, IntervalType.Closed),
+                    new Interval( 26,  35, IntervalType.Closed),
+                    new Interval( 30,  35, IntervalType.Closed),
+                    new Interval( 31,  35, IntervalType.Closed),
+                    new Interval( 10,  11, IntervalType.Closed),
+                    new Interval( 10,  10, IntervalType.Closed),
+                    new Interval(  6,   8, IntervalType.Closed),
+                    new Interval(  5,  15, IntervalType.LowIncluded),
+                    new Interval(  5,   9, IntervalType.Closed),
+                    new Interval(  0,  10, IntervalType.Closed),
+                    new Interval(  0,   5, IntervalType.Closed),
+                    new Interval(  0,   4, IntervalType.Closed)
+                };
+
+            foreach (var interval in ranges)
+                CollectionAssert.AreEquivalent(intervals.Where(x => x.Overlaps(interval)), coll.FindOverlaps(interval));
         }
 
         #endregion
@@ -883,6 +975,24 @@ namespace C5.Tests.intervals_new
             Assert.True(span.IntervalEquals(coll.Span));
 
             Assert.AreEqual(5, coll.MaximumOverlap);
+
+            if (!coll.IsReadOnly)
+            {
+                // TODO: Finish. This is just the intervals from the old test being added and removed!
+                var additionalIntervals = new[]
+                {
+                    new Interval(1, 2,  IntervalType.Closed),
+                    new Interval(1, 4,  IntervalType.Closed),
+                    new Interval(6, 12, IntervalType.Closed),
+                    new Interval(5, 21, IntervalType.Closed)
+                };
+
+                foreach (var interval in additionalIntervals)
+                {
+                    coll.Add(interval);
+                    coll.Remove(interval);
+                }
+            }
         }
 
         #endregion

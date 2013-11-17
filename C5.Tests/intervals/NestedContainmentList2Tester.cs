@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using C5.Tests.intervals.Generic;
-using C5.Tests.intervals.Generic.Static;
 using C5.intervals;
 using NUnit.Framework;
 
@@ -13,25 +12,7 @@ namespace C5.Tests.intervals
     namespace NestedContainmentList2
     {
         [TestFixture]
-        public class Sample100 : intervals.Generic.Sample100
-        {
-            protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new NestedContainmentList2<IInterval<int>, int>(intervals);
-            }
-        }
-
-        [TestFixture]
-        public class BensTest : intervals.Generic.BensTest
-        {
-            protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new NestedContainmentList2<IInterval<int>, int>(intervals);
-            }
-        }
-
-        [TestFixture]
-        public class StaticEmptyCollection : StaticIntervaledEmptyCollection
+        public class Sample100 : Generic.Sample100
         {
             protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
             {
@@ -94,7 +75,7 @@ namespace C5.Tests.intervals
                             new IntervalOfInt( 0, 20, true, true),
                             new IntervalOfInt( 5, 25, true, true),
                             new IntervalOfInt(10, 15, true, true),
-                            new IntervalOfInt(20, 30, true, true),
+                            new IntervalOfInt(20, 30, true, true)
                         }
                 );
             }
