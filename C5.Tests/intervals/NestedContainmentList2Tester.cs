@@ -11,42 +11,7 @@ namespace C5.Tests.intervals
 
     namespace NestedContainmentList2
     {
-        [TestFixture]
-        public class Sample100 : Generic.Sample100
-        {
-            protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new NestedContainmentList2<IInterval<int>, int>(intervals);
-            }
-        }
-
-        [TestFixture]
-        public class NestedContainmentList2Perfomance : Performance23333
-        {
-            protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new NestedContainmentList2<IInterval<int>, int>(intervals);
-            }
-        }
-
-        [TestFixture]
-        public class NestedContainmentList2100000Perfomance : Performance100000
-        {
-            protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new NestedContainmentList2<IInterval<int>, int>(intervals);
-            }
-        }
-
-        [TestFixture]
-        public class NestedContainmentList2_LargeTest : LargeTest_100000
-        {
-            protected override IIntervalCollection<IInterval<int>, int> Factory(IEnumerable<IInterval<int>> intervals)
-            {
-                return new NestedContainmentList2<IInterval<int>, int>(intervals);
-            }
-        }
-
+        
         //***************************************
         //   0     5    10    15    20    25   30
         //   |     |     |     |     |     |    |
