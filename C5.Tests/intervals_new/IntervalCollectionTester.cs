@@ -673,6 +673,32 @@ namespace C5.Tests.intervals_new
             Assert.IsNull(interval);
         }
 
+        [Test]
+        [Category("Find Overlap Range")]
+        public void FindOverlapRange_ManyIntervals_ChooseOverlapsInCollection()
+        {
+            var intervals = ITH.ManyIntervals(Count);
+            var collection = CreateCollection(intervals);
+            var interval = collection.Choose();
+            IInterval<int> overlap = null;
+            Assert.True(collection.FindOverlap(interval, ref overlap));
+            Assert.True(interval.Overlaps(overlap));
+        }
+
+        [Test]
+        [Category("Find Overlap Range")]
+        public void FindOverlapRange_ManyIntervals_ChooseOverlapsNotInCollection()
+        {
+            var intervals = ITH.ManyIntervals(Count);
+            var collection = CreateCollection(intervals);
+            var interval = ITH.RandomIntInterval();
+            IInterval<int> overlap = null;
+            while (intervals.Any(x => x.Overlaps(interval)))
+                interval = ITH.RandomIntInterval();
+            Assert.False(collection.FindOverlap(interval, ref overlap));
+            Assert.IsNull(overlap);
+        }
+
         #endregion
 
         #endregion
