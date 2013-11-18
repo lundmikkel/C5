@@ -14,15 +14,19 @@ namespace C5.Ucsc
         {
             //var interval = IntervalExtensions.ParseIntInterval("[12:13)");
 
-            //UcscHumanGenomeParser.ParseMafToAlignments("//VBOXSVR/raw/maf.txt", "//VBOXSVR/parsed/maf_compressed.txt");
+            //UcscHumanGenomeParser.ParseMafToAlignments("//VBOXSVR/raw/chr1.maf", "//VBOXSVR/parsed/chr1.compressed.txt");
             //Console.Out.WriteLine(interval);
 
-            var intervals = UcscHumanGenomeParser.ParseCompressedMaf("//VBOXSVR/parsed/chr1.compressed.maf");
-            var lclist = new LayeredContainmentList<UcscHumanGenomeParser.UcscHumanAlignmentGene, int>(intervals);
+            /*
+            UcscHumanGenomeParser.ParseMafToAlignments("//VBOXSVR/raw/maf.txt", "//VBOXSVR/parsed/maf_compressed.txt");
+            /*/
+            var intervals = UcscHumanGenomeParser.ParseCompressedMaf("//VBOXSVR/parsed/chr1.compressed.txt");
+            var lclist = new LayeredContainmentList<UcscHumanGenomeParser.SequenceInterval, int>(intervals);
             Console.Out.WriteLine(lclist.Count);
             Console.Out.WriteLine(lclist.ContainmentDegree);
             Console.Out.WriteLine(lclist.MaximumOverlap);
             Console.Out.WriteLine(lclist.CountOverlaps(270000000));
+            //*/
 
             //Console.Out.WriteLine("Number of intervals: " + File.ReadLines(@"//VBOXSVR/parsed/chr1.compressed.maf").Count());
             //UcscHumanGenomeParser.ParseMaf("//VBOXSVR/raw/chr1.maf", "//VBOXSVR/parsed/maf_compressed.txt");
@@ -34,6 +38,8 @@ namespace C5.Ucsc
             Console.Out.WriteLine("Done creating LCList");
             Console.Out.WriteLine(lclist.Count);
              */
+
+            Console.WriteLine("Done");
             Console.ReadLine();
         }
     }

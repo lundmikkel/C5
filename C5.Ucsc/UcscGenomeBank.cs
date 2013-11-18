@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Text;
 using System.Linq;
@@ -15,24 +16,21 @@ namespace C5.Ucsc
 
     class UcscHumanGenomeParser
     {
-        public static IEnumerable<UcscHumanAlignmentGene> ParseCompressedMaf(string source)
+        public static IEnumerable<SequenceInterval> ParseCompressedMaf(string source)
         {
-            var intervals = new ArrayList<UcscHumanAlignmentGene>(3000000);
+            var intervals = new ArrayList<SequenceInterval>(3000000);
 
             using (var sr = new StreamReader(source))
             {
-                while (!sr.EndOfStream)
+                string line;
+                while ((line = sr.ReadLine()) != null)
                 {
-                    var parts = sr.ReadLine().Split(' ');
+                    var parts = line.Split(' ');
+                    var low = Int32.Parse(parts[2]);
+                    var high = Int32.Parse(parts[3]);
 
-                    var low = Int32.Parse(parts[0]);
-                    var high = Int32.Parse(parts[1]);
-                    //var alignments = parts[2].Split(',').Select(Int32.Parse);
-
-                    intervals.Add(new UcscHumanAlignmentGene(low, high));
-
-                    if (intervals.Count % 100000 == 0)
-                        Console.Out.WriteLine(intervals.Count);
+                    if (low != high)
+                        intervals.Add(new SequenceInterval(String.Empty, low, high));
                 }
             }
 
@@ -96,84 +94,183 @@ namespace C5.Ucsc
             }
         }
 
+        class Alignment
+        {
+            public Alignment(SequenceInterval human, SequenceInterval animal)
+            {
+                Human = human;
+                Animal = animal;
+            }
+
+            public SequenceInterval Human { get; private set; }
+            public SequenceInterval Animal { get; private set; }
+
+            public override string ToString()
+            {
+                return String.Format("{0} {1}", Human, Animal);
+            }
+        }
+
+        public class SequenceInterval : IInterval<int>
+        {
+            #region Properties
+
+            public string Chromosome { get; private set; }
+            public Animal Type { get; private set; }
+            public string Sequence { get; private set; }
+
+            public int Low { get; private set; }
+            public int High { get; private set; }
+            public bool LowIncluded { get { return true; } }
+            public bool HighIncluded { get { return false; } }
+
+            #endregion
+
+            #region Constructors
+
+            public SequenceInterval(string chromosome, int low, int high)
+            {
+                Chromosome = chromosome;
+                Type = ParseAnimal(chromosome);
+                Low = low;
+                High = high;
+            }
+
+            public SequenceInterval(SequenceInterval human, int low, int high)
+            {
+                Chromosome = human.Chromosome;
+                Type = human.Type;
+                Sequence = human.Sequence;
+                Low = low;
+                High = high;
+            }
+
+            private SequenceInterval(string chromosome, int start, int length, string sequence)
+            {
+                Contract.Requires(start >= 0);
+                Contract.Requires(length > 0);
+
+                Chromosome = chromosome;
+                Type = ParseAnimal(chromosome);
+                Low = start;
+                High = start + length;
+                Sequence = sequence;
+            }
+
+            private static Animal ParseAnimal(string chromosome)
+            {
+                var chromosomeParts = chromosome.Split('.');
+
+                switch (chromosomeParts[0])
+                {
+                    case "hg19":
+                        return Animal.Human;
+                    case "panTro2":
+                        return Animal.Chimp;
+                    case "papHam1":
+                        return Animal.Baboon;
+                    case "mm9":
+                        return Animal.Mouse;
+                    case "rn4":
+                        return Animal.Rat;
+                    case "bosTau4":
+                        return Animal.Cow;
+                    case "felCat3":
+                        return Animal.Cat;
+                    case "canFam2":
+                        return Animal.Dog;
+                }
+
+                return Animal.Unknown;
+            }
+
+            #endregion
+
+            #region Factory
+
+            public static SequenceInterval Parse(string line)
+            {
+                var parts = line.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
+
+                var chromosome = parts[1];
+                var start = Int32.Parse(parts[2]);
+                var length = Int32.Parse(parts[3]);
+                var sequence = parts[6];
+
+                return new SequenceInterval(chromosome, start, length, sequence);
+            }
+
+            #endregion
+
+            public override string ToString()
+            {
+                return String.Format("{0} {1} {2} {3}", Type, Chromosome, Low, High);
+            }
+        }
+
         public static void ParseMafToAlignments(string source, string target)
         {
             using (var sr = new StreamReader(source))
+            using (var sw = new StreamWriter(target))
             {
-                using (var sw = new StreamWriter(target))
+                SequenceInterval human = null;
+                string line;
+
+                while ((line = sr.ReadLine()) != null)
                 {
-                    IInterval<int> humanGene = null;
+                    // Skip blank lines and comments
+                    if (String.IsNullOrWhiteSpace(line) && line.StartsWith("#"))
+                        continue;
 
-                    while (!sr.EndOfStream)
+                    // Start of a new alignment block
+                    if (line.StartsWith("a"))
                     {
-                        var line = sr.ReadLine();
+                        // Read next line with human sequence
+                        line = sr.ReadLine();
+                        human = SequenceInterval.Parse(line);
 
-                        // Skip comments
-                        if (line.StartsWith("#"))
-                            continue;
+                        continue;
+                    }
 
-                        // Skip blank lines and comments
-                        if (String.IsNullOrWhiteSpace(line))
-                            continue;
+                    // Parse alignments
+                    if (line.StartsWith("s"))
+                    {
+                        var animal = SequenceInterval.Parse(line);
 
-                        if (line.StartsWith("a"))
-                            continue;
-
-                        if (line.StartsWith("s"))
+                        if (animal.Type != Animal.Unknown)
                         {
-                            var parts = line.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
+                            var alignmentInterval = makeAlignmentInterval(human, animal);
+                            var alignment = new Alignment(alignmentInterval, animal);
 
-                            // Reference 
-                            if (parts[1].Equals("hg19.chr1"))
-                            {
-                                var start = Int32.Parse(parts[2]);
-                                var length = Int32.Parse(parts[3]);
-                                humanGene = new IntervalBase<int>(start, start + length - 1, IntervalType.Closed);
-                            }
-                            else
-                            {
-                                var chromosome = parts[1].Split('.');
-                                var type = Animal.Human;
-                                var match = true;
-
-                                switch (chromosome[0])
-                                {
-                                    case "panTro2":
-                                        type = Animal.Chimp;
-                                        break;
-                                    case "papHam1":
-                                        type = Animal.Baboon;
-                                        break;
-                                    case "mm9":
-                                        type = Animal.Mouse;
-                                        break;
-                                    case "rn4":
-                                        type = Animal.Rat;
-                                        break;
-                                    case "bosTau4":
-                                        type = Animal.Cow;
-                                        break;
-                                    case "felCat3":
-                                        type = Animal.Cat;
-                                        break;
-                                    case "canFam2":
-                                        type = Animal.Dog;
-                                        break;
-                                    default:
-                                        match = false;
-                                        break;
-                                }
-
-                                if (match)
-                                {
-                                    var gene = new UcscAlignmentGene(Int32.Parse(parts[2]), Int32.Parse(parts[3]), type, chromosome[1], humanGene);
-                                    sw.WriteLine(gene.CompactFormat());
-                                }
-                            }
+                            sw.WriteLine(alignment);
                         }
                     }
                 }
             }
+        }
+
+        private static SequenceInterval makeAlignmentInterval(SequenceInterval human, SequenceInterval animal)
+        {
+            var low = human.Low;
+            var high = human.High;
+
+            var i = 0;
+
+            // Make reference interval shorter by incrementing low
+            while (animal.Sequence[i].CompareTo('-') == 0)
+            {
+                if (human.Sequence[i].CompareTo('-') != 0)
+                    low++;
+
+                i++;
+            }
+
+            // Make reference interval shorter by incrementing low
+            for (var j = animal.Sequence.Length - 1; animal.Sequence[j].CompareTo('-') == 0 && i < j; j--)
+                if (human.Sequence[j].CompareTo('-') != 0)
+                    high--;
+
+            return new SequenceInterval(human, low, high);
         }
 
         internal struct UcscHumanAlignmentGene : IInterval<int>
@@ -212,6 +309,8 @@ namespace C5.Ucsc
 
         internal enum Animal
         {
+            Unknown,
+
             [Description("Human")]
             Human,
 
