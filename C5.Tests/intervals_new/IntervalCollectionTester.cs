@@ -49,6 +49,7 @@ namespace C5.Tests.intervals_new
         /// <returns>An object array of the extra parameters.</returns>
         protected virtual object[] AdditionalParameters()
         {
+            Console.Out.WriteLine("No additional parameters.");
             return new object[0];
         }
 
