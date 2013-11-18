@@ -186,6 +186,7 @@ namespace C5
 
         public int MaximumOverlap
         {
+            // TODO: Returns 1 when the collection is not empty, but still has no overlaps. Find a better name?
             get
             {
                 // Result must be non-negative

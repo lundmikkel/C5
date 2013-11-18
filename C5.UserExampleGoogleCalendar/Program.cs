@@ -7,84 +7,78 @@ namespace C5.UserExampleGoogleCalendar
 {
     class Program
     {
-        static void Main(string[] args)
+        /// <summary>
+        /// Creates an interval collection from the intervals found in the calendar at the url. See the calendar at https://www.google.com/calendar/embed?src=bechmellson.com_eoauecnh84i50tbftksd5bfdl4@group.calendar.google.com&ctz=Europe/Copenhagen
+        /// </summary>
+        public static void Main(string[] args)
         {
-            // Interval Calendar - see it at https://www.google.com/calendar/embed?src=bechmellson.com_eoauecnh84i50tbftksd5bfdl4@group.calendar.google.com&ctz=Europe/Copenhagen
             const string url = "http://www.google.com/calendar/ical/bechmellson.com_eoauecnh84i50tbftksd5bfdl4%40group.calendar.google.com/public/basic.ics";
-            var events = GetCalendarEvents(url);
+
+            var events = getCalendarEvents(url);
             foreach (var e in events)
                 Console.Out.WriteLine(e);
             Console.Out.WriteLine();
+            Console.Out.WriteLine(events);
 
-            var dit = eventsToDITCollenction(events);
-            
-            // TODO skal overlap returnere 0 eller 1 ved intet overlap?
-            Console.Out.WriteLine(dit.MaximumOverlap);
+            var coll = new DynamicIntervalTree<CalendarEvent, DateTime>(events);
+            Console.Out.WriteLine(coll.MaximumOverlap);
             Console.ReadLine();
         }
 
-        private static IIntervalCollection<IInterval<DateTime>, DateTime> eventsToDITCollenction(List<CalendarEvent> events)
+        class CalendarEvent : IInterval<DateTime>
         {
-            var dit = new DynamicIntervalTree<IInterval<DateTime>, DateTime>();
-            foreach (var e in events)
+            public string Title { get; private set; }
+            public DateTime Low { get; private set; }
+            public DateTime High { get; private set; }
+            public bool LowIncluded { get { return true; } }
+            public bool HighIncluded { get { return false; } }
+            public TimeSpan Length { get { return High.Subtract(Low); } }
+
+            public CalendarEvent(string title, DateTime startTime, DateTime endTime)
             {
-                dit.Add(new IntervalBase<DateTime>(e.StartTime,e.EndTime, lowIncluded: true, highIncluded: true));
+                Title = title;
+                Low = startTime;
+                High = endTime;
             }
-            return dit;
+
+            public override string ToString()
+            {
+                return IntervalExtensions.ToString(this) + " Length = " + Length;
+            }
         }
 
-        private static List<CalendarEvent> GetCalendarEvents(string url)
+        private static IEnumerable<CalendarEvent> getCalendarEvents(string url)
         {
+            // In case of IOException take a look here: http://stackoverflow.com/questions/14432079/wcf-the-specified-registry-key-does-not-exist-in-base-channel-call#14432540
             var contents = new WebClient().DownloadString(url);
+            // All the parsed events
+            var events = new ArrayList<CalendarEvent>();
 
-            // Example datestring from the feed to get the correct length for parsing
-            var dsLen = "20131114T123000Z".Length;
-            var dates = new List<DateTime>();
+            // Example datestring to get the correct length for parsing
+            var dsLen = @"19700101T000000Z".Length;
             var index = contents.IndexOf("DTSTART:", StringComparison.Ordinal);
+
             do
             {
-                dates.Add(stringToDate(contents.Substring(index + "DTSTART:".Length, dsLen)));
+                // TODO: Parse title
+                var title = String.Empty;
+                var low = stringToDate(contents.Substring(index + "DTSTART:".Length, dsLen));
                 contents = contents.Substring(index + dsLen + "DTEND:".Length + "DTSTART:".Length + "\r\n".Length);
-                dates.Add(stringToDate(contents.Substring(0, dsLen)));
+                var high = stringToDate(contents.Substring(0, dsLen));
+
+                // Create and add calendar event to list
+                events.Add(new CalendarEvent(title, low, high));
+
                 index = contents.IndexOf("DTSTART:", StringComparison.Ordinal);
             } while (index >= 0);
-            return parseCalendarFeed(dates);
+
+            return events;
         }
 
         private static DateTime stringToDate(String dateString)
         {
             var correctedDateString = dateString.Substring(0, dateString.Length - 3).Insert(4, "-").Insert(7, "-").Insert(13, ":");
             return DateTime.Parse(correctedDateString).AddHours(1);
-        }
-
-        class CalendarEvent
-        {
-            public DateTime StartTime { get; private set; }
-            public DateTime EndTime { get; private set; }
-
-            public TimeSpan Length()
-            {
-                return EndTime.Subtract(StartTime);
-            }
-
-            public CalendarEvent(DateTime startTime, DateTime endTime)
-            {
-                StartTime = startTime;
-                EndTime = endTime;
-            }
-
-            public override string ToString()
-            {
-                return StartTime + " -> " + EndTime + " Length = " + Length();
-            }
-        }
-
-        private static List<CalendarEvent> parseCalendarFeed(List<DateTime> dates)
-        {
-            var events = new List<CalendarEvent>();
-            for (var i = 0; i < dates.Count; i += 2)
-                events.Add(new CalendarEvent(dates[i], dates[i + 1]));
-            return events;
         }
     }
 }
