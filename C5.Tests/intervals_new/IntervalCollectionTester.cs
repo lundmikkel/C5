@@ -637,6 +637,30 @@ namespace C5.Tests.intervals_new
                 CollectionAssert.AreEquivalent(intervals.Where(x => x.Overlaps(interval)), coll.FindOverlaps(interval));
         }
 
+        [Test]
+        [Category("Find Overlaps Range")]
+        public void FindOverlapsRange_ManyIntervals_ChooseOverlapsInCollection()
+        {
+            var intervals = ITH.ManyIntervals(Count);
+            var collection = CreateCollection(intervals);
+            var interval = collection.Choose();
+            var overlappingIntervals = collection.FindOverlaps(interval);
+            Assert.True(overlappingIntervals.Count().CompareTo(0) == 1);
+        }
+        
+        [Test]
+        [Category("Find Overlaps Range")]
+        public void FindOverlapsRange_ManyIntervals_ChooseOverlapsNotInCollection()
+        {
+            var intervals = ITH.ManyIntervals(Count);
+            var collection = CreateCollection(intervals);
+            var interval = ITH.RandomIntInterval();
+            while (intervals.Any(x => x.Overlaps(interval)))
+                interval = ITH.RandomIntInterval();
+            var overlappingIntervals = collection.FindOverlaps(interval);
+            Assert.True(overlappingIntervals.Count().Equals(0));
+        }
+
         #endregion
 
         #endregion
@@ -673,6 +697,32 @@ namespace C5.Tests.intervals_new
             Assert.IsNull(interval);
         }
 
+        [Test]
+        [Category("Find Overlap Range")]
+        public void FindOverlapRange_ManyIntervals_ChooseOverlapsInCollection()
+        {
+            var intervals = ITH.ManyIntervals(Count);
+            var collection = CreateCollection(intervals);
+            var interval = collection.Choose();
+            IInterval<int> overlap = null;
+            Assert.True(collection.FindOverlap(interval, ref overlap));
+            Assert.True(interval.Overlaps(overlap));
+        }
+
+        [Test]
+        [Category("Find Overlap Range")]
+        public void FindOverlapRange_ManyIntervals_ChooseOverlapsNotInCollection()
+        {
+            var intervals = ITH.ManyIntervals(Count);
+            var collection = CreateCollection(intervals);
+            var interval = ITH.RandomIntInterval();
+            IInterval<int> overlap = null;
+            while (intervals.Any(x => x.Overlaps(interval)))
+                interval = ITH.RandomIntInterval();
+            Assert.False(collection.FindOverlap(interval, ref overlap));
+            Assert.IsNull(overlap);
+        }
+
         #endregion
 
         #endregion
@@ -703,6 +753,30 @@ namespace C5.Tests.intervals_new
             var coll = CreateEmptyCollection<int>();
 
             Assert.AreEqual(0, coll.CountOverlaps(query));
+        }
+
+        [Test]
+        [Category("Count Overlaps Range")]
+        public void CountOverlapsRange_ManyIntervals_ChooseOverlapsInCollection()
+        {
+            var intervals = ITH.ManyIntervals(Count);
+            var collection = CreateCollection(intervals);
+            var interval = collection.Choose();
+            var numberOfoverlappingIntervals = collection.CountOverlaps(interval);
+            Assert.True(numberOfoverlappingIntervals.CompareTo(0) == 1);
+        }
+
+        [Test]
+        [Category("Count Overlaps Range")]
+        public void CountOverlapsRange_ManyIntervals_ChooseOverlapsNotInCollection()
+        {
+            var intervals = ITH.ManyIntervals(Count);
+            var collection = CreateCollection(intervals);
+            var interval = ITH.RandomIntInterval();
+            while (intervals.Any(x => x.Overlaps(interval)))
+                interval = ITH.RandomIntInterval();
+            var numberOfoverlappingIntervals = collection.CountOverlaps(interval);
+            Assert.True(numberOfoverlappingIntervals.Equals(0));
         }
 
         #endregion
