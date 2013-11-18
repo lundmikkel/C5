@@ -22,14 +22,17 @@ namespace C5.Tests.intervals_new
 
         #region Meta
 
-        // TODO: Should we seed it with a fix seed to make the tests repeatable?
-        private readonly Random _random = new Random();
+        private Random _random;
 
         private int Count { get; set; }
 
         [SetUp]
         public void SetUp()
         {
+            var seed = new Random().Next(Int32.MinValue, Int32.MaxValue);
+            _random = new Random(seed);
+            Console.Out.WriteLine("Seed: {0}", seed);
+
             Count = _random.Next(10, 20);
         }
 
