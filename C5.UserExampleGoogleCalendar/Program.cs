@@ -45,7 +45,7 @@ namespace C5.UserExampleGoogleCalendar
 
             public override string ToString()
             {
-                return IntervalExtensions.ToString(this) + " Length = " + Length;
+                return IntervalExtensions.ToString(this) + " Length = " + Length + " Title = " + Title;
             }
         }
 
@@ -62,11 +62,12 @@ namespace C5.UserExampleGoogleCalendar
 
             do
             {
-                // TODO: Parse title
-                var title = String.Empty;
                 var low = stringToDate(contents.Substring(index + "DTSTART:".Length, dsLen));
                 contents = contents.Substring(index + dsLen + "DTEND:".Length + "DTSTART:".Length + "\r\n".Length);
                 var high = stringToDate(contents.Substring(0, dsLen));
+                var titleIndex = contents.IndexOf("SUMMARY:", System.StringComparison.Ordinal);
+                var title = contents.Substring(titleIndex + "SUMMARY:".Length);
+                title = title.Substring(0, title.IndexOf("\r", System.StringComparison.Ordinal));
 
                 // Create and add calendar event to list
                 events.Add(new CalendarEvent(title, low, high));
