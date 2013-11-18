@@ -12,7 +12,12 @@ namespace C5.UserExampleGoogleCalendar
         /// </summary>
         public static void Main(string[] args)
         {
+            // Google Calendar Feed
             const string url = "http://www.google.com/calendar/ical/bechmellson.com_eoauecnh84i50tbftksd5bfdl4%40group.calendar.google.com/public/basic.ics";
+
+            // Anders FaceBook events - see how to get your URL here http://www.askdavetaylor.com/subscribe_to_facebook_calendar_ical/
+            //const string url = "http://www.facebook.com/ical/u.php?uid=100002201102330&key=AQC8FQYGgkuL2Ajy";
+            
             // Parse url
             var events = parseUrlToCalendarEvents(url);
 
@@ -52,7 +57,8 @@ namespace C5.UserExampleGoogleCalendar
         private static IEnumerable<CalendarEvent> parseUrlToCalendarEvents(string url)
         {
             // In case of IOException take a look here: http://stackoverflow.com/questions/14432079/wcf-the-specified-registry-key-does-not-exist-in-base-channel-call#14432540
-            var contents = new WebClient().DownloadString(url);
+            var webclient = new WebClient {Encoding = System.Text.Encoding.UTF8};
+            var contents = webclient.DownloadString(url);
             // All the parsed events
             var events = new ArrayList<CalendarEvent>();
 
@@ -65,9 +71,9 @@ namespace C5.UserExampleGoogleCalendar
                 var low = stringToDate(contents.Substring(index + "DTSTART:".Length, dsLen));
                 contents = contents.Substring(index + dsLen + "DTEND:".Length + "DTSTART:".Length + "\r\n".Length);
                 var high = stringToDate(contents.Substring(0, dsLen));
-                var titleIndex = contents.IndexOf("SUMMARY:", System.StringComparison.Ordinal);
+                var titleIndex = contents.IndexOf("SUMMARY:", StringComparison.Ordinal);
                 var title = contents.Substring(titleIndex + "SUMMARY:".Length);
-                title = title.Substring(0, title.IndexOf("\r", System.StringComparison.Ordinal));
+                title = title.Substring(0, title.IndexOf("\r"));
 
                 // Create and add calendar event to list
                 events.Add(new CalendarEvent(title, low, high));
