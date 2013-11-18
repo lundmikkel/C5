@@ -13,13 +13,15 @@ namespace C5.UserExampleGoogleCalendar
         public static void Main(string[] args)
         {
             const string url = "http://www.google.com/calendar/ical/bechmellson.com_eoauecnh84i50tbftksd5bfdl4%40group.calendar.google.com/public/basic.ics";
+            // Parse url
+            var events = parseUrlToCalendarEvents(url);
 
-            var events = getCalendarEvents(url);
+            // Print events
             foreach (var e in events)
                 Console.Out.WriteLine(e);
             Console.Out.WriteLine();
-            Console.Out.WriteLine(events);
 
+            // Create interval collection
             var coll = new DynamicIntervalTree<CalendarEvent, DateTime>(events);
             Console.Out.WriteLine(coll.MaximumOverlap);
             Console.ReadLine();
@@ -47,7 +49,7 @@ namespace C5.UserExampleGoogleCalendar
             }
         }
 
-        private static IEnumerable<CalendarEvent> getCalendarEvents(string url)
+        private static IEnumerable<CalendarEvent> parseUrlToCalendarEvents(string url)
         {
             // In case of IOException take a look here: http://stackoverflow.com/questions/14432079/wcf-the-specified-registry-key-does-not-exist-in-base-channel-call#14432540
             var contents = new WebClient().DownloadString(url);
