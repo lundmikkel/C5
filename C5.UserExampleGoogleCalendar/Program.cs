@@ -27,14 +27,14 @@ namespace C5.UserExampleGoogleCalendar
             Console.ReadLine();
         }
 
-        class CalendarEvent : IInterval<DateTime>
+        class CalendarEvent : IInterval<DateTime>, IComparable<CalendarEvent>
         {
             public string Title { get; private set; }
             public DateTime Low { get; private set; }
             public DateTime High { get; private set; }
             public bool LowIncluded { get { return true; } }
             public bool HighIncluded { get { return false; } }
-            public TimeSpan Length { get { return High.Subtract(Low); } }
+            public TimeSpan Duration { get { return High.Subtract(Low); } }
 
             public CalendarEvent(string title, DateTime startTime, DateTime endTime)
             {
@@ -43,9 +43,14 @@ namespace C5.UserExampleGoogleCalendar
                 High = endTime;
             }
 
+            public int CompareTo(CalendarEvent other)
+            {
+                return IntervalExtensions.CompareTo(this, other);
+            }
+
             public override string ToString()
             {
-                return IntervalExtensions.ToString(this) + " Length = " + Length + " Title = " + Title;
+                return String.Format("{0,-15}: {1} (duration: {2})", Title, IntervalExtensions.ToString(this), Duration);
             }
         }
 
@@ -75,7 +80,11 @@ namespace C5.UserExampleGoogleCalendar
                 index = contents.IndexOf("DTSTART:", StringComparison.Ordinal);
             } while (index >= 0);
 
-            return events;
+            // Sort events
+            var eventArray = events.ToArray();
+            Sorting.IntroSort(eventArray);
+
+            return eventArray;
         }
 
         private static DateTime stringToDate(String dateString)
