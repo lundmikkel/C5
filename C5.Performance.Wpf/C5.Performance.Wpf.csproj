@@ -137,12 +137,10 @@
     <Compile Include="Benchmarks\IbsAddBenchmarker.cs" />
     <Compile Include="Benchmarks\IbsAvlRandomRemoveBenchmarker.cs" />
     <Compile Include="Benchmarks\IbsAvlAddBenchmarker.cs" />
-    <Compile Include="Benchmarks\JITCheater.cs" />
     <Compile Include="Benchmarks\LCListEnumeratorSorted.cs" />
-    <Compile Include="SestoftBenchmark.cs" />
     <Compile Include="Benchmarks\DynamicTreeRandomRemoveBenchmarker.cs" />
     <Compile Include="Timer.cs" />
-    <Page Include="MainWindow.xaml">
+    <Page Include="Benchmarker.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -153,8 +151,8 @@
     <Compile Include="Benchmarks\SearchAndSort.cs" />
     <Compile Include="Benchmarks\SearchScalability.cs" />
     <Compile Include="Benchmarks\SimpleBenchmark.cs" />
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
+    <Compile Include="Benchmarker.xaml.cs">
+      <DependentUpon>Benchmarker.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
