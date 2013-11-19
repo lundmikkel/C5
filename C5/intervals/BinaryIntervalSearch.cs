@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace C5.intervals
 {
+    // TODO: Finish data strucutre
     public class BinaryIntervalSearch<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
         where I : IInterval<T>
         where T : IComparable<T>
@@ -269,7 +270,7 @@ namespace C5.intervals
         public bool FindOverlap(IInterval<T> query, ref I overlap)
         {
             // No overlap if query is null, collection is empty, or query doesn't overlap collection
-            if (query == null || IsEmpty || !query.Overlaps(Span))
+            if (IsEmpty || !query.Overlaps(Span))
                 return false;
 
             // Find first overlap

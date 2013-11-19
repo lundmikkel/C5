@@ -7,6 +7,7 @@ namespace C5.Tests.intervals_new
     {
         #region Black-box
 
+        /*
         class BinaryIntervalSearchTester_BlackBox : IntervalCollectionTester
         {
             protected override Type GetCollectionType()
@@ -19,6 +20,7 @@ namespace C5.Tests.intervals_new
                 return true;
             }
         }
+        */
 
         #endregion
     }

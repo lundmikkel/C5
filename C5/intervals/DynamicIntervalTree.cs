@@ -483,9 +483,6 @@ namespace C5.intervals
                 // Check that there is a reference equal interval in the collection
                 Contract.Ensures(Contract.Result<bool>() == Contract.Exists(_dictionary, keyValuePair => ReferenceEquals(keyValuePair.Key, interval) || keyValuePair.Value != null && Contract.Exists(keyValuePair.Value, x => ReferenceEquals(x, interval))));
 
-                if (IsEmpty)
-                    return false;
-
                 var key = interval;
                 ArrayList<I> list;
                 if (_dictionary.Find(ref key, out list))
@@ -1210,16 +1207,16 @@ namespace C5.intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
-            if (query == null)
+            if (IsEmpty)
                 return Enumerable.Empty<I>();
 
-            return FindOverlaps(new IntervalBase<T>(query));
+            return findOverlaps(new IntervalBase<T>(query), _root);
         }
 
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
-            if (IsEmpty || query == null)
+            if (IsEmpty)
                 return Enumerable.Empty<I>();
 
             return findOverlaps(query, _root);
@@ -1228,7 +1225,6 @@ namespace C5.intervals
         /// <inheritdoc/>
         private static IEnumerable<I> findOverlaps(IInterval<T> query, Node root)
         {
-            Contract.Requires(query != null);
             Contract.Requires(root != null);
 
             // Query is to the left of root's Low
