@@ -50,6 +50,7 @@ namespace C5.intervals
         private readonly Node _root;
         private readonly int _count;
         private IInterval<T> _span;
+        private int _maximumOverlap = -1;
 
         #region Node nested classes
 
@@ -317,6 +318,7 @@ namespace C5.intervals
 
         private int _nodeCounter;
         private int _nullCounter;
+
         private string graphviz(Node root, string parent)
         {
             // Leaf
@@ -392,7 +394,38 @@ namespace C5.intervals
         /// <inheritdoc/>
         public int MaximumOverlap
         {
-            get { throw new NotSupportedException(); }
+            get
+            {
+                if (_maximumOverlap < 0)
+                    _maximumOverlap = findMaximumOverlap();
+
+                return _maximumOverlap;
+            }
+        }
+
+        private int findMaximumOverlap()
+        {
+            // Check MNO is correct
+            var max = 0;
+
+            // Create queue sorted on high intervals
+            var highComparer = ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareHigh);
+            var queue = new IntervalHeap<IInterval<T>>(highComparer);
+
+            // Loop through intervals in sorted order
+            foreach (var interval in ToArray())
+            {
+                // Remove all intervals from the queue not overlapping the current interval
+                while (!queue.IsEmpty && interval.CompareLowHigh(queue.FindMin()) > 0)
+                    queue.DeleteMin();
+
+                queue.Add(interval);
+
+                if (queue.Count > max)
+                    max = queue.Count;
+            }
+
+            return max;
         }
 
         /// <inheritdoc/>
