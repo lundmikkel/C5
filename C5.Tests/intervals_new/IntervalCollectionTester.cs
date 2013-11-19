@@ -82,11 +82,11 @@ namespace C5.Tests.intervals_new
         public void CodeContracts_VerifyPreconditionsAreInAssembly()
         {
             const string contractExceptionName = "System.Diagnostics.Contracts.__ContractsRuntime+ContractException";
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
             try
             {
-                var overlaps = coll.FindOverlaps(null);
+                var overlaps = collection.FindOverlaps(null);
                 Assert.Fail();
             }
             catch (Exception e)
@@ -111,9 +111,9 @@ namespace C5.Tests.intervals_new
         [Category("Count")]
         public void Count_EmptyCollection_Zero()
         {
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            Assert.AreEqual(0, coll.Count);
+            Assert.AreEqual(0, collection.Count);
         }
 
         [Test]
@@ -121,9 +121,9 @@ namespace C5.Tests.intervals_new
         public void Count_SingleInterval_One()
         {
             var interval = ITH.RandomIntInterval();
-            var coll = CreateCollection(interval);
+            var collection = CreateCollection(interval);
 
-            Assert.AreEqual(1, coll.Count);
+            Assert.AreEqual(1, collection.Count);
         }
 
         [Test]
@@ -131,9 +131,9 @@ namespace C5.Tests.intervals_new
         public void Count_SingleObject_CountOrOne()
         {
             var intervals = ITH.SingleObject(Count);
-            var coll = CreateCollection(intervals);
+            var collection = CreateCollection(intervals);
 
-            Assert.AreEqual(coll.AllowsReferenceDuplicates ? Count : 1, coll.Count);
+            Assert.AreEqual(collection.AllowsReferenceDuplicates ? Count : 1, collection.Count);
         }
 
         [Test]
@@ -141,9 +141,9 @@ namespace C5.Tests.intervals_new
         public void Count_DuplicateIntervals_Count()
         {
             var intervals = ITH.DuplicateIntervals(Count);
-            var coll = CreateCollection(intervals);
+            var collection = CreateCollection(intervals);
 
-            Assert.AreEqual(Count, coll.Count);
+            Assert.AreEqual(Count, collection.Count);
         }
 
         [Test]
@@ -151,9 +151,9 @@ namespace C5.Tests.intervals_new
         public void Count_ManyIntervals_Count()
         {
             var intervals = ITH.ManyIntervals(Count);
-            var coll = CreateCollection(intervals);
+            var collection = CreateCollection(intervals);
 
-            Assert.AreEqual(Count, coll.Count);
+            Assert.AreEqual(Count, collection.Count);
         }
 
         #endregion
@@ -176,8 +176,8 @@ namespace C5.Tests.intervals_new
         public void Choose_SingleInterval_IntervalIsSameAsChoose()
         {
             var interval = ITH.RandomIntInterval();
-            var coll = CreateCollection(interval);
-            var choose = coll.Choose();
+            var collection = CreateCollection(interval);
+            var choose = collection.Choose();
 
             Assert.AreSame(interval, choose);
         }
@@ -187,8 +187,8 @@ namespace C5.Tests.intervals_new
         public void Choose_SingleObject_IntervalsAreSameAsChoose()
         {
             var intervals = ITH.SingleObject(Count);
-            var coll = CreateCollection(intervals);
-            var choose = coll.Choose();
+            var collection = CreateCollection(intervals);
+            var choose = collection.Choose();
 
             Assert.True(intervals.All(x => ReferenceEquals(x, choose)));
         }
@@ -198,8 +198,8 @@ namespace C5.Tests.intervals_new
         public void Choose_DuplicateIntervals_OneIntervalIsSameAsChoose()
         {
             var intervals = ITH.ManyIntervals(Count);
-            var coll = CreateCollection(intervals);
-            var choose = coll.Choose();
+            var collection = CreateCollection(intervals);
+            var choose = collection.Choose();
 
             Assert.AreEqual(1, intervals.Count(x => ReferenceEquals(x, choose)));
         }
@@ -209,8 +209,8 @@ namespace C5.Tests.intervals_new
         public void Choose_ManyIntervals_OneIntervalIsSameAsChoose()
         {
             var intervals = ITH.ManyIntervals(Count);
-            var coll = CreateCollection(intervals);
-            var choose = coll.Choose();
+            var collection = CreateCollection(intervals);
+            var choose = collection.Choose();
 
             Assert.AreEqual(1, intervals.Count(x => ReferenceEquals(x, choose)));
         }
@@ -225,9 +225,9 @@ namespace C5.Tests.intervals_new
         [Category("Enumerable")]
         public void Enumerable_EmptyCollection_Empty()
         {
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            CollectionAssert.IsEmpty(coll);
+            CollectionAssert.IsEmpty(collection);
         }
 
         [Test]
@@ -235,9 +235,9 @@ namespace C5.Tests.intervals_new
         public void Enumerable_SingleInterval_AreEqual()
         {
             var interval = ITH.RandomIntInterval();
-            var coll = CreateCollection(interval);
+            var collection = CreateCollection(interval);
 
-            CollectionAssert.AreEqual(new[] { interval }, coll);
+            CollectionAssert.AreEqual(new[] { interval }, collection);
         }
 
         [Test]
@@ -245,12 +245,12 @@ namespace C5.Tests.intervals_new
         public void Enumerable_SingleObject_AreEquivalent()
         {
             var intervals = ITH.SingleObject(Count);
-            var coll = CreateCollection(intervals);
+            var collection = CreateCollection(intervals);
 
-            if (coll.AllowsReferenceDuplicates)
-                CollectionAssert.AreEquivalent(intervals, coll);
+            if (collection.AllowsReferenceDuplicates)
+                CollectionAssert.AreEquivalent(intervals, collection);
             else
-                CollectionAssert.AreEquivalent(new[] { intervals.First() }, coll);
+                CollectionAssert.AreEquivalent(new[] { intervals.First() }, collection);
         }
 
         [Test]
@@ -258,9 +258,9 @@ namespace C5.Tests.intervals_new
         public void Enumerable_DuplicateIntervals_AreEquivalent()
         {
             var intervals = ITH.DuplicateIntervals(Count);
-            var coll = CreateCollection(intervals);
+            var collection = CreateCollection(intervals);
 
-            CollectionAssert.AreEquivalent(intervals, coll);
+            CollectionAssert.AreEquivalent(intervals, collection);
         }
 
         [Test]
@@ -268,9 +268,9 @@ namespace C5.Tests.intervals_new
         public void Enumerable_ManyIntervals_AreEquivalent()
         {
             var intervals = ITH.ManyIntervals(Count);
-            var coll = CreateCollection(intervals);
+            var collection = CreateCollection(intervals);
 
-            CollectionAssert.AreEquivalent(intervals, coll);
+            CollectionAssert.AreEquivalent(intervals, collection);
         }
 
         #endregion
@@ -349,9 +349,9 @@ namespace C5.Tests.intervals_new
         [Category("Maximum Overlap")]
         public void MaximumOverlap_EmptyCollection_Zero()
         {
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            Assert.AreEqual(0, coll.MaximumOverlap);
+            Assert.AreEqual(0, collection.MaximumOverlap);
         }
 
         [Test]
@@ -359,9 +359,9 @@ namespace C5.Tests.intervals_new
         public void MaximumOverlap_SingleInterval_One()
         {
             var interval = ITH.RandomIntInterval();
-            var coll = CreateCollection(interval);
+            var collection = CreateCollection(interval);
 
-            Assert.AreEqual(1, coll.MaximumOverlap);
+            Assert.AreEqual(1, collection.MaximumOverlap);
         }
 
         [Test]
@@ -369,9 +369,9 @@ namespace C5.Tests.intervals_new
         public void MaximumOverlap_SingleObject_CountOrOne()
         {
             var intervals = ITH.SingleObject(Count);
-            var coll = CreateCollection(intervals);
+            var collection = CreateCollection(intervals);
 
-            Assert.AreEqual(coll.AllowsReferenceDuplicates ? Count : 1, coll.MaximumOverlap);
+            Assert.AreEqual(collection.AllowsReferenceDuplicates ? Count : 1, collection.MaximumOverlap);
         }
 
         [Test]
@@ -379,9 +379,9 @@ namespace C5.Tests.intervals_new
         public void MaximumOverlap_DuplicateIntervals_Count()
         {
             var intervals = ITH.DuplicateIntervals(Count);
-            var coll = CreateCollection(intervals);
+            var collection = CreateCollection(intervals);
 
-            Assert.AreEqual(Count, coll.MaximumOverlap);
+            Assert.AreEqual(Count, collection.MaximumOverlap);
         }
 
         [Test]
@@ -389,9 +389,9 @@ namespace C5.Tests.intervals_new
         public void MaximumOverlap_NonOverlappingIntervals_One()
         {
             var intervals = ITH.NonOverlappingIntervals(Count);
-            var coll = CreateCollection(intervals);
+            var collection = CreateCollection(intervals);
 
-            Assert.AreEqual(1, coll.MaximumOverlap);
+            Assert.AreEqual(1, collection.MaximumOverlap);
         }
 
         [Test]
@@ -403,9 +403,9 @@ namespace C5.Tests.intervals_new
                     new Interval(1, 3, IntervalType.Open),
                     new Interval(2, 4, IntervalType.Open)
                 };
-            var coll = CreateCollection(intervals);
+            var collection = CreateCollection(intervals);
 
-            Assert.AreEqual(2, coll.MaximumOverlap);
+            Assert.AreEqual(2, collection.MaximumOverlap);
         }
 
         [Test]
@@ -442,9 +442,9 @@ namespace C5.Tests.intervals_new
                     new Interval(0),
                     new Interval(0, 15, IntervalType.Closed)
                 };
-            var coll = CreateCollection(intervals);
+            var collection = CreateCollection(intervals);
 
-            Assert.AreEqual(4, coll.MaximumOverlap);
+            Assert.AreEqual(4, collection.MaximumOverlap);
         }
 
         [Test]
@@ -476,9 +476,9 @@ namespace C5.Tests.intervals_new
                     new Interval(1, 18, IntervalType.Closed),
                     new Interval(0, 19, IntervalType.Closed)
                 };
-            var coll = CreateCollection(intervals);
+            var collection = CreateCollection(intervals);
 
-            Assert.AreEqual(coll.Count, coll.MaximumOverlap);
+            Assert.AreEqual(collection.Count, collection.MaximumOverlap);
         }
 
         #endregion
@@ -491,9 +491,9 @@ namespace C5.Tests.intervals_new
         [Category("Allows Reference Duplicates")]
         public void AllowsReferenceDuplicates_EmptyCollection_DefinedResult()
         {
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            Assert.AreEqual(AllowsReferenceDuplicates(), coll.AllowsReferenceDuplicates);
+            Assert.AreEqual(AllowsReferenceDuplicates(), collection.AllowsReferenceDuplicates);
         }
 
         [Test]
@@ -501,9 +501,9 @@ namespace C5.Tests.intervals_new
         public void AllowsReferenceDuplicates_SingleInterval_DefinedResult()
         {
             var interval = ITH.RandomIntInterval();
-            var coll = CreateCollection(interval);
+            var collection = CreateCollection(interval);
 
-            Assert.AreEqual(AllowsReferenceDuplicates(), coll.AllowsReferenceDuplicates);
+            Assert.AreEqual(AllowsReferenceDuplicates(), collection.AllowsReferenceDuplicates);
         }
 
         [Test]
@@ -511,9 +511,9 @@ namespace C5.Tests.intervals_new
         public void AllowsReferenceDuplicates_ManyIntervals_DefinedResult()
         {
             var interval = ITH.ManyIntervals(Count);
-            var coll = CreateCollection(interval);
+            var collection = CreateCollection(interval);
 
-            Assert.AreEqual(AllowsReferenceDuplicates(), coll.AllowsReferenceDuplicates);
+            Assert.AreEqual(AllowsReferenceDuplicates(), collection.AllowsReferenceDuplicates);
         }
 
         #endregion
@@ -529,9 +529,9 @@ namespace C5.Tests.intervals_new
         public void FindOverlapsStabbing_EmptyCollection_Empty()
         {
             var query = randomInt();
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            CollectionAssert.IsEmpty(coll.FindOverlaps(query));
+            CollectionAssert.IsEmpty(collection.FindOverlaps(query));
         }
 
         #region Endpoint Inclusion
@@ -542,11 +542,11 @@ namespace C5.Tests.intervals_new
         {
             var interval = ITH.RandomIntInterval();
             var intervals = Enumerable.Range(0, 4).Select(i => new Interval(interval.Low, interval.High, (IntervalType) i)).ToArray();
-            var coll = CreateCollection(intervals);
+            var collection = CreateCollection(intervals);
 
-            CollectionAssert.AreEquivalent(intervals.Where(x => x.LowIncluded), coll.FindOverlaps(interval.Low));
-            CollectionAssert.AreEquivalent(intervals.Where(x => x.HighIncluded), coll.FindOverlaps(interval.High));
-            CollectionAssert.AreEquivalent(intervals, coll.FindOverlaps(interval.Low / 2 + interval.High / 2));
+            CollectionAssert.AreEquivalent(intervals.Where(x => x.LowIncluded), collection.FindOverlaps(interval.Low));
+            CollectionAssert.AreEquivalent(intervals.Where(x => x.HighIncluded), collection.FindOverlaps(interval.High));
+            CollectionAssert.AreEquivalent(intervals, collection.FindOverlaps(interval.Low / 2 + interval.High / 2));
         }
 
         #endregion
@@ -560,9 +560,9 @@ namespace C5.Tests.intervals_new
         public void FindOverlapsRange_EmptyCollection_Empty()
         {
             var query = ITH.RandomIntInterval();
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            CollectionAssert.IsEmpty(coll.FindOverlaps(query));
+            CollectionAssert.IsEmpty(collection.FindOverlaps(query));
         }
 
         [Test]
@@ -609,7 +609,7 @@ namespace C5.Tests.intervals_new
                 new IntervalBase<int>(26, 30, true, true)
             };
 
-            var coll = CreateCollection(intervals);
+            var collection = CreateCollection(intervals);
 
             var ranges = new[] {
                     new Interval(  9,  26, IntervalType.Closed),
@@ -634,7 +634,7 @@ namespace C5.Tests.intervals_new
                 };
 
             foreach (var interval in ranges)
-                CollectionAssert.AreEquivalent(intervals.Where(x => x.Overlaps(interval)), coll.FindOverlaps(interval));
+                CollectionAssert.AreEquivalent(intervals.Where(x => x.Overlaps(interval)), collection.FindOverlaps(interval));
         }
 
         [Test]
@@ -647,7 +647,7 @@ namespace C5.Tests.intervals_new
             var overlappingIntervals = collection.FindOverlaps(interval);
             Assert.True(overlappingIntervals.Count().CompareTo(0) == 1);
         }
-        
+
         [Test]
         [Category("Find Overlaps Range")]
         public void FindOverlapsRange_ManyIntervals_ChooseOverlapsNotInCollection()
@@ -675,9 +675,9 @@ namespace C5.Tests.intervals_new
         {
             var query = randomInt();
             IInterval<int> interval = null;
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            Assert.False(coll.FindOverlap(query, ref interval));
+            Assert.False(collection.FindOverlap(query, ref interval));
             Assert.IsNull(interval);
         }
 
@@ -691,9 +691,9 @@ namespace C5.Tests.intervals_new
         {
             var query = ITH.RandomIntInterval();
             IInterval<int> interval = null;
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            Assert.False(coll.FindOverlap(query, ref interval));
+            Assert.False(collection.FindOverlap(query, ref interval));
             Assert.IsNull(interval);
         }
 
@@ -736,9 +736,9 @@ namespace C5.Tests.intervals_new
         public void CountOverlapsStabbing_EmptyCollection_Zero()
         {
             var query = randomInt();
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            Assert.AreEqual(0, coll.CountOverlaps(query));
+            Assert.AreEqual(0, collection.CountOverlaps(query));
         }
 
         #endregion
@@ -750,9 +750,9 @@ namespace C5.Tests.intervals_new
         public void CountOverlapsRange_EmptyCollection_Zero()
         {
             var query = ITH.RandomIntInterval();
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            Assert.AreEqual(0, coll.CountOverlaps(query));
+            Assert.AreEqual(0, collection.CountOverlaps(query));
         }
 
         [Test]
@@ -796,13 +796,13 @@ namespace C5.Tests.intervals_new
         public void Add_IsReadOnly_Exception()
         {
             var interval = ITH.RandomIntInterval();
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            if (coll.IsReadOnly)
+            if (collection.IsReadOnly)
             {
                 try
                 {
-                    coll.Add(interval);
+                    collection.Add(interval);
                     Assert.Fail();
                 }
                 catch (ReadOnlyCollectionException)
@@ -817,14 +817,14 @@ namespace C5.Tests.intervals_new
         public void Add_SingleObject_FirstAdded()
         {
             var intervals = ITH.SingleObject(Count);
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            if (!coll.IsReadOnly)
+            if (!collection.IsReadOnly)
             {
-                Assert.True(coll.Add(intervals.First()));
+                Assert.True(collection.Add(intervals.First()));
 
                 foreach (var interval in intervals)
-                    Assert.True(coll.Add(interval) == coll.AllowsReferenceDuplicates);
+                    Assert.True(collection.Add(interval) == collection.AllowsReferenceDuplicates);
             }
         }
 
@@ -833,12 +833,12 @@ namespace C5.Tests.intervals_new
         public void Add_DuplicateIntervals_AllAdded()
         {
             var intervals = ITH.DuplicateIntervals(Count);
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            if (!coll.IsReadOnly)
+            if (!collection.IsReadOnly)
             {
                 foreach (var interval in intervals)
-                    Assert.True(coll.Add(interval));
+                    Assert.True(collection.Add(interval));
             }
         }
 
@@ -847,12 +847,12 @@ namespace C5.Tests.intervals_new
         public void Add_ManyIntervals_AllAdded()
         {
             var intervals = ITH.ManyIntervals(Count);
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            if (!coll.IsReadOnly)
+            if (!collection.IsReadOnly)
             {
                 foreach (var interval in intervals)
-                    Assert.True(coll.Add(interval));
+                    Assert.True(collection.Add(interval));
             }
         }
 
@@ -868,13 +868,13 @@ namespace C5.Tests.intervals_new
         public void AddAll_IsReadOnly_Exception()
         {
             var intervals = new[] { ITH.RandomIntInterval() };
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            if (coll.IsReadOnly)
+            if (collection.IsReadOnly)
             {
                 try
                 {
-                    coll.AddAll(intervals);
+                    collection.AddAll(intervals);
                     Assert.Fail();
                 }
                 catch (ReadOnlyCollectionException)
@@ -896,13 +896,13 @@ namespace C5.Tests.intervals_new
         public void Remove_IsReadOnly_Exception()
         {
             var interval = ITH.RandomIntInterval();
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            if (coll.IsReadOnly)
+            if (collection.IsReadOnly)
             {
                 try
                 {
-                    coll.Remove(interval);
+                    collection.Remove(interval);
                     Assert.Fail();
                 }
                 catch (ReadOnlyCollectionException)
@@ -917,11 +917,11 @@ namespace C5.Tests.intervals_new
         public void Remove_EmptyCollection_False()
         {
             var interval = ITH.RandomIntInterval();
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            if (!coll.IsReadOnly)
+            if (!collection.IsReadOnly)
             {
-                Assert.False(coll.Remove(interval));
+                Assert.False(collection.Remove(interval));
             }
         }
 
@@ -936,13 +936,13 @@ namespace C5.Tests.intervals_new
         [Category("Clear")]
         public void Clear_IsReadOnly_Exception()
         {
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            if (coll.IsReadOnly)
+            if (collection.IsReadOnly)
             {
                 try
                 {
-                    coll.Clear();
+                    collection.Clear();
                     Assert.Fail();
                 }
                 catch (ReadOnlyCollectionException)
@@ -956,13 +956,13 @@ namespace C5.Tests.intervals_new
         [Category("Clear")]
         public void Clear_EmptyCollection_IsEmpty()
         {
-            var coll = CreateEmptyCollection<int>();
+            var collection = CreateEmptyCollection<int>();
 
-            if (!coll.IsReadOnly)
+            if (!collection.IsReadOnly)
             {
-                Assert.True(coll.IsEmpty);
-                coll.Clear();
-                Assert.True(coll.IsEmpty);
+                Assert.True(collection.IsEmpty);
+                collection.Clear();
+                Assert.True(collection.IsEmpty);
             }
         }
 
@@ -971,13 +971,13 @@ namespace C5.Tests.intervals_new
         public void Clear_SingleInterval_BecomesEmpty()
         {
             var interval = ITH.RandomIntInterval();
-            var coll = CreateCollection(interval);
+            var collection = CreateCollection(interval);
 
-            if (!coll.IsReadOnly)
+            if (!collection.IsReadOnly)
             {
-                Assert.False(coll.IsEmpty);
-                coll.Clear();
-                Assert.True(coll.IsEmpty);
+                Assert.False(collection.IsEmpty);
+                collection.Clear();
+                Assert.True(collection.IsEmpty);
             }
         }
 
@@ -986,13 +986,13 @@ namespace C5.Tests.intervals_new
         public void Clear_ManyIntervals_BecomesEmpty()
         {
             var interval = ITH.ManyIntervals(Count);
-            var coll = CreateCollection(interval);
+            var collection = CreateCollection(interval);
 
-            if (!coll.IsReadOnly)
+            if (!collection.IsReadOnly)
             {
-                Assert.False(coll.IsEmpty);
-                coll.Clear();
-                Assert.True(coll.IsEmpty);
+                Assert.False(collection.IsEmpty);
+                collection.Clear();
+                Assert.True(collection.IsEmpty);
             }
         }
 
@@ -1041,20 +1041,20 @@ namespace C5.Tests.intervals_new
                     new Interval(5, 10, IntervalType.Open)                      // H
                 };
 
-            var coll = CreateCollection(intervals);
+            var collection = CreateCollection(intervals);
 
             foreach (var point in intervals.UniqueEndpoints())
             {
                 var expected = intervals.Where(x => x.Overlaps(point));
-                CollectionAssert.AreEquivalent(expected, coll.FindOverlaps(point));
+                CollectionAssert.AreEquivalent(expected, collection.FindOverlaps(point));
             }
 
             var span = new Interval(int.MinValue, 20, false, true);
-            Assert.True(span.IntervalEquals(coll.Span));
+            Assert.True(span.IntervalEquals(collection.Span));
 
-            Assert.AreEqual(5, coll.MaximumOverlap);
+            Assert.AreEqual(5, collection.MaximumOverlap);
 
-            if (!coll.IsReadOnly)
+            if (!collection.IsReadOnly)
             {
                 // TODO: Finish. This is just the intervals from the old test being added and removed!
                 var additionalIntervals = new[]
@@ -1067,8 +1067,8 @@ namespace C5.Tests.intervals_new
 
                 foreach (var interval in additionalIntervals)
                 {
-                    coll.Add(interval);
-                    coll.Remove(interval);
+                    collection.Add(interval);
+                    collection.Remove(interval);
                 }
             }
         }
