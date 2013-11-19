@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Net;
 using C5.intervals;
 
-namespace C5.UserExampleGoogleCalendar
+namespace C5.UserGuideExamples.intervals
 {
-    class IcsFeed
+    public class FeedReader
     {
         /// <summary>
         /// Creates an interval collection from the intervals found in the calendar at the url. See the calendar at https://www.google.com/calendar/embed?src=bechmellson.com_eoauecnh84i50tbftksd5bfdl4@group.calendar.google.com&ctz=Europe/Copenhagen
@@ -18,7 +18,7 @@ namespace C5.UserExampleGoogleCalendar
             //url = "http://www.facebook.com/ical/u.php?uid=100002201102330&key=AQC8FQYGgkuL2Ajy";
 
             // Parse url
-            var events = ParseUrl(url);
+            var events = ParseUrl(url, FeedType.Ics);
 
             // Print events
             foreach (var e in events)
@@ -58,14 +58,19 @@ namespace C5.UserExampleGoogleCalendar
             }
         }
 
-        public static IEnumerable<CalendarEvent> ParseUrl(string url)
+        public enum FeedType
+        {
+            Ics
+        }
+
+        public static IEnumerable<CalendarEvent> ParseUrl(string url, FeedType type)
         {
             // In case of IOException take a look here: http://stackoverflow.com/questions/14432079/wcf-the-specified-registry-key-does-not-exist-in-base-channel-call#14432540
-            return ParseString(new WebClient { Encoding = System.Text.Encoding.UTF8 }.DownloadString(url));
+            return ParseString(new WebClient { Encoding = System.Text.Encoding.UTF8 }.DownloadString(url), type);
 
         }
 
-        public static IEnumerable<CalendarEvent> ParseString(string feed)
+        public static IEnumerable<CalendarEvent> ParseString(string feed, FeedType type)
         {
             // All the parsed events
             var events = new ArrayList<CalendarEvent>();
