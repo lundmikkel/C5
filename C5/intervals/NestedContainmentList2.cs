@@ -105,7 +105,7 @@ namespace C5.intervals
 
             _count = intervalsArray.Count();
 
-            Sorting.IntroSort(intervalsArray, 0, _count, ComparerFactory<I>.CreateComparer((x, y) => x.CompareTo(y)));
+            Sorting.IntroSort(intervalsArray, 0, _count, IntervalExtensions.CreateComparer<I, T>());
 
             // Build nested containment list recursively and save the upper-most list in the class
             _list = createList(intervalsArray);

@@ -172,7 +172,7 @@ namespace C5.intervals
             var count = intervals.Length;
 
             // Sort intervals
-            var comparer = ComparerFactory<I>.CreateComparer((x, y) => x.CompareTo(y));
+            var comparer = IntervalExtensions.CreateComparer<I, T>();
             Sorting.IntroSort(intervals, 0, count, comparer);
 
             // Initialize layers with two empty layers

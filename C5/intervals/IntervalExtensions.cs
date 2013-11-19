@@ -395,6 +395,13 @@ namespace C5.intervals
                 x.High,
                 x.HighIncluded ? "]" : ")");
         }
+
+        public static IComparer<I> CreateComparer<I, T>()
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            return ComparerFactory<I>.CreateComparer((x, y) => x.CompareTo(y));
+        }
     }
 
     /// <summary>
@@ -454,20 +461,20 @@ namespace C5.intervals
             using (var enumerator = collection.GetEnumerator())
             {
 
-            if (enumerator.MoveNext())
-            {
-                var previous = enumerator.Current;
-
-                while (enumerator.MoveNext())
+                if (enumerator.MoveNext())
                 {
-                    var current = enumerator.Current;
+                    var previous = enumerator.Current;
 
-                    if (previous.CompareTo(current) > 0)
-                        return false;
+                    while (enumerator.MoveNext())
+                    {
+                        var current = enumerator.Current;
 
-                    previous = current;
+                        if (previous.CompareTo(current) > 0)
+                            return false;
+
+                        previous = current;
+                    }
                 }
-            }
             }
 
             return true;

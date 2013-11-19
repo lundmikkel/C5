@@ -37,7 +37,7 @@ namespace C5.intervals
 
 
             // Sort intervals
-            var lowComparer = ComparerFactory<I>.CreateComparer((x, y) => x.CompareTo(y));
+            var lowComparer = IntervalExtensions.CreateComparer<I, T>();
             Sorting.IntroSort(_lowSorted, 0, _count, lowComparer);
 
             var highComparer = ComparerFactory<I>.CreateComparer((x, y) =>

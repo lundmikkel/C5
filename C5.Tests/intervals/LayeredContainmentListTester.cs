@@ -528,8 +528,7 @@ namespace C5.Tests.intervals
             public void SetUp()
             {
                 _intervals = BenchmarkTestCases.DataSetC(10);
-                var comparer = ComparerFactory<IInterval<int>>.CreateComparer(IntervalExtensions.CompareTo);
-                Sorting.IntroSort(_intervals, 0, _intervals.Count(), comparer);
+                Sorting.IntroSort(_intervals, 0, _intervals.Count(), IntervalExtensions.CreateComparer<IInterval<int>, int>());
             }
 
             [Test]
@@ -570,7 +569,7 @@ namespace C5.Tests.intervals
         public class FindOverlapsSortedTester
         {
             private IInterval<int>[] _intervals;
-            private readonly IComparer<IInterval<int>> _comparer = ComparerFactory<IInterval<int>>.CreateComparer(IntervalExtensions.CompareTo);
+            private readonly IComparer<IInterval<int>> _comparer = IntervalExtensions.CreateComparer<IInterval<int>, int>();
 
             [SetUp]
             public void SetUp()

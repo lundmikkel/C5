@@ -74,7 +74,7 @@ namespace C5.intervals
             {
                 _count = intervalsArray.Count();
 
-                Sorting.IntroSort(intervalsArray, 0, _count, ComparerFactory<I>.CreateComparer((x, y) => x.CompareTo(y)));
+                Sorting.IntroSort(intervalsArray, 0, _count, IntervalExtensions.CreateComparer<I, T>());
 
                 var totalSection = new Sublist(0, intervalsArray.Count());
                 _list = new Node[totalSection.Length];
