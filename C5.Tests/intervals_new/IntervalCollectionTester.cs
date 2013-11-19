@@ -926,6 +926,87 @@ namespace C5.Tests.intervals_new
             }
         }
 
+        [Test]
+        [Category("Remove")]
+        public void Remove_SingleInterval_Removed()
+        {
+            var singleInterval = ITH.RandomIntInterval();
+            var collection = CreateCollection(singleInterval);
+
+            if (!collection.IsReadOnly)
+            {
+                Assert.True(collection.Remove(singleInterval));
+                Assert.False(collection.Remove(singleInterval));
+            }
+        }
+
+        [Test]
+        [Category("Remove")]
+        public void Remove_SingleObject_Removed()
+        {
+            var intervals = ITH.SingleObject(Count);
+            var collection = CreateCollection(intervals);
+
+            if (!collection.IsReadOnly)
+            {
+                for (var i = 0; i < Count; i++)
+                {
+                    if (i == 0)
+                        Assert.True(collection.Remove(intervals[i]));
+                    else
+                        Assert.AreEqual(collection.AllowsReferenceDuplicates, collection.Remove(intervals[i]));
+                }
+            }
+        }
+
+        [Test]
+        [Category("Remove")]
+        public void Remove_DuplicateIntervals_True()
+        {
+            var intervals = ITH.DuplicateIntervals(Count);
+            var collection = CreateCollection(intervals);
+
+            if (!collection.IsReadOnly)
+            {
+                foreach (var interval in intervals)
+                {
+                    Assert.True(collection.Remove(interval));
+                    Assert.False(collection.Remove(interval));
+                }
+            }
+        }
+
+        [Test]
+        [Category("Remove")]
+        public void Remove_ManyIntervals_True()
+        {
+            var intervals = ITH.ManyIntervals(Count);
+            var collection = CreateCollection(intervals);
+
+            if (!collection.IsReadOnly)
+            {
+                foreach (var interval in intervals)
+                {
+                    Assert.True(collection.Remove(interval));
+                    Assert.False(collection.Remove(interval));
+                }
+            }
+        }
+
+        [Test]
+        [Category("Remove")]
+        public void Remove_ManyIntervals_RemovingIntervalsNotInCollection()
+        {
+            var intervals = ITH.ManyIntervals(Count);
+            var collection = CreateCollection(intervals);
+
+            if (!collection.IsReadOnly)
+            {
+                foreach (var interval in ITH.ManyIntervals(Count))
+                    Assert.False(collection.Remove(interval));
+            }
+        }
+
         #region Events
         #endregion
 
