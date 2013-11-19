@@ -644,8 +644,8 @@ namespace C5.Tests.intervals_new
             var intervals = ITH.ManyIntervals(Count);
             var collection = CreateCollection(intervals);
             var interval = collection.Choose();
-            var overlappingIntervals = collection.FindOverlaps(interval);
-            Assert.True(overlappingIntervals.Count().CompareTo(0) == 1);
+            var overlaps = collection.FindOverlaps(interval);
+            Assert.True(overlaps.Any());
         }
 
         [Test]
@@ -657,8 +657,9 @@ namespace C5.Tests.intervals_new
             var interval = ITH.RandomIntInterval();
             while (intervals.Any(x => x.Overlaps(interval)))
                 interval = ITH.RandomIntInterval();
-            var overlappingIntervals = collection.FindOverlaps(interval);
-            Assert.True(overlappingIntervals.Count().Equals(0));
+
+            var overlaps = collection.FindOverlaps(interval);
+            Assert.True(!overlaps.Any());
         }
 
         #endregion
@@ -762,8 +763,7 @@ namespace C5.Tests.intervals_new
             var intervals = ITH.ManyIntervals(Count);
             var collection = CreateCollection(intervals);
             var interval = collection.Choose();
-            var numberOfOverlappingIntervals = collection.CountOverlaps(interval);
-            Assert.True(numberOfOverlappingIntervals.CompareTo(0) == 1);
+            Assert.Greater(collection.CountOverlaps(interval), 0);
         }
 
         [Test]
@@ -772,11 +772,12 @@ namespace C5.Tests.intervals_new
         {
             var intervals = ITH.ManyIntervals(Count);
             var collection = CreateCollection(intervals);
+
             var interval = ITH.RandomIntInterval();
             while (intervals.Any(x => x.Overlaps(interval)))
                 interval = ITH.RandomIntInterval();
-            var numberOfOverlappingIntervals = collection.CountOverlaps(interval);
-            Assert.True(numberOfOverlappingIntervals.Equals(0));
+
+            Assert.AreEqual(0, collection.CountOverlaps(interval));
         }
 
         #endregion
