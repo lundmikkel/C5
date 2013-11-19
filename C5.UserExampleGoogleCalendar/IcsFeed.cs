@@ -14,6 +14,9 @@ namespace C5.UserExampleGoogleCalendar
         {
             string url = "http://www.google.com/calendar/ical/bechmellson.com_eoauecnh84i50tbftksd5bfdl4%40group.calendar.google.com/public/basic.ics";
 
+            // Anders' FaceBook events - see how to get your URL here http://www.askdavetaylor.com/subscribe_to_facebook_calendar_ical/
+            //url = "http://www.facebook.com/ical/u.php?uid=100002201102330&key=AQC8FQYGgkuL2Ajy";
+
             // Parse url
             var events = ParseUrl(url);
 
@@ -58,7 +61,8 @@ namespace C5.UserExampleGoogleCalendar
         public static IEnumerable<CalendarEvent> ParseUrl(string url)
         {
             // In case of IOException take a look here: http://stackoverflow.com/questions/14432079/wcf-the-specified-registry-key-does-not-exist-in-base-channel-call#14432540
-            return ParseString(new WebClient().DownloadString(url));
+            return ParseString(new WebClient { Encoding = System.Text.Encoding.UTF8 }.DownloadString(url));
+
         }
 
         public static IEnumerable<CalendarEvent> ParseString(string feed)
@@ -68,32 +72,31 @@ namespace C5.UserExampleGoogleCalendar
 
             // Example datestring to get the correct length for parsing
             var dateLength = @"19700101T000000Z".Length;
-            //var index = feed.IndexOf("DTSTART:", StringComparison.Ordinal);
-            var begin = 0;
-            var end = 0;
 
-            while ((begin = feed.IndexOf("BEGIN:VEVENT", end, StringComparison.Ordinal)) >= 0)
+            int begin, end = 0;
+
+            while ((begin = feed.IndexOf("BEGIN:VEVENT", end)) >= 0)
             {
                 // Find end of event
-                end = feed.IndexOf("END:VEVENT", begin, StringComparison.Ordinal);
+                end = feed.IndexOf("END:VEVENT", begin);
 
                 // Take a substring of the vevent found
                 var vevent = feed.Substring(begin, end - begin);
 
                 // Find title
-                var index = vevent.IndexOf("SUMMARY", StringComparison.Ordinal);
-                index = vevent.IndexOf(":", index, StringComparison.Ordinal) + 1;
+                var index = vevent.IndexOf("SUMMARY");
+                index = vevent.IndexOf(":", index) + 1;
                 // TODO: Is this the proper way to find the title?
-                var title = vevent.Substring(index, vevent.IndexOf("\r", index, StringComparison.Ordinal) - index);
+                var title = vevent.Substring(index, vevent.IndexOf("\r", index) - index);
 
                 // Find start time
-                index = vevent.IndexOf("DTSTART", StringComparison.Ordinal);
-                index = vevent.IndexOf(":", index, StringComparison.Ordinal) + 1;
+                index = vevent.IndexOf("DTSTART");
+                index = vevent.IndexOf(":", index) + 1;
                 var low = stringToDate(vevent.Substring(index, dateLength));
 
                 // Find end time
-                index = vevent.IndexOf("DTEND", StringComparison.Ordinal);
-                index = vevent.IndexOf(":", index, StringComparison.Ordinal) + 1;
+                index = vevent.IndexOf("DTEND");
+                index = vevent.IndexOf(":", index) + 1;
                 var high = stringToDate(vevent.Substring(index, dateLength));
 
                 // Create and add calendar event to list

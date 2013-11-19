@@ -762,8 +762,8 @@ namespace C5.Tests.intervals_new
             var intervals = ITH.ManyIntervals(Count);
             var collection = CreateCollection(intervals);
             var interval = collection.Choose();
-            var numberOfoverlappingIntervals = collection.CountOverlaps(interval);
-            Assert.True(numberOfoverlappingIntervals.CompareTo(0) == 1);
+            var numberOfOverlappingIntervals = collection.CountOverlaps(interval);
+            Assert.True(numberOfOverlappingIntervals.CompareTo(0) == 1);
         }
 
         [Test]
@@ -775,8 +775,8 @@ namespace C5.Tests.intervals_new
             var interval = ITH.RandomIntInterval();
             while (intervals.Any(x => x.Overlaps(interval)))
                 interval = ITH.RandomIntInterval();
-            var numberOfoverlappingIntervals = collection.CountOverlaps(interval);
-            Assert.True(numberOfoverlappingIntervals.Equals(0));
+            var numberOfOverlappingIntervals = collection.CountOverlaps(interval);
+            Assert.True(numberOfOverlappingIntervals.Equals(0));
         }
 
         #endregion
