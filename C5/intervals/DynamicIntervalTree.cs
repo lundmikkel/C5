@@ -32,28 +32,27 @@ namespace C5.intervals
         #endregion
 
         #region Code Contracts
-
         [ContractInvariantMethod]
         private void invariant()
         {
             // Check the balance invariant holds
-            Contract.Invariant(confirmBalance(_root));
+            Contract.Invariant(contractHelperConfirmBalance(_root));
 
             // Check node spans
-            Contract.Invariant(checkNodeSpans(_root));
+            Contract.Invariant(contractHelperCheckNodeSpans(_root));
 
             // The left most node will always contain at least one interval
-            Contract.Invariant(IsEmpty || lowestNodeIsNonEmpty(_root));
+            Contract.Invariant(IsEmpty || contractHelperLowestNodeIsNonEmpty(_root));
 
             // Check nodes are sorted
             Contract.Invariant(nodes(_root).IsSorted());
 
             // Check that the MNO variables are correct for all nodes
-            Contract.Invariant(checkMnoForEachNode(_root));
+            Contract.Invariant(contractHelperCheckMnoForEachNode(_root));
         }
 
         [Pure]
-        private static bool lowestNodeIsNonEmpty(Node root)
+        private static bool contractHelperLowestNodeIsNonEmpty(Node root)
         {
             Contract.Requires(root != null);
 
@@ -64,7 +63,7 @@ namespace C5.intervals
         }
 
         [Pure]
-        private static bool checkNodeSpans(Node root)
+        private static bool contractHelperCheckNodeSpans(Node root)
         {
             foreach (var node in nodes(root))
             {
@@ -95,7 +94,7 @@ namespace C5.intervals
         /// </summary>
         /// <returns>True if the tree is balanced, else false.</returns>
         [Pure]
-        private static bool confirmBalance(Node root)
+        private static bool contractHelperConfirmBalance(Node root)
         {
             var result = true;
             height(root, ref result);
@@ -124,7 +123,7 @@ namespace C5.intervals
         }
 
         [Pure]
-        private bool checkMnoForEachNode(Node root)
+        private bool contractHelperCheckMnoForEachNode(Node root)
         {
             if (root != null && root.Sum != 0)
                 return false;

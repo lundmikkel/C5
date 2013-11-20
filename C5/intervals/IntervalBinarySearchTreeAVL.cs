@@ -35,29 +35,29 @@ namespace C5.intervals
         private void invariants()
         {
             // Check the balance invariant holds.
-            Contract.Invariant(confirmBalance(_root));
+            Contract.Invariant(contractHelperConfirmBalance(_root));
 
             // Check nodes are sorted
-            Contract.Invariant(checkNodesAreSorted(_root));
+            Contract.Invariant(contractHelperCheckNodesAreSorted(_root));
 
             // Check that the MNO variables are correct for all nodes
-            Contract.Invariant(checkMnoAndIntervalsEndingInNodeForEachNode(_root));
+            Contract.Invariant(contractHelperCheckMnoAndIntervalsEndingInNodeForEachNode(_root));
 
             // Check that the IBS tree invariants from the Hanson article holds.
-            Contract.Invariant(Contract.ForAll(nodes(_root), checkIbsInvariants));
+            Contract.Invariant(Contract.ForAll(nodes(_root), contractHelperCheckIbsInvariants));
 
             // Check that the intervals are correctly placed
-            Contract.Invariant(confirmIntervalPlacement(_root));
+            Contract.Invariant(contractHelperConfirmIntervalPlacement(_root));
         }
 
         [Pure]
-        private static bool checkNodesAreSorted(Node root)
+        private static bool contractHelperCheckNodesAreSorted(Node root)
         {
             return nodes(root).IsSorted();
         }
 
         [Pure]
-        private static bool checkMnoAndIntervalsEndingInNodeForEachNode(Node root)
+        private static bool contractHelperCheckMnoAndIntervalsEndingInNodeForEachNode(Node root)
         {
             if (root != null && root.Sum != 0)
                 return false;
@@ -200,7 +200,7 @@ namespace C5.intervals
         /// <param name="v">The node to check (It only makes sense to check all the nodes of the tree, so call this enumerating the entire tree)</param>
         /// <returns>Returns true if all the invariants hold and false if one of them does not hold.</returns>
         [Pure]
-        private bool checkIbsInvariants(Node v)
+        private bool contractHelperCheckIbsInvariants(Node v)
         {
             Contract.Requires(v != null);
 
@@ -307,7 +307,7 @@ namespace C5.intervals
         /// </summary>
         /// <returns>True if the tree is balanced, else false.</returns>
         [Pure]
-        private static bool confirmBalance(Node root)
+        private static bool contractHelperConfirmBalance(Node root)
         {
             var result = true;
             height(root, ref result);
@@ -337,7 +337,7 @@ namespace C5.intervals
         }
 
         [Pure]
-        private bool confirmIntervalPlacement(Node root)
+        private bool contractHelperConfirmIntervalPlacement(Node root)
         {
             foreach (var interval in this)
             {
