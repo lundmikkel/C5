@@ -75,6 +75,10 @@ namespace C5.intervals
                     if (node.LocalSpan != null && !node.Span.Contains(node.LocalSpan))
                         return false;
 
+                    // If span is set then left, right and local span cannot be null at the same time
+                    if (node.LocalSpan == null && (node.Left == null || node.Left.Span == null) && (node.Right == null || node.Right.Span == null))
+                        return false;
+
                     // Span must contain left's span
                     if (node.Left != null && node.Left.Span != null && !node.Span.Contains(node.Left.Span))
                         return false;
@@ -83,8 +87,12 @@ namespace C5.intervals
                         return false;
                 }
                 // If span is null, then local span and subtree spans must be null too
-                else if (!(node.LocalSpan == null || (node.Left == null || node.Left.Span == null) && (node.Right == null || node.Right.Span == null)))
-                    return false;
+                else
+                {
+                    if (node.LocalSpan != null || (node.Left != null && node.Left.Span != null) || (node.Right != null && node.Right.Span != null))
+                        return false;
+                }
+
             }
 
             return true;
