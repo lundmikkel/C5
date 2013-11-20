@@ -1171,6 +1171,20 @@ namespace C5.intervals
 
         #endregion
 
+        #region Events
+
+        /// <inheritdoc/>
+        public override EventTypeEnum ListenableEvents { get { return EventTypeEnum.Basic; } }
+        //public EventTypeEnum ActiveEvents { get; private set; }
+        //public event CollectionChangedHandler<T> CollectionChanged;
+        //public event CollectionClearedHandler<T> CollectionCleared;
+        //public event ItemsAddedHandler<T> ItemsAdded;
+        //public event ItemInsertedHandler<T> ItemInserted;
+        //public event ItemsRemovedHandler<T> ItemsRemoved;
+        //public event ItemRemovedAtHandler<T> ItemRemovedAt;
+
+        #endregion
+
         #region Interval Collection
 
         #region Properties

@@ -858,6 +858,35 @@ namespace C5.Tests.intervals_new
         }
 
         #region Events
+
+        [Test]
+        [Category("Add Event")]
+        public void Add_ManyIntervals_EventThrown()
+        {
+            var intervals = ITH.ManyIntervals(Count);
+            var collection = CreateEmptyCollection<int>();
+
+            if (!collection.IsReadOnly)
+            {
+                IInterval<int> eventInterval = null;
+                collection.ItemsAdded += (c, args) => eventInterval = args.Item;
+
+                foreach (var interval in intervals)
+                {
+                    Assert.True(collection.Add(interval));
+                    Assert.AreSame(interval, eventInterval);
+                    eventInterval = null;
+
+                    Assert.AreEqual(collection.AllowsReferenceDuplicates, collection.Add(interval));
+                    if (collection.AllowsReferenceDuplicates)
+                        Assert.AreSame(interval, eventInterval);
+                    else
+                        Assert.IsNull(eventInterval);
+                    eventInterval = null;
+                }
+            }
+        }
+
         #endregion
 
         #endregion
@@ -1008,6 +1037,38 @@ namespace C5.Tests.intervals_new
         }
 
         #region Events
+
+        [Test]
+        [Category("Remove Event")]
+        public void Remove_ManyIntervals_EventThrown()
+        {
+            var intervals = ITH.ManyIntervals(Count);
+            var collection = CreateCollection(intervals.Concat(intervals).ToArray());
+
+            if (!collection.IsReadOnly)
+            {
+                IInterval<int> eventInterval = null;
+                collection.ItemsRemoved += (c, args) => eventInterval = args.Item;
+
+                foreach (var interval in intervals)
+                {
+                    Assert.True(collection.Remove(interval));
+                    Assert.AreSame(interval, eventInterval);
+                    eventInterval = null;
+
+                    Assert.AreEqual(collection.AllowsReferenceDuplicates, collection.Remove(interval));
+                    if (collection.AllowsReferenceDuplicates)
+                        Assert.AreSame(interval, eventInterval);
+                    else
+                        Assert.IsNull(eventInterval);
+                    eventInterval = null;
+
+                    Assert.False(collection.Remove(interval));
+                    Assert.IsNull(eventInterval);
+                }
+            }
+        }
+
         #endregion
 
         #endregion
@@ -1079,7 +1140,30 @@ namespace C5.Tests.intervals_new
         }
 
         #region Events
-        // TODO: Should this be handled in the other tests or should we duplicate the construction parts and verify on them that the events were thrown?
+
+        [Test]
+        [Category("Clear Event")]
+        public void Clear_ManyIntervals_EventThrown()
+        {
+            var intervals = ITH.ManyIntervals(Count);
+            var collection = CreateCollection(intervals);
+
+            if (!collection.IsReadOnly)
+            {
+                var eventThrown = false;
+                collection.CollectionCleared += (sender, args) => eventThrown = true;
+
+                collection.Clear();
+                Assert.True(eventThrown);
+                Assert.True(collection.IsEmpty);
+                eventThrown = false;
+
+                collection.Clear();
+                Assert.False(eventThrown);
+                Assert.True(collection.IsEmpty);
+            }
+        }
+
         #endregion
 
         #endregion
