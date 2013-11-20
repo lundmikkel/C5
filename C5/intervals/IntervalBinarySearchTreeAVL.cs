@@ -62,7 +62,7 @@ namespace C5.intervals
             if (root != null && root.Sum != 0)
                 return false;
 
-            foreach (var keyValuePair in getIntervalsByEndpoint(root))
+            foreach (var keyValuePair in contractHelperGetIntervalsByEndpoint(root))
             {
                 var key = keyValuePair.Key;
                 var intervals = keyValuePair.Value;
@@ -89,14 +89,14 @@ namespace C5.intervals
                     }
                 }
 
-                var node = findNode(root, key);
+                var node = contractHelperFindNode(root, key);
 
                 // Check DeltaAt and DeltaAfter
                 if (node.DeltaAt != deltaAt || node.DeltaAfter != deltaAfter)
                     return false;
 
                 // Check Sum and Max
-                if (!checkMno(node))
+                if (!contractHelperCheckMno(node))
                     return false;
 
                 // Check IntervalsEndingInNode
@@ -114,7 +114,7 @@ namespace C5.intervals
         /// <param name="key">The key being searched.</param>
         /// <returns>The node containing the key if it exists, otherwise null.</returns>
         [Pure]
-        private static Node findNode(Node node, T key)
+        private static Node contractHelperFindNode(Node node, T key)
         {
             Contract.Requires(node != null);
             Contract.Ensures(Contract.Result<Node>() != null);
@@ -135,7 +135,7 @@ namespace C5.intervals
         }
 
         [Pure]
-        private static IEnumerable<KeyValuePair<T, IntervalSet>> getIntervalsByEndpoint(Node root)
+        private static IEnumerable<KeyValuePair<T, IntervalSet>> contractHelperGetIntervalsByEndpoint(Node root)
         {
             var dictionary = new TreeDictionary<T, IntervalSet>();
 
@@ -156,7 +156,7 @@ namespace C5.intervals
         }
 
         [Pure]
-        private static bool checkMno(Node node)
+        private static bool contractHelperCheckMno(Node node)
         {
             Contract.Requires(node != null);
 
@@ -208,7 +208,7 @@ namespace C5.intervals
             Node leftUp = null;
 
             // Find j intervals and left and right parent
-            var js = findJs(v, ref leftUp, ref rightUp);
+            var js = contractHelperFindJs(v, ref leftUp, ref rightUp);
 
             // Interval represented by Less
             var greaterInterval = rightUp != null ? new IntervalBase<T>(v.Key, rightUp.Key, IntervalType.Open) : null;
@@ -257,7 +257,7 @@ namespace C5.intervals
 
         [Pure]
         // TODO er det ok at have en pure metode med ref parametre
-        private IEnumerable<IInterval<T>> findJs(Node v, ref Node leftUp, ref Node rightUp)
+        private IEnumerable<IInterval<T>> contractHelperFindJs(Node v, ref Node leftUp, ref Node rightUp)
         {
             Contract.Requires(v != null);
 
@@ -303,32 +303,32 @@ namespace C5.intervals
         }
 
         /// <summary>
-        /// Checks that the height of the tree is balanced.
+        /// Checks that the contractHelperHeight of the tree is balanced.
         /// </summary>
         /// <returns>True if the tree is balanced, else false.</returns>
         [Pure]
         private static bool contractHelperConfirmBalance(Node root)
         {
             var result = true;
-            height(root, ref result);
+            contractHelperHeight(root, ref result);
             return result;
         }
 
         /// <summary>
-        /// Get the height of the tree.
+        /// Get the contractHelperHeight of the tree.
         /// </summary>
-        /// <param name="node">The node you wish to check the height on.</param>
+        /// <param name="node">The node you wish to check the contractHelperHeight on.</param>
         /// <param name="result">Reference to a bool that will be set to false if an in-balance is discovered.</param>
         /// <returns>Height of the tree.</returns>
         [Pure]
         // TODO Can we use ref in pure methods?
-        private static int height(Node node, ref bool result)
+        private static int contractHelperHeight(Node node, ref bool result)
         {
             if (node == null)
                 return 0;
 
-            var heightLeft = height(node.Left, ref result);
-            var heightRight = height(node.Right, ref result);
+            var heightLeft = contractHelperHeight(node.Left, ref result);
+            var heightRight = contractHelperHeight(node.Right, ref result);
 
             if (node.Balance != heightRight - heightLeft)
                 result = false;
@@ -341,16 +341,16 @@ namespace C5.intervals
         {
             foreach (var interval in this)
             {
-                if (!confirmLowPlacement(interval, root))
+                if (!contractHelperConfirmLowPlacement(interval, root))
                     return false;
-                if (!confirmHighPlacement(interval, root))
+                if (!contractHelperConfirmHighPlacement(interval, root))
                     return false;
             }
             return true;
         }
 
         [Pure]
-        private static bool confirmLowPlacement(I interval, Node root, Node rightUp = null, bool result = true)
+        private static bool contractHelperConfirmLowPlacement(I interval, Node root, Node rightUp = null, bool result = true)
         {
             var compare = root.Key.CompareTo(interval.Low);
             if (compare == 0)
@@ -361,20 +361,20 @@ namespace C5.intervals
                     result &= root.Equal.Contains(interval);
             }
             else if (compare < 0)
-                return confirmLowPlacement(interval, root.Right, rightUp, result);
+                return contractHelperConfirmLowPlacement(interval, root.Right, rightUp, result);
             else if (compare > 0)
             {
                 if (root.Key.CompareTo(interval.High) < 0)
                     result &= root.Equal.Contains(interval);
                 if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0)
                     result &= root.Greater.Contains(interval);
-                return confirmLowPlacement(interval, root.Left, root, result);
+                return contractHelperConfirmLowPlacement(interval, root.Left, root, result);
             }
             return result;
         }
 
         [Pure]
-        private static bool confirmHighPlacement(I interval, Node root, Node leftUp = null, bool result = true)
+        private static bool contractHelperConfirmHighPlacement(I interval, Node root, Node leftUp = null, bool result = true)
         {
             var compare = root.Key.CompareTo(interval.High);
             if (compare == 0)
@@ -385,14 +385,14 @@ namespace C5.intervals
                     result &= root.Equal.Contains(interval);
             }
             else if (compare > 0)
-                return confirmHighPlacement(interval, root.Left, leftUp, result);
+                return contractHelperConfirmHighPlacement(interval, root.Left, leftUp, result);
             else if (compare < 0)
             {
                 if (root.Key.CompareTo(interval.Low) > 0)
                     result &= root.Equal.Contains(interval);
                 if (leftUp != null && leftUp.Key.CompareTo(interval.Low) >= 0)
                     result &= root.Less.Contains(interval);
-                return confirmHighPlacement(interval, root.Right, root, result);
+                return contractHelperConfirmHighPlacement(interval, root.Right, root, result);
             }
             return result;
         }

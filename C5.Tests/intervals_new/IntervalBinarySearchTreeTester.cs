@@ -26,7 +26,7 @@ namespace C5.Tests.intervals_new
         #region White-box
 
         [TestFixture]
-        class IntervalBinarySearchTree
+        class IntervalBinarySearchTreeTester_WhiteBox
         {
             [SetUp]
             public void SetUp()
@@ -34,11 +34,24 @@ namespace C5.Tests.intervals_new
 
             }
 
+            #region Interval Collection
+
+            #region Properties
+
+            #region Span
+
             [Test]
             public void Test()
             {
 
             }
+
+            #endregion
+
+            #endregion
+
+            #endregion
+
         }
 
         #endregion
