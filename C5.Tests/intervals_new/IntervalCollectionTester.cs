@@ -1061,6 +1061,14 @@ namespace C5.Tests.intervals_new
 
         [Test]
         [Category("Remove")]
+        public void Remove_ManyIntervals_True_FixedSeed()
+        {
+            updateRandom(-284197963);
+            Remove_ManyIntervals_True();
+        }
+
+        [Test]
+        [Category("Remove")]
         public void Remove_ManyIntervals_True()
         {
             var intervals = ManyIntervals();
@@ -1097,6 +1105,8 @@ namespace C5.Tests.intervals_new
         public void Remove_ManyIntervals_EventThrown_FixedSeed()
         {
             updateRandom(1352270728);
+            Remove_ManyIntervals_EventThrown();
+            updateRandom(-904807620);
             Remove_ManyIntervals_EventThrown();
         }
 
