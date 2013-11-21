@@ -1631,6 +1631,7 @@ namespace C5.intervals
                 }
             }
 
+            root.UpdateSpan();
             root.UpdateMaximumOverlap();
 
             // Rotate if necessary
