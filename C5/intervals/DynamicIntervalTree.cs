@@ -98,31 +98,31 @@ namespace C5.intervals
         }
 
         /// <summary>
-        /// Checks that the height of the tree is balanced.
+        /// Checks that the contractHelperHeight of the tree is balanced.
         /// </summary>
         /// <returns>True if the tree is balanced, else false.</returns>
         [Pure]
         private static bool contractHelperConfirmBalance(Node root)
         {
             var result = true;
-            height(root, ref result);
+            contractHelperHeight(root, ref result);
             return result;
         }
 
         /// <summary>
-        /// Get the height of the tree.
+        /// Get the contractHelperHeight of the tree.
         /// </summary>
-        /// <param name="node">The node you wish to check the height on.</param>
+        /// <param name="node">The node you wish to check the contractHelperHeight on.</param>
         /// <param name="result">Reference to a bool that will be set to false if an in-balance is discovered.</param>
         /// <returns>Height of the tree.</returns>
         [Pure]
-        private static int height(Node node, ref bool result)
+        private static int contractHelperHeight(Node node, ref bool result)
         {
             if (node == null)
                 return 0;
 
-            var heightLeft = height(node.Left, ref result);
-            var heightRight = height(node.Right, ref result);
+            var heightLeft = contractHelperHeight(node.Left, ref result);
+            var heightRight = contractHelperHeight(node.Right, ref result);
 
             if (node.Balance != heightRight - heightLeft)
                 result = false;
@@ -136,7 +136,7 @@ namespace C5.intervals
             if (root != null && root.Sum != 0)
                 return false;
 
-            foreach (var keyValuePair in getIntervalsByEndpoint())
+            foreach (var keyValuePair in contractHelperGetIntervalsByEndpoint())
             {
                 var key = keyValuePair.Key;
                 var intervals = keyValuePair.Value;
@@ -163,14 +163,14 @@ namespace C5.intervals
                     }
                 }
 
-                var node = findNode(root, key);
+                var node = contractHelperFindNode(root, key);
 
                 // Check DeltaAt and DeltaAfter
                 if (node.DeltaAt != deltaAt || node.DeltaAfter != deltaAfter)
                     return false;
 
                 // Check Sum and Max
-                if (!checkMno(node))
+                if (!contractHelperCheckMno(node))
                     return false;
             }
 
@@ -178,7 +178,7 @@ namespace C5.intervals
         }
 
         [Pure]
-        private IEnumerable<KeyValuePair<T, ArrayList<I>>> getIntervalsByEndpoint()
+        private IEnumerable<KeyValuePair<T, ArrayList<I>>> contractHelperGetIntervalsByEndpoint()
         {
             var dictionary = new TreeDictionary<T, ArrayList<I>>();
 
@@ -201,7 +201,7 @@ namespace C5.intervals
         }
 
         [Pure]
-        private static bool checkMno(Node node)
+        private static bool contractHelperCheckMno(Node node)
         {
             Contract.Requires(node != null);
 
@@ -244,7 +244,7 @@ namespace C5.intervals
         /// <param name="key">The key being searched.</param>
         /// <returns>The node containing the key if it exists, otherwise null.</returns>
         [Pure]
-        private static Node findNode(Node node, T key)
+        private static Node contractHelperFindNode(Node node, T key)
         {
             Contract.Requires(node != null);
             Contract.Ensures(Contract.Result<Node>() != null);
