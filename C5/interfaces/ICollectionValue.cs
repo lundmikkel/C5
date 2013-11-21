@@ -91,7 +91,7 @@ namespace C5.interfaces
         public T Choose()
         {
             Contract.EnsuresOnThrow<NoSuchItemException>(IsEmpty);
-            Contract.Ensures(IsEmpty || Contract.Result<T>() != null && Contract.Exists(this, x => ReferenceEquals(x, Contract.Result<T>())));
+            //Contract.Ensures(IsEmpty || Contract.Result<T>() != null && Contract.Exists(this, x => ReferenceEquals(x, Contract.Result<T>())));
 
             throw new NotImplementedException();
         }
