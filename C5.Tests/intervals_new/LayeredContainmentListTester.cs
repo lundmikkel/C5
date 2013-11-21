@@ -14,6 +14,11 @@ namespace C5.Tests.intervals_new
                 return typeof(LayeredContainmentList<,>);
             }
 
+            protected override Speed CountSpeed()
+            {
+                return Speed.Constant;
+            }
+
             protected override bool AllowsReferenceDuplicates()
             {
                 return true;

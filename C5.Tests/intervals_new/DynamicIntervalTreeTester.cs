@@ -21,6 +21,11 @@ namespace C5.Tests.intervals_new
                 return new object[] { false };
             }
 
+            protected override Speed CountSpeed()
+            {
+                return Speed.Constant;
+            }
+
             protected override bool AllowsReferenceDuplicates()
             {
                 return false;
@@ -38,6 +43,11 @@ namespace C5.Tests.intervals_new
             protected override object[] AdditionalParameters()
             {
                 return new object[] { true };
+            }
+
+            protected override Speed CountSpeed()
+            {
+                return Speed.Constant;
             }
 
             protected override bool AllowsReferenceDuplicates()

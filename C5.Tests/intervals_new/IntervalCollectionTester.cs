@@ -133,7 +133,7 @@ namespace C5.Tests.intervals_new
 
         [Test]
         [Category("Code Contracts")]
-        public void CodeContracts_VerifyPreconditionsAreInAssembly()
+        public void CodeContracts_VerifyPreconditionsAreInAssembly_ContractRuntimeContractException()
         {
             const string contractExceptionName = "System.Diagnostics.Contracts.__ContractsRuntime+ContractException";
             var collection = CreateEmptyCollection<int>();
@@ -157,6 +157,51 @@ namespace C5.Tests.intervals_new
         #region Collection Value
 
         #region IsEmpty
+
+        [Test]
+        [Category("IsEmpty")]
+        public void IsEmpty_EmptyCollection_Empty()
+        {
+            var collection = CreateEmptyCollection<int>();
+            Assert.True(collection.IsEmpty);
+        }
+
+        [Test]
+        [Category("IsEmpty")]
+        public void IsEmpty_SingleInterval_NotEmpty()
+        {
+            var interval = SingleInterval();
+            var collection = CreateCollection(interval);
+            Assert.False(collection.IsEmpty);
+        }
+
+        [Test]
+        [Category("IsEmpty")]
+        public void IsEmpty_SingleObject_NotEmpty()
+        {
+            var intervals = SingleObject();
+            var collection = CreateCollection(intervals);
+            Assert.False(collection.IsEmpty);
+        }
+
+        [Test]
+        [Category("IsEmpty")]
+        public void IsEmpty_DuplicateIntervals_NotEmpty()
+        {
+            var intervals = DuplicateIntervals();
+            var collection = CreateCollection(intervals);
+            Assert.False(collection.IsEmpty);
+        }
+
+        [Test]
+        [Category("IsEmpty")]
+        public void IsEmpty_ManyIntervals_NotEmpty()
+        {
+            var intervals = ManyIntervals();
+            var collection = CreateCollection(intervals);
+            Assert.False(collection.IsEmpty);
+        }
+
         #endregion
 
         #region Count
@@ -213,6 +258,17 @@ namespace C5.Tests.intervals_new
         #endregion
 
         #region CountSpeed
+
+        protected abstract Speed CountSpeed();
+
+        [Test]
+        [Category("Count Speed")]
+        public void CountSpeed_VerifyCountSpeed_EqualToStated()
+        {
+            var collection = CreateEmptyCollection<int>();
+            Assert.AreEqual(CountSpeed(), collection.CountSpeed);
+        }
+
         #endregion
 
         #region Choose
@@ -325,6 +381,7 @@ namespace C5.Tests.intervals_new
             var collection = CreateCollection(intervals);
 
             CollectionAssert.AreEquivalent(intervals, collection);
+            CollectionAssert.AllItemsAreUnique(collection);
         }
 
         #endregion
@@ -340,9 +397,7 @@ namespace C5.Tests.intervals_new
         [ExpectedException(typeof(InvalidOperationException))]
         public void Span_EmptyCollection_Exception()
         {
-            // ReSharper disable UnusedVariable
             var span = CreateEmptyCollection<int>().Span;
-            // ReSharper restore UnusedVariable
         }
 
         [Test]
@@ -351,7 +406,19 @@ namespace C5.Tests.intervals_new
         {
             var interval = SingleInterval();
             var span = CreateCollection(interval).Span;
+
             Assert.True(span.IntervalEquals(interval));
+        }
+
+        [Test]
+        [Category("Span")]
+        public void Span_ManyIntervals_JoinedSpan()
+        {
+            var intervals = ManyIntervals();
+            var span = intervals.Aggregate(intervals[0], (current, interval) => current.JoinedSpan(interval));
+            var collection = CreateCollection(intervals);
+
+            Assert.True(span.IntervalEquals(collection.Span));
         }
 
         [Test]
@@ -507,29 +574,17 @@ namespace C5.Tests.intervals_new
         {
             // 0    5   10   15   20
             // 
-            //          []
-            //         [--]
-            //        [----]
-            //       [------]
-            //      [--------]
-            //     [----------]
-            //    [------------]
-            //   [--------------]
-            //  [----------------]
-            // [------------------]
-            var intervals = new[]
-                {
-                    new Interval(9, 10, IntervalType.Closed),
-                    new Interval(8, 11, IntervalType.Closed),
-                    new Interval(7, 12, IntervalType.Closed),
-                    new Interval(6, 13, IntervalType.Closed),
-                    new Interval(5, 14, IntervalType.Closed),
-                    new Interval(4, 15, IntervalType.Closed),
-                    new Interval(3, 16, IntervalType.Closed),
-                    new Interval(2, 17, IntervalType.Closed),
-                    new Interval(1, 18, IntervalType.Closed),
-                    new Interval(0, 19, IntervalType.Closed)
-                };
+            //          [-]
+            //         [---]
+            //        [-----]
+            //       [-------]
+            //      [---------]
+            //     [-----------]
+            //    [-------------]
+            //   [---------------]
+            //  [-----------------]
+            // [-------------------]
+            var intervals = Enumerable.Range(0, 10).Select(i => new IntervalBase<int>(i, 20 - i, IntervalType.Closed)).ToArray();
             var collection = CreateCollection(intervals);
 
             Assert.AreEqual(collection.Count, collection.MaximumOverlap);
@@ -588,7 +643,103 @@ namespace C5.Tests.intervals_new
             CollectionAssert.IsEmpty(collection.FindOverlaps(query));
         }
 
-        #region Endpoint Inclusion
+        [Test]
+        [Category("Find Overlap Stabbing")]
+        public void FindOverlapsStabbing_SingleInterval_SingleOverlap()
+        {
+            var interval = SingleInterval();
+            int query;
+            do query = randomInt(); while (interval.Overlaps(query));
+            var collection = CreateCollection(interval);
+
+            CollectionAssert.IsEmpty(collection.FindOverlaps(query));
+
+            if (interval.LowIncluded)
+                CollectionAssert.AreEqual(new[] { interval }, collection.FindOverlaps(interval.Low));
+            else
+                CollectionAssert.IsEmpty(collection.FindOverlaps(interval.Low));
+
+            if (interval.HighIncluded)
+                CollectionAssert.AreEqual(new[] { interval }, collection.FindOverlaps(interval.High));
+            else
+                CollectionAssert.IsEmpty(collection.FindOverlaps(interval.High));
+
+            CollectionAssert.AreEquivalent(new[] { interval }, collection.FindOverlaps(interval.Low / 2 + interval.High / 2));
+        }
+
+        [Test]
+        [Category("Find Overlap Stabbing")]
+        public void FindOverlapsStabbing_SingleObject_CountOrSingleOverlap()
+        {
+            var intervals = SingleObject();
+            var interval = intervals[0];
+            int query;
+            do query = randomInt(); while (interval.Overlaps(query));
+            var collection = CreateCollection(intervals);
+            var overlaps = collection.AllowsReferenceDuplicates ? intervals : new[] { interval };
+
+            CollectionAssert.IsEmpty(collection.FindOverlaps(query));
+
+            if (interval.LowIncluded)
+                CollectionAssert.AreEquivalent(overlaps, collection.FindOverlaps(interval.Low));
+            else
+                CollectionAssert.IsEmpty(collection.FindOverlaps(interval.Low));
+
+            if (interval.HighIncluded)
+                CollectionAssert.AreEquivalent(overlaps, collection.FindOverlaps(interval.High));
+            else
+                CollectionAssert.IsEmpty(collection.FindOverlaps(interval.High));
+
+            CollectionAssert.AreEquivalent(overlaps, collection.FindOverlaps(interval.Low / 2 + interval.High / 2));
+        }
+
+        [Test]
+        [Category("Find Overlap Stabbing")]
+        public void FindOverlapsStabbing_DuplicateIntervals_CountOverlaps()
+        {
+            var intervals = DuplicateIntervals();
+            var interval = intervals[0];
+            int query;
+            do query = randomInt(); while (interval.Overlaps(query));
+            var collection = CreateCollection(intervals);
+
+            CollectionAssert.IsEmpty(collection.FindOverlaps(query));
+
+            if (interval.LowIncluded)
+                CollectionAssert.AreEquivalent(intervals, collection.FindOverlaps(interval.Low));
+            else
+                CollectionAssert.IsEmpty(collection.FindOverlaps(interval.Low));
+
+            if (interval.HighIncluded)
+                CollectionAssert.AreEquivalent(intervals, collection.FindOverlaps(interval.High));
+            else
+                CollectionAssert.IsEmpty(collection.FindOverlaps(interval.High));
+
+            CollectionAssert.AreEquivalent(intervals, collection.FindOverlaps(interval.Low / 2 + interval.High / 2));
+        }
+
+        [Test]
+        [Category("Find Overlap Stabbing")]
+        public void FindOverlapsStabbing_ManyIntervals_AtLeastOneOverlap()
+        {
+            /*var intervals = ManyIntervals();
+            var collection = CreateCollection(intervals);
+            var query = 
+                CollectionAssert.IsEmpty(collection.FindOverlaps(query));
+            foreach (var interval in collection)
+            {
+
+                if (interval.LowIncluded)
+                    CollectionAssert.AreEquivalent(overlaps, collection.FindOverlaps(interval.Low));
+                else
+                    CollectionAssert.IsEmpty(collection.FindOverlaps(interval.Low));
+                if (interval.HighIncluded)
+                    CollectionAssert.AreEquivalent(overlaps, collection.FindOverlaps(interval.High));
+                else
+                    CollectionAssert.IsEmpty(collection.FindOverlaps(interval.High));
+                CollectionAssert.AreEquivalent(overlaps, collection.FindOverlaps(interval.Low / 2 + interval.High / 2));
+            }*/
+        }
 
         [Test]
         [Category("Find Overlaps Stabbing")]
@@ -602,8 +753,6 @@ namespace C5.Tests.intervals_new
             CollectionAssert.AreEquivalent(intervals.Where(x => x.HighIncluded), collection.FindOverlaps(interval.High));
             CollectionAssert.AreEquivalent(intervals, collection.FindOverlaps(interval.Low / 2 + interval.High / 2));
         }
-
-        #endregion
 
         #endregion
 
