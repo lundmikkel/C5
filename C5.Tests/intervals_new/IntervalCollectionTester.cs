@@ -1065,6 +1065,8 @@ namespace C5.Tests.intervals_new
         {
             updateRandom(-284197963);
             Remove_ManyIntervals_True();
+            updateRandom(873007789);
+            Remove_ManyIntervals_True();
         }
 
         [Test]
