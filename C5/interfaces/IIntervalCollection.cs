@@ -37,6 +37,7 @@ namespace C5
         /// <remarks>The point of maximum overlap may not be representable with an endpoint value, as it could be between two descrete values.</remarks>
         /// </summary>
         [Pure]
+        // TODO: Rename to MaximumDepth?
         int MaximumOverlap { get; }
 
         /// <summary>
