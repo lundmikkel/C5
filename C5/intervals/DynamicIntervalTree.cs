@@ -271,7 +271,7 @@ namespace C5.intervals
         private class IntervalList : IEnumerable<I>
         {
             // A dictionary sorted on high with an accompanying sublist to handle objects with duplicate intervals
-            private readonly IDictionary<I, ArrayList<I>> _dictionary;
+            private readonly ISortedDictionary<I, HashBag<I>> _dictionary;
 
             #region Code Contracts
 
@@ -307,7 +307,8 @@ namespace C5.intervals
                 Contract.Ensures(_dictionary != null);
                 Contract.Ensures(_dictionary.IsEmpty);
 
-                _dictionary = new SortedArrayDictionary<I, ArrayList<I>>((IComparer<I>) Comparer);
+                // TODO: Benchmark against SortedArrayDictionary
+                _dictionary = new TreeDictionary<I, HashBag<I>>((IComparer<I>) Comparer);
             }
 
             /// <summary>
@@ -335,12 +336,12 @@ namespace C5.intervals
                 Contract.Ensures(Contract.OldValue(_dictionary.Contains(interval)) || _dictionary[interval] == null);
 
                 var key = interval;
-                ArrayList<I> list;
+                HashBag<I> list;
                 if (_dictionary.Find(ref key, out list))
                 {
                     if (list == null)
                     {
-                        _dictionary[key] = new ArrayList<I>((IEqualityComparer<I>) EqualityComparer) { interval };
+                        _dictionary[key] = new HashBag<I>((IEqualityComparer<I>) EqualityComparer) { interval };
                         return true;
                     }
                     return list.Add(interval);
@@ -373,7 +374,7 @@ namespace C5.intervals
                     return false;
 
                 var key = interval;
-                ArrayList<I> list;
+                HashBag<I> list;
 
                 if (!_dictionary.Find(ref key, out list))
                     return false;
@@ -385,7 +386,8 @@ namespace C5.intervals
                     if (list == null || list.IsEmpty)
                         return _dictionary.Remove(interval);
 
-                    var newKey = list.RemoveLast();
+                    var newKey = list.Choose();
+                    list.Remove(newKey);
                     _dictionary.Remove(interval);
                     _dictionary.Add(newKey, (list.IsEmpty ? null : list));
                     return true;
@@ -491,7 +493,7 @@ namespace C5.intervals
                 Contract.Ensures(Contract.Result<bool>() == Contract.Exists(_dictionary, keyValuePair => ReferenceEquals(keyValuePair.Key, interval) || keyValuePair.Value != null && Contract.Exists(keyValuePair.Value, x => ReferenceEquals(x, interval))));
 
                 var key = interval;
-                ArrayList<I> list;
+                HashBag<I> list;
                 if (_dictionary.Find(ref key, out list))
                     return ReferenceEquals(key, interval) || list != null && list.Any(i => ReferenceEquals(i, interval));
 
