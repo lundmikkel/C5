@@ -152,10 +152,8 @@
     <Compile Include="heaps\IntervalHeap.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="interfaces\ICollectionValue.cs" />
-    <Compile Include="interfaces\IDictionary.cs" />
     <Compile Include="interfaces\IInterval.cs" />
     <Compile Include="interfaces\IIntervalCollection.cs" />
-    <Compile Include="interfaces\IList.cs" />
     <Compile Include="intervals\AvlTree.cs" />
     <Compile Include="intervals\BinaryIntervalSearch.cs" />
     <Compile Include="intervals\IntervalBinarySearchTreeAvl.cs" />

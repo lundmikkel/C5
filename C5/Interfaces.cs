@@ -698,7 +698,6 @@ namespace C5
     ///
     /// NBNBNB: we need a description of the view functionality here!
     /// </summary>
-    [ContractClass(typeof(ListContract<>))]
     public interface IList<T> : IIndexed<T>, IDisposable, SCG.IList<T>, System.Collections.IList
     {
         /// <summary>
@@ -1566,7 +1565,6 @@ namespace C5
     /// A dictionary with keys of type K and values of type V. Equivalent to a
     /// finite partial map from K to V.
     /// </summary>
-    [ContractClass(typeof(DictionaryContract<,>))]
     public interface IDictionary<K, V> : ICollectionValue<KeyValuePair<K, V>>
     {
         /// <summary>

@@ -738,7 +738,7 @@ namespace C5.Tests.intervals_new
                 else
                     CollectionAssert.IsEmpty(collection.FindOverlaps(interval.High));
                 CollectionAssert.AreEquivalent(overlaps, collection.FindOverlaps(interval.Low / 2 + interval.High / 2));
-            }*/
+            }*/ 
         }
 
         [Test]
