@@ -121,8 +121,8 @@ namespace C5
         #region Extensible
 
         /// <summary>
-        /// If true any call of an updating operation will throw an
-        /// <code>ReadOnlyCollectionException</code>
+        /// If true any call of an updating operation will throw a
+        /// <code>ReadOnlyCollectionException</code>.
         /// </summary>
         /// <value>True if this collection is read-only.</value>
         [Pure]
