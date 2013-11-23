@@ -73,7 +73,7 @@ namespace C5.interfaces
         public bool Find(Func<T, bool> predicate, out T item)
         {
             Contract.Requires(predicate != null);
-            //Contract.Ensures(!Contract.Result<bool>() || predicate(item));
+            Contract.Ensures(!Contract.Result<bool>() || predicate(Contract.ValueAtReturn(out item)));
 
             throw new NotImplementedException();
         }
@@ -91,7 +91,7 @@ namespace C5.interfaces
         public T Choose()
         {
             Contract.EnsuresOnThrow<NoSuchItemException>(IsEmpty);
-            //Contract.Ensures(IsEmpty || Contract.Result<T>() != null && Contract.Exists(this, x => ReferenceEquals(x, Contract.Result<T>())));
+            Contract.Ensures(IsEmpty || Contract.Result<T>() != null && Contract.Exists(this, x => ReferenceEquals(x, Contract.Result<T>())));
 
             throw new NotImplementedException();
         }

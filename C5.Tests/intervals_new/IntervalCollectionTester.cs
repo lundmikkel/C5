@@ -738,7 +738,7 @@ namespace C5.Tests.intervals_new
                 else
                     CollectionAssert.IsEmpty(collection.FindOverlaps(interval.High));
                 CollectionAssert.AreEquivalent(overlaps, collection.FindOverlaps(interval.Low / 2 + interval.High / 2));
-            }*/ 
+            }*/
         }
 
         [Test]
@@ -1174,6 +1174,14 @@ namespace C5.Tests.intervals_new
 
         [Test]
         [Category("Remove")]
+        public void Remove_SingleObject_Removed_FixedSeed()
+        {
+            updateRandom(1358768120);
+            Remove_SingleObject_Removed();
+        }
+
+        [Test]
+        [Category("Remove")]
         public void Remove_SingleObject_Removed()
         {
             var intervals = SingleObject();
@@ -1189,6 +1197,16 @@ namespace C5.Tests.intervals_new
                         Assert.AreEqual(collection.AllowsReferenceDuplicates, collection.Remove(intervals[i]));
                 }
             }
+        }
+
+        [Test]
+        [Category("Remove")]
+        public void Remove_DuplicateIntervals_True_FixedSeed()
+        {
+            updateRandom(1747493494);
+            Remove_DuplicateIntervals_True();
+            updateRandom(-356355912);
+            Remove_DuplicateIntervals_True();
         }
 
         [Test]
@@ -1258,6 +1276,8 @@ namespace C5.Tests.intervals_new
             updateRandom(1352270728);
             Remove_ManyIntervals_EventThrown();
             updateRandom(-904807620);
+            Remove_ManyIntervals_EventThrown();
+            updateRandom(-356355912);
             Remove_ManyIntervals_EventThrown();
         }
 
