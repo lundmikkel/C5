@@ -386,7 +386,7 @@ namespace C5.intervals
                     if (list == null || list.IsEmpty)
                         return _dictionary.Remove(interval);
 
-                    var newKey = list.Choose();
+                    var newKey = list.First();
                     list.Remove(newKey);
                     _dictionary.Remove(interval);
                     _dictionary.Add(newKey, (list.IsEmpty ? null : list));
