@@ -289,6 +289,14 @@ namespace C5.Tests.intervals_new
 
         [Test]
         [Category("Count")]
+        public void Count_ManyIntervals_Count_FixedSeed()
+        {
+            updateRandom(-623960470);
+            Count_ManyIntervals_Count();
+        }
+
+        [Test]
+        [Category("Count")]
         public void Count_ManyIntervals_Count()
         {
             var intervals = ManyIntervals();
@@ -817,6 +825,14 @@ namespace C5.Tests.intervals_new
 
         [Test]
         [Category("Find Overlaps Range")]
+        public void FindOverlapsRange_BensTest_FixedSeed()
+        {
+            updateRandom(-1166356094);
+            FindOverlapsRange_BensTest();
+        }
+
+        [Test]
+        [Category("Find Overlaps Range")]
         public void FindOverlapsRange_BensTest()
         {
             // ****************************************
@@ -912,6 +928,14 @@ namespace C5.Tests.intervals_new
             do { interval = SingleInterval(); } while (intervals.Any(x => x.Overlaps(interval)));
 
             CollectionAssert.IsEmpty(collection.FindOverlaps(interval));
+        }
+
+        [Test]
+        [Category("Find Overlaps Range")]
+        public void FindOverlapsRange_ManyIntervals_ManyIntervals_FixedSeed()
+        {
+            updateRandom(-1585512131);
+            FindOverlapsRange_ManyIntervals_ManyIntervals();
         }
 
         [Test]
