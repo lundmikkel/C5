@@ -7,7 +7,49 @@ using NUnit.Framework;
 
 namespace C5.Tests.intervals_new
 {
-    using Interval = IntervalBase<int>;
+    using Interval = TestInterval<int>;
+
+    internal class TestInterval<T> : IntervalBase<T> where T : IComparable<T>
+    {
+        public int Id { get; private set; }
+
+        private int randomInt()
+        {
+            var bytes = new byte[4];
+            System.Security.Cryptography.RandomNumberGenerator.Create().GetBytes(bytes);
+            return BitConverter.ToInt32(bytes, 0);
+        }
+
+        public TestInterval(T query)
+            : base(query)
+        {
+            Id = randomInt();
+        }
+
+        public TestInterval(T low, T high, bool lowIncluded = true, bool highIncluded = false)
+            : base(low, high, lowIncluded, highIncluded)
+        {
+            Id = randomInt();
+        }
+
+        public TestInterval(T low, T high, IntervalType type)
+            : base(low, high, type)
+        {
+            Id = randomInt();
+        }
+
+        public TestInterval(IInterval<T> i)
+            : base(i)
+        {
+            Id = randomInt();
+        }
+
+        public TestInterval(IInterval<T> low, IInterval<T> high)
+            : base(low, high)
+        {
+            Id = randomInt();
+        }
+    }
 
     [TestFixture]
     abstract class IntervalCollectionTester
@@ -52,7 +94,7 @@ namespace C5.Tests.intervals_new
             var low = Random.Next(Int32.MinValue, Int32.MaxValue);
             var high = Random.Next(low + 2, Int32.MaxValue);
 
-            return new IntervalBase<int>(low, high, (IntervalType) Random.Next(0, 4));
+            return new Interval(low, high, (IntervalType) Random.Next(0, 4));
         }
 
         public IInterval<int>[] ManyIntervals()
@@ -65,7 +107,7 @@ namespace C5.Tests.intervals_new
         public IInterval<int>[] DuplicateIntervals()
         {
             var interval = SingleInterval();
-            return Enumerable.Range(0, Count).Select(i => new IntervalBase<int>(interval)).ToArray();
+            return Enumerable.Range(0, Count).Select(i => new Interval(interval)).ToArray();
         }
 
         public IInterval<int>[] SingleObject()
@@ -76,7 +118,7 @@ namespace C5.Tests.intervals_new
 
         public IInterval<int> SinglePoint()
         {
-            return new IntervalBase<int>(Random.Next(Int32.MinValue, Int32.MaxValue));
+            return new Interval(Random.Next(Int32.MinValue, Int32.MaxValue));
         }
 
         public static IInterval<int>[] NonOverlappingIntervals(int count, int length = 1, int space = 0)
@@ -88,7 +130,7 @@ namespace C5.Tests.intervals_new
             var low = 0;
             for (var i = 0; i < count; i++)
             {
-                intervals[i] = new IntervalBase<int>(low, low + length, IntervalType.LowIncluded);
+                intervals[i] = new Interval(low, low + length, IntervalType.LowIncluded);
                 low += length + space;
             }
 
@@ -584,7 +626,7 @@ namespace C5.Tests.intervals_new
             //   [---------------]
             //  [-----------------]
             // [-------------------]
-            var intervals = Enumerable.Range(0, 10).Select(i => new IntervalBase<int>(i, 20 - i, IntervalType.Closed)).ToArray();
+            var intervals = Enumerable.Range(0, 10).Select(i => new Interval(i, 20 - i, IntervalType.Closed)).ToArray();
             var collection = CreateCollection(intervals);
 
             Assert.AreEqual(collection.Count, collection.MaximumOverlap);
@@ -805,11 +847,11 @@ namespace C5.Tests.intervals_new
             // | [   ]                                |
             // ****************************************
             var intervals = new[] {
-                new IntervalBase<int>(5, 9, true, true),
-                new IntervalBase<int>(11, 15, true, true),
-                new IntervalBase<int>(15, 20, true, true),
-                new IntervalBase<int>(20, 24, true, true),
-                new IntervalBase<int>(26, 30, true, true)
+                new Interval(5, 9, true, true),
+                new Interval(11, 15, true, true),
+                new Interval(15, 20, true, true),
+                new Interval(20, 24, true, true),
+                new Interval(26, 30, true, true)
             };
 
             var collection = CreateCollection(intervals);
