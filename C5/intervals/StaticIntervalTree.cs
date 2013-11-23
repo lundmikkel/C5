@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
-using SCG = System.Collections.Generic;
 
 namespace C5.intervals
 {
@@ -47,15 +46,21 @@ namespace C5.intervals
         where I : IInterval<T>
         where T : IComparable<T>
     {
+        #region Fields
+
         private readonly Node _root;
         private readonly int _count;
         private IInterval<T> _span;
         private int _maximumOverlap = -1;
 
-        #region Node nested classes
+        #endregion
+
+        #region Inner classes
 
         class Node
         {
+            #region Fields
+
             internal T Key { get; private set; }
             // Left and right subtree
             internal Node Left { get; private set; }
@@ -64,8 +69,12 @@ namespace C5.intervals
             internal I[] LeftList { get; private set; }
             internal I[] RightList { get; private set; }
 
-            private static SCG.IComparer<I> LeftComparer = IntervalExtensions.CreateComparer<I, T>();
-            private static SCG.IComparer<I> RightComparer = IntervalExtensions.CreateReversedComparer<I, T>();
+            private static IComparer<I> LeftComparer = IntervalExtensions.CreateComparer<I, T>();
+            private static IComparer<I> RightComparer = IntervalExtensions.CreateReversedComparer<I, T>();
+
+            #endregion
+
+            #region Constructor
 
             internal Node(I[] intervals, ref IInterval<T> span)
             {
@@ -132,31 +141,32 @@ namespace C5.intervals
                 if (rights != null)
                     Right = new Node(rights.ToArray(), ref span);
             }
+
+            #endregion
         }
 
         #endregion
 
-        #region Constructors
+        #region Constructor
 
         /// <summary>
         /// Create a static interval tree from a collection of intervals.
         /// </summary>
         /// <param name="intervals">Interval collection</param>
-        public StaticIntervalTree(SCG.IEnumerable<I> intervals)
+        public StaticIntervalTree(IEnumerable<I> intervals)
         {
             var intervalArray = intervals as I[] ?? intervals.ToArray();
 
-            if (intervalArray.Any())
-            {
-                _count = intervalArray.Count();
+            if (!intervalArray.Any())
+                return;
 
-                IInterval<T> span = new IntervalBase<T>(intervalArray.First());
+            _count = intervalArray.Count();
 
-                _root = new Node(intervalArray, ref span);
-
-                Span = span;
-            }
+            _span = new IntervalBase<T>(intervalArray.First());
+            _root = new Node(intervalArray, ref _span);
         }
+
+        #endregion
 
         #region Median
 
@@ -221,42 +231,27 @@ namespace C5.intervals
 
         #endregion
 
-        #endregion
-
-        #region IEnumerable
+        #region Enumerable
 
         /// <inheritdoc/>
-        public int CountOverlaps(T query)
+        public override IEnumerator<I> GetEnumerator()
         {
-            return FindOverlaps(query).Count();
+            return getEnumerator(_root);
         }
 
-        /// <inheritdoc/>
-        public int CountOverlaps(IInterval<T> query)
-        {
-            return FindOverlaps(query).Count();
-        }
-
-        /// <inheritdoc/>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        private SCG.IEnumerator<I> getEnumerator(Node node)
+        private IEnumerator<I> getEnumerator(Node node)
         {
             // Just return if tree is empty
-            if (node == null) yield break;
+            if (node == null)
+                yield break;
 
             // Recursively retrieve intervals in left subtree
             if (node.Left != null)
             {
-                SCG.IEnumerator<I> child = getEnumerator(node.Left);
+                IEnumerator<I> child = getEnumerator(node.Left);
 
                 while (child.MoveNext())
-                {
                     yield return child.Current;
-                }
             }
 
             // Go through all intervals in the node
@@ -271,65 +266,11 @@ namespace C5.intervals
                 while (child.MoveNext())
                     yield return child.Current;
             }
-
         }
 
         #endregion
 
-        #region Formatting
-
-        /// <summary>
-        /// Print the tree structure in Graphviz format
-        /// </summary>
-        /// <returns></returns>
-        public string Graphviz
-        {
-            get
-            {
-                return "digraph StaticIntervalTree {\n"
-                    + "\troot [fontname=consolas,shape=plaintext,label=\"Root\"];\n"
-                    + graphviz(_root, "root")
-                    + "}\n";
-            }
-        }
-
-        private int _nodeCounter;
-        private int _nullCounter;
-
-        private string graphviz(Node root, string parent)
-        {
-            // Leaf
-            int id;
-            if (root == null)
-            {
-                id = _nullCounter++;
-                return
-                    String.Format("\tleaf{0} [shape=point];\n", id) +
-                    String.Format("\t{0} -> leaf{1};\n", parent, id);
-            }
-
-            id = _nodeCounter++;
-            return
-                String.Format("\tnode{0} [fontname=consolas,label=\"{1}\"];\n", id, root.Key) +
-                String.Format("\t{0} -> node{1};\n", parent, id) +
-                graphviz(root.Left, "node" + id) +
-                String.Format("\tnode{0}left [fontname=consolas,shape=plaintext, label=\"{1}\"];\n", id, root.LeftList) +
-                String.Format("\tnode{0} -> node{0}left [style=dotted];\n", id) +
-                String.Format("\tnode{0}right [fontname=consolas,shape=plaintext, label=\"{1}\"];\n", id, root.RightList.Reverse()) +
-                String.Format("\tnode{0} -> node{0}right [style=dotted];\n", id) +
-                graphviz(root.Right, "node" + id);
-        }
-
-        /// <inheritdoc/>
-        public override SCG.IEnumerator<I> GetEnumerator()
-        {
-            return getEnumerator(_root);
-        }
-
-
-        #endregion
-
-        #region ICollectionValue
+        #region Collection Value
 
         /// <inheritdoc/>
         public override bool IsEmpty { get { return _root == null; } }
@@ -349,7 +290,27 @@ namespace C5.intervals
 
         #endregion
 
-        #region IIntervaled
+        #region Interval Collection
+
+        #region Properties
+
+        #region Span
+
+        /// <inheritdoc/>
+        public IInterval<T> Span
+        {
+            get
+            {
+                if (_span == null)
+                    throw new InvalidOperationException("An empty collection has no span");
+
+                return _span;
+            }
+        }
+
+        #endregion
+
+        #region MNO
 
         /// <inheritdoc/>
         public int MaximumOverlap
@@ -388,19 +349,62 @@ namespace C5.intervals
             return max;
         }
 
+        #endregion
+
         /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get { return true; } }
 
-        /// <inheritdoc/>
-        public SCG.IEnumerable<I> FindOverlaps(T query)
-        {
-            if (ReferenceEquals(query, null))
-                return Enumerable.Empty<I>();
+        #endregion
 
+        #region Count Overlaps
+
+        /// <inheritdoc/>
+        public int CountOverlaps(T query)
+        {
+            return FindOverlaps(query).Count();
+        }
+
+        /// <inheritdoc/>
+        public int CountOverlaps(IInterval<T> query)
+        {
+            return FindOverlaps(query).Count();
+        }
+
+        #endregion
+
+        #region Find Overlaps
+
+        /// <inheritdoc/>
+        public IEnumerable<I> FindOverlaps(T query)
+        {
             return findOverlaps(_root, query);
         }
 
-        private static SCG.IEnumerable<I> findOverlaps(Node root, T query)
+        /// <inheritdoc/>
+        public IEnumerable<I> FindOverlaps(IInterval<T> query)
+        {
+            if (ReferenceEquals(query, null))
+                yield break;
+
+            // Break if collection is empty or the query is outside the collections span
+            if (IsEmpty || !Span.Overlaps(query))
+                yield break;
+
+            var splitNode = _root;
+            // Use a lambda instead of out, as out or ref isn't allowed for itorators
+            foreach (var interval in findSplitNode(_root, query, n => { splitNode = n; }))
+                yield return interval;
+
+            // Find all intersecting intervals in left subtree
+            foreach (var interval in findLeft(splitNode.Left, query))
+                yield return interval;
+
+            // Find all intersecting intervals in right subtree
+            foreach (var interval in findRight(splitNode.Right, query))
+                yield return interval;
+        }
+
+        private static IEnumerable<I> findOverlaps(Node root, T query)
         {
             // Don't search empty leaves
             if (root == null)
@@ -447,66 +451,10 @@ namespace C5.intervals
             }
         }
 
-        /// <inheritdoc/>
-        public SCG.IEnumerable<I> FindOverlaps(IInterval<T> query)
-        {
-            if (ReferenceEquals(query, null))
-                yield break;
-
-            // Break if collection is empty or the query is outside the collections span
-            if (IsEmpty || !Span.Overlaps(query))
-                yield break;
-
-            var splitNode = _root;
-            // Use a lambda instead of out, as out or ref isn't allowed for itorators
-            foreach (var interval in findSplitNode(_root, query, n => { splitNode = n; }))
-                yield return interval;
-
-            // Find all intersecting intervals in left subtree
-            foreach (var interval in findLeft(splitNode.Left, query))
-                yield return interval;
-
-            // Find all intersecting intervals in right subtree
-            foreach (var interval in findRight(splitNode.Right, query))
-                yield return interval;
-        }
-
-        /// <inheritdoc/>
-        public bool FindOverlap(IInterval<T> query, ref I overlap)
-        {
-            bool result;
-
-            using (var enumerator = FindOverlaps(query).GetEnumerator())
-            {
-                result = enumerator.MoveNext();
-
-                if (result)
-                    overlap = enumerator.Current;
-            }
-
-            return result;
-        }
-
-        /// <inheritdoc/>
-        public bool FindOverlap(T query, ref I overlap)
-        {
-            bool result;
-
-            using (var enumerator = FindOverlaps(query).GetEnumerator())
-            {
-                result = enumerator.MoveNext();
-
-                if (result)
-                    overlap = enumerator.Current;
-            }
-
-            return result;
-        }
-
         /// <summary>
         /// Create an enumerable, enumerating all intersecting intervals on the path to the split node. Returns the split node in splitNode.
         /// </summary>
-        private SCG.IEnumerable<I> findSplitNode(Node root, IInterval<T> query, Action<Node> splitNode)
+        private IEnumerable<I> findSplitNode(Node root, IInterval<T> query, Action<Node> splitNode)
         {
             if (root == null) yield break;
 
@@ -554,7 +502,7 @@ namespace C5.intervals
             }
         }
 
-        private SCG.IEnumerable<I> findLeft(Node root, IInterval<T> query)
+        private IEnumerable<I> findLeft(Node root, IInterval<T> query)
         {
             // If root is null we have reached the end
             if (root == null) yield break;
@@ -593,7 +541,7 @@ namespace C5.intervals
 
                 // Recursively add all intervals in right subtree as they must be
                 // contained by [root.Key:splitNode]
-                SCG.IEnumerator<I> child = getEnumerator(root.Right);
+                IEnumerator<I> child = getEnumerator(root.Right);
                 while (child.MoveNext())
                 {
                     yield return child.Current;
@@ -618,7 +566,7 @@ namespace C5.intervals
                 }
 
                 // If we find the matching node, we can add everything in the left subtree
-                SCG.IEnumerator<I> child = getEnumerator(root.Right);
+                IEnumerator<I> child = getEnumerator(root.Right);
                 while (child.MoveNext())
                 {
                     yield return child.Current;
@@ -626,7 +574,7 @@ namespace C5.intervals
             }
         }
 
-        private SCG.IEnumerable<I> findRight(Node root, IInterval<T> query)
+        private IEnumerable<I> findRight(Node root, IInterval<T> query)
         {
             // If root is null we have reached the end
             if (root == null) yield break;
@@ -664,7 +612,7 @@ namespace C5.intervals
 
                 // Recursively add all intervals in right subtree as they must be
                 // contained by [root.Key:splitNode]
-                SCG.IEnumerator<I> child = getEnumerator(root.Left);
+                IEnumerator<I> child = getEnumerator(root.Left);
                 while (child.MoveNext())
                 {
                     yield return child.Current;
@@ -688,7 +636,7 @@ namespace C5.intervals
                 }
 
                 // If we find the matching node, we can add everything in the left subtree
-                SCG.IEnumerator<I> child = getEnumerator(root.Left);
+                IEnumerator<I> child = getEnumerator(root.Left);
                 while (child.MoveNext())
                 {
                     yield return child.Current;
@@ -696,18 +644,40 @@ namespace C5.intervals
             }
         }
 
-        /// <inheritdoc/>
-        public IInterval<T> Span
-        {
-            get
-            {
-                if (_span == null)
-                    throw new InvalidOperationException("An empty collection has no span");
+        #endregion
 
-                return _span;
+        #region Find Overlap
+
+        /// <inheritdoc/>
+        public bool FindOverlap(T query, ref I overlap)
+        {
+            bool result;
+
+            using (var enumerator = FindOverlaps(query).GetEnumerator())
+            {
+                result = enumerator.MoveNext();
+
+                if (result)
+                    overlap = enumerator.Current;
             }
 
-            private set { _span = value; }
+            return result;
+        }
+
+        /// <inheritdoc/>
+        public bool FindOverlap(IInterval<T> query, ref I overlap)
+        {
+            bool result;
+
+            using (var enumerator = FindOverlaps(query).GetEnumerator())
+            {
+                result = enumerator.MoveNext();
+
+                if (result)
+                    overlap = enumerator.Current;
+            }
+
+            return result;
         }
 
         #endregion
@@ -724,7 +694,7 @@ namespace C5.intervals
         }
 
         /// <inheritdoc/>
-        public void AddAll(SCG.IEnumerable<I> intervals)
+        public void AddAll(IEnumerable<I> intervals)
         {
             throw new ReadOnlyCollectionException();
         }
@@ -739,6 +709,54 @@ namespace C5.intervals
         public void Clear()
         {
             throw new ReadOnlyCollectionException();
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Formatting
+
+        /// <summary>
+        /// Print the tree structure in Graphviz format
+        /// </summary>
+        /// <returns></returns>
+        public string Graphviz
+        {
+            get
+            {
+                return "digraph StaticIntervalTree {\n"
+                    + "\troot [fontname=consolas,shape=plaintext,label=\"Root\"];\n"
+                    + graphviz(_root, "root")
+                    + "}\n";
+            }
+        }
+
+        private int _nodeCounter;
+        private int _nullCounter;
+
+        private string graphviz(Node root, string parent)
+        {
+            // Leaf
+            int id;
+            if (root == null)
+            {
+                id = _nullCounter++;
+                return
+                    String.Format("\tleaf{0} [shape=point];\n", id) +
+                    String.Format("\t{0} -> leaf{1};\n", parent, id);
+            }
+
+            id = _nodeCounter++;
+            return
+                String.Format("\tnode{0} [fontname=consolas,label=\"{1}\"];\n", id, root.Key) +
+                String.Format("\t{0} -> node{1};\n", parent, id) +
+                graphviz(root.Left, "node" + id) +
+                String.Format("\tnode{0}left [fontname=consolas,shape=plaintext, label=\"{1}\"];\n", id, root.LeftList) +
+                String.Format("\tnode{0} -> node{0}left [style=dotted];\n", id) +
+                String.Format("\tnode{0}right [fontname=consolas,shape=plaintext, label=\"{1}\"];\n", id, root.RightList.Reverse()) +
+                String.Format("\tnode{0} -> node{0}right [style=dotted];\n", id) +
+                graphviz(root.Right, "node" + id);
         }
 
         #endregion
