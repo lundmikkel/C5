@@ -71,21 +71,29 @@ namespace C5.intervals
             {
                 Key = getKey(intervals);
 
-                // TODO: Don't create list if not necessary
                 IList<I>
                     keyIntersections = new ArrayList<I>(),
-                    lefts = new ArrayList<I>(),
-                    rights = new ArrayList<I>();
-
+                    lefts = null,
+                    rights = null;
 
                 // Compute I_mid and construct two sorted lists, LeftList and RightList
                 // Divide intervals according to intersection with key
                 foreach (var interval in intervals)
                 {
                     if (interval.High.CompareTo(Key) < 0)
+                    {
+                        if (lefts == null)
+                            lefts = new ArrayList<I>();
+
                         lefts.Add(interval);
+                    }
                     else if (Key.CompareTo(interval.Low) < 0)
+                    {
+                        if (rights == null)
+                            rights = new ArrayList<I>();
+
                         rights.Add(interval);
+                    }
                     else
                         keyIntersections.Add(interval);
                 }
@@ -118,10 +126,10 @@ namespace C5.intervals
 
 
                 // Construct interval tree recursively for Left and Right subtrees
-                if (!lefts.IsEmpty)
+                if (lefts != null)
                     Left = new Node(lefts.ToArray(), ref span);
 
-                if (!rights.IsEmpty)
+                if (rights != null)
                     Right = new Node(rights.ToArray(), ref span);
             }
         }
