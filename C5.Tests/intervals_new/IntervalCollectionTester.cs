@@ -447,9 +447,11 @@ namespace C5.Tests.intervals_new
         public void Span_SingleInterval_IntervalEqualsSpan()
         {
             var interval = SingleInterval();
-            var span = CreateCollection(interval).Span;
+            var collection = CreateCollection(interval);
+            var span = collection.Span;
 
             Assert.True(span.IntervalEquals(interval));
+            Assert.True(collection.All(span.Contains));
         }
 
         [Test]
@@ -461,6 +463,7 @@ namespace C5.Tests.intervals_new
             var collection = CreateCollection(intervals);
 
             Assert.True(span.IntervalEquals(collection.Span));
+            Assert.True(collection.All(span.Contains));
         }
 
         [Test]
@@ -476,12 +479,14 @@ namespace C5.Tests.intervals_new
             } while (interval1.Overlaps(interval2));
 
             var joinedSpan = interval1.JoinedSpan(interval2);
-            var span = CreateCollection(
+            var collection = CreateCollection(
                     interval1,
                     interval2
-                ).Span;
+                );
+            var span = collection.Span;
 
             Assert.True(joinedSpan.IntervalEquals(span));
+            Assert.True(collection.All(span.Contains));
         }
 
         [Test]
@@ -496,10 +501,11 @@ namespace C5.Tests.intervals_new
                 interval2 = SingleInterval();
             } while (!interval1.StrictlyContains(interval2));
 
-            var span = CreateCollection(
+            var collection = CreateCollection(
                     interval1,
                     interval2
-                ).Span;
+                );
+            var span = collection.Span;
 
             Assert.True(interval1.IntervalEquals(span));
         }
@@ -762,25 +768,24 @@ namespace C5.Tests.intervals_new
 
         [Test]
         [Category("Find Overlap Stabbing")]
+        public void FindOverlapsStabbing_ManyIntervals_AtLeastOneOverlap_FixedSeed()
+        {
+            updateRandom(1641746101);
+            FindOverlapsStabbing_ManyIntervals_AtLeastOneOverlap();
+        }
+
+        [Test]
+        [Category("Find Overlap Stabbing")]
         public void FindOverlapsStabbing_ManyIntervals_AtLeastOneOverlap()
         {
-            /*var intervals = ManyIntervals();
+            var intervals = ManyIntervals();
             var collection = CreateCollection(intervals);
-            var query = 
-                CollectionAssert.IsEmpty(collection.FindOverlaps(query));
-            foreach (var interval in collection)
-            {
 
-                if (interval.LowIncluded)
-                    CollectionAssert.AreEquivalent(overlaps, collection.FindOverlaps(interval.Low));
-                else
-                    CollectionAssert.IsEmpty(collection.FindOverlaps(interval.Low));
-                if (interval.HighIncluded)
-                    CollectionAssert.AreEquivalent(overlaps, collection.FindOverlaps(interval.High));
-                else
-                    CollectionAssert.IsEmpty(collection.FindOverlaps(interval.High));
-                CollectionAssert.AreEquivalent(overlaps, collection.FindOverlaps(interval.Low / 2 + interval.High / 2));
-            }*/
+            foreach (var interval in intervals)
+            {
+                CollectionAssert.AreEquivalent(intervals.Where(x => x.Overlaps(interval.Low)), collection.FindOverlaps(interval.Low));
+                CollectionAssert.AreEquivalent(intervals.Where(x => x.Overlaps(interval.High)), collection.FindOverlaps(interval.High));
+            }
         }
 
         [Test]
@@ -812,7 +817,7 @@ namespace C5.Tests.intervals_new
 
         [Test]
         [Category("Find Overlaps Range")]
-        public void BensTest()
+        public void FindOverlapsRange_BensTest()
         {
             // ****************************************
             // | 0    5   10   15   20   25   30   35 |
@@ -834,6 +839,8 @@ namespace C5.Tests.intervals_new
             // |                          []          |
             // |                         [ ]          |
             // |                     [         ]      |
+            // |           []                         |
+            // |           |                          |
             // |          [                ]          |
             // |          [ ]                         |
             // |          []                          |
@@ -841,8 +848,8 @@ namespace C5.Tests.intervals_new
             // |      [                        ]      |
             // |      [         )                     |
             // |      [   ]                           |
-            // | [                                   ]|
-            // | [        ]                           |
+            // | [                                  ] |
+            // | [         ]                          |
             // | [    ]                               |
             // | [   ]                                |
             // ****************************************
@@ -857,22 +864,24 @@ namespace C5.Tests.intervals_new
             var collection = CreateCollection(intervals);
 
             var ranges = new[] {
-                    new Interval(  9,  26, IntervalType.Closed),
-                    new Interval(  5,  30, IntervalType.Closed),
-                    new Interval(  0,  35, IntervalType.Closed),
+                    new Interval( 31,  35, IntervalType.Closed),
+                    new Interval( 30,  35, IntervalType.Closed),
                     new Interval( 27,  29, IntervalType.Closed),
+                    new Interval( 26,  35, IntervalType.Closed),
                     new Interval( 26,  30, IntervalType.Closed),
-                    new Interval( 26,  26, IntervalType.Closed),
+                    new Interval( 25,  26, IntervalType.Closed),
                     new Interval( 24,  26, IntervalType.Closed),
                     new Interval( 20,  30, IntervalType.Closed),
-                    new Interval( 26,  35, IntervalType.Closed),
-                    new Interval( 30,  35, IntervalType.Closed),
-                    new Interval( 31,  35, IntervalType.Closed),
                     new Interval( 10,  11, IntervalType.Closed),
                     new Interval( 10,  10, IntervalType.Closed),
+                    new Interval(  9,  26, IntervalType.Closed),
+                    new Interval(  9,  11, IntervalType.Closed),
+                    new Interval(  9,  10, IntervalType.Closed),
                     new Interval(  6,   8, IntervalType.Closed),
+                    new Interval(  5,  30, IntervalType.Closed),
                     new Interval(  5,  15, IntervalType.LowIncluded),
                     new Interval(  5,   9, IntervalType.Closed),
+                    new Interval(  0,  35, IntervalType.Closed),
                     new Interval(  0,  10, IntervalType.Closed),
                     new Interval(  0,   5, IntervalType.Closed),
                     new Interval(  0,   4, IntervalType.Closed)
@@ -899,12 +908,21 @@ namespace C5.Tests.intervals_new
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection(intervals);
-            var interval = SingleInterval();
-            while (intervals.Any(x => x.Overlaps(interval)))
-                interval = SingleInterval();
+            IInterval<int> interval;
+            do { interval = SingleInterval(); } while (intervals.Any(x => x.Overlaps(interval)));
 
-            var overlaps = collection.FindOverlaps(interval);
-            Assert.True(!overlaps.Any());
+            CollectionAssert.IsEmpty(collection.FindOverlaps(interval));
+        }
+
+        [Test]
+        [Category("Find Overlaps Range")]
+        public void FindOverlapsRange_ManyIntervals_ManyIntervals()
+        {
+            var intervals = ManyIntervals();
+            var collection = CreateCollection(intervals);
+
+            foreach (var query in ManyIntervals())
+                CollectionAssert.AreEquivalent(intervals.Where(x => x.Overlaps(query)), collection.FindOverlaps(query));
         }
 
         #endregion
