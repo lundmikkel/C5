@@ -402,6 +402,13 @@ namespace C5.intervals
         {
             return ComparerFactory<I>.CreateComparer((x, y) => x.CompareTo(y));
         }
+
+        public static IComparer<I> CreateReversedComparer<I, T>()
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            return ComparerFactory<I>.CreateComparer((x, y) => { var compare = y.CompareHigh(x); return compare != 0 ? compare : y.CompareLow(x); });
+        }
     }
 
     /// <summary>
