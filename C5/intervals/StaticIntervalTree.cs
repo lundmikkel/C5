@@ -14,10 +14,10 @@ namespace C5.intervals
         /// </summary>
         /// <param name="list">The list</param>
         /// <typeparam name="T">The element type</typeparam>
-        public static void Shuffle<T>(this IList<T> list)
+        public static void Shuffle<T>(this T[] list)
         {
             var random = new Random();
-            var n = list.Count;
+            var n = list.Length;
             while (--n > 0)
                 list.Swap(random.Next(n + 1), n);
         }
@@ -29,7 +29,7 @@ namespace C5.intervals
         /// <param name="i">The index of the first element</param>
         /// <param name="j">The index of the second element</param>
         /// <typeparam name="T">The element type</typeparam>
-        public static void Swap<T>(this IList<T> list, int i, int j)
+        public static void Swap<T>(this T[] list, int i, int j)
         {
             var tmp = list[i];
             list[i] = list[j];
@@ -50,7 +50,7 @@ namespace C5.intervals
 
         private readonly Node _root;
         private readonly int _count;
-        private IInterval<T> _span;
+        private readonly IInterval<T> _span;
         private int _maximumOverlap = -1;
 
         #endregion
@@ -119,18 +119,17 @@ namespace C5.intervals
                 Sorting.IntroSort(LeftList, 0, count, LeftComparer);
                 Sorting.IntroSort(RightList, 0, count, RightComparer);
 
+
                 // Set span
                 var lowestInterval = LeftList[0];
-                var lowCompare = lowestInterval.Low.CompareTo(span.Low);
                 // If the left most interval in the node has a lower Low than the current _span, update _span
-                if (lowCompare < 0 || (lowCompare == 0 && !span.LowIncluded && lowestInterval.LowIncluded))
+                if (lowestInterval.CompareLow(span) < 0)
                     span = new IntervalBase<T>(lowestInterval, span);
 
                 // Set span
                 var highestInterval = RightList[0];
-                var highCompare = span.High.CompareTo(highestInterval.High);
                 // If the right most interval in the node has a higher High than the current Span, update Span
-                if (highCompare < 0 || (highCompare == 0 && !span.HighIncluded && highestInterval.HighIncluded))
+                if (span.CompareHigh(highestInterval) < 0)
                     span = new IntervalBase<T>(span, highestInterval);
 
 
@@ -172,23 +171,24 @@ namespace C5.intervals
 
         private static T getKey(I[] list)
         {
-            IList<T> endpoints = new ArrayList<T>();
+            var length = list.Length;
+            var endpoints = new T[length * 2];
 
-            foreach (var interval in list)
+            for (var i = 0; i < length; i++)
             {
-                // Add both endpoints
-                endpoints.Add(interval.Low);
-                endpoints.Add(interval.High);
+                var interval = list[i];
+                endpoints[i] = interval.Low;
+                endpoints[i + 1] = interval.High;
             }
 
             return getK(endpoints, list.Count() - 1);
         }
 
-        private static T getK(IList<T> list, int k)
+        private static T getK(T[] list, int k)
         {
             list.Shuffle();
 
-            int low = 0, high = list.Count - 1;
+            int low = 0, high = list.Length - 1;
 
             while (high > low)
             {
@@ -205,7 +205,7 @@ namespace C5.intervals
             return list[k];
         }
 
-        private static int partition(IList<T> list, int low, int high)
+        private static int partition(T[] list, int low, int high)
         {
             int i = low, j = high + 1;
             var v = list[low];
@@ -239,7 +239,7 @@ namespace C5.intervals
             return getEnumerator(_root);
         }
 
-        private IEnumerator<I> getEnumerator(Node node)
+        private static IEnumerator<I> getEnumerator(Node node)
         {
             // Just return if tree is empty
             if (node == null)
@@ -248,7 +248,7 @@ namespace C5.intervals
             // Recursively retrieve intervals in left subtree
             if (node.Left != null)
             {
-                IEnumerator<I> child = getEnumerator(node.Left);
+                var child = getEnumerator(node.Left);
 
                 while (child.MoveNext())
                     yield return child.Current;
@@ -356,22 +356,6 @@ namespace C5.intervals
 
         #endregion
 
-        #region Count Overlaps
-
-        /// <inheritdoc/>
-        public int CountOverlaps(T query)
-        {
-            return FindOverlaps(query).Count();
-        }
-
-        /// <inheritdoc/>
-        public int CountOverlaps(IInterval<T> query)
-        {
-            return FindOverlaps(query).Count();
-        }
-
-        #endregion
-
         #region Find Overlaps
 
         /// <inheritdoc/>
@@ -415,13 +399,8 @@ namespace C5.intervals
 
             if (compare > 0)
             {
-                foreach (var interval in root.RightList)
-                {
-                    if (!interval.Overlaps(query))
-                        break;
-
+                foreach (var interval in root.RightList.TakeWhile(interval => interval.Overlaps(query)))
                     yield return interval;
-                }
 
                 // Recurse Right
                 foreach (var interval in findOverlaps(root.Right, query))
@@ -430,13 +409,8 @@ namespace C5.intervals
             // If query comes before root key, we go through LeftList to find all intervals with a Low smaller than our query
             else if (compare < 0)
             {
-                foreach (var interval in root.LeftList)
-                {
-                    if (!interval.Overlaps(query))
-                        break;
-
+                foreach (var interval in root.LeftList.TakeWhile(interval => interval.Overlaps(query)))
                     yield return interval;
-                }
 
                 // Recurse Left
                 foreach (var interval in findOverlaps(root.Left, query))
@@ -445,16 +419,15 @@ namespace C5.intervals
             else
             {
                 // yield all elements in lists
-                foreach (var interval in root.LeftList)
-                    if (interval.Overlaps(query))
-                        yield return interval;
+                foreach (var interval in root.LeftList.Where(interval => interval.Overlaps(query)))
+                    yield return interval;
             }
         }
 
         /// <summary>
         /// Create an enumerable, enumerating all intersecting intervals on the path to the split node. Returns the split node in splitNode.
         /// </summary>
-        private IEnumerable<I> findSplitNode(Node root, IInterval<T> query, Action<Node> splitNode)
+        private static IEnumerable<I> findSplitNode(Node root, IInterval<T> query, Action<Node> splitNode)
         {
             if (root == null) yield break;
 
@@ -464,13 +437,8 @@ namespace C5.intervals
             if (query.High.CompareTo(root.Key) < 0)
             {
                 // yield all elements in lists
-                foreach (var interval in root.LeftList)
-                {
-                    if (!interval.Overlaps(query))
-                        break;
-
+                foreach (var interval in root.LeftList.TakeWhile(interval => interval.Overlaps(query)))
                     yield return interval;
-                }
 
                 // Recursively travese left subtree
                 foreach (var interval in findSplitNode(root.Left, query, splitNode))
@@ -480,13 +448,8 @@ namespace C5.intervals
             else if (root.Key.CompareTo(query.Low) < 0)
             {
                 // yield all elements in lists
-                foreach (var interval in root.RightList)
-                {
-                    if (!interval.Overlaps(query))
-                        break;
-
+                foreach (var interval in root.RightList.TakeWhile(interval => interval.Overlaps(query)))
                     yield return interval;
-                }
 
                 // Recursively travese right subtree
                 foreach (var interval in findSplitNode(root.Right, query, splitNode))
@@ -496,29 +459,24 @@ namespace C5.intervals
             else
             {
                 // yield all elements in lists
-                foreach (var interval in root.LeftList)
-                    if (interval.Overlaps(query))
-                        yield return interval;
+                foreach (var interval in root.LeftList.Where(interval => interval.Overlaps(query)))
+                    yield return interval;
             }
         }
 
-        private IEnumerable<I> findLeft(Node root, IInterval<T> query)
+        private static IEnumerable<I> findLeft(Node root, IInterval<T> query)
         {
             // If root is null we have reached the end
-            if (root == null) yield break;
+            if (root == null)
+                yield break;
 
             //
             if (root.Key.CompareTo(query.Low) < 0)
             {
                 // Add all intersecting intervals from right list
                 // yield all elements in lists
-                foreach (var interval in root.RightList)
-                {
-                    if (!interval.Overlaps(query))
-                        break;
-
+                foreach (var interval in root.RightList.TakeWhile(interval => interval.Overlaps(query)))
                     yield return interval;
-                }
 
                 // Recursively travese right subtree
                 foreach (var interval in findLeft(root.Right, query))
@@ -531,50 +489,34 @@ namespace C5.intervals
                 // all intervals in root can be returned without any checks
 
                 // yield all elements in lists
-                foreach (var interval in root.RightList)
-                {
-                    if (!interval.Overlaps(query))
-                        break;
-
+                foreach (var interval in root.RightList.TakeWhile(interval => interval.Overlaps(query)))
                     yield return interval;
-                }
 
                 // Recursively add all intervals in right subtree as they must be
                 // contained by [root.Key:splitNode]
-                IEnumerator<I> child = getEnumerator(root.Right);
+                var child = getEnumerator(root.Right);
                 while (child.MoveNext())
-                {
                     yield return child.Current;
-                }
 
                 // Recursively travese left subtree
                 foreach (var interval in findLeft(root.Left, query))
-                {
                     yield return interval;
-                }
             }
             else
             {
                 // Add all intersecting intervals from right list
                 // yield all elements in lists
-                foreach (var interval in root.RightList)
-                {
-                    if (!interval.Overlaps(query))
-                        break;
-
+                foreach (var interval in root.RightList.TakeWhile(interval => interval.Overlaps(query)))
                     yield return interval;
-                }
 
                 // If we find the matching node, we can add everything in the left subtree
-                IEnumerator<I> child = getEnumerator(root.Right);
+                var child = getEnumerator(root.Right);
                 while (child.MoveNext())
-                {
                     yield return child.Current;
-                }
             }
         }
 
-        private IEnumerable<I> findRight(Node root, IInterval<T> query)
+        private static IEnumerable<I> findRight(Node root, IInterval<T> query)
         {
             // If root is null we have reached the end
             if (root == null) yield break;
@@ -583,64 +525,41 @@ namespace C5.intervals
             if (query.High.CompareTo(root.Key) < 0)
             {
                 // Add all intersecting intervals from left list
-                foreach (var interval in root.LeftList)
-                {
-                    if (!interval.Overlaps(query))
-                        break;
-
+                foreach (var interval in root.LeftList.TakeWhile(interval => interval.Overlaps(query)))
                     yield return interval;
-                }
 
                 // Otherwise Recursively travese left subtree
                 foreach (var interval in findRight(root.Left, query))
-                {
                     yield return interval;
-                }
             }
             //
             else if (root.Key.CompareTo(query.High) < 0)
             {
                 // As our query interval contains the interval [root.Key:splitNode]
                 // all intervals in root can be returned without any checks
-                foreach (var interval in root.RightList)
-                {
-                    if (!interval.Overlaps(query))
-                        break;
-
+                foreach (var interval in root.RightList.TakeWhile(interval => interval.Overlaps(query)))
                     yield return interval;
-                }
 
                 // Recursively add all intervals in right subtree as they must be
                 // contained by [root.Key:splitNode]
-                IEnumerator<I> child = getEnumerator(root.Left);
+                var child = getEnumerator(root.Left);
                 while (child.MoveNext())
-                {
                     yield return child.Current;
-                }
 
                 // Recursively travese left subtree
                 foreach (var interval in findRight(root.Right, query))
-                {
                     yield return interval;
-                }
             }
             else
             {
                 // Add all intersecting intervals from left list
-                foreach (var interval in root.LeftList)
-                {
-                    if (!interval.Overlaps(query))
-                        break;
-
+                foreach (var interval in root.LeftList.TakeWhile(interval => interval.Overlaps(query)))
                     yield return interval;
-                }
 
                 // If we find the matching node, we can add everything in the left subtree
-                IEnumerator<I> child = getEnumerator(root.Left);
+                var child = getEnumerator(root.Left);
                 while (child.MoveNext())
-                {
                     yield return child.Current;
-                }
             }
         }
 
@@ -678,6 +597,22 @@ namespace C5.intervals
             }
 
             return result;
+        }
+
+        #endregion
+
+        #region Count Overlaps
+
+        /// <inheritdoc/>
+        public int CountOverlaps(T query)
+        {
+            return FindOverlaps(query).Count();
+        }
+
+        /// <inheritdoc/>
+        public int CountOverlaps(IInterval<T> query)
+        {
+            return FindOverlaps(query).Count();
         }
 
         #endregion
