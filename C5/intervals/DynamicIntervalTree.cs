@@ -1214,56 +1214,50 @@ namespace C5.intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
-            if (IsEmpty)
-                return Enumerable.Empty<I>();
-
             return findOverlaps(new IntervalBase<T>(query), _root);
         }
 
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
-            if (IsEmpty)
-                return Enumerable.Empty<I>();
-
             return findOverlaps(query, _root);
         }
 
         /// <inheritdoc/>
         private static IEnumerable<I> findOverlaps(IInterval<T> query, Node root)
         {
-            Contract.Requires(root != null);
-
-            // Query is to the left of root's Low
-            if (root.LocalSpan == null && query.High.CompareTo(root.Key) <= 0 || root.LocalSpan != null && query.CompareHighLow(root.LocalSpan) < 0)
+            while (root != null)
             {
-                if (root.Left != null)
-                    foreach (var value in findOverlaps(query, root.Left))
-                        yield return value;
-            }
-            else if (root.Span != null && root.Span.CompareHighLow(query) >= 0)
-            {
-                // Search left
-                if (root.Left != null)
+                // Query is to the left of root's Low
+                if (root.LocalSpan == null && query.High.CompareTo(root.Key) <= 0 ||
+                    root.LocalSpan != null && query.CompareHighLow(root.LocalSpan) < 0)
+                {
+                    // Search left iteratively
+                    root = root.Left;
+                }
+                else if (root.Span != null && root.Span.CompareHighLow(query) >= 0)
+                {
+                    // Search left recursively
                     foreach (var interval in findOverlaps(query, root.Left))
                         yield return interval;
 
-                if (root.LocalSpan != null)
-                {
-                    // Find overlaps in lists
-                    if (root.IncludedList != null)
-                        foreach (var interval in root.IncludedList.FindOverlaps(query))
-                            yield return interval;
+                    if (root.LocalSpan != null)
+                    {
+                        // Find overlaps in lists
+                        if (root.IncludedList != null)
+                            foreach (var interval in root.IncludedList.FindOverlaps(query))
+                                yield return interval;
 
-                    if (root.ExcludedList != null)
-                        foreach (var interval in root.ExcludedList.FindOverlaps(query))
-                            yield return interval;
+                        if (root.ExcludedList != null)
+                            foreach (var interval in root.ExcludedList.FindOverlaps(query))
+                                yield return interval;
+                    }
+
+                    // Search right iteratively
+                    root = root.Right;
                 }
-
-                // Search right
-                if (root.Right != null)
-                    foreach (var interval in findOverlaps(query, root.Right))
-                        yield return interval;
+                else
+                    break;
             }
         }
 
