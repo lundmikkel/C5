@@ -8,7 +8,7 @@ namespace C5.Tests.intervals_new
     {
         #region Black-box
 
-        class DynamicIntervalTreeTester_BlackBox_ReferenceDuplicatesFalse : IntervalCollectionTester
+        abstract class DynamicIntervalTreeTester_BlackBox : IntervalCollectionTester
         {
             protected override Type GetCollectionType()
             {
@@ -18,38 +18,25 @@ namespace C5.Tests.intervals_new
             // DIT's standard behavior where we set the ReferenceDuplicates to false
             protected override object[] AdditionalParameters()
             {
-                return new object[] { false };
+                return new object[] { AllowsReferenceDuplicates() };
             }
 
             protected override Speed CountSpeed()
             {
                 return Speed.Constant;
             }
+        }
 
+        class DynamicIntervalTreeTester_BlackBox_ReferenceDuplicatesFalse : DynamicIntervalTreeTester_BlackBox
+        {
             protected override bool AllowsReferenceDuplicates()
             {
                 return false;
             }
         }
 
-        class DynamicIntervalTreeTester_BlackBox_ReferenceDuplicatesTrue : IntervalCollectionTester
+        class DynamicIntervalTreeTester_BlackBox_ReferenceDuplicatesTrue : DynamicIntervalTreeTester_BlackBox
         {
-            protected override Type GetCollectionType()
-            {
-                return typeof(DynamicIntervalTree<,>);
-            }
-
-            // DIT where we set the ReferenceDuplicates to true
-            protected override object[] AdditionalParameters()
-            {
-                return new object[] { true };
-            }
-
-            protected override Speed CountSpeed()
-            {
-                return Speed.Constant;
-            }
-
             protected override bool AllowsReferenceDuplicates()
             {
                 return true;
