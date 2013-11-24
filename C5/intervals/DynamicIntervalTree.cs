@@ -311,27 +311,18 @@ namespace C5.intervals
                 _dictionary = new TreeDictionary<I, HashBag<I>>((IComparer<I>) Comparer);
             }
 
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <param name="interval"></param>
-            /// <returns></returns>
             public bool Add(I interval)
             {
                 Contract.Requires(interval != null);
 
                 // The dictionary contains a key equal to the interval
                 Contract.Ensures(_dictionary.Contains(interval));
-
                 // The dictionary contains the interval
                 Contract.Ensures(Contract.Exists(_dictionary, keyValuePair => ReferenceEquals(keyValuePair.Key, interval) || keyValuePair.Value != null && Contract.Exists(keyValuePair.Value, x => ReferenceEquals(x, interval))));
-
                 // If the interval is added the count goes up by one
                 Contract.Ensures(!Contract.Result<bool>() || count == Contract.OldValue(count) + 1);
-
                 // If the interval is not added the count stays the same
                 Contract.Ensures(Contract.Result<bool>() || count == Contract.OldValue(count));
-
                 // If the list didn't contain an interval with the same high, then the sublist is null
                 Contract.Ensures(Contract.OldValue(_dictionary.Contains(interval)) || _dictionary[interval] == null);
 
@@ -344,6 +335,7 @@ namespace C5.intervals
                         _dictionary[key] = new HashBag<I>((IEqualityComparer<I>) EqualityComparer) { interval };
                         return true;
                     }
+
                     return list.Add(interval);
                 }
 
@@ -358,13 +350,10 @@ namespace C5.intervals
 
                 // If the interval is removed the count goes down by one
                 Contract.Ensures(!Contract.Result<bool>() || count == Contract.OldValue(count) - 1);
-
                 // If the interval isn't removed the count stays the same
                 Contract.Ensures(Contract.Result<bool>() || count == Contract.OldValue(count));
-
                 // The result is true if the collection contained the interval before remove was called
                 Contract.Ensures(Contract.Result<bool>() == Contract.OldValue(Contract.Exists(_dictionary, keyValuePair => ReferenceEquals(keyValuePair.Key, interval) || keyValuePair.Value != null && Contract.Exists(keyValuePair.Value, x => ReferenceEquals(x, interval)))));
-
                 // Check that it was the correct interval that was removed
                 Contract.Ensures(!Contract.Result<bool>() || this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval))) - 1);
                 Contract.Ensures(Contract.Result<bool>() || this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval))));
@@ -394,7 +383,7 @@ namespace C5.intervals
                 }
 
                 // The list doesn't contain interval
-                if (list == null || list.IsEmpty)
+                if (list == null)
                     return false;
 
                 // Otherwise just remove it from the list
@@ -444,20 +433,15 @@ namespace C5.intervals
                 // All intervals in the collection that do not overlap cannot by in the result
                 Contract.Ensures(Contract.ForAll(this.Where(x => !x.Overlaps(query)), x => Contract.ForAll(Contract.Result<IEnumerable<I>>(), y => !ReferenceEquals(x, y))));
 
-                foreach (var keyValuePair in _dictionary)
+                foreach (var keyValuePair in _dictionary.TakeWhile(keyValuePair => keyValuePair.Key.Overlaps(query)))
                 {
-                    if (keyValuePair.Key.Overlaps(query))
-                    {
-                        // Return indexed interval
-                        yield return keyValuePair.Key;
+                    // Return indexed interval
+                    yield return keyValuePair.Key;
 
-                        // Return intervals with duplicate endpoints
-                        if (keyValuePair.Value != null && !keyValuePair.Value.IsEmpty)
-                            foreach (var interval in keyValuePair.Value)
-                                yield return interval;
-                    }
-                    else
-                        break;
+                    // Return intervals with duplicate endpoints
+                    if (keyValuePair.Value != null)
+                        foreach (var interval in keyValuePair.Value)
+                            yield return interval;
                 }
             }
 
@@ -468,11 +452,11 @@ namespace C5.intervals
 
             public IEnumerator<I> GetEnumerator()
             {
-                foreach (var keyValuePair in _dictionary)
+                foreach (var keyValuePair in _dictionary.RangeAll().Backwards())
                 {
                     yield return keyValuePair.Key;
 
-                    if (keyValuePair.Value != null && !keyValuePair.Value.IsEmpty)
+                    if (keyValuePair.Value != null)
                         foreach (var interval in keyValuePair.Value)
                             yield return interval;
                 }
