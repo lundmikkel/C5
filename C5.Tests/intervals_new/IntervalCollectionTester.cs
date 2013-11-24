@@ -157,8 +157,14 @@ namespace C5.Tests.intervals_new
             for (var i = 0; i < additionalParameters.Length; i++)
                 parameters[i + 1] = additionalParameters[i];
 
+            // Check that test class name matches implementation
+            var type = GetCollectionType();
+            var className = GetType().Name.Substring(0, GetType().Name.IndexOf("Tester"));
+            if (!type.Name.StartsWith(className))
+                throw new ArgumentException("The class name does not match the type of the class!");
+
             Type[] typeArgs = { typeof(IInterval<T>), typeof(T) };
-            var genericType = GetCollectionType().MakeGenericType(typeArgs);
+            var genericType = type.MakeGenericType(typeArgs);
             return (IIntervalCollection<IInterval<T>, T>) Activator.CreateInstance(genericType, parameters);
         }
 
