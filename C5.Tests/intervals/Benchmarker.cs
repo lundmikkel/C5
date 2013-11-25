@@ -10,6 +10,8 @@ namespace C5.Tests.intervals
 {
     using IntervalOfInt = IInterval<int>;
 
+    // TODO: Move tests to the new benchmarker
+
     [TestFixture, Ignore]
     public class searchBenchmarker
     {
@@ -371,7 +373,7 @@ namespace C5.Tests.intervals
                 var highIncluded = r.Next(Int32.MinValue, Int32.MaxValue) > 0;
                 if (low == high)
                     lowIncluded = highIncluded = true;
-                intervals[i] = new IntervalBase<int>(low, high,lowIncluded,highIncluded);
+                intervals[i] = new IntervalBase<int>(low, high, lowIncluded, highIncluded);
             }
             return intervals;
         }

@@ -256,7 +256,6 @@ namespace C5.intervals
         }
 
         [Pure]
-        // TODO er det ok at have en pure metode med ref parametre
         private IEnumerable<IInterval<T>> contractHelperFindJs(Node v, ref Node leftUp, ref Node rightUp)
         {
             Contract.Requires(v != null);
@@ -321,7 +320,6 @@ namespace C5.intervals
         /// <param name="result">Reference to a bool that will be set to false if an in-balance is discovered.</param>
         /// <returns>Height of the tree.</returns>
         [Pure]
-        // TODO Can we use ref in pure methods?
         private static int contractHelperHeight(Node node, ref bool result)
         {
             if (node == null)
@@ -799,7 +797,6 @@ namespace C5.intervals
                     {
                         // If root.Greater is empty, uniqueInNodeGreater is a pointer to the set node.Greater
                         // We don't want root.Less and node.Greater to be the same IntervalSet object, so we duplicate it
-                        // TODO Maybe we can optimize the new set operation with a .clone or similar
                         root.Less = rootGreaterIsEmpty ? new IntervalSet(uniqueInNodeGreater) : uniqueInNodeGreater;
                     }
                 }
@@ -921,7 +918,6 @@ namespace C5.intervals
 
             var intervalArray = intervals as I[] ?? intervals.ToArray();
 
-            // TODO: Pre-generate balanced tree based on endpoints and insert intervals afterwards
             preconstructNodeStructure(intervalArray);
 
             foreach (var interval in intervalArray)
@@ -1101,48 +1097,28 @@ namespace C5.intervals
         {
             Contract.Requires(root != null);
 
-            if (root.Less != null && !root.Less.IsEmpty)
-                return root.Less.Choose();
-
-            if (root.Left != null)
-                return getLowest(root.Left);
+            while (root.Left != null)
+                root = root.Left;
 
             if (root.Equal != null && !root.Equal.IsEmpty)
                 return root.Equal.Choose();
-            else if (root.Greater != null && !root.Greater.IsEmpty)
+            if (root.Greater != null && !root.Greater.IsEmpty)
                 return root.Greater.Choose();
-            else
-            {
-                // TODO: Is there a better way to find the lowest low?
-                foreach (var interval in root.IntervalsEndingInNode.Where(interval => interval.LowIncluded))
-                    return interval;
-
-                return root.IntervalsEndingInNode.First();
-            }
+            return root.IntervalsEndingInNode.First();
         }
 
         private static IInterval<T> getHighest(Node root)
         {
             Contract.Requires(root != null);
 
-            if (root.Greater != null && !root.Greater.IsEmpty)
-                return root.Greater.Choose();
-
-            if (root.Right != null)
-                return getHighest(root.Right);
+            while (root.Right != null)
+                root = root.Right;
 
             if (root.Equal != null && !root.Equal.IsEmpty)
                 return root.Equal.Choose();
-            else if (root.Less != null && !root.Less.IsEmpty)
+            if (root.Less != null && !root.Less.IsEmpty)
                 return root.Less.Choose();
-            else
-            {
-                // TODO: Is there a better way to find the highest high?
-                foreach (var interval in root.IntervalsEndingInNode.Where(interval => interval.HighIncluded))
-                    return interval;
-
-                return root.IntervalsEndingInNode.First();
-            }
+            return root.IntervalsEndingInNode.First();
         }
 
         #endregion
@@ -1570,8 +1546,7 @@ namespace C5.intervals
         /// <inheritdoc/>
         public void AddAll(IEnumerable<I> intervals)
         {
-            // TODO: Handle events properly. Only throw one event when done!
-            // TODO: Any fancy things missing here?
+            // TODO: Look into bulk insertion
             foreach (var interval in intervals)
                 Add(interval);
         }

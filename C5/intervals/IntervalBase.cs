@@ -117,7 +117,6 @@ namespace C5.intervals
         /// <inheritdoc/>
         public override bool Equals(object that)
         {
-            // TODO: Is this done?
             if (ReferenceEquals(null, that)) return false;
             if (ReferenceEquals(this, that)) return true;
             if (GetType() != that.GetType()) return false;

@@ -47,6 +47,8 @@ namespace C5.Tests.intervals_new
 
         #region White-box
 
+        // TODO: Hardcode examples from articles
+
         [TestFixture]
         class DynamicIntervalTreeTester
         {
