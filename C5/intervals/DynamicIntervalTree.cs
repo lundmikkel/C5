@@ -1609,7 +1609,9 @@ namespace C5.intervals
                 }
             }
 
-            root.UpdateSpan();
+            if (nodeWasDeleted)
+                root.UpdateSpan();
+
             root.UpdateMaximumOverlap();
 
             // Rotate if necessary
