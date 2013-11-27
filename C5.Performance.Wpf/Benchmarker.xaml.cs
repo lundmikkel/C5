@@ -21,7 +21,7 @@ namespace C5.Performance.Wpf
         internal int MaxIterations;
         // Every time we benchmark we count this up in order to get a new color for every benchmark
         private int _lineSeriesIndex;
-        private int _maxCount = Int32.MaxValue/10;
+        private int _maxCount = Int32.MaxValue / 10;
         private int _repeats = StandardRepeats;
         private bool _runSequential;
         private bool _runWarmups = true;
@@ -46,7 +46,6 @@ namespace C5.Performance.Wpf
             MaxIterations = Convert.ToInt32(Math.Round(Math.Log(MaxCollectionSize)));
             _plotter = Plotter.CreatePlotter();
             DataContext = _plotter;
-            InitializeComponent();
         }
         #endregion
 
@@ -142,7 +141,7 @@ namespace C5.Performance.Wpf
         private void updateProgressBar(int numberOfBenchmarks)
         {
             Dispatcher.Invoke(DispatcherPriority.Normal,
-                new Action(() => progress.Value += (100.0/MaxIterations)/numberOfBenchmarks));
+                new Action(() => progress.Value += (100.0 / MaxIterations) / numberOfBenchmarks));
         }
 
         private void updateStatusLabel(String s)
@@ -168,13 +167,13 @@ namespace C5.Performance.Wpf
         private void CheckBox_Checked_RunQuick(object sender, RoutedEventArgs e)
         {
             _repeats = 1;
-            _maxCount = Int32.MaxValue/1000;
+            _maxCount = Int32.MaxValue / 1000;
         }
 
         private void CheckBox_Unchecked_RunQuick(object sender, RoutedEventArgs e)
         {
             _repeats = StandardRepeats;
-            _maxCount = Int32.MaxValue/10;
+            _maxCount = Int32.MaxValue / 10;
         }
 
         private void CheckBox_Checked_RunSequential(object sender, RoutedEventArgs e)
