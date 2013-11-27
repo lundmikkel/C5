@@ -1459,7 +1459,8 @@ namespace C5.intervals
             if (intervalWasRemoved)
             {
                 nodeWasDeleted = false;
-                _root = removeHigh(interval, _root, ref nodeWasDeleted);
+                var updateSpan = false;
+                _root = removeHigh(interval, _root, ref nodeWasDeleted, ref updateSpan);
 
                 // Adjust count and throw event
                 _count--;
@@ -1530,7 +1531,7 @@ namespace C5.intervals
                     {
                         nodeWasDeleted = true;
 
-                        // We simply removeLow the node by returning a reference to its child
+                        // We simply remove the node by returning a reference to its child
                         return root.Left ?? root.Right;
                     }
                 }
@@ -1550,7 +1551,7 @@ namespace C5.intervals
             return root;
         }
 
-        private static Node removeHigh(I interval, Node root, ref bool nodeWasDeleted)
+        private static Node removeHigh(I interval, Node root, ref bool nodeWasDeleted, ref bool updateSpan)
         {
             Contract.Requires(interval != null);
             Contract.Requires(root != null);
@@ -1560,7 +1561,7 @@ namespace C5.intervals
             // Search right
             if (compare > 0)
             {
-                root.Right = removeHigh(interval, root.Right, ref nodeWasDeleted);
+                root.Right = removeHigh(interval, root.Right, ref nodeWasDeleted, ref updateSpan);
 
                 // Adjust balance if necessary
                 if (nodeWasDeleted)
@@ -1569,7 +1570,7 @@ namespace C5.intervals
             // Search left
             else if (compare < 0)
             {
-                root.Left = removeHigh(interval, root.Left, ref nodeWasDeleted);
+                root.Left = removeHigh(interval, root.Left, ref nodeWasDeleted, ref updateSpan);
 
                 // Adjust balance if necessary
                 if (nodeWasDeleted)
@@ -1580,9 +1581,12 @@ namespace C5.intervals
                 // Update delta for the interval's high
                 root.RemoveHighFromDelta(interval.HighIncluded);
 
-                // If the interval was removed, we might be able to removeLow the node as well
+                // If the interval was removed, we might be able to remove the node as well
                 if (root.IsEmpty)
                 {
+                    // A node will be removed, which requires updates of spans
+                    updateSpan = true;
+
                     // The root has two children
                     if (root.Left != null && root.Right != null)
                     {
@@ -1591,7 +1595,7 @@ namespace C5.intervals
 
                         // Remove the successor node from the right subtree
                         nodeWasDeleted = false;
-                        root.Right = removeHigh(interval, root.Right, ref nodeWasDeleted);
+                        root.Right = removeHigh(interval, root.Right, ref nodeWasDeleted, ref updateSpan);
 
                         // Adjust balance if necessary
                         if (nodeWasDeleted)
@@ -1602,13 +1606,13 @@ namespace C5.intervals
                     {
                         nodeWasDeleted = true;
 
-                        // We simply removeLow the node by returning a reference to its child
+                        // We simply remove the node by returning a reference to its child
                         return root.Left ?? root.Right;
                     }
                 }
             }
 
-            if (nodeWasDeleted)
+            if (updateSpan)
                 root.UpdateSpan();
 
             root.UpdateMaximumOverlap();

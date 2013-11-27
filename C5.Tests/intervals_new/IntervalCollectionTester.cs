@@ -1384,6 +1384,10 @@ namespace C5.Tests.intervals_new
             Remove_ManyIntervals_EventThrown();
             updateRandom(-356355912);
             Remove_ManyIntervals_EventThrown();
+            updateRandom(693772309);
+            Remove_ManyIntervals_EventThrown();
+            updateRandom(288655792);
+            Remove_ManyIntervals_EventThrown();
         }
 
         [Test]
