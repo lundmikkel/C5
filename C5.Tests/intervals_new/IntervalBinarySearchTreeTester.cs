@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Linq;
 using C5.intervals;
+using C5.Tests.intervals;
+using C5.Tests.intervals.LayeredContainmentList;
 using NUnit.Framework;
 
 namespace C5.Tests.intervals_new
@@ -37,6 +40,22 @@ namespace C5.Tests.intervals_new
         {
             #region Helpers
             // TODO: Builder pattern
+
+            private static IntervalBinarySearchTreeAvl<IInterval<int>, int> _createIBS(params IInterval<int>[] intervals)
+            {
+                return new IntervalBinarySearchTreeAvl<IInterval<int>, int>(intervals);
+            }
+
+            private static IInterval<int>[] Ø { get { return new IInterval<int>[0]; } }
+            private static IInterval<int> A { get { return new IntervalBase<int>(1, 3); } }
+            private static IInterval<int>[] B { get { return new IInterval<int>[]
+            { new IntervalBase<int>(1,3), new IntervalBase<int>(3,5), };}}
+            private static IInterval<int>[] C { get { return new IInterval<int>[]
+            { new IntervalBase<int>(1,3), new IntervalBase<int>(2,5), new IntervalBase<int>(3,5), };}}
+            private static IInterval<int>[] D { get { return new IInterval<int>[]
+            { new IntervalBase<int>(1,3), new IntervalBase<int>(1,5), new IntervalBase<int>(3,5), };}}
+            private static IInterval<int>[] E { get { return new IInterval<int>[]
+            { new IntervalBase<int>(1,3), new IntervalBase<int>(1,5) };}}
 
             #endregion
 
@@ -152,6 +171,69 @@ namespace C5.Tests.intervals_new
             #region Find Overlaps
 
             #region Stabbing
+
+            [Test]
+            public void FindOverlapsStabbing_WhileRootNotNull_Zero()
+            {
+                CollectionAssert.IsEmpty(_createIBS(Ø).FindOverlaps(1));
+            }
+            
+            [Test]
+            public void FindOverlapsStabbing_WhileRootNotNull_One()
+            {
+                CollectionAssert.AreEquivalent(new[]{A},_createIBS(A).FindOverlaps(A.Low));
+            }
+
+            [Test]
+            public void FindOverlapsStabbing_WhileRootNotNull_Many1()
+            {
+                CollectionAssert.AreEquivalent(new[] { B.First() }, _createIBS(B).FindOverlaps(2));
+            }
+            
+            [Test]
+            public void FindOverlapsStabbing_WhileRootNotNull_Many2()
+            {
+                CollectionAssert.AreEquivalent(new[] { B.Last() }, _createIBS(B).FindOverlaps(4));
+            }
+            
+            [Test]
+            public void FindOverlapsStabbing_RootLessIsEmpty()
+            {
+                var emptyLess = _createIBS(B);
+                var success = emptyLess.Remove(emptyLess.Last());
+                CollectionAssert.AreEquivalent(Ø, emptyLess.FindOverlaps(4));
+            }
+
+            [Test]
+            public void FindOverlapsStabbing_ForeachIntervalInRootLessMany()
+            {
+                var resultSet = _createIBS(C);
+                resultSet.Remove(resultSet.First());
+                CollectionAssert.AreEquivalent(resultSet, _createIBS(C).FindOverlaps(4));
+            }
+
+            [Test]
+            public void FindOverlapsStabbing_ForeachIntervalInRootGreaterOne()
+            {
+                var resultSet = _createIBS(B);
+                resultSet.Remove(resultSet.Last());
+                CollectionAssert.AreEquivalent(resultSet, _createIBS(B).FindOverlaps(2));
+            }
+
+            [Test]
+            public void FindOverlapsStabbing_ForeachIntervalInRootGreaterMany()
+            {
+                var resultSet = _createIBS(D);
+                resultSet.Remove(resultSet.Last());
+                CollectionAssert.AreEquivalent(resultSet, _createIBS(D).FindOverlaps(2));
+            }
+
+            [Test]
+            public void FindOverlapsStabbing_ForeachIntervalInRootequalMany()
+            {
+                CollectionAssert.AreEquivalent(E, _createIBS(E).FindOverlaps(1));
+            }
+
             #endregion
 
             #region Range
