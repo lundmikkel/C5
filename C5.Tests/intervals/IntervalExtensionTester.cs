@@ -29,7 +29,7 @@ namespace C5.Tests.intervals
         [Test]
         public void Test()
         {
-            Console.WriteLine((new IntervalBase<int>(2, 7)).IntersectionWith(new IntervalBase<int>(1, 3)));
+            Console.WriteLine((new IntervalBase<int>(2, 7)).OverlapWith(new IntervalBase<int>(1, 3)));
         }
     }
 

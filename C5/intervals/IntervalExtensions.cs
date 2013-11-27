@@ -256,15 +256,15 @@ namespace C5.intervals
         }
 
         /// <summary>
-        /// Get the intersection between two intervals.
+        /// Get the interval in which two intervals overlap.
         /// </summary>
         /// <param name="x">First interval.</param>
         /// <param name="y">Second interval.</param>
         /// <typeparam name="T">The endpoint type.</typeparam>
         /// <returns>An interval of intersection.</returns>
-        /// <exception cref="ArgumentException">If intervals do not overlap.</exception>
+        /// <exception cref="ArgumentException">If the intervals do not overlap.</exception>
         [Pure]
-        public static IInterval<T> IntersectionWith<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        public static IInterval<T> OverlapWith<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             Contract.Requires(x != null);
             Contract.Requires(y != null);
@@ -409,14 +409,7 @@ namespace C5.intervals
         {
             return ComparerFactory<I>.CreateComparer((x, y) => { var compare = y.CompareHigh(x); return compare != 0 ? compare : y.CompareLow(x); });
         }
-    }
 
-    /// <summary>
-    /// Convenient extensions.
-    /// </summary>
-    // TODO: Find the proper file for the extension class
-    public static class C5Extensions
-    {
         /// <summary>
         /// Create an enumerable, enumerating all unique endpoints in intervals.
         /// </summary>
@@ -452,6 +445,53 @@ namespace C5.intervals
                     uniqueEndpoints[endpointCount++] = endpoint;
 
             return uniqueEndpoints.Take(endpointCount);
+        }
+
+        /// <summary>
+        /// Get the span of a collection of intervals. The span is the smallest interval that spans
+        /// all intervals in the collection. The interval's low is the lowest low endpoint in the
+        /// collection and the high is the highest high endpoint.
+        /// </summary>
+        /// <param name="intervals">The collection of intervals.</param>
+        /// <typeparam name="T">The endpoint type.</typeparam>
+        /// <returns>The span of the intervals.</returns>
+        /// <exception cref="InvalidOperationException">If the collection is empty.</exception>
+        [Pure]
+        public static IInterval<T> Span<T>(this IEnumerable<IInterval<T>> intervals)
+            where T : IComparable<T>
+        {
+            var enumerator = intervals.GetEnumerator();
+
+            if (!enumerator.MoveNext())
+                throw new InvalidOperationException("An empty collection has no span");
+
+            var low = enumerator.Current;
+            var high = enumerator.Current;
+
+            while (enumerator.MoveNext())
+            {
+                var interval = enumerator.Current;
+
+                if (interval.CompareLow(low) < 0)
+                    low = interval;
+                if (high.CompareHigh(interval) < 0)
+                    high = interval;
+            }
+
+            return new IntervalBase<T>(low, high);
+        }
+    }
+
+    /// <summary>
+    /// Convenient extensions.
+    /// </summary>
+    // TODO: Find the proper file for the extension class
+    public static class C5Extensions
+    {
+
+        public static IEnumerable<T> ToEnumerable<T>(this IEnumerator<T> enumerator)
+        {
+            while (enumerator.MoveNext())       yield return enumerator.Current;
         }
 
         /// <summary>
