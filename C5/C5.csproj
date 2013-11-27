@@ -154,7 +154,6 @@
     <Compile Include="interfaces\ICollectionValue.cs" />
     <Compile Include="interfaces\IInterval.cs" />
     <Compile Include="interfaces\IIntervalCollection.cs" />
-    <Compile Include="intervals\AvlTree.cs" />
     <Compile Include="intervals\BinaryIntervalSearch.cs" />
     <Compile Include="intervals\IntervalBinarySearchTreeAvl.cs" />
     <Compile Include="intervals\IntervalRelations.cs" />
