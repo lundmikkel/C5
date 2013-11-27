@@ -407,20 +407,26 @@ namespace C5.intervals
             private void invariant()
             {
                 // The key cannot be null
-                Contract.Invariant(!ReferenceEquals(Key, null));
+                Contract.Invariant(Key != null);
+                // Balance never has an absolute value greater than 2
+                Contract.Invariant(-2 <= Balance && Balance <= 2);
             }
 
             #endregion
 
             #region Fields
 
+            // The intervals with an endpoint in the node
+            private IntervalSet _intervalsEndingInNode;
+
+            #endregion
+
+            #region Properties
+
             public T Key { get; private set; }
 
             public Node Left { get; internal set; }
             public Node Right { get; internal set; }
-
-            // The intervals with an endpoint in the node
-            private IntervalSet _intervalsEndingInNode;
 
             // Fields for Maximum Number of Overlaps
             public int DeltaAt { get; internal set; }
@@ -434,19 +440,11 @@ namespace C5.intervals
             // Used for printing
             public bool Dummy { get; private set; }
 
-            #endregion
-
-            #region Properties
-
             public IntervalSet Less { get; set; }
             public IntervalSet Equal { get; set; }
             public IntervalSet Greater { get; set; }
 
-            public IntervalSet IntervalsEndingInNode
-            {
-                get { return _intervalsEndingInNode ?? (_intervalsEndingInNode = new IntervalSet()); }
-                private set { _intervalsEndingInNode = value; }
-            }
+            public IntervalSet IntervalsEndingInNode { get; private set; }
 
             #endregion
 
@@ -456,6 +454,7 @@ namespace C5.intervals
             {
                 Contract.Requires(key != null);
                 Key = key;
+                IntervalsEndingInNode = new IntervalSet();
             }
 
             public Node()
