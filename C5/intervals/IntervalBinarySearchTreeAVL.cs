@@ -414,13 +414,6 @@ namespace C5.intervals
 
             #endregion
 
-            #region Fields
-
-            // The intervals with an endpoint in the node
-            private IntervalSet _intervalsEndingInNode;
-
-            #endregion
-
             #region Properties
 
             public T Key { get; private set; }
@@ -453,6 +446,7 @@ namespace C5.intervals
             public Node(T key)
             {
                 Contract.Requires(key != null);
+
                 Key = key;
                 IntervalsEndingInNode = new IntervalSet();
             }
@@ -580,6 +574,7 @@ namespace C5.intervals
             {
                 Contract.Requires(s1 != null);
                 Contract.Requires(s2 != null);
+
                 var res = new IntervalSet();
                 foreach (var interval in s1.Where(interval => !s2.Contains(interval)))
                     res.Add(interval);
@@ -589,7 +584,7 @@ namespace C5.intervals
 
         #endregion
 
-        #region AVL tree methods
+        #region AVL Tree Methods
 
         private static Node rotateForAdd(Node root, ref bool updateBalance)
         {
@@ -991,6 +986,7 @@ namespace C5.intervals
             get
             {
                 Contract.Ensures(Contract.Result<bool>() == (_count == 0));
+                Contract.Ensures(Contract.Result<bool>() == (_root == null));
                 return _count == 0;
             }
         }
@@ -1184,7 +1180,7 @@ namespace C5.intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
-            return IsEmpty ? Enumerable.Empty<I>() : findOverlaps(_root, query);
+            return findOverlaps(_root, query);
         }
 
         /// <inheritdoc/>

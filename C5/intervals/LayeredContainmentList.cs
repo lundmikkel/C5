@@ -539,10 +539,6 @@ namespace C5.intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
-            // Check for null to avoid creating empty interval
-            if (ReferenceEquals(query, null))
-                return Enumerable.Empty<I>();
-
             return FindOverlaps(new IntervalBase<T>(query));
         }
 
