@@ -1150,16 +1150,15 @@ namespace C5.intervals
         [Pure]
         private static IEnumerable<Node> nodes(Node root)
         {
-            if (root == null)
-                yield break;
+            while (root != null)
+            {
+                foreach (var node in nodes(root.Left))
+                    yield return node;
 
-            foreach (var node in nodes(root.Left))
-                yield return node;
+                yield return root;
 
-            yield return root;
-
-            foreach (var node in nodes(root.Right))
-                yield return node;
+                root = root.Right;
+            }
         }
 
         #endregion
