@@ -1332,6 +1332,7 @@ namespace C5.intervals
 
             if (intervalWasAdded)
             {
+                nodeWasAdded = false;
                 _root = addHigh(interval, _root, ref nodeWasAdded);
 
                 _count++;
