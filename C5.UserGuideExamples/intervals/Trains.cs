@@ -13,7 +13,35 @@ namespace C5.UserGuideExamples.intervals
         public static void Main(string[] args)
         {
             var resources = parseCvs();
+            
+            var numberOfTrains = resources.SelectMany(col => col.Select(tr => tr.Train)).ToArray();
+            Console.Out.WriteLine("Number of trains: " + numberOfTrains.Count()+ "\nDistinct number of trains: " + numberOfTrains.Distinct().Count());
+            
+            var numberOfTracks = resources.SelectMany(col => col.Select(tr => tr.Track)).Distinct().ToList();
+            numberOfTracks.Sort();
+            Console.Out.WriteLine("Distinct number of tracks: " + numberOfTracks.Count());
 
+            foreach (var track in numberOfTracks.Distinct())
+            {
+                var trains = resources.SelectMany(col => col.Filter(tr => tr.Track == track)).ToArray();
+                var trainIds = trains.Select(tr => tr.Train).Distinct();
+                var distinctTrains = trainIds.Select(trainId => trains.First(tr => tr.Train == trainId));
+                Console.Out.WriteLine("Track " + track + " has " + distinctTrains.Count() + " trains on it.");
+
+                foreach (var trainRide in trains)
+                {
+                    var collision =
+                        resources.SelectMany(
+                            col => col.Filter(
+                                    // Detect possible collisions
+                                    tr => tr.Train != trainRide.Train &&
+                                    tr.Track == trainRide.Track &&
+                                    tr.Overlaps(trainRide)
+                                    )).ToArray();
+                    if (collision.Any())
+                        Console.Out.WriteLine("{0} Possible collision detected on track {1}, with train(s) {2}.",collision.Count(),trainRide.Track,String.Join(",", collision.Select(tr=>tr.Train).ToArray()));
+                }
+            }
             Console.Read();
         }
 
@@ -21,7 +49,7 @@ namespace C5.UserGuideExamples.intervals
         {
             const string filepath = @"../../../C5.UserGuideExamples/intervals/data/train.csv";
 
-            var resources = new IIntervalCollection<TrainRide, double>[17];
+            var resources = new IIntervalCollection<TrainRide, double>[16];
 
             using (var parser = new TextFieldParser(filepath) { Delimiters = new[] { "," } })
             {
@@ -30,7 +58,7 @@ namespace C5.UserGuideExamples.intervals
                 var i = 0;
                 while ((parts = parser.ReadFields()) != null)
                 {
-                    var resource = Int32.Parse(parts[0]);
+                    var resource = Int32.Parse(parts[0]) - 1;
 
                     var start = double.Parse(parts[1], CultureInfo.InvariantCulture);
                     var end = double.Parse(parts[2], CultureInfo.InvariantCulture);
@@ -39,16 +67,16 @@ namespace C5.UserGuideExamples.intervals
 
                     var ride = new TrainRide(start, end, track, train);
 
-
                     if (resources[resource] == null)
+                    {
                         /*
                             resources[resource] = new IntervalBinarySearchTreeAvl<TrainRide, double>();
                         /*/
                         resources[resource] = new DynamicIntervalTree<TrainRide, double>();
-                    //*/
-
-                    if (i++ % 100 == 0)
-                        Console.Out.WriteLine(ride);
+                        //*/
+                    }
+                    //if (i++ % 100 == 0)
+                      //  Console.Out.WriteLine(ride);
 
                     resources[resource].Add(ride);
                 }
