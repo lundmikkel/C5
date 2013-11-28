@@ -1193,6 +1193,7 @@ namespace C5.intervals
             var set = new IntervalSet();
 
             var splitNode = _root;
+
             // Use a lambda instead of out, as out or ref isn't allowed for iterators
             foreach (var interval in findSplitNode(_root, query, n => { splitNode = n; }).Where(set.Add))
                 yield return interval;
@@ -2085,24 +2086,25 @@ namespace C5.intervals
                             // Add Less, Equal and Greater set in bottom cell
                             var bottom = new GraphvizRecordCell();
 
+                            const string emptyString = "()"; // "{}" would have been better - but they mess with the output.
+                            const string nullString = "Ø";
                             bottom.Cells.Add(new GraphvizRecordCell
                                 {
-                                    Text =
-                                        e.Vertex.Less != null && !e.Vertex.Less.IsEmpty ? e.Vertex.Less.ToString() : "Ø"
+                                    Text = e.Vertex.Less != null && !e.Vertex.Less.IsEmpty ?
+                                    e.Vertex.Less.ToString() : e.Vertex.Less != null && e.Vertex.Less.IsEmpty ?
+                                    emptyString : nullString
                                 });
                             bottom.Cells.Add(new GraphvizRecordCell
                                 {
-                                    Text =
-                                        e.Vertex.Equal != null && !e.Vertex.Equal.IsEmpty
-                                            ? e.Vertex.Equal.ToString()
-                                            : "Ø"
+                                    Text = e.Vertex.Equal != null && !e.Vertex.Equal.IsEmpty ?
+                                    e.Vertex.Equal.ToString() : e.Vertex.Equal != null && e.Vertex.Equal.IsEmpty ?
+                                    emptyString : nullString
                                 });
                             bottom.Cells.Add(new GraphvizRecordCell
                                 {
-                                    Text =
-                                        e.Vertex.Greater != null && !e.Vertex.Greater.IsEmpty
-                                            ? e.Vertex.Greater.ToString()
-                                            : "Ø"
+                                    Text = e.Vertex.Greater != null && !e.Vertex.Greater.IsEmpty ?
+                                    e.Vertex.Greater.ToString() : e.Vertex.Greater != null && e.Vertex.Greater.IsEmpty ?
+                                    emptyString : nullString
                                 });
 
                             cell.Cells.Add(bottom);
