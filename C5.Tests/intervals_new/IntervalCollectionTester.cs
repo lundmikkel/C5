@@ -193,7 +193,7 @@ namespace C5.Tests.intervals_new
             try
             {
                 var overlaps = collection.FindOverlaps(null);
-                Assert.Fail();
+                Assert.Fail("Code Contracts Disabled.");
             }
             catch (Exception e)
             {
@@ -202,6 +202,15 @@ namespace C5.Tests.intervals_new
 
                 Assert.Pass();
             }
+        }
+
+        [Test]
+        [Category("Code Contracts")]
+        public void CodeContracts_VerifyNoPostConditionInRelease()
+        {
+#if !DEBUG
+            Contract.Ensures(false);
+#endif
         }
 
         #endregion
