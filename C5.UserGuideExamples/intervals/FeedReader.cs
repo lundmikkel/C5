@@ -12,6 +12,8 @@ namespace C5.UserGuideExamples.intervals
         /// </summary>
         public static void Main(string[] args)
         {
+            // TODO: http://www.kanzaki.com/docs/ical/
+
             string url = "http://www.google.com/calendar/ical/bechmellson.com_eoauecnh84i50tbftksd5bfdl4%40group.calendar.google.com/public/basic.ics";
 
             // Anders' FaceBook events - see how to get your URL here http://www.askdavetaylor.com/subscribe_to_facebook_calendar_ical/
