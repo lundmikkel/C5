@@ -50,7 +50,7 @@ namespace C5.UserGuideExamples.intervals
                         //*/
                     }
                     //if (i++ % 100 == 0)
-                      //  Console.Out.WriteLine(ride);
+                    //  Console.Out.WriteLine(ride);
 
                     resources[resource].Add(ride);
                 }
@@ -109,7 +109,7 @@ namespace C5.UserGuideExamples.intervals
                 {
                     var collision =
                         trainsOnSeperateTracks[i].FindAll(
-                                // Detect possible collisions
+                        // Detect possible collisions
                                 tr => tr.Train != trainRide.Train &&
                                       tr.Track == trainRide.Track &&
                                       tr.Overlaps(trainRide)
