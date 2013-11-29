@@ -193,7 +193,6 @@ namespace C5.Tests.intervals_new
             try
             {
                 var overlaps = collection.FindOverlaps(null);
-                Assert.Fail("Code Contracts Disabled.");
             }
             catch (Exception e)
             {
@@ -201,16 +200,44 @@ namespace C5.Tests.intervals_new
                     throw;
 
                 Assert.Pass();
+                return;
             }
+
+            Assert.Fail();
         }
 
         [Test]
         [Category("Code Contracts")]
-        public void CodeContracts_VerifyNoPostConditionInRelease()
+        public void CodeContracts_VerifyPostconditionsAreInDebugAssembly_ContractRuntimeContractException()
         {
-#if !DEBUG
-            Contract.Ensures(false);
+#if DEBUG
+            /*
+            const string contractExceptionName = "System.Diagnostics.Contracts.__ContractsRuntime+ContractException";
+
+            try
+            {
+                var sum = CodeContract_EnsureFails();
+            }
+            catch (Exception e)
+            {
+                if (e.GetType().FullName != contractExceptionName)
+                    throw;
+
+                Assert.Pass();
+                return;
+            }
+
+            Assert.Fail("Post conditions not activated in debug!");
+            */
+#else
+            CodeContract_EnsureFails();
 #endif
+        }
+
+        public int CodeContract_EnsureFails()
+        {
+            Contract.Ensures(false);
+            return -1;
         }
 
         #endregion
