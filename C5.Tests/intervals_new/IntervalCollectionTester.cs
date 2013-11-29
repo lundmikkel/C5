@@ -72,7 +72,10 @@ namespace C5.Tests.intervals_new
         [SetUp]
         public void SetUp()
         {
-            var seed = new Random().Next(Int32.MinValue, Int32.MaxValue);
+            var bytes = new byte[4];
+            System.Security.Cryptography.RandomNumberGenerator.Create().GetBytes(bytes);
+            var seed = BitConverter.ToInt32(bytes, 0);
+
             updateRandom(seed);
         }
 
