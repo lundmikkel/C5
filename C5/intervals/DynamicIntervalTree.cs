@@ -1333,7 +1333,8 @@ namespace C5.intervals
             if (intervalWasAdded)
             {
                 nodeWasAdded = false;
-                _root = addHigh(interval, _root, ref nodeWasAdded);
+                var updateSpan = false;
+                _root = addHigh(interval, _root, ref nodeWasAdded, ref updateSpan);
 
                 _count++;
                 raiseForAdd(interval);
@@ -1398,13 +1399,14 @@ namespace C5.intervals
             return root;
         }
 
-        private static Node addHigh(I interval, Node root, ref bool nodeWasAdded)
+        private static Node addHigh(I interval, Node root, ref bool nodeWasAdded, ref bool updateSpan)
         {
             Contract.Requires(interval != null);
 
             if (root == null)
             {
                 nodeWasAdded = true;
+                updateSpan = true;
                 return new Node(interval.High, interval.HighIncluded);
             }
 
@@ -1412,7 +1414,7 @@ namespace C5.intervals
 
             if (compare > 0)
             {
-                root.Right = addHigh(interval, root.Right, ref nodeWasAdded);
+                root.Right = addHigh(interval, root.Right, ref nodeWasAdded, ref updateSpan);
 
                 Contract.Assert(root.Right != null);
 
@@ -1421,7 +1423,7 @@ namespace C5.intervals
             }
             else if (compare < 0)
             {
-                root.Left = addHigh(interval, root.Left, ref nodeWasAdded);
+                root.Left = addHigh(interval, root.Left, ref nodeWasAdded, ref updateSpan);
 
                 Contract.Assert(root.Left != null);
 
@@ -1430,6 +1432,9 @@ namespace C5.intervals
             }
             else
                 root.AddHighToDelta(interval.HighIncluded);
+
+            if (updateSpan)
+                root.UpdateSpan();
 
             // Update MNO
             root.UpdateMaximumOverlap();
