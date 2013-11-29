@@ -62,6 +62,44 @@ namespace C5.Tests.intervals_new
             public void Test() { }
         }
 
+        [TestFixture]
+        [Category("Former Bug")]
+        internal class FormerBugs
+        {
+            [Test]
+            public void Add_LowInsertedNodeButDidNotRotate_UnbalancedTree()
+            {
+                new DynamicIntervalTree<IInterval<int>, int>
+                    {
+                        new IntervalBase<int>(3, 5),
+                        new IntervalBase<int>(1, 2),
+                        new IntervalBase<int>(0, 4),
+                        new IntervalBase<int>(-1, 5)
+                    };
+                Assert.Pass();
+            }
+
+            [Test]
+            public void Remove_RotationDuringRemoveHighCausedUnupdatedSpan()
+            {
+                var interval1 = new IntervalBase<int>(6, 8);
+                var interval2 = new IntervalBase<int>(3, 6);
+
+                var collection = new DynamicIntervalTree<IInterval<int>, int>
+                    {
+                        interval1,
+                        new IntervalBase<int>(4, 5),
+                        new IntervalBase<int>(2, 5),
+                        new IntervalBase<int>(7, 8),
+                        new IntervalBase<int>(1, 4),
+                        interval2
+                    };
+
+                collection.Remove(interval1);
+                collection.Remove(interval2);
+            }
+        }
+
         #endregion
     }
 }
