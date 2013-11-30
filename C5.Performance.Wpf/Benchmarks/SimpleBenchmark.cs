@@ -45,7 +45,7 @@ namespace C5.Performance.Wpf.Benchmarks
 
         public override string BenchMarkName()
         {
-            return "BinarySearch";
+            return "TrainSearch";
         }
     }
 }

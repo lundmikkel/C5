@@ -158,11 +158,15 @@
     </ApplicationDefinition>
     <Compile Include="Benchmarks\Benchmark.cs" />
     <Compile Include="Benchmarks\Benchmarkable.cs" />
+    <Compile Include="Benchmarks\IBSTrainConstructBenchmark.cs" />
+    <Compile Include="Benchmarks\DITTrainConstructBenchmark.cs" />
+    <Compile Include="Benchmarks\IBSTrainSearchBenchmark.cs" />
     <Compile Include="Benchmarks\IbsAddBenchmarker.cs" />
     <Compile Include="Benchmarks\IbsAvlRandomRemoveBenchmarker.cs" />
     <Compile Include="Benchmarks\IbsAvlAddBenchmarker.cs" />
     <Compile Include="Benchmarks\LCListEnumeratorSorted.cs" />
     <Compile Include="Benchmarks\DynamicTreeRandomRemoveBenchmarker.cs" />
+    <Compile Include="Benchmarks\DITTrainSearchBenchmark.cs" />
     <Compile Include="Timer.cs" />
     <Page Include="Benchmarker.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -213,6 +217,14 @@
     <ProjectReference Include="..\C5.Tests\C5.Tests.csproj">
       <Project>{08cbfdeb-a2e2-4f0e-a4e1-b996b05569de}</Project>
       <Name>C5.Tests</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\C5.UserGuideExampleRunner\C5.UserGuideExampleRunner.csproj">
+      <Project>{651f7788-6152-4dcb-9588-44552dcd48e2}</Project>
+      <Name>C5.UserGuideExampleRunner</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\C5.UserGuideExamples\C5.UserGuideExamples.csproj">
+      <Project>{B2A29FF2-A5C5-4F07-8CE7-FF5D744D7562}</Project>
+      <Name>C5.UserGuideExamples</Name>
     </ProjectReference>
     <ProjectReference Include="..\C5\C5.csproj">
       <Project>{d02e0664-c56c-4c3f-98e5-c8ec881a8439}</Project>

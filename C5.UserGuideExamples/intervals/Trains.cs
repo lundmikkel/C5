@@ -19,7 +19,7 @@ namespace C5.UserGuideExamples.intervals
             Console.Read();
         }
 
-        private static IIntervalCollection<TrainRide, double>[] parseCvs()
+        public static IIntervalCollection<TrainRide, double>[] parseCvs()
         {
             const string filepath = @"../../../C5.UserGuideExamples/intervals/data/train.csv";
 
@@ -59,7 +59,7 @@ namespace C5.UserGuideExamples.intervals
             return resources;
         }
 
-        class TrainRide : IInterval<double>
+        public class TrainRide : IInterval<double>
         {
             public TrainRide(double low, double high, int track, int train)
             {

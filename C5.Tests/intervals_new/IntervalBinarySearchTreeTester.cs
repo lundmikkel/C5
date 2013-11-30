@@ -389,6 +389,163 @@ namespace C5.Tests.intervals_new
                 CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
             }
 
+            [Test]
+            public void FindOverlapsQuery_RootEqualIsEmpty()
+            {
+                var inputDataSet = _createIBS(B);
+                var interval = new IntervalBase<int>(5, 5, true, true);
+                inputDataSet.Add(interval);
+                inputDataSet.Remove(interval);
+                var inputContents = new IntervalBase<int>(4, 5, false, true);
+                var result = new[] {B.Last()};
+                CollectionAssert.AreEquivalent(result,inputDataSet.FindOverlaps(inputContents));
+            }
+
+            [Test]
+            public void FindOverlapsQuery_RootLessIsEmpty()
+            {
+                var inputDataSet = _createIBS(B);
+                var interval = new IntervalBase<int>(5, 5, true, true);
+                var interval2 = new IntervalBase<int>(5, 5, true, true);
+                inputDataSet.Add(interval);
+                inputDataSet.Add(interval2);
+                inputDataSet.Remove(inputDataSet.Filter(i => i.Low.Equals(3)).First());
+                var inputContents = new IntervalBase<int>(4, 5, false, true);
+                var result = new[] { interval,interval2 };
+                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
+            }
+
+            [Test]
+            public void FindOverlapsQuery_RootLessIsEmpty2()
+            {
+                var inputDataSet = _createIBS(B);
+                var interval = new IntervalBase<int>(5, 5, true, true);
+                inputDataSet.Add(interval);
+                inputDataSet.Remove(inputDataSet.Filter(i => i.Low.Equals(3)).First());
+                var inputContents = new IntervalBase<int>(4, 4, true, true);
+                CollectionAssert.IsEmpty(inputDataSet.FindOverlaps(inputContents));
+            }
+
+            [Test]
+            public void FindOverlapsQuery_RootEqualIsEmpty2()
+            {
+                var inputDataSet = _createIBS(B);
+                var interval = new IntervalBase<int>(3, 5);
+                inputDataSet.Add(interval);
+                var inputContents = new IntervalBase<int>(4, 4, true, true);
+                var result = new[] { B.Last(), interval };
+                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
+            }
+
+
+            [Test]
+            public void FindOverlapsQuery_RootEqualIsEmpty3()
+            {
+                var inputDataSet = _createIBS(B);
+                var inputContents = new IntervalBase<int>(2, 4, true, true);
+                var result = new[] { B.First(), B.Last() };
+                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
+            }
+
+            [Test]
+            public void FindOverlapsQuery_RootGreaterIsNotEmpty()
+            {
+                var inputDataSet = _createIBS(B);
+                var inputContents = new IntervalBase<int>(1, 1, true, true);
+                var result = new[] { B.First() };
+                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
+            }
+
+            [Test]
+            public void FindOverlapsQuery_RootGreaterIsNotEmpty2()
+            {
+                var inputDataSet = _createIBS(B);
+                var interval = new IntervalBase<int>(1, 3, false);
+                inputDataSet.Add(interval);
+                var inputContents = new IntervalBase<int>(1, 1, true, true);
+                var result = new[] { inputDataSet.First() };
+                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
+            }
+
+            [Test]
+            public void FindOverlapsQuery_RootGreaterIsEmpty()
+            {
+                var inputDataSet = _createIBS(B);
+                var interval = new IntervalBase<int>(1, 1, true, true);
+                inputDataSet.Add(interval);
+                inputDataSet.Remove(inputDataSet.Filter(i => i.High.Equals(3)).First());
+                var inputContents = new IntervalBase<int>(2, 2, true, true);
+                CollectionAssert.IsEmpty(inputDataSet.FindOverlaps(inputContents));
+            }
+
+            [Test]
+            public void FindOverlapsQuery_RootGreaterIsEmpty2()
+            {
+                var inputDataSet = _createIBS(B);
+                var interval = new IntervalBase<int>(1, 1, true, true);
+                inputDataSet.Add(interval);
+                inputDataSet.Remove(inputDataSet.Filter(i => i.High.Equals(3)).First());
+                var inputContents = new IntervalBase<int>(1, 1, true, true);
+                var result = new[] { interval };
+                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
+            }
+
+            [Test]
+            public void FindOverlapsQuery_RootGreaterOneIteration()
+            {
+                var inputDataSet = _createIBS(B);
+                var inputContents = new IntervalBase<int>(2, 2, true, true);
+                var result = new[] { B.First() };
+                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
+            }
+
+            [Test]
+            public void FindOverlapsQuery_RootGreaterManyIterations()
+            {
+                var inputDataSet = _createIBS(B);
+                var interval = new IntervalBase<int>(1, 3, false);
+                inputDataSet.Add(interval);
+                var inputContents = new IntervalBase<int>(2, 2, true, true);
+                var result = new[] { interval, B.First() };
+                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
+            }
+
+            [Test]
+            public void FindOverlapsQuery_QueryLow()
+            {
+                var inputDataSet = _createIBS(F);
+                var inputContents = new IntervalBase<int>(1, 7, true, true);
+                CollectionAssert.AreEquivalent(inputDataSet,inputDataSet.FindOverlaps(inputContents));
+            }
+
+            [Test]
+            public void FindOverlapsQuery_QueryLow2()
+            {
+                var inputDataSet = _createIBS(B);
+                var inputContents = new IntervalBase<int>(1, 3);
+                var result = new[] { B.First() };
+                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
+            }
+
+            [Test]
+            public void FindOverlapsQuery_QueryLow3()
+            {
+                var inputDataSet = _createIBS(B);                
+                inputDataSet.Remove(inputDataSet.First());
+                var inputContents = new IntervalBase<int>(2, 4);
+                var result = new[] {B.Last()};
+                CollectionAssert.AreEquivalent(result,inputDataSet.FindOverlaps(inputContents));
+            }
+            
+            [Test]
+            public void FindOverlapsQuery_SplitRightOnce()
+            {
+                var inputDataSet = _createIBS(F);
+                var inputContents = new IntervalBase<int>(5, 7, false);
+                var result = inputDataSet.Filter(i => i.Overlaps(inputContents));
+                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
+            }
+
             #endregion
 
             #region Range
