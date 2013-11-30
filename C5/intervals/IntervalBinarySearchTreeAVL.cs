@@ -1083,7 +1083,7 @@ namespace C5.intervals
                 if (_span == null)
                     _span = new IntervalBase<T>(getLowest(_root), getHighest(_root));
 
-                return new IntervalBase<T>(_span);
+                return _span;
             }
         }
 
@@ -1098,6 +1098,7 @@ namespace C5.intervals
                 return root.Equal.Choose();
             if (root.Greater != null && !root.Greater.IsEmpty)
                 return root.Greater.Choose();
+
             return root.IntervalsEndingInNode.First();
         }
 
@@ -1506,9 +1507,7 @@ namespace C5.intervals
             if (intervalWasAdded)
             {
                 // Update span if necessary
-                if (_span == null)
-                    _span = interval;
-                else if (!_span.Contains(interval))
+                if (_span != null && !_span.Contains(interval))
                     _span = _span.JoinedSpan(interval);
 
                 // Update MNO delta for low

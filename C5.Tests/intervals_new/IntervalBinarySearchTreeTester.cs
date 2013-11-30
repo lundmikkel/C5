@@ -451,6 +451,39 @@ namespace C5.Tests.intervals_new
 
         }
 
+        [TestFixture]
+        [Category("Former Bug")]
+        internal class FormerBugs
+        {
+            [Test]
+            public void Span_CachingSpan()
+            {
+                var interval = new IntervalBase<int>(1, 2);
+
+                var collection = new IntervalBinarySearchTreeAvl<IntervalBase<int>, int>
+                    {
+                        interval,
+                        new IntervalBase<int>(3,4),
+                    };
+
+                collection.Remove(interval);
+                collection.Add(interval);
+                var span = collection.Span;
+                Assert.Pass();
+            }
+
+            [Test]
+            public void Span_RetrievSpanFromNodeWithEmptyIntervalSets()
+            {
+                var collection = new IntervalBinarySearchTreeAvl<IntervalBase<int>, int>
+                    {
+                        new IntervalBase<int>(3,4, IntervalType.HighIncluded)
+                    };
+                var span = collection.Span;
+                Assert.Pass();
+            }
+        }
+
         #endregion
     }
 }
