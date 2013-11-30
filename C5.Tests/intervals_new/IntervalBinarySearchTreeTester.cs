@@ -58,8 +58,7 @@ namespace C5.Tests.intervals_new
             {
                 get
                 {
-                    return new IInterval<int>[]
-                    {new IntervalBase<int>(1, 3), new IntervalBase<int>(3, 5)};
+                    return new IInterval<int>[] { new IntervalBase<int>(1, 3), new IntervalBase<int>(3, 5) };
                 }
             }
 
@@ -67,8 +66,7 @@ namespace C5.Tests.intervals_new
             {
                 get
                 {
-                    return new IInterval<int>[]
-                    {new IntervalBase<int>(1, 3), new IntervalBase<int>(2, 5), new IntervalBase<int>(3, 5)};
+                    return new IInterval<int>[] { new IntervalBase<int>(1, 3), new IntervalBase<int>(2, 5), new IntervalBase<int>(3, 5) };
                 }
             }
 
@@ -76,8 +74,7 @@ namespace C5.Tests.intervals_new
             {
                 get
                 {
-                    return new IInterval<int>[]
-                    {new IntervalBase<int>(1, 3), new IntervalBase<int>(1, 5), new IntervalBase<int>(3, 5)};
+                    return new IInterval<int>[] { new IntervalBase<int>(1, 3), new IntervalBase<int>(1, 5), new IntervalBase<int>(3, 5) };
                 }
             }
 
@@ -85,8 +82,7 @@ namespace C5.Tests.intervals_new
             {
                 get
                 {
-                    return new IInterval<int>[]
-                    {new IntervalBase<int>(1, 3), new IntervalBase<int>(1, 5)};
+                    return new IInterval<int>[] { new IntervalBase<int>(1, 3), new IntervalBase<int>(1, 5) };
                 }
             }
 
@@ -104,7 +100,7 @@ namespace C5.Tests.intervals_new
                         if (i > 1) intervals.Add(new IntervalBase<int>(i - 1, i, false));
 
                         // Create (2:4) & (4:6)
-                        if (i%2 == 0 && i + 2 < 7) intervals.Add(new IntervalBase<int>(i, i + 2, false));
+                        if (i % 2 == 0 && i + 2 < 7) intervals.Add(new IntervalBase<int>(i, i + 2, false));
                     }
                     return intervals.ToArray();
                 }
@@ -246,7 +242,7 @@ namespace C5.Tests.intervals_new
                 const int inputContents = 1;
                 CollectionAssert.IsEmpty(inputDataSet.FindOverlaps(inputContents));
             }
-            
+
             [Test]
             public void FindOverlapsStabbing_WhileRootNotNull_One()
             {
@@ -264,16 +260,16 @@ namespace C5.Tests.intervals_new
                 var result = new[] { B.First() };
                 CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
             }
-            
+
             [Test]
             public void FindOverlapsStabbing_WhileRootNotNull_Many2()
             {
                 var inputDataSet = _createIBS(B);
                 const int inputContents = 4;
-                var result = new[] {B.Last()};
+                var result = new[] { B.Last() };
                 CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
             }
-            
+
             [Test]
             public void FindOverlapsStabbing_RootLessIsEmpty()
             {
@@ -284,7 +280,7 @@ namespace C5.Tests.intervals_new
                 const int inputContents = 4;
                 CollectionAssert.IsEmpty(inputDataSet.FindOverlaps(inputContents));
             }
-            
+
             [Test]
             public void FindOverlapsStabbing_RootGreaterIsEmpty()
             {
@@ -375,7 +371,7 @@ namespace C5.Tests.intervals_new
             {
                 var inputDataSet = _createIBS(A);
                 var inputContents = new IntervalBase<int>(1, 2);
-                var result = new[] {A};
+                var result = new[] { A };
                 CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
             }
 

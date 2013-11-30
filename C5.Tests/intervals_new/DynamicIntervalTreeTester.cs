@@ -64,7 +64,7 @@ namespace C5.Tests.intervals_new
 
         [TestFixture]
         [Category("Former Bug")]
-        internal class FormerBugs
+        class FormerBugs
         {
             [Test]
             public void Add_LowInsertedNodeButDidNotRotate_UnbalancedTree()
