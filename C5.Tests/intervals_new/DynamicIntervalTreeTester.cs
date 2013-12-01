@@ -104,19 +104,21 @@ namespace C5.Tests.intervals_new
             [Test]
             public void Add_SortedQueryingOutsideSpan()
             {
-                const int count = 100;
+                var count = (int) Math.Pow(2.0, 5.0);
                 var intervals = new IntervalBase<int>[count];
 
-                for (int i = 0; i < count; i++)
-                    intervals[i] = new IntervalBase<int>(i);
+                for (var i = 0; i < count; i++)
+                    intervals[i] = new IntervalBase<int>(i * 2, i * 2 + 1);
 
                 var collection = new DynamicIntervalTree<IInterval<int>, int>();
 
                 foreach (var interval in intervals)
                     collection.Add(interval);
 
+                Console.Out.WriteLine(collection.QuickGraph);
+
                 Assert.AreEqual(0, collection.FindOverlaps(-1).Count());
-                Assert.AreEqual(0, collection.FindOverlaps(count + 1).Count());
+                Assert.AreEqual(0, collection.FindOverlaps(count * 2 + 2).Count());
             }
         }
 
