@@ -35,7 +35,7 @@ namespace C5.Performance.Wpf
         /// <summary>
         /// Prepare the plotter
         /// </summary>
-        private void setUpModel()
+        private void setUpModel(bool logarithmicXAxis = false)
         {
             //PlotModel.Title = "Interval Plotter";
             //PlotModel.LegendTitle = "Legend";
@@ -52,17 +52,26 @@ namespace C5.Performance.Wpf
                 MinorGridlineStyle = LineStyle.Dot
             };
 
-            var valueAxis = new LinearAxis(AxisPosition.Left)
-            {
-                AxisTitleDistance = 10,
-                Title = "Execution Time in seconds",
-                MajorGridlineStyle = LineStyle.Solid,
-                MinorGridlineStyle = LineStyle.Dot
-            };
+            // Comment in the line with the axis you want
+            var valueAxis = logarithmicXAxis ? (Axis)new LogarithmicAxis() : new LinearAxis();
+            valueAxis.Position = AxisPosition.Left;
+            valueAxis.AxisTitleDistance = 10;
+            valueAxis.Title = "Execution Time in seconds";
+            valueAxis.MajorGridlineStyle = LineStyle.Solid;
+            valueAxis.MinorGridlineStyle = LineStyle.Dot;
+            
             sizeAxis.AbsoluteMinimum = 0;
             valueAxis.AbsoluteMinimum = 0;
+
             PlotModel.Axes.Add(sizeAxis);
             PlotModel.Axes.Add(valueAxis);
+        }
+
+        public void ToggleLogarithmicAxis(bool logarithmicXAxis)
+        {
+            PlotModel.Axes.Clear();
+            setUpModel(logarithmicXAxis);
+            PlotModel.RefreshPlot(true);
         }
 
         /// <summary>

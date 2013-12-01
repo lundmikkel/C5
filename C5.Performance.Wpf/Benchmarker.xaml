@@ -20,5 +20,6 @@
         <CheckBox Content="Warmup" HorizontalAlignment="Right" Margin="0,0,215,58" VerticalAlignment="Bottom" Checked="CheckBox_Checked_RunWarmups" Unchecked="CheckBox_Unchecked_RunWarmups" BorderThickness="0" IsChecked="True"/>
         <ProgressBar x:Name="progress" HorizontalAlignment="Right" Height="25" Margin="0,0,305,60" VerticalAlignment="Bottom" Width="200" ValueChanged="ProgressBar_ValueChanged" BorderThickness="0"/>
         <CheckBox x:Name="runSequentialCheckBox" Content="Sequential" HorizontalAlignment="Right" Margin="0,0,205,44" VerticalAlignment="Bottom" Checked="CheckBox_Checked_RunSequential" Unchecked="CheckBox_Unchecked_RunSequential" BorderThickness="0"/>
+        <CheckBox x:Name="logarithmicXAxisCheckBox" Content="Logarithmic X Axis" HorizontalAlignment="Right" Margin="0,0,515,72" VerticalAlignment="Bottom" Checked="CheckBox_Checked_LogarithmicXAxis" Unchecked="CheckBox_Unchecked_LogarithmicXAxis" BorderThickness="0" IsChecked="False"/>
     </Grid>
 </Window>
