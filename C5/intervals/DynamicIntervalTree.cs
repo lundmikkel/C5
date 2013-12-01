@@ -1274,14 +1274,15 @@ namespace C5.intervals
             if (IsEmpty)
                 yield break;
 
-            //var height = (int) Math.Ceiling(1.44 * Math.Log(Count, 2) - 0.328);
-            var stack = new ArrayList<Node>();
+            var height = (int) Math.Ceiling(1.44 * Math.Log(Count + 2, 2) - 0.328);
+            var stack = new Node[height];
+            var i = 0;
 
-            stack.Push(_root);
+            stack[i++] = _root;
 
-            while (!stack.IsEmpty)
+            while (i > 0)
             {
-                var root = stack.Pop();
+                var root = stack[--i];
                 if (root == null)
                     continue;
 
@@ -1290,12 +1291,12 @@ namespace C5.intervals
                 if (compare < 0 || compare == 0 && (!query.HighIncluded || root.IncludedList == null))
                 {
                     // Search left iteratively
-                    stack.Push(root.Left);
+                    stack[i++] = root.Left;
                 }
                 else if (root.Span != null && root.Span.CompareHighLow(query) >= 0)
                 {
-                    stack.Push(root.Left);
-                    stack.Push(root.Right);
+                    stack[i++] = root.Left;
+                    stack[i++] = root.Right;
 
                     if (root.LocalSpan != null)
                     {
