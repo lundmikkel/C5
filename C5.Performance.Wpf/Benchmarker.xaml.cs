@@ -14,7 +14,7 @@ namespace C5.Performance.Wpf
         #region Benchmark setup
         // Parameters for running the benchmarks
         private const int MinCollectionSize = 100;
-        private const int MaxCollectionSize = TrainUtilities.DataSetACount;
+        private const int MaxCollectionSize = TrainUtilities.DataSetBCount;
         private const int CollectionMultiplier = 2;
         private const int StandardRepeats = 10;
         private const double MaxExecutionTimeInSeconds = 0.25;
@@ -60,6 +60,8 @@ namespace C5.Performance.Wpf
         private void benchmarkStart(object sender, RoutedEventArgs e)
         {
             runSequentialCheckBox.IsEnabled = false;
+            logarithmicXAxisCheckBox.IsEnabled = false;
+
             // This benchmark is the one we use to compare with Sestoft's cmd line version of the tool
             var thread = _runSequential
                 ? new Thread(() => runBenchmarks(Benchmarks))
@@ -180,6 +182,16 @@ namespace C5.Performance.Wpf
         {
             _repeats = StandardRepeats;
             _maxCount = Int32.MaxValue / 10;
+        }
+        
+        private void CheckBox_Checked_LogarithmicXAxis(object sender, RoutedEventArgs e)
+        {
+            _plotter.ToggleLogarithmicAxis(true);
+        }
+
+        private void CheckBox_Unchecked_LogarithmicXAxis(object sender, RoutedEventArgs e)
+        {
+            _plotter.ToggleLogarithmicAxis(false);
         }
 
         private void CheckBox_Checked_RunSequential(object sender, RoutedEventArgs e)
