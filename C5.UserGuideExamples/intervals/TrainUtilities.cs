@@ -19,7 +19,7 @@ namespace C5.UserGuideExamples.intervals
         public static Trains.TrainRide[] GetTrains(int numberOfTrainsToGet)
         {
             // Return the trains with ressources - number of trains 21998
-//            return Trains.ParseDataSetA().SelectMany(col => col).Take(numberOfTrainsToGet).ToArray();
+            return Trains.ParseDataSetA().SelectMany(col => col).Take(numberOfTrainsToGet).ToArray();
             
             // Return the trains without ressources - number of trains 31156
             return Trains.ParseDataSetB().Take(numberOfTrainsToGet).ToArray();
