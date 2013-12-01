@@ -1655,15 +1655,6 @@ namespace C5.Tests.intervals_new
         #region Large Scale Random
 
         [Test]
-        public void Random_CallWholeInterface_FixedSeed()
-        {
-            updateRandom(1051843629);
-            Random_CallWholeInterface();
-            updateRandom(-374669985);
-            Random_CallWholeInterface();
-        }
-
-        [Test]
         [Category("Large Scale")]
         public void Random_CallWholeInterface()
         {
