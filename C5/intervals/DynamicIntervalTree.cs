@@ -1219,7 +1219,7 @@ namespace C5.intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
-            //*
+            /*
             return FindOverlapsIterative(query);
             /*/
             if (IsEmpty)
