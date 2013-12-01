@@ -1222,25 +1222,18 @@ namespace C5.intervals
             /*
             return FindOverlapsIterative(query);
             /*/
-            if (IsEmpty)
-                yield break;
-
-            foreach (var node in findNodes(query, _root))
-            {
-                // Find overlaps in lists
-                if (node.IncludedList != null)
-                    foreach (var interval in node.IncludedList.FindOverlaps(query))
-                        yield return interval;
-
-                if (node.ExcludedList != null)
-                    foreach (var interval in node.ExcludedList.FindOverlaps(query))
-                        yield return interval;
-            }
+            return IsEmpty ? Enumerable.Empty<I>() : findOverlaps(query, _root);
             //*/
         }
 
         /// <inheritdoc/>
-        private static IEnumerable<Node> findNodes(IInterval<T> query, Node root)
+        public IEnumerable<I> FindOverlapsRecursive(IInterval<T> query)
+        {
+            return IsEmpty ? Enumerable.Empty<I>() : findOverlapsRecursive(query, _root);
+        }
+
+        /// <inheritdoc/>
+        private static IEnumerable<I> findOverlaps(IInterval<T> query, Node root)
         {
             do
             {
@@ -1255,11 +1248,20 @@ namespace C5.intervals
                 {
                     // Search left recursively
                     if (root.Left != null)
-                        foreach (var node in findNodes(query, root.Left))
-                            yield return node;
+                        foreach (var interval in findOverlaps(query, root.Left))
+                            yield return interval;
 
                     if (root.LocalSpan != null)
-                        yield return root;
+                    {
+                        // Find overlaps in lists
+                        if (root.IncludedList != null)
+                            foreach (var interval in root.IncludedList.FindOverlaps(query))
+                                yield return interval;
+
+                        if (root.ExcludedList != null)
+                            foreach (var interval in root.ExcludedList.FindOverlaps(query))
+                                yield return interval;
+                    }
 
                     // Search right iteratively
                     root = root.Right;
@@ -1267,6 +1269,44 @@ namespace C5.intervals
                 else
                     break;
             } while (root != null);
+        }
+
+        /// <inheritdoc/>
+        private static IEnumerable<I> findOverlapsRecursive(IInterval<T> query, Node root)
+        {
+            // Query is to the left of root's Low
+            var compare = query.High.CompareTo(root.Key);
+            if (compare < 0 || compare == 0 && (!query.HighIncluded || root.IncludedList == null))
+            {
+                // Search left recursively
+                if (root.Left != null)
+                    foreach (var interval in findOverlapsRecursive(query, root.Left))
+                        yield return interval;
+            }
+            else if (root.Span != null && root.Span.CompareHighLow(query) >= 0)
+            {
+                // Search left recursively
+                if (root.Left != null)
+                    foreach (var interval in findOverlapsRecursive(query, root.Left))
+                        yield return interval;
+
+                if (root.LocalSpan != null)
+                {
+                    // Find overlaps in lists
+                    if (root.IncludedList != null)
+                        foreach (var interval in root.IncludedList.FindOverlaps(query))
+                            yield return interval;
+
+                    if (root.ExcludedList != null)
+                        foreach (var interval in root.ExcludedList.FindOverlaps(query))
+                            yield return interval;
+                }
+
+                // Search right recursively
+                if (root.Right != null)
+                    foreach (var interval in findOverlapsRecursive(query, root.Right))
+                        yield return interval;
+            }
         }
 
         public IEnumerable<I> FindOverlapsIterative(IInterval<T> query)
