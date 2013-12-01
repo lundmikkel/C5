@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using C5.intervals;
 using Microsoft.VisualBasic.FileIO;
 
@@ -10,8 +12,16 @@ namespace C5.UserGuideExamples.intervals
         public static void Main(string[] args)
         {
             Console.Out.WriteLine(train());
-            TrainUtilities.FindInbetweenTrains(ParseDataSetB());
-            TrainUtilities.PrintTrainStatistics(ParseDataSetB());
+            var trains = ParseDataSetA().SelectMany(c => c).ToArray();
+            Console.Out.WriteLine("Found {0} trains in the data file.",trains.Count());
+            var inbetweenTrains = TrainUtilities.FindInbetweenTrains(trains);
+            Console.Out.WriteLine("Found {0} trains to put inbetween the existing trains.",inbetweenTrains.Count());
+            Console.Out.WriteLine("Press any key to check for collisions...");
+            Console.ReadLine();
+            var trainz = new ArrayList<TrainRide>();
+            trainz.AddAll(ParseDataSetA().SelectMany(c => c).ToArray());
+            TrainUtilities.PrintTrainStatistics(trainz);
+            Console.Out.WriteLine("Press any key to exit.");
             Console.Read();
         }
 
@@ -32,8 +42,8 @@ namespace C5.UserGuideExamples.intervals
 
                     var start = double.Parse(parts[1], CultureInfo.InvariantCulture);
                     var end = double.Parse(parts[2], CultureInfo.InvariantCulture);
-                    var track = Int32.Parse(parts[3]);
-                    var train = Int32.Parse(parts[4]);
+                    var train = Int32.Parse(parts[3]);
+                    var track = Int32.Parse(parts[4]);
 
                     var ride = new TrainRide(start, end, track, train);
 

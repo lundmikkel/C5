@@ -14,7 +14,7 @@ namespace C5.Performance.Wpf
         #region Benchmark setup
         // Parameters for running the benchmarks
         private const int MinCollectionSize = 100;
-        private const int MaxCollectionSize = TrainUtilities.DataSetBCount;
+        private const int MaxCollectionSize = TrainUtilities.DataSetACount;
         private const int CollectionMultiplier = 2;
         private const int StandardRepeats = 10;
         private const double MaxExecutionTimeInSeconds = 0.25;
@@ -36,6 +36,7 @@ namespace C5.Performance.Wpf
                 {
 //                    new DITTrainConstructBenchmark(), 
 //                    new DITTrainRemoveBenchmark(), 
+                    new DITTrainSearchRecursiveBenchmark(), 
                     new DITTrainSearchIterativeBenchmark(),
                     new DITTrainSearchBenchmark(), 
 //                    new IBSTrainConstructBenchmark(), 
