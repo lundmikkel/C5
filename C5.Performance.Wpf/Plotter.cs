@@ -39,7 +39,7 @@ namespace C5.Performance.Wpf
         {
             //PlotModel.Title = "Interval Plotter";
             //PlotModel.LegendTitle = "Legend";
-            PlotModel.LegendPosition = LegendPosition.BottomRight;
+            PlotModel.LegendPosition = LegendPosition.TopLeft;
             PlotModel.LegendBackground = OxyColors.White;
             PlotModel.LegendBorder = OxyColors.Black;
             PlotModel.LegendPlacement = LegendPlacement.Inside;

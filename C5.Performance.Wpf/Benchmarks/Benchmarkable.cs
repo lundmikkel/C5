@@ -29,7 +29,7 @@ namespace C5.Performance.Wpf.Benchmarks
                 var warmupTimer = new Timer();
                 warmupTimer.Play();
                 var i1 = 0;
-                while (i1 < warmups && warmupTimer.Check() < 2)
+                while (i1 < warmups && warmupTimer.Check() < 3) // Don't warmup for more than 3 seconds
                 {
                     Setup();
                     caller.UpdateRunningLabel("Warmup run " + i1);
