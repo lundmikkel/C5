@@ -1283,20 +1283,20 @@ namespace C5.intervals
             while (i > 0)
             {
                 var root = stack[--i];
-                if (root == null)
-                    continue;
 
                 // Query is to the left of root's Low
                 var compare = query.High.CompareTo(root.Key);
                 if (compare < 0 || compare == 0 && (!query.HighIncluded || root.IncludedList == null))
                 {
-                    // Search left iteratively
-                    stack[i++] = root.Left;
+                    if (root.Left != null)
+                        stack[i++] = root.Left;
                 }
                 else if (root.Span != null && root.Span.CompareHighLow(query) >= 0)
                 {
-                    stack[i++] = root.Left;
-                    stack[i++] = root.Right;
+                    if (root.Left != null)
+                        stack[i++] = root.Left;
+                    if (root.Right != null)
+                        stack[i++] = root.Right;
 
                     if (root.LocalSpan != null)
                     {
