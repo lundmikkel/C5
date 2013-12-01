@@ -100,11 +100,14 @@ namespace C5.Tests.intervals_new
             return new Interval(low, high, (IntervalType) Random.Next(0, 4));
         }
 
-        public Interval[] ManyIntervals()
+        public Interval[] ManyIntervals(int count = -1)
         {
             Contract.Ensures(Contract.Result<IEnumerable<IInterval<int>>>().Count() == Count);
 
-            return Enumerable.Range(0, Count).Select(i => SingleInterval()).ToArray();
+            if (count < 0)
+                count = Count;
+
+            return Enumerable.Range(0, count).Select(i => SingleInterval()).ToArray();
         }
 
         public Interval[] DuplicateIntervals()
@@ -1645,6 +1648,65 @@ namespace C5.Tests.intervals_new
                     collection.Remove(interval);
                 }
             }
+        }
+
+        #endregion
+
+        #region Large Scale Random
+
+        [Test]
+        public void Random_CallWholeInterface_FixedSeed()
+        {
+            updateRandom(1051843629);
+            Random_CallWholeInterface();
+            updateRandom(-374669985);
+            Random_CallWholeInterface();
+        }
+
+        [Test]
+        [Category("Large Scale")]
+        public void Random_CallWholeInterface()
+        {
+            var collection = CreateEmptyCollection<Interval, int>();
+
+            var sum = 0;
+
+            if (!collection.IsReadOnly)
+            {
+                var count = Random.Next(50, 100);
+                var set = new HashSet<Interval>();
+                var intervals = ManyIntervals(count);
+
+                for (var i = 0; i < count; i++)
+                {
+                    var interval = intervals[i];
+                    collection.Add(interval);
+                    set.Add(interval);
+
+                    interval = set.Choose();
+                    var span = collection.Span;
+                    var mno = collection.MaximumOverlap;
+                    Assert.AreEqual(collection.FindOverlaps(interval).Count(), collection.CountOverlaps(interval));
+                    Assert.AreEqual(collection.FindOverlaps(interval.Low).Count(), collection.CountOverlaps(interval.Low));
+                    sum += collection.FindOverlaps(interval).Count();
+                    Assert.True(collection.FindOverlap(interval, ref interval));
+                    collection.FindOverlap(interval.Low, ref interval);
+
+                    var remove = Random.Next(0, 2);
+                    if (remove == 1)
+                    {
+                        interval = set.Choose();
+                        collection.Remove(interval);
+                        set.Remove(interval);
+                    }
+                }
+
+                collection.Clear();
+                CollectionAssert.IsEmpty(collection);
+            }
+
+            Console.Out.WriteLine("Sum: " + sum);
+            Console.Out.WriteLine("Count: " + collection.Count);
         }
 
         #endregion
