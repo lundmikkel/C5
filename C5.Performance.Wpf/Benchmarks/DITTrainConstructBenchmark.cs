@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using C5.intervals;
+﻿using C5.intervals;
 using C5.UserGuideExamples.intervals;
 
 namespace C5.Performance.Wpf.Benchmarks
@@ -8,23 +6,21 @@ namespace C5.Performance.Wpf.Benchmarks
     public class DITTrainConstructBenchmark : Benchmarkable
     {
         private Trains.TrainRide[] _trains;
-        private IInterval<double>[] _trainsNotInCollection;
-        private DynamicIntervalTree<Trains.TrainRide, double> intervalTrains;
+        private DynamicIntervalTree<Trains.TrainRide, double> _intervalTrains;
 
 
         private int trainConstruct(int trainId)
         {
-            for (var i = 0; i < trainId; i++)
-                intervalTrains.Add(_trains[trainId]);
+            _intervalTrains = new DynamicIntervalTree<Trains.TrainRide, double>(_trains);
             return 1;
         }
 
         public override void CollectionSetup()
         {
-            var trainRessource = Trains.parseCvs();
-
             // Get the number of trains from the csv file matching the collectionsize
-            _trains = trainRessource.SelectMany(col => col).Take(CollectionSize).ToArray();
+            _trains = TrainUtilities.GetTrains(CollectionSize);
+            
+            Sorting.IntroSort(_trains, 0, CollectionSize, IntervalExtensions.CreateComparer<Trains.TrainRide, double>());
 
             /*
              * Setup an items array with things to look for. Not used in this benchmark.
@@ -34,7 +30,7 @@ namespace C5.Performance.Wpf.Benchmarks
 
         public override void Setup()
         {
-            intervalTrains = new DynamicIntervalTree<Trains.TrainRide, double>();
+//            _trains.Shuffle();
         }
 
         public override double Call(int i)

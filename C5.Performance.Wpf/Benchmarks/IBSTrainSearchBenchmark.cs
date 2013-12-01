@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using C5.intervals;
 using C5.UserGuideExamples.intervals;
 
@@ -8,48 +7,29 @@ namespace C5.Performance.Wpf.Benchmarks
     public class IBSTrainSearchBenchmark : Benchmarkable
     {
         private Trains.TrainRide[] _trains;
-        private IInterval<double>[] _trainsNotInCollection;
-        private IntervalBinarySearchTreeAvl<Trains.TrainRide, double> intervalTrains;
+        private TrainUtilities.InBetweenTrainRide[] _trainsNotInCollection;
+        private IntervalBinarySearchTreeAvl<Trains.TrainRide, double> _intervalTrains;
 
 
         private int trainSearch(int trainId)
         {
             // If the id is in range of the original trains search for a train we know is there
             if (trainId < CollectionSize)
-                return intervalTrains.Contains(_trains[trainId]) ? 1 : 0;
+                return _intervalTrains.FindOverlaps(_trains[trainId]).Count() > 0 ? 1 : 0;
             // If the is is out of range search for a train we know is not in the collection.
-            return intervalTrains.Contains(_trainsNotInCollection[(trainId - CollectionSize)]) ? 1 : 0;
-        }
-
-        private static IEnumerable<IInterval<double>> findInbetweenTrains(IEnumerable<Trains.TrainRide> trains)
-        {
-            var sortedTrains = trains.ToList();
-            sortedTrains.Sort((t1, t2) => t1.CompareTo(t2));
-            var intervalsNotInCollection = new ArrayList<IInterval<double>>();
-            for (var i = 0; i < sortedTrains.Count - 1; i++)
-            {
-                var i1 = sortedTrains[i];
-                var i2 = sortedTrains[i + 1];
-                if (i1.High.CompareTo(i2.Low) < 0)
-                    intervalsNotInCollection.Add(new IntervalBase<double>(i1.High, i2.Low, false, highIncluded: false));
-                if (i1.High.CompareTo(i2.Low) < 0 && i == sortedTrains.Count - 2)
-                    intervalsNotInCollection.Add(new IntervalBase<double>(i1.High, i2.Low, false, highIncluded: false));
-            }
-            return intervalsNotInCollection;
+            return _intervalTrains.FindOverlaps(_trainsNotInCollection[(trainId - CollectionSize)]).Count() > 0 ? 1 : 0;
         }
 
         public override void CollectionSetup()
         {
-            var trainRessource = Trains.parseCvs();
-
             // Get the number of trains from the csv file matching the collectionsize
-            _trains = trainRessource.SelectMany(col => col).Take(CollectionSize).ToArray();
+            _trains = TrainUtilities.GetTrains(CollectionSize);
 
             // Create collection of trains that is not in the collection to have unsuccesfull searches
-            _trainsNotInCollection = findInbetweenTrains(_trains).ToArray();
+            _trainsNotInCollection = TrainUtilities.FindInbetweenTrains(_trains).ToArray();
 
-            intervalTrains = new IntervalBinarySearchTreeAvl<Trains.TrainRide, double>();
-            intervalTrains.AddAll(_trains);
+            _intervalTrains = new IntervalBinarySearchTreeAvl<Trains.TrainRide, double>();
+            _intervalTrains.AddAll(_trains);
 
             /*
              * Setup an items array with things to look for.

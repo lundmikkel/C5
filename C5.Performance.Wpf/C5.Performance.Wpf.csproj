@@ -158,6 +158,8 @@
     </ApplicationDefinition>
     <Compile Include="Benchmarks\Benchmark.cs" />
     <Compile Include="Benchmarks\Benchmarkable.cs" />
+    <Compile Include="Benchmarks\IBSTrainRemoveBenchmark.cs" />
+    <Compile Include="Benchmarks\DITTrainRemoveBenchmark.cs" />
     <Compile Include="Benchmarks\IBSTrainConstructBenchmark.cs" />
     <Compile Include="Benchmarks\DITTrainConstructBenchmark.cs" />
     <Compile Include="Benchmarks\IBSTrainSearchBenchmark.cs" />

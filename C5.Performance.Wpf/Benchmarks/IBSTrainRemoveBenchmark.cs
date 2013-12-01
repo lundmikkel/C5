@@ -4,21 +4,24 @@ using C5.UserGuideExamples.intervals;
 
 namespace C5.Performance.Wpf.Benchmarks
 {
-    public class DITTrainSearchBenchmark : Benchmarkable
+    public class IBSTrainRemoveBenchmark : Benchmarkable
     {
         private Trains.TrainRide[] _trains;
         private TrainUtilities.InBetweenTrainRide[] _trainsNotInCollection;
-        private DynamicIntervalTree<Trains.TrainRide, double> _intervalTrains;
+        private IntervalBinarySearchTreeAvl<Trains.TrainRide, double> _intervalTrains;
 
 
         private int trainSearch(int trainId)
         {
             // If the id is in range of the original trains search for a train we know is there
             if (trainId < CollectionSize)
-                return _intervalTrains.FindOverlaps(_trains[trainId]).Count() > 0 ? 1 : 0;
-            // If the is is out of range search for a train we know is not in the collection.
-            return _intervalTrains.FindOverlaps(_trainsNotInCollection[(trainId - CollectionSize)]).Count() > 0 ? 1 : 0;
+                return _intervalTrains.Remove(_trains[trainId]) ? 1 : 0;
+
+            // If the trainId is out of range search for a train we know is not in the collection and we search for a train that should not be there.
+            return _intervalTrains.Remove(_trainsNotInCollection[(trainId - CollectionSize)]) ? 1 : 0;
         }
+
+        
 
         public override void CollectionSetup()
         {
@@ -28,9 +31,7 @@ namespace C5.Performance.Wpf.Benchmarks
             // Create collection of trains that is not in the collection to have unsuccesfull searches
             _trainsNotInCollection = TrainUtilities.FindInbetweenTrains(_trains).ToArray();
 
-            _intervalTrains = new DynamicIntervalTree<Trains.TrainRide, double>();
-            _intervalTrains.AddAll(_trains);
-
+            _intervalTrains = new IntervalBinarySearchTreeAvl<Trains.TrainRide, double>();
             /*
              * Setup an items array with things to look for.
              * Fill in random numbers from 0 to the number of trains plus the number of trains not in the collection.
@@ -42,6 +43,9 @@ namespace C5.Performance.Wpf.Benchmarks
 
         public override void Setup()
         {
+            // Add all trains after each removal benchmark
+            _intervalTrains.Clear();
+            _intervalTrains.AddAll(_trains);
         }
 
         public override double Call(int i)
@@ -51,7 +55,7 @@ namespace C5.Performance.Wpf.Benchmarks
 
         public override string BenchMarkName()
         {
-            return "DIT Train Search";
+            return "IBS Train Remove";
         }
     }
 }
