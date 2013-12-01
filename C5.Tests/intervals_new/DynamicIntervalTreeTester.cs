@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using C5.intervals;
 using NUnit.Framework;
 
@@ -97,6 +98,25 @@ namespace C5.Tests.intervals_new
 
                 collection.Remove(interval1);
                 collection.Remove(interval2);
+            }
+
+
+            [Test]
+            public void Add_SortedQueryingOutsideSpan()
+            {
+                const int count = 100;
+                var intervals = new IntervalBase<int>[count];
+
+                for (int i = 0; i < count; i++)
+                    intervals[i] = new IntervalBase<int>(i);
+
+                var collection = new DynamicIntervalTree<IInterval<int>, int>();
+
+                foreach (var interval in intervals)
+                    collection.Add(interval);
+
+                Assert.AreEqual(0, collection.FindOverlaps(-1).Count());
+                Assert.AreEqual(0, collection.FindOverlaps(count + 1).Count());
             }
         }
 
