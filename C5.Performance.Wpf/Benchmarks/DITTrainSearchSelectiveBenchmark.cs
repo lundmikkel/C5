@@ -4,7 +4,7 @@ using C5.UserGuideExamples.intervals;
 
 namespace C5.Performance.Wpf.Benchmarks
 {
-    public class DITTrainSearchIterativeBenchmark : Benchmarkable
+    public class DITTrainSearchSelectiveBenchmark : Benchmarkable
     {
         private Trains.TrainRide[] _trains;
         private TrainUtilities.InBetweenTrainRide[] _trainsNotInCollection;
@@ -15,9 +15,10 @@ namespace C5.Performance.Wpf.Benchmarks
         {
             // If the id is in range of the original trains search for a train we know is there
             if (trainId < CollectionSize)
-                return _intervalTrains.FindOverlapsIterative(_trains[trainId]).Count() > 0 ? 1 : 0;
+                return _intervalTrains.FindOverlapsSelective(_trains[trainId]).Count() > 0 ? 1 : 0;
             // If the is is out of range search for a train we know is not in the collection.
-            return _intervalTrains.FindOverlapsIterative(_trainsNotInCollection[(trainId - CollectionSize)]).Count() > 0 ? 1 : 0;
+            return _intervalTrains.FindOverlapsSelective(_trainsNotInCollection[(trainId - CollectionSize)]).Count() > 0 ? 1 : 0;
+            //return -1;
         }
 
         public override void CollectionSetup()
@@ -51,7 +52,7 @@ namespace C5.Performance.Wpf.Benchmarks
 
         public override string BenchMarkName()
         {
-            return "DIT Train Iterative Search";
+            return "DIT Train Selective Search";
         }
     }
 }

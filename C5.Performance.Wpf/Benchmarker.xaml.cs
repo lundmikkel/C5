@@ -36,7 +36,7 @@ namespace C5.Performance.Wpf
                 {
 //                    new DITTrainConstructBenchmark(), 
 //                    new DITTrainRemoveBenchmark(), 
-                    new DITTrainSearchIterativeBenchmark(),
+                    new DITTrainSearchSelectiveBenchmark(),
                     new DITTrainSearchBenchmark(), 
 //                    new IBSTrainConstructBenchmark(), 
 //                    new IBSTrainRemoveBenchmark(), 
