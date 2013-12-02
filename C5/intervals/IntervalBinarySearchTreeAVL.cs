@@ -1080,14 +1080,11 @@ namespace C5.intervals
                 if (IsEmpty)
                     throw new InvalidOperationException("An empty collection has no span");
 
-                if (_span == null)
-                    _span = new IntervalBase<T>(getLowest(_root), getHighest(_root));
-
-                return _span;
+                return _span ?? (_span = new IntervalBase<T>(lowestLow(_root), highestHigh(_root)));
             }
         }
 
-        private static IInterval<T> getLowest(Node root)
+        private static IInterval<T> lowestLow(Node root)
         {
             Contract.Requires(root != null);
 
@@ -1102,7 +1099,7 @@ namespace C5.intervals
             return root.IntervalsEndingInNode.First();
         }
 
-        private static IInterval<T> getHighest(Node root)
+        private static IInterval<T> highestHigh(Node root)
         {
             Contract.Requires(root != null);
 
