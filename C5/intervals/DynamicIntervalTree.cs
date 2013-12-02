@@ -45,6 +45,8 @@ namespace C5.intervals
             // Check node spans
             Contract.Invariant(contractHelperCheckNodeSpans(_root));
 
+            Contract.Invariant(IsEmpty && _root == null || _root.Span != null);
+
             // The left most node will always contain at least one interval
             Contract.Invariant(IsEmpty || contractHelperLowestNodeIsNonEmpty(_root));
 
@@ -1513,7 +1515,7 @@ namespace C5.intervals
         public bool Remove(I interval)
         {
             // Nothing to remove is the collection is empty or the interval doesn't overlap the span
-            if (IsEmpty || !interval.Overlaps(Span))
+            if (IsEmpty || !interval.Overlaps(_root.Span))
                 return false;
 
             // Remove the interval based on low endpoint
