@@ -34,16 +34,16 @@ namespace C5.Performance.Wpf
             {
                 return new Benchmarkable[]
                 {
-                    new DITSearchRecursiveBenchmark(), 
-                    new DITSearchIterativeBenchmark(), 
-                    new DITSearchBenchmark(), 
-                    new IBSSearchBenchmark(), 
-                    
+//                    new DITSearchRecursiveBenchmark(), 
+//                    new DITSearchIterativeBenchmark(), 
+//                    new DITSearchBenchmark(), 
+//                    new IBSSearchBenchmark(), 
 //                    new DITTrainConstructBenchmark(), 
 //                    new DITTrainRemoveBenchmark(), 
 //                    new DITTrainSearchRecursiveBenchmark(), 
-//                    new DITTrainSearchIterativeBenchmark(),
 //                    new DITTrainSearchBenchmark(), 
+//                    new DITTrainSearchSelectiveBenchmark(),
+                    new DITTrainSearchBenchmark(), 
 //                    new IBSTrainConstructBenchmark(), 
 //                    new IBSTrainRemoveBenchmark(), 
 //                    new IBSTrainSearchBenchmark(), 
@@ -66,6 +66,7 @@ namespace C5.Performance.Wpf
         private void benchmarkStart(object sender, RoutedEventArgs e)
         {
             runSequentialCheckBox.IsEnabled = false;
+            logarithmicXAxisCheckBox.IsEnabled = false;
 
             // This benchmark is the one we use to compare with Sestoft's cmd line version of the tool
             var thread = _runSequential

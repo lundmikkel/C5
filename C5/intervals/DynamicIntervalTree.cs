@@ -29,6 +29,10 @@ namespace C5.intervals
         private static readonly IEqualityComparer<IInterval<T>> EqualityComparer =
             ComparerFactory<IInterval<T>>.CreateEqualityComparer(ReferenceEquals, x => x.GetHashCode());
 
+#if DEBUG
+        private int _visit = 0;
+#endif
+
         #endregion
 
         #region Code Contracts
@@ -553,6 +557,9 @@ namespace C5.intervals
 
             // Used for printing
             public bool Dummy { get; private set; }
+#if DEBUG
+            public int Visit { get; set; }
+#endif
 
             #endregion
 
@@ -1219,37 +1226,40 @@ namespace C5.intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
-            /*
-            return FindOverlapsIterative(query);
-            /*/
-            return IsEmpty ? Enumerable.Empty<I>() : findOverlaps(query, _root);
-            //*/
-        }
+            if (IsEmpty)
+                yield break;
 
-        /// <inheritdoc/>
-        public IEnumerable<I> FindOverlapsRecursive(IInterval<T> query)
-        {
-            return IsEmpty ? Enumerable.Empty<I>() : findOverlapsRecursive(query, _root);
-        }
+#if DEBUG
+            _visit++;
+#endif
 
-        /// <inheritdoc/>
-        private static IEnumerable<I> findOverlaps(IInterval<T> query, Node root)
-        {
-            do
+            // TODO: Should this be one more as the count is intervals, and not endpoints? Can't seem to make it fail.
+            var height = (int) Math.Ceiling(1.44 * Math.Log(Count + 2, 2) - 0.328);
+            var stack = new Node[height];
+            var i = 0;
+
+            stack[i++] = _root;
+
+            while (i > 0)
             {
+                var root = stack[--i];
+
+#if DEBUG
+                root.Visit = _visit;
+#endif
+
                 // Query is to the left of root's Low
                 var compare = query.High.CompareTo(root.Key);
-                if (compare < 0 || compare == 0 && (!query.HighIncluded || root.IncludedList == null))
+                if (root.Left != null && (compare < 0 || compare == 0 && (!query.HighIncluded || root.IncludedList == null)))
                 {
-                    // Search left iteratively
-                    root = root.Left;
+                    stack[i++] = root.Left;
                 }
-                else if (root.Span != null && root.Span.CompareHighLow(query) >= 0)
+                else if (root.Span != null && query.CompareLowHigh(root.Span) <= 0)
                 {
-                    // Search left recursively
                     if (root.Left != null)
-                        foreach (var interval in findOverlaps(query, root.Left))
-                            yield return interval;
+                        stack[i++] = root.Left;
+                    if (root.Right != null)
+                        stack[i++] = root.Right;
 
                     if (root.LocalSpan != null)
                     {
@@ -1262,58 +1272,21 @@ namespace C5.intervals
                             foreach (var interval in root.ExcludedList.FindOverlaps(query))
                                 yield return interval;
                     }
-
-                    // Search right iteratively
-                    root = root.Right;
                 }
-                else
-                    break;
-            } while (root != null);
+            }
         }
 
         /// <inheritdoc/>
-        private static IEnumerable<I> findOverlapsRecursive(IInterval<T> query, Node root)
-        {
-            // Query is to the left of root's Low
-            var compare = query.High.CompareTo(root.Key);
-            if (compare < 0 || compare == 0 && (!query.HighIncluded || root.IncludedList == null))
-            {
-                // Search left recursively
-                if (root.Left != null)
-                    foreach (var interval in findOverlapsRecursive(query, root.Left))
-                        yield return interval;
-            }
-            else if (root.Span != null && root.Span.CompareHighLow(query) >= 0)
-            {
-                // Search left recursively
-                if (root.Left != null)
-                    foreach (var interval in findOverlapsRecursive(query, root.Left))
-                        yield return interval;
-
-                if (root.LocalSpan != null)
-                {
-                    // Find overlaps in lists
-                    if (root.IncludedList != null)
-                        foreach (var interval in root.IncludedList.FindOverlaps(query))
-                            yield return interval;
-
-                    if (root.ExcludedList != null)
-                        foreach (var interval in root.ExcludedList.FindOverlaps(query))
-                            yield return interval;
-                }
-
-                // Search right recursively
-                if (root.Right != null)
-                    foreach (var interval in findOverlapsRecursive(query, root.Right))
-                        yield return interval;
-            }
-        }
-
-        public IEnumerable<I> FindOverlapsIterative(IInterval<T> query)
+        public IEnumerable<I> FindOverlapsSelective(IInterval<T> query)
         {
             if (IsEmpty)
                 yield break;
 
+#if DEBUG
+            _visit++;
+#endif
+
+            // TODO: Should this be one more as the count is intervals, and not endpoints? Can't seem to make it fail.
             var height = (int) Math.Ceiling(1.44 * Math.Log(Count + 2, 2) - 0.328);
             var stack = new Node[height];
             var i = 0;
@@ -1324,16 +1297,20 @@ namespace C5.intervals
             {
                 var root = stack[--i];
 
+#if DEBUG
+                root.Visit = _visit;
+#endif
+
                 // Query is to the left of root's Low
                 var compare = query.High.CompareTo(root.Key);
-                if (compare < 0 || compare == 0 && (!query.HighIncluded || root.IncludedList == null))
+                if (root.Left != null && (compare < 0 || compare == 0 && (!query.HighIncluded || root.IncludedList == null)))
                 {
-                    if (root.Left != null)
+                    if (root.Left.Span != null && query.Overlaps(root.Left.Span))
                         stack[i++] = root.Left;
                 }
-                else if (root.Span != null && root.Span.CompareHighLow(query) >= 0)
+                else if (root.Span != null && query.CompareLowHigh(root.Span) <= 0)
                 {
-                    if (root.Left != null)
+                    if (root.Left != null && root.Left.Span != null && query.CompareLowHigh(root.Left.Span) <= 0)
                         stack[i++] = root.Left;
                     if (root.Right != null)
                         stack[i++] = root.Right;
@@ -1862,7 +1839,7 @@ namespace C5.intervals
                             Text = String.Format("Inc: {0} - Ex: {1}", e.Vertex.IncludedList == null ? "Ø" : e.Vertex.IncludedList.ToString(), e.Vertex.ExcludedList == null ? "Ø" : e.Vertex.ExcludedList.ToString())
                         });
 
-                        //*
+                        /*
                         cell.Cells.Add(new GraphvizRecordCell
                         {
                             Text = String.Format("dAt: {0}, dAfter: {1}, Sum: {2}, Max: {3}", e.Vertex.DeltaAt, e.Vertex.DeltaAfter, e.Vertex.Sum, e.Vertex.Max)
@@ -1879,8 +1856,13 @@ namespace C5.intervals
                     {
                         Value = !e.Edge.Target.Dummy
                             ? ((e.Edge.Target.Balance > 0 ? "+" : "") + e.Edge.Target.Balance)
-                            : ""
+                            : "",
                     };
+
+#if DEBUG
+                    if (e.Edge.Target.Visit == _visit)
+                        e.EdgeFormatter.Style = GraphvizEdgeStyle.Dashed;
+#endif
                 };
 
 
