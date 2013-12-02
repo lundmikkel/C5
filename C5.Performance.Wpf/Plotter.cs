@@ -56,7 +56,7 @@ namespace C5.Performance.Wpf
             var valueAxis = logarithmicXAxis ? (Axis)new LogarithmicAxis() : new LinearAxis();
             valueAxis.Position = AxisPosition.Left;
             valueAxis.AxisTitleDistance = 10;
-            valueAxis.Title = "Execution Time in seconds";
+            valueAxis.Title = "Execution Time in nanoseconds";
             valueAxis.MajorGridlineStyle = LineStyle.Solid;
             valueAxis.MinorGridlineStyle = LineStyle.Dot;
             
@@ -85,9 +85,9 @@ namespace C5.Performance.Wpf
             if (areaSeries != null)
             {
                 areaSeries.Points.Add(new DataPoint(benchmark.CollectionSize,
-                    (benchmark.MeanTime + benchmark.StandardDeviation) / 10e8));
+                    (benchmark.MeanTime + benchmark.StandardDeviation)));
                 areaSeries.Points2.Add(new DataPoint(benchmark.CollectionSize,
-                    (benchmark.MeanTime - benchmark.StandardDeviation)/ 10e8));
+                    (benchmark.MeanTime - benchmark.StandardDeviation)));
             }
             PlotModel.RefreshPlot(true);
 

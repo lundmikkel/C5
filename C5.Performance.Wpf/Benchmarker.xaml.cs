@@ -3,7 +3,6 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
 using C5.Performance.Wpf.Benchmarks;
-using C5.UserGuideExamples.intervals;
 using Microsoft.Win32;
 
 namespace C5.Performance.Wpf
@@ -22,10 +21,10 @@ namespace C5.Performance.Wpf
         internal int MaxIterations;
         // Every time we benchmark we count this up in order to get a new color for every benchmark
         private int _lineSeriesIndex;
-        private int _maxCount = Int32.MaxValue / 10;
-        private int _repeats = StandardRepeats;
+        private int _maxCount = Int32.MaxValue / 1000;
+        private int _repeats = 1;
         private bool _runSequential;
-        private bool _runWarmups = true;
+        private bool _runWarmups = false;
 
         // These are the benchmarks that will be run by the benchmarker.
         private static Benchmarkable[] Benchmarks
@@ -34,7 +33,8 @@ namespace C5.Performance.Wpf
             {
                 return new Benchmarkable[]
                 {
-                    new IbsAvlIntervalSetsBenchmarker(), 
+                    new IBSSearchBenchmark(), 
+                    new DITSearchBenchmark(), 
                 };
             }
         }
@@ -54,8 +54,6 @@ namespace C5.Performance.Wpf
         private void benchmarkStart(object sender, RoutedEventArgs e)
         {
             runSequentialCheckBox.IsEnabled = false;
-            CheckBox_Checked_RunQuick(null, null);
-            CheckBox_Unchecked_RunWarmups(null, null);
 
             // This benchmark is the one we use to compare with Sestoft's cmd line version of the tool
             var thread = _runSequential
