@@ -296,16 +296,7 @@ namespace C5.intervals
         #region Span
 
         /// <inheritdoc/>
-        public IInterval<T> Span
-        {
-            get
-            {
-                if (_span == null)
-                    throw new InvalidOperationException("An empty collection has no span");
-
-                return _span;
-            }
-        }
+        public IInterval<T> Span { get { return _span; } }
 
         #endregion
 

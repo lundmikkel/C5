@@ -170,7 +170,7 @@ namespace C5
         {
             get
             {
-                Contract.EnsuresOnThrow<InvalidOperationException>(IsEmpty);
+                Contract.Requires(!IsEmpty, "An empty collection has no span.");
 
                 // Span is not null
                 Contract.Ensures(Contract.Result<IInterval<T>>() != null);

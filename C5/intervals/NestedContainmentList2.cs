@@ -183,17 +183,7 @@ namespace C5.intervals
         #region IIntervaled
 
         /// <inheritdoc/>
-        public IInterval<T> Span
-        {
-            get
-            {
-                // TODO: Use a better exception? Return null for empty collection?
-                if (IsEmpty)
-                    throw new InvalidOperationException("An empty collection has no span");
-
-                return _span;
-            }
-        }
+        public IInterval<T> Span { get { return _span; } }
 
         /// <inheritdoc/>
         public int MaximumOverlap

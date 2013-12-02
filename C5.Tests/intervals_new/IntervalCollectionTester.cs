@@ -499,7 +499,23 @@ namespace C5.Tests.intervals_new
         [ExpectedException(typeof(InvalidOperationException))]
         public void Span_EmptyCollection_Exception()
         {
-            var span = CreateEmptyCollection<Interval, int>().Span;
+            const string contractExceptionName = "System.Diagnostics.Contracts.__ContractsRuntime+ContractException";
+            var collection = CreateEmptyCollection<IInterval<int>, int>();
+
+            try
+            {
+                var span = CreateEmptyCollection<Interval, int>().Span;
+            }
+            catch (Exception e)
+            {
+                if (e.GetType().FullName != contractExceptionName)
+                    throw;
+
+                Assert.Pass();
+                return;
+            }
+
+            Assert.Fail();
         }
 
         [Test]

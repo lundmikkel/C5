@@ -1189,17 +1189,7 @@ namespace C5.intervals
         #region Properties
 
         /// <inheritdoc/>
-        public IInterval<T> Span
-        {
-            get
-            {
-                if (IsEmpty)
-                    throw new InvalidOperationException("An empty collection has no span");
-
-                // Return copy so users can't change object
-                return new IntervalBase<T>(_root.Span);
-            }
-        }
+        public IInterval<T> Span { get { return new IntervalBase<T>(_root.Span); } }
 
         /// <inheritdoc/>
         public int MaximumOverlap

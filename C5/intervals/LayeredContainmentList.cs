@@ -27,7 +27,7 @@ namespace C5.intervals
         private readonly I[][] _intervalLayers;
         private readonly int[][] _pointerLayers;
 
-        private IInterval<T> _span;
+        private readonly IInterval<T> _span;
 
         // MNO
         private int _maximumNumberOfOverlaps = -1;
@@ -163,6 +163,9 @@ namespace C5.intervals
                 _pointerLayers[i][count] = previousCount;
                 previousCount = count;
             }
+
+            // Cache span value
+            _span = new IntervalBase<T>(_intervalLayers.First().First(), _intervalLayers.First()[_firstLayerCount - 1]);
         }
 
         private static ArrayList<ArrayList<Node>> generateLayers(ref I[] intervals)
@@ -387,25 +390,8 @@ namespace C5.intervals
 
         #region Properties
 
-        #region Span
-
         /// <inheritdoc/>
-        public IInterval<T> Span
-        {
-            get
-            {
-                if (IsEmpty)
-                    throw new InvalidOperationException("An empty collection has no span");
-
-                // Cache value for later requests
-                if (_span == null)
-                    _span = new IntervalBase<T>(_intervalLayers.First().First(), _intervalLayers.First()[_firstLayerCount - 1]);
-
-                return _span;
-            }
-        }
-
-        #endregion
+        public IInterval<T> Span { get { return _span; } }
 
         #region MNO
 

@@ -921,9 +921,6 @@ namespace C5.intervals
         {
             get
             {
-                if (_root == null)
-                    throw new InvalidOperationException("An empty collection has no span");
-
                 return new IntervalBase<T>(getLowest(_root), getHighest(_root));
             }
         }
