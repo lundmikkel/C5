@@ -12,14 +12,15 @@ namespace C5.Performance.Wpf.Benchmarks
 
         private int intervalSearch(int intervalId)
         {
-            if (intervalId < CollectionSize)
-                return _intervalCollection.FindOverlapsIterative(_intervals[intervalId]).Count() > 0 ? 1 : 0;
-            return _intervalCollection.FindOverlapsIterative(_intervalsNot[intervalId - CollectionSize]).Count() > 0 ? 1 : 0;
+            return -1;
+//            if (intervalId < CollectionSize)
+//                return _intervalCollection.FindOverlapsIterative(_intervals[intervalId]).Count() > 0 ? 1 : 0;
+//            return _intervalCollection.FindOverlapsIterative(_intervalsNot[intervalId - CollectionSize]).Count() > 0 ? 1 : 0;
         }
 
         public override void CollectionSetup()
         {
-            _intervals = BenchmarkTestCases.DataSetB(CollectionSize);
+            _intervals = BenchmarkTestCases.DataSetA(CollectionSize);
             _intervalsNot = BenchmarkTestCases.DataSetNotA(CollectionSize);
             _intervalCollection = new DynamicIntervalTree<IInterval<int>, int>(_intervals);
 
@@ -42,7 +43,7 @@ namespace C5.Performance.Wpf.Benchmarks
 
         public override string BenchMarkName()
         {
-            return "DIT Iterative Search";
+            return "DIT Iterative Search - Only works on special branch!";
         }
     }
 }
