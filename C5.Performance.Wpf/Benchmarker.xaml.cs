@@ -54,6 +54,8 @@ namespace C5.Performance.Wpf
         private void benchmarkStart(object sender, RoutedEventArgs e)
         {
             runSequentialCheckBox.IsEnabled = false;
+            CheckBox_Checked_RunQuick(null, null);
+            CheckBox_Unchecked_RunWarmups(null, null);
 
             // This benchmark is the one we use to compare with Sestoft's cmd line version of the tool
             var thread = _runSequential
