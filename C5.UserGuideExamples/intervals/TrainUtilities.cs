@@ -19,7 +19,7 @@ namespace C5.UserGuideExamples.intervals
         public static Trains.TrainRide[] GetTrains(int numberOfTrainsToGet)
         {
             // Return the trains with ressources - number of trains 21998
-//            return Trains.ParseDataSetA().SelectMany(col => col).Take(numberOfTrainsToGet).ToArray();
+            return Trains.ParseDataSetA().SelectMany(col => col).Take(numberOfTrainsToGet).ToArray();
             
             // Return the trains without ressources - number of trains 31156
             return Trains.ParseDataSetB().Take(numberOfTrainsToGet).ToArray();
@@ -105,7 +105,7 @@ namespace C5.UserGuideExamples.intervals
                                       tr.Overlaps(trainRide)
                                 );
                     if (collision.Any())
-                        Console.Out.WriteLine("{0} Possible collision detected on track {1}, with train(s) {2} & {3}.",
+                        Console.Out.WriteLine("{0} collision(s) detected on track {1}, between train {2} & {3}.",
                             collision.Count(), trainRide.Track,
                             trainRide.Train,
                             String.Join(",", collision.Select(tr => tr.Train).ToArray()));

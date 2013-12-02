@@ -342,8 +342,12 @@ namespace C5.Tests.intervals_new
                 CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
             }
 
+            #endregion
+
+            #region Range
+
             [Test]
-            public void FindOverlapsQuery_IsEmpty()
+            public void FindOverlapsRange_IsEmpty()
             {
                 var inputDataSet = _createIBS(Ø);
                 var inputContents = new IntervalBase<int>(1, 2);
@@ -351,7 +355,7 @@ namespace C5.Tests.intervals_new
             }
 
             [Test]
-            public void FindOverlapsQuery_NotSpanOverlaps()
+            public void FindOverlapsRange_NotSpanOverlaps()
             {
                 var inputDataSet = _createIBS(A);
                 var inputContents = new IntervalBase<int>(3, 4);
@@ -359,7 +363,7 @@ namespace C5.Tests.intervals_new
             }
 
             [Test]
-            public void FindOverlapsQuery_NoSplitNode()
+            public void FindOverlapsRange_NoSplitNode()
             {
                 var inputDataSet = _createIBS(G);
                 var inputContents = new IntervalBase<int>(1, 3, false, true);
@@ -367,7 +371,7 @@ namespace C5.Tests.intervals_new
             }
 
             [Test]
-            public void FindOverlapsQuery_SpanOverlaps()
+            public void FindOverlapsRange_SpanOverlaps()
             {
                 var inputDataSet = _createIBS(A);
                 var inputContents = new IntervalBase<int>(1, 2);
@@ -377,7 +381,7 @@ namespace C5.Tests.intervals_new
 
 
             [Test]
-            public void FindOverlapsQuery_SpanMultipleOverlaps()
+            public void FindOverlapsRange_SpanMultipleOverlaps()
             {
                 var inputDataSet = _createIBS(C);
                 var inputContents = new IntervalBase<int>(1, 5);
@@ -386,19 +390,19 @@ namespace C5.Tests.intervals_new
             }
 
             [Test]
-            public void FindOverlapsQuery_RootEqualIsEmpty()
+            public void FindOverlapsRange_RootEqualIsEmpty()
             {
                 var inputDataSet = _createIBS(B);
                 var interval = new IntervalBase<int>(5, 5, true, true);
                 inputDataSet.Add(interval);
                 inputDataSet.Remove(interval);
                 var inputContents = new IntervalBase<int>(4, 5, false, true);
-                var result = new[] {B.Last()};
-                CollectionAssert.AreEquivalent(result,inputDataSet.FindOverlaps(inputContents));
+                var result = new[] { B.Last() };
+                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
             }
 
             [Test]
-            public void FindOverlapsQuery_RootLessIsEmpty()
+            public void FindOverlapsRange_RootLessIsEmpty()
             {
                 var inputDataSet = _createIBS(B);
                 var interval = new IntervalBase<int>(5, 5, true, true);
@@ -407,12 +411,12 @@ namespace C5.Tests.intervals_new
                 inputDataSet.Add(interval2);
                 inputDataSet.Remove(inputDataSet.Filter(i => i.Low.Equals(3)).First());
                 var inputContents = new IntervalBase<int>(4, 5, false, true);
-                var result = new[] { interval,interval2 };
+                var result = new[] { interval, interval2 };
                 CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
             }
 
             [Test]
-            public void FindOverlapsQuery_RootLessIsEmpty2()
+            public void FindOverlapsRange_RootLessIsEmpty2()
             {
                 var inputDataSet = _createIBS(B);
                 var interval = new IntervalBase<int>(5, 5, true, true);
@@ -423,7 +427,7 @@ namespace C5.Tests.intervals_new
             }
 
             [Test]
-            public void FindOverlapsQuery_RootEqualIsEmpty2()
+            public void FindOverlapsRange_RootEqualIsEmpty2()
             {
                 var inputDataSet = _createIBS(B);
                 var interval = new IntervalBase<int>(3, 5);
@@ -435,7 +439,7 @@ namespace C5.Tests.intervals_new
 
 
             [Test]
-            public void FindOverlapsQuery_RootEqualIsEmpty3()
+            public void FindOverlapsRange_RootEqualIsEmpty3()
             {
                 var inputDataSet = _createIBS(B);
                 var inputContents = new IntervalBase<int>(2, 4, true, true);
@@ -444,7 +448,7 @@ namespace C5.Tests.intervals_new
             }
 
             [Test]
-            public void FindOverlapsQuery_RootGreaterIsNotEmpty()
+            public void FindOverlapsRange_RootGreaterIsNotEmpty()
             {
                 var inputDataSet = _createIBS(B);
                 var inputContents = new IntervalBase<int>(1, 1, true, true);
@@ -453,7 +457,7 @@ namespace C5.Tests.intervals_new
             }
 
             [Test]
-            public void FindOverlapsQuery_RootGreaterIsNotEmpty2()
+            public void FindOverlapsRange_RootGreaterIsNotEmpty2()
             {
                 var inputDataSet = _createIBS(B);
                 var interval = new IntervalBase<int>(1, 3, false);
@@ -464,7 +468,7 @@ namespace C5.Tests.intervals_new
             }
 
             [Test]
-            public void FindOverlapsQuery_RootGreaterIsEmpty()
+            public void FindOverlapsRange_RootGreaterIsEmpty()
             {
                 var inputDataSet = _createIBS(B);
                 var interval = new IntervalBase<int>(1, 1, true, true);
@@ -475,7 +479,7 @@ namespace C5.Tests.intervals_new
             }
 
             [Test]
-            public void FindOverlapsQuery_RootGreaterIsEmpty2()
+            public void FindOverlapsRange_RootGreaterIsEmpty2()
             {
                 var inputDataSet = _createIBS(B);
                 var interval = new IntervalBase<int>(1, 1, true, true);
@@ -487,7 +491,7 @@ namespace C5.Tests.intervals_new
             }
 
             [Test]
-            public void FindOverlapsQuery_RootGreaterOneIteration()
+            public void FindOverlapsRange_RootGreaterOneIteration()
             {
                 var inputDataSet = _createIBS(B);
                 var inputContents = new IntervalBase<int>(2, 2, true, true);
@@ -496,7 +500,7 @@ namespace C5.Tests.intervals_new
             }
 
             [Test]
-            public void FindOverlapsQuery_RootGreaterManyIterations()
+            public void FindOverlapsRange_RootGreaterManyIterations()
             {
                 var inputDataSet = _createIBS(B);
                 var interval = new IntervalBase<int>(1, 3, false);
@@ -507,15 +511,15 @@ namespace C5.Tests.intervals_new
             }
 
             [Test]
-            public void FindOverlapsQuery_QueryLow()
+            public void FindOverlapsRange_RangeLow()
             {
                 var inputDataSet = _createIBS(F);
                 var inputContents = new IntervalBase<int>(1, 7, true, true);
-                CollectionAssert.AreEquivalent(inputDataSet,inputDataSet.FindOverlaps(inputContents));
+                CollectionAssert.AreEquivalent(inputDataSet, inputDataSet.FindOverlaps(inputContents));
             }
 
             [Test]
-            public void FindOverlapsQuery_QueryLow2()
+            public void FindOverlapsRange_RangeLow2()
             {
                 var inputDataSet = _createIBS(B);
                 var inputContents = new IntervalBase<int>(1, 3);
@@ -524,17 +528,17 @@ namespace C5.Tests.intervals_new
             }
 
             [Test]
-            public void FindOverlapsQuery_QueryLow3()
+            public void FindOverlapsRange_RangeLow3()
             {
-                var inputDataSet = _createIBS(B);                
+                var inputDataSet = _createIBS(B);
                 inputDataSet.Remove(inputDataSet.First());
                 var inputContents = new IntervalBase<int>(2, 4);
-                var result = new[] {B.Last()};
-                CollectionAssert.AreEquivalent(result,inputDataSet.FindOverlaps(inputContents));
+                var result = new[] { B.Last() };
+                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
             }
-            
+
             [Test]
-            public void FindOverlapsQuery_SplitRightOnce()
+            public void FindOverlapsRange_SplitRightOnce()
             {
                 var inputDataSet = _createIBS(F);
                 var inputContents = new IntervalBase<int>(5, 7, false);
@@ -542,9 +546,7 @@ namespace C5.Tests.intervals_new
                 CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
             }
 
-            #endregion
 
-            #region Range
             #endregion
 
             #endregion
