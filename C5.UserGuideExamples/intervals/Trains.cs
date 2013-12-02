@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using C5.intervals;
@@ -12,20 +11,20 @@ namespace C5.UserGuideExamples.intervals
         public static void Main(string[] args)
         {
             Console.Out.WriteLine(train());
-            var trains = ParseDataSetA().SelectMany(c => c).ToArray();
+            var trains = ParseTrainSetA().SelectMany(c => c).ToArray();
             Console.Out.WriteLine("Found {0} trains in the data file.",trains.Count());
             var inbetweenTrains = TrainUtilities.FindInbetweenTrains(trains);
             Console.Out.WriteLine("Found {0} trains to put inbetween the existing trains.",inbetweenTrains.Count());
             Console.Out.WriteLine("Press any key to check for collisions...");
             Console.ReadLine();
             var trainz = new ArrayList<TrainRide>();
-            trainz.AddAll(ParseDataSetA().SelectMany(c => c).ToArray());
+            trainz.AddAll(ParseTrainSetA().SelectMany(c => c).ToArray());
             TrainUtilities.PrintTrainStatistics(trainz);
             Console.Out.WriteLine("Press any key to exit.");
             Console.Read();
         }
 
-        public static ArrayList<TrainRide>[] ParseDataSetA()
+        public static ArrayList<TrainRide>[] ParseTrainSetA()
         {
             const string filepath = @"../../../C5.UserGuideExamples/intervals/data/train.csv";
 
@@ -62,7 +61,7 @@ namespace C5.UserGuideExamples.intervals
             return resources;
         }
 
-        public static ArrayList<TrainRide> ParseDataSetB()
+        public static ArrayList<TrainRide> ParseTrainSetB()
         {
             const string filepath = @"../../../C5.UserGuideExamples/intervals/data/trainsWithoutRessources.csv";
 

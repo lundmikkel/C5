@@ -158,6 +158,10 @@
     </ApplicationDefinition>
     <Compile Include="Benchmarks\Benchmark.cs" />
     <Compile Include="Benchmarks\Benchmarkable.cs" />
+    <Compile Include="Benchmarks\IBSSearchBenchmark.cs" />
+    <Compile Include="Benchmarks\DITSearchIterativeBenchmark.cs" />
+    <Compile Include="Benchmarks\DITSearchRecursiveBenchmark.cs" />
+    <Compile Include="Benchmarks\DITSearchBenchmark.cs" />
     <Compile Include="Benchmarks\DITTrainSearchRecursiveBenchmark.cs" />
     <Compile Include="Benchmarks\DITTrainSearchIterativeBenchmark.cs" />
     <Compile Include="Benchmarks\IBSTrainRemoveBenchmark.cs" />

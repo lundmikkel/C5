@@ -8,8 +8,8 @@ namespace C5.UserGuideExamples.intervals
     // Helper class used by some of the train benchmarks
     public class TrainUtilities
     {
-        public const int DataSetACount = 21998;
-        public const int DataSetBCount = 31156;
+        public const int TrainSetACount = 21998;
+        public const int TrainSetBCount = 31156;
 
         /// <summary>
         /// This method decides which train data gets used when running the train benchmarks.
@@ -19,10 +19,10 @@ namespace C5.UserGuideExamples.intervals
         public static Trains.TrainRide[] GetTrains(int numberOfTrainsToGet)
         {
             // Return the trains with ressources - number of trains 21998
-            return Trains.ParseDataSetA().SelectMany(col => col).Take(numberOfTrainsToGet).ToArray();
+            return Trains.ParseTrainSetA().SelectMany(col => col).Take(numberOfTrainsToGet).ToArray();
             
             // Return the trains without ressources - number of trains 31156
-            return Trains.ParseDataSetB().Take(numberOfTrainsToGet).ToArray();
+            return Trains.ParseTrainSetB().Take(numberOfTrainsToGet).ToArray();
         }
 
         public static IEnumerable<InBetweenTrainRide> FindInbetweenTrains(IEnumerable<Trains.TrainRide> resources)
