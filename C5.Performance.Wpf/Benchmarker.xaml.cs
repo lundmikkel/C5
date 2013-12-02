@@ -35,6 +35,7 @@ namespace C5.Performance.Wpf
                 return new Benchmarkable[]
                 {
                     new IbsAvlIntervalSetsBenchmarker(), 
+                    new IbsAvlOldIntervalSetsBenchmarker(), 
                 };
             }
         }
@@ -178,7 +179,7 @@ namespace C5.Performance.Wpf
             _repeats = StandardRepeats;
             _maxCount = Int32.MaxValue / 10;
         }
-        
+
         private void CheckBox_Checked_LogarithmicXAxis(object sender, RoutedEventArgs e)
         {
             _plotter.ToggleLogarithmicAxis(true);

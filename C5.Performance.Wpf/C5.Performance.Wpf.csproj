@@ -158,6 +158,7 @@
     </ApplicationDefinition>
     <Compile Include="Benchmarks\Benchmark.cs" />
     <Compile Include="Benchmarks\Benchmarkable.cs" />
+    <Compile Include="Benchmarks\IbsAvlOldIntervalSetsBenchmarker.cs" />
     <Compile Include="Benchmarks\DITSearchBenchmark.cs" />
     <Compile Include="Benchmarks\DITSearchIterativeBenchmark.cs" />
     <Compile Include="Benchmarks\DITSearchRecursiveBenchmark.cs" />
