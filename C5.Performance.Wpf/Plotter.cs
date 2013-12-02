@@ -44,22 +44,22 @@ namespace C5.Performance.Wpf
             PlotModel.LegendBorder = OxyColors.Black;
             PlotModel.LegendPlacement = LegendPlacement.Inside;
 
-            var sizeAxis = new LinearAxis(AxisPosition.Bottom)
-            {
-                AxisTitleDistance = 10,
-                Title = "Collection Size",
-                MajorGridlineStyle = LineStyle.Solid,
-                MinorGridlineStyle = LineStyle.Dot
-            };
+            var sizeAxis = logarithmicXAxis ? (Axis) new LogarithmicAxis(AxisPosition.Bottom) : new LinearAxis(AxisPosition.Bottom);
+            sizeAxis.AxisTitleDistance = 10;
+            sizeAxis.Title = "Collection Size";
+            sizeAxis.MajorGridlineStyle = LineStyle.Solid;
+            sizeAxis.MinorGridlineStyle = LineStyle.Dot;
 
             // Comment in the line with the axis you want
-            var valueAxis = logarithmicXAxis ? (Axis)new LogarithmicAxis() : new LinearAxis();
-            valueAxis.Position = AxisPosition.Left;
-            valueAxis.AxisTitleDistance = 10;
-            valueAxis.Title = "Execution Time in seconds";
-            valueAxis.MajorGridlineStyle = LineStyle.Solid;
-            valueAxis.MinorGridlineStyle = LineStyle.Dot;
-            
+            var valueAxis = new LinearAxis
+                {
+                    Position = AxisPosition.Left,
+                    AxisTitleDistance = 10,
+                    Title = "Execution Time in seconds",
+                    MajorGridlineStyle = LineStyle.Solid,
+                    MinorGridlineStyle = LineStyle.Dot
+                };
+
             sizeAxis.AbsoluteMinimum = 0;
             valueAxis.AbsoluteMinimum = 0;
 
@@ -87,7 +87,7 @@ namespace C5.Performance.Wpf
                 areaSeries.Points.Add(new DataPoint(benchmark.CollectionSize,
                     (benchmark.MeanTime + benchmark.StandardDeviation) / 10e8));
                 areaSeries.Points2.Add(new DataPoint(benchmark.CollectionSize,
-                    (benchmark.MeanTime - benchmark.StandardDeviation)/ 10e8));
+                    (benchmark.MeanTime - benchmark.StandardDeviation) / 10e8));
             }
             PlotModel.RefreshPlot(true);
 
