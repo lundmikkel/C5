@@ -13,8 +13,8 @@ namespace C5.Performance.Wpf
     {
         #region Benchmark setup
         // Parameters for running the benchmarks
-        private const int MinCollectionSize = 1600;
-        private const int MaxCollectionSize = TrainUtilities.TrainSetACount;
+        private const int MinCollectionSize = 100;
+        private const int MaxCollectionSize = 102401;//TrainUtilities.TrainSetACount;
         private const int CollectionMultiplier = 2;
         private const int StandardRepeats = 10;
         private const double MaxExecutionTimeInSeconds = 0.25;
@@ -34,19 +34,7 @@ namespace C5.Performance.Wpf
             {
                 return new Benchmarkable[]
                 {
-//                    new DITSearchRecursiveBenchmark(), 
-//                    new DITSearchIterativeBenchmark(), 
-//                    new DITSearchBenchmark(), 
-//                    new IBSSearchBenchmark(), 
-//                    new DITTrainConstructBenchmark(), 
-//                    new DITTrainRemoveBenchmark(), 
-//                    new DITTrainSearchRecursiveBenchmark(), 
-//                    new DITTrainSearchBenchmark(), 
-                    new DITTrainSearchSelectiveBenchmark(),
-                    new DITTrainSearchBenchmark(), 
-//                    new IBSTrainConstructBenchmark(), 
-//                    new IBSTrainRemoveBenchmark(), 
-//                    new IBSTrainSearchBenchmark(), 
+                    new IbsAvlIntervalSetsBenchmarker(), 
                 };
             }
         }
@@ -66,7 +54,6 @@ namespace C5.Performance.Wpf
         private void benchmarkStart(object sender, RoutedEventArgs e)
         {
             runSequentialCheckBox.IsEnabled = false;
-            logarithmicXAxisCheckBox.IsEnabled = false;
 
             // This benchmark is the one we use to compare with Sestoft's cmd line version of the tool
             var thread = _runSequential
