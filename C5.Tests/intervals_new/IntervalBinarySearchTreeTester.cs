@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
 using C5.intervals;
 using NUnit.Framework;
@@ -463,8 +464,8 @@ namespace C5.Tests.intervals_new
                 var interval = new IntervalBase<int>(1, 3, false);
                 inputDataSet.Add(interval);
                 var inputContents = new IntervalBase<int>(1, 1, true, true);
-                var result = new[] { inputDataSet.First() };
-                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
+                var expected = inputDataSet.Where(x => x.Overlaps(inputContents));
+                CollectionAssert.AreEquivalent(expected, inputDataSet.FindOverlaps(inputContents));
             }
 
             [Test]

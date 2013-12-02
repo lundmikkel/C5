@@ -460,25 +460,6 @@ namespace C5.intervals
 
             #region Public Methods
 
-            [Pure]
-            public IEnumerable<I> Intervals
-            {
-                get
-                {
-                    if (Less != null && !Less.IsEmpty)
-                        foreach (var interval in Less)
-                            yield return interval;
-
-                    if (Equal != null && !Equal.IsEmpty)
-                        foreach (var interval in Equal)
-                            yield return interval;
-
-                    if (Greater != null && !Greater.IsEmpty)
-                        foreach (var interval in Greater)
-                            yield return interval;
-                }
-            }
-
             /// <summary>
             /// Update the maximum overlap value for the node.
             /// </summary>
@@ -1033,7 +1014,7 @@ namespace C5.intervals
         /// <returns>An enumerable of intervals</returns>
         private static IEnumerable<I> intervals(Node root)
         {
-            return nodes(root).SelectMany(node => node.Intervals);
+            return nodes(root).SelectMany(node => node.IntervalsEndingInNode);
         }
 
         [Pure]
