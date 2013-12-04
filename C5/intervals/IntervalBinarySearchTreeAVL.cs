@@ -1087,10 +1087,8 @@ namespace C5.intervals
 
             if (root.Equal != null && !root.Equal.IsEmpty)
                 return root.Equal.Choose();
-            if (root.Greater != null && !root.Greater.IsEmpty)
-                return root.Greater.Choose();
 
-            return root.IntervalsEndingInNode.First();
+            return root.IntervalsEndingInNode.Choose();
         }
 
         private static IInterval<T> highestHigh(Node root)
@@ -1102,9 +1100,8 @@ namespace C5.intervals
 
             if (root.Equal != null && !root.Equal.IsEmpty)
                 return root.Equal.Choose();
-            if (root.Less != null && !root.Less.IsEmpty)
-                return root.Less.Choose();
-            return root.IntervalsEndingInNode.First();
+
+            return root.IntervalsEndingInNode.Choose();
         }
 
         #endregion
