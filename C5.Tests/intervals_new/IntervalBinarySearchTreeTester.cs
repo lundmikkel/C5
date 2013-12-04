@@ -10,7 +10,7 @@ namespace C5.Tests.intervals_new
     {
         #region Black-box
 
-        class IntervalBinarySearchTreeTester_BlackBox : IntervalCollectionTester
+        abstract class IntervalBinarySearchTreeTester_BlackBox : IntervalCollectionTester
         {
             protected override Type GetCollectionType()
             {
@@ -25,6 +25,22 @@ namespace C5.Tests.intervals_new
             protected override bool AllowsReferenceDuplicates()
             {
                 return false;
+            }
+        }
+
+        class IntervalBinarySearchTreeTesterPreConstruct_BlackBox : IntervalBinarySearchTreeTester_BlackBox
+        {
+            protected override object[] AdditionalParameters()
+            {
+                return new object[] { true };
+            }
+        }
+
+        class IntervalBinarySearchTreeTesterRegular_BlackBox : IntervalBinarySearchTreeTester_BlackBox
+        {
+            protected override object[] AdditionalParameters()
+            {
+                return new object[] { false };
             }
         }
 

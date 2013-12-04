@@ -887,13 +887,15 @@ namespace C5.intervals
         /// Create an Interval Binary Search Tree with a collection of intervals.
         /// </summary>
         /// <param name="intervals">The collection of intervals.</param>
-        public IntervalBinarySearchTreeAvl(IEnumerable<I> intervals)
+        /// <param name="preconstructTree">True if a balanced tree structure should be preconstructed, before inserting the intervals.</param>
+        public IntervalBinarySearchTreeAvl(IEnumerable<I> intervals, bool preconstructTree = true)
         {
             Contract.Requires(intervals != null);
 
             var intervalArray = intervals as I[] ?? intervals.ToArray();
 
-            preconstructNodeStructure(intervalArray);
+            if (preconstructTree)
+                preconstructNodeStructure(intervalArray);
 
             foreach (var interval in intervalArray)
                 Add(interval);
@@ -999,11 +1001,16 @@ namespace C5.intervals
         #region Enumerable
 
         /// <inheritdoc/>
-        public override IEnumerator<I> GetEnumerator()
+        public override IEnumerator<I>
+            GetEnumerator()
         {
             var set = new IntervalSet();
 
-            return intervals(_root).Where(set.Add).GetEnumerator();
+            // TODO: Is Linq version lazy?
+
+            foreach (var interval in intervals(_root))
+                if (set.Add(interval))
+                    yield return interval;
         }
 
         /// <summary>
@@ -1014,6 +1021,7 @@ namespace C5.intervals
         /// <returns>An enumerable of intervals</returns>
         private static IEnumerable<I> intervals(Node root)
         {
+            // TODO: Is this lazy?
             return nodes(root).SelectMany(node => node.IntervalsEndingInNode);
         }
 
@@ -1559,7 +1567,9 @@ namespace C5.intervals
                 {
                     if (root.Greater == null)
                         root.Greater = new IntervalSet();
-                    intervalWasAdded |= root.Greater.Add(interval);
+
+                    if (!(intervalWasAdded |= root.Greater.Add(interval)))
+                        return root;
                 }
 
                 // root key is between interval.low and interval.high
@@ -1568,7 +1578,8 @@ namespace C5.intervals
                     if (root.Equal == null)
                         root.Equal = new IntervalSet();
 
-                    intervalWasAdded |= root.Equal.Add(interval);
+                    if (!(intervalWasAdded |= root.Equal.Add(interval)))
+                        return root;
                 }
 
                 root.Left = addLow(interval, root.Left, root, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
@@ -1585,7 +1596,8 @@ namespace C5.intervals
                     if (root.Greater == null)
                         root.Greater = new IntervalSet();
 
-                    intervalWasAdded |= root.Greater.Add(interval);
+                    if (!(intervalWasAdded |= root.Greater.Add(interval)))
+                        return root;
                 }
 
                 if (interval.LowIncluded)
@@ -1593,7 +1605,8 @@ namespace C5.intervals
                     if (root.Equal == null)
                         root.Equal = new IntervalSet();
 
-                    intervalWasAdded |= root.Equal.Add(interval);
+                    if (!(intervalWasAdded |= root.Equal.Add(interval)))
+                        return root;
                 }
 
                 // Save reference to endpoint node
@@ -1647,7 +1660,8 @@ namespace C5.intervals
                     if (root.Less == null)
                         root.Less = new IntervalSet();
 
-                    intervalWasAdded |= root.Less.Add(interval);
+                    if (!(intervalWasAdded |= root.Less.Add(interval)))
+                        return root;
                 }
 
                 // root key is between interval.low and interval.high
@@ -1656,7 +1670,8 @@ namespace C5.intervals
                     if (root.Equal == null)
                         root.Equal = new IntervalSet();
 
-                    intervalWasAdded |= root.Equal.Add(interval);
+                    if (!(intervalWasAdded |= root.Equal.Add(interval)))
+                        return root;
                 }
 
                 root.Right = addHigh(interval, root.Right, root, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
@@ -1673,7 +1688,8 @@ namespace C5.intervals
                     if (root.Less == null)
                         root.Less = new IntervalSet();
 
-                    intervalWasAdded |= root.Less.Add(interval);
+                    if (!(intervalWasAdded |= root.Less.Add(interval)))
+                        return root;
                 }
 
                 if (interval.HighIncluded)
@@ -1681,7 +1697,8 @@ namespace C5.intervals
                     if (root.Equal == null)
                         root.Equal = new IntervalSet();
 
-                    intervalWasAdded |= root.Equal.Add(interval);
+                    if (!(intervalWasAdded |= root.Equal.Add(interval)))
+                        return root;
                 }
 
                 // Save reference to endpoint node
