@@ -896,18 +896,18 @@ namespace C5.intervals
         {
             var set = new IntervalSet();
 
-            var enumerator = getEnumerator(_root);
-            while (enumerator.MoveNext())
-                set.Add(enumerator.Current);
+            if (_root != null)
+            {
+                var enumerator = getEnumerator(_root);
+                while (enumerator.MoveNext())
+                    set.Add(enumerator.Current);
+            }
 
             return set.GetEnumerator();
         }
 
         private IEnumerator<I> getEnumerator(Node node)
         {
-            // Just return if tree is empty
-            if (node == null) yield break;
-
             // Recursively retrieve intervals in left subtree
             if (node.Left != null)
             {
@@ -1726,6 +1726,7 @@ namespace C5.intervals
                             return;
 
                     if (interval.HighIncluded)
+                        // TODO Remove checks
                         if (root.Equal == null || !(intervalWasRemoved |= root.Equal.Remove(interval)))
                             return;
 

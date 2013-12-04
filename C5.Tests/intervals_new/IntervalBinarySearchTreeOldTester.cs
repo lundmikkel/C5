@@ -34,7 +34,7 @@ namespace C5.Tests.intervals_new
         // TODO: Hardcode examples from articles
 
         [TestFixture]
-        class IntervalBinarySearchTreeTester_WhiteBox
+        class IntervalBinarySearchTreeOldTester_WhiteBox
         {
             #region Helpers
             // TODO: Builder pattern
@@ -310,7 +310,8 @@ namespace C5.Tests.intervals_new
                 const int inputContents = 4;
                 var result = _createIBS(C);
                 result.Remove(result.First());
-                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
+                var expected = inputDataSet.Where(x => x.Overlaps(inputContents));
+                CollectionAssert.AreEquivalent(expected, inputDataSet.FindOverlaps(inputContents));
             }
 
             [Test]
@@ -320,7 +321,8 @@ namespace C5.Tests.intervals_new
                 const int inputContents = 2;
                 var result = _createIBS(B);
                 result.Remove(result.Last());
-                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
+                var expected = inputDataSet.Where(x => x.Overlaps(inputContents));
+                CollectionAssert.AreEquivalent(expected, inputDataSet.FindOverlaps(inputContents));
             }
 
             [Test]
@@ -330,7 +332,8 @@ namespace C5.Tests.intervals_new
                 const int inputContents = 2;
                 var result = _createIBS(D);
                 result.Remove(result.Last());
-                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
+                var expected = inputDataSet.Where(x => x.Overlaps(inputContents));
+                CollectionAssert.AreEquivalent(expected, inputDataSet.FindOverlaps(inputContents));
             }
 
             [Test]
@@ -433,8 +436,8 @@ namespace C5.Tests.intervals_new
                 var interval = new IntervalBase<int>(3, 5);
                 inputDataSet.Add(interval);
                 var inputContents = new IntervalBase<int>(4, 4, true, true);
-                var result = new[] { B.Last(), interval };
-                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
+                var expected = inputDataSet.Where(x => x.Overlaps(inputContents));
+                CollectionAssert.AreEquivalent(expected, inputDataSet.FindOverlaps(inputContents));
             }
 
 
@@ -463,8 +466,8 @@ namespace C5.Tests.intervals_new
                 var interval = new IntervalBase<int>(1, 3, false);
                 inputDataSet.Add(interval);
                 var inputContents = new IntervalBase<int>(1, 1, true, true);
-                var result = new[] { inputDataSet.First() };
-                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
+                var expected = inputDataSet.Where(x => x.Overlaps(inputContents));
+                CollectionAssert.AreEquivalent(expected, inputDataSet.FindOverlaps(inputContents));
             }
 
             [Test]
@@ -533,8 +536,8 @@ namespace C5.Tests.intervals_new
                 var inputDataSet = _createIBS(B);
                 inputDataSet.Remove(inputDataSet.First());
                 var inputContents = new IntervalBase<int>(2, 4);
-                var result = new[] { B.Last() };
-                CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
+                var expected = inputDataSet.Where(x => x.Overlaps(inputContents));
+                CollectionAssert.AreEquivalent(expected, inputDataSet.FindOverlaps(inputContents));
             }
 
             [Test]
