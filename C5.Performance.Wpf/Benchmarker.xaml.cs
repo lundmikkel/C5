@@ -34,7 +34,8 @@ namespace C5.Performance.Wpf
                 return new Benchmarkable[]
                 {
                     new IbsAvlIntervalSetsBenchmarker(), 
-                    new IbsAvlOldIntervalSetsBenchmarker(),
+                    new IbsAvlIntervalSetsPrebuildBenchmarker(),
+                    //new IbsAvlOldIntervalSetsBenchmarker(),
                 };
             }
         }
