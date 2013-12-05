@@ -2,7 +2,7 @@
 using C5.Performance.Wpf.Benchmarks;
 using C5.Tests.intervals;
 
-namespace C5.Performance.Wpf.Report
+namespace C5.Performance.Wpf.Report_Benchmarks
 {
     public class IBSConstructionAllInConstructor : Benchmarkable
     {
@@ -11,20 +11,18 @@ namespace C5.Performance.Wpf.Report
 
         private int intervalSearch(int intervalId)
         {
-            _intervalCollection.AddAll(_intervals);
+            _intervalCollection = new IntervalBinarySearchTreeAvl<IInterval<int>, int>(_intervals);
             return 1;
         }
 
         public override void CollectionSetup()
         {
             _intervals = BenchmarkTestCases.DataSetA(CollectionSize);
-            _intervalCollection = new IntervalBinarySearchTreeAvl<IInterval<int>, int>();
             ItemsArray = SearchAndSort.FillIntArray(CollectionSize);
         }
 
         public override void Setup()
         {
-            _intervalCollection.Clear();
         }
 
         public override double Call(int i)

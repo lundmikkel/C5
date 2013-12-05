@@ -3,7 +3,7 @@ using C5.intervals;
 using C5.Performance.Wpf.Benchmarks;
 using C5.Tests.intervals;
 
-namespace C5.Performance.Wpf.Report
+namespace C5.Performance.Wpf.Report_Benchmarks
 {
     public class DITQueryRange : Benchmarkable
     {
@@ -15,7 +15,7 @@ namespace C5.Performance.Wpf.Report
         {
             var stabbing = intervalId < CollectionSize ? _intervals[intervalId] : _intervalsNot[intervalId - CollectionSize];
             var success = _intervalCollection.FindOverlaps(stabbing);
-            return success.Any() ? 1 : 0;
+            return success.Count();
         }
 
         public override void CollectionSetup()

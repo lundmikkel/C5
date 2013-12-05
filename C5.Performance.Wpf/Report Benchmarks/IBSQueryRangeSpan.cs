@@ -1,23 +1,25 @@
-﻿using C5.intervals;
+﻿using System.Linq;
+using C5.intervals;
 using C5.Performance.Wpf.Benchmarks;
 using C5.Tests.intervals;
 
 namespace C5.Performance.Wpf.Report_Benchmarks
 {
-    public class DITConstructionAllInConstructor : Benchmarkable
+    public class IBSQueryRangeSpan : Benchmarkable
     {
         private IInterval<int>[] _intervals;
-        private DynamicIntervalTree<IInterval<int>, int> _intervalCollection; 
+        private IntervalBinarySearchTreeAvl<IInterval<int>, int> _intervalCollection; 
 
         private int intervalSearch(int intervalId)
         {
-            _intervalCollection = new DynamicIntervalTree<IInterval<int>, int>(_intervals);
-            return 1;
+            var success = _intervalCollection.FindOverlaps(_intervalCollection.Span);
+            return success.Count();
         }
 
         public override void CollectionSetup()
         {
             _intervals = BenchmarkTestCases.DataSetA(CollectionSize);
+            _intervalCollection = new IntervalBinarySearchTreeAvl<IInterval<int>, int>(_intervals);
             ItemsArray = SearchAndSort.FillIntArray(CollectionSize);
         }
 
@@ -32,7 +34,7 @@ namespace C5.Performance.Wpf.Report_Benchmarks
 
         public override string BenchMarkName()
         {
-            return "DIT Construct Add All In Constructor";
+            return "IBS Stabbing Range Span";
         }
     }
 }

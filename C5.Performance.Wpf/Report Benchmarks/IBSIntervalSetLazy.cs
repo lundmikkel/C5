@@ -1,23 +1,24 @@
 ﻿using C5.intervals;
+using C5.Performance.Wpf.Benchmarks;
 using C5.Tests.intervals;
 
-namespace C5.Performance.Wpf.Benchmarks
+namespace C5.Performance.Wpf.Report_Benchmarks
 {
-    public class IBSIntervalSetHotspotsNew : Benchmarkable
+    public class IBSIntervalSetLazy : Benchmarkable
     {
         private IInterval<int>[] _intervals;
         private IntervalBinarySearchTreeAvl<IInterval<int>, int> _intervalCollection; 
 
         private int intervalSearch(int intervalId)
         {
-            _intervalCollection.AddAll(_intervals);
+            // TODO Do Something that shows the laze interval set creation here
             return 1;
         }
 
         public override void CollectionSetup()
         {
-            _intervals = BenchmarkTestCases.DataSetA(CollectionSize);
-            BenchmarkTestCases.DataSetNotA(CollectionSize);
+            _intervals = BenchmarkTestCases.DataSetB(CollectionSize);
+            _intervalCollection.AddAll(_intervals);
             _intervalCollection = new IntervalBinarySearchTreeAvl<IInterval<int>, int>(_intervals);
 
             /*
@@ -30,7 +31,6 @@ namespace C5.Performance.Wpf.Benchmarks
 
         public override void Setup()
         {
-            _intervalCollection.Clear();
         }
 
         public override double Call(int i)
@@ -40,7 +40,7 @@ namespace C5.Performance.Wpf.Benchmarks
 
         public override string BenchMarkName()
         {
-            return "IBS Intervalset Lazy Construction";
+            return "IBS Intervalset Lazy";
         }
     }
 }

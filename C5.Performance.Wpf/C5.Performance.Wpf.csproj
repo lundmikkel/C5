@@ -158,6 +158,8 @@
     </ApplicationDefinition>
     <Compile Include="Benchmarks\Benchmark.cs" />
     <Compile Include="Benchmarks\Benchmarkable.cs" />
+    <Compile Include="Report Benchmarks\IBSQueryRangeSpan.cs" />
+    <Compile Include="Report Benchmarks\DITQueryRangeSpan.cs" />
     <Compile Include="Report Benchmarks\IBSQueryRange.cs" />
     <Compile Include="Report Benchmarks\DITQueryRange.cs" />
     <Compile Include="Report Benchmarks\IBSQueryStabbing.cs" />
@@ -174,8 +176,8 @@
     <Compile Include="Benchmarks\DITSearchRecursiveBenchmark.cs" />
     <Compile Include="Benchmarks\DITTrainSearchSelectiveBenchmark.cs" />
     <Compile Include="Benchmarks\IbsAvlIntervalSetsBenchmarker.cs" />
-    <Compile Include="Benchmarks\IBSIntervalSetHotspotsNew.cs" />
-    <Compile Include="Benchmarks\IBSIntervalSetHotspotsOld.cs" />
+    <Compile Include="Report Benchmarks\IBSIntervalSetLazy.cs" />
+    <Compile Include="Report Benchmarks\IBSIntervalSetEager.cs" />
     <Compile Include="Benchmarks\IBSSearchBenchmark.cs" />
     <Compile Include="Benchmarks\IBSTrainRemoveBenchmark.cs" />
     <Compile Include="Benchmarks\DITTrainRemoveBenchmark.cs" />

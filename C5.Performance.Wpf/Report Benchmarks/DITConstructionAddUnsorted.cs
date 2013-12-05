@@ -2,7 +2,7 @@
 using C5.Performance.Wpf.Benchmarks;
 using C5.Tests.intervals;
 
-namespace C5.Performance.Wpf.Report
+namespace C5.Performance.Wpf.Report_Benchmarks
 {
     public class DITConstructionAddUnsorted : Benchmarkable
     {

@@ -1,23 +1,24 @@
 ﻿using C5.intervals;
+using C5.Performance.Wpf.Benchmarks;
 using C5.Tests.intervals;
 
-namespace C5.Performance.Wpf.Benchmarks
+namespace C5.Performance.Wpf.Report_Benchmarks
 {
-    public class IBSIntervalSetHotspotsOld : Benchmarkable
+    public class IBSIntervalSetEager : Benchmarkable
     {
         private IInterval<int>[] _intervals;
         private IntervalBinarySearchTreeOld<IInterval<int>, int> _intervalCollection; 
 
         private int intervalSearch(int intervalId)
         {
-            _intervalCollection.AddAll(_intervals);
+            // TODO Do Something that shows the eager interval set creation here
             return 1;
         }
 
         public override void CollectionSetup()
         {
-            _intervals = BenchmarkTestCases.DataSetA(CollectionSize);
-            BenchmarkTestCases.DataSetNotA(CollectionSize);
+            _intervals = BenchmarkTestCases.DataSetB(CollectionSize);
+            _intervalCollection.AddAll(_intervals);
             _intervalCollection = new IntervalBinarySearchTreeOld<IInterval<int>, int>(_intervals);
 
             /*
@@ -30,7 +31,6 @@ namespace C5.Performance.Wpf.Benchmarks
 
         public override void Setup()
         {
-            _intervalCollection.Clear();
         }
 
         public override double Call(int i)
@@ -40,7 +40,7 @@ namespace C5.Performance.Wpf.Benchmarks
 
         public override string BenchMarkName()
         {
-            return "IBS Intervalset Eager Construction";
+            return "IBS Intervalset Eager";
         }
     }
 }

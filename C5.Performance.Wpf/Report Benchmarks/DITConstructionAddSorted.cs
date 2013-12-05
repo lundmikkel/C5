@@ -2,7 +2,7 @@
 using C5.Performance.Wpf.Benchmarks;
 using C5.Tests.intervals;
 
-namespace C5.Performance.Wpf.Report
+namespace C5.Performance.Wpf.Report_Benchmarks
 {
     public class DITConstructionAddSorted : Benchmarkable
     {
@@ -18,7 +18,7 @@ namespace C5.Performance.Wpf.Report
 
         public override void CollectionSetup()
         {
-            _intervals = BenchmarkTestCases.DataSetA(CollectionSize);
+            _intervals = BenchmarkTestCases.DataSetA(CollectionSize); // Create benchmarks with datasets a,b,c,d
             Sorting.IntroSort(_intervals, 0, CollectionSize, IntervalExtensions.CreateComparer<IInterval<int>, int>());
             _intervalCollection = new DynamicIntervalTree<IInterval<int>, int>();
             ItemsArray = SearchAndSort.FillIntArray(CollectionSize);

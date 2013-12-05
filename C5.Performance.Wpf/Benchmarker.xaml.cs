@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Threading;
 using C5.Performance.Wpf.Benchmarks;
 using C5.Performance.Wpf.Report;
+using C5.Performance.Wpf.Report_Benchmarks;
 using Microsoft.Win32;
 
 namespace C5.Performance.Wpf
