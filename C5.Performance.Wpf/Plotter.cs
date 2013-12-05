@@ -85,9 +85,9 @@ namespace C5.Performance.Wpf
             if (areaSeries != null)
             {
                 areaSeries.Points.Add(new DataPoint(benchmark.CollectionSize,
-                    (benchmark.MeanTime + benchmark.StandardDeviation)));
+                    (benchmark.MeanTime + benchmark.StandardDeviation) / 10e8));
                 areaSeries.Points2.Add(new DataPoint(benchmark.CollectionSize,
-                    (benchmark.MeanTime - benchmark.StandardDeviation)));
+                    (benchmark.MeanTime - benchmark.StandardDeviation) / 10e8));
             }
             PlotModel.RefreshPlot(true);
 
