@@ -3,6 +3,8 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
 using C5.Performance.Wpf.Benchmarks;
+using C5.Performance.Wpf.Report;
+using C5.Performance.Wpf.Report_Benchmarks;
 using Microsoft.Win32;
 
 namespace C5.Performance.Wpf
@@ -33,9 +35,17 @@ namespace C5.Performance.Wpf
             {
                 return new Benchmarkable[]
                 {
-                    new IbsAvlIntervalSetsBenchmarker(), 
-                    new IbsAvlIntervalSetsPrebuildBenchmarker(),
-                    //new IbsAvlOldIntervalSetsBenchmarker(),
+//                    new DITConstructionAllInConstructor(), 
+//                    new DITConstructionAddSorted(), 
+//                    new DITConstructionAddUnsorted(),
+                    new DITQueryStabbing(), 
+                    new DITQueryRange(), 
+//                    new IBSConstructionAllInConstructor(), 
+//                    new IBSConstructionAddSorted(), 
+//                    new IBSConstructionAddUnsorted(), 
+                    new IBSQueryStabbing(), 
+                    new IBSQueryRange(), 
+                    
                 };
             }
         }

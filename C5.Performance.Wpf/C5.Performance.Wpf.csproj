@@ -158,12 +158,26 @@
     </ApplicationDefinition>
     <Compile Include="Benchmarks\Benchmark.cs" />
     <Compile Include="Benchmarks\Benchmarkable.cs" />
+    <Compile Include="Report Benchmarks\IBSQueryRangeSpan.cs" />
+    <Compile Include="Report Benchmarks\DITQueryRangeSpan.cs" />
+    <Compile Include="Report Benchmarks\IBSQueryRange.cs" />
+    <Compile Include="Report Benchmarks\DITQueryRange.cs" />
+    <Compile Include="Report Benchmarks\IBSQueryStabbing.cs" />
+    <Compile Include="Report Benchmarks\DITQueryStabbing.cs" />
+    <Compile Include="Report Benchmarks\IBSConstructionAddUnsorted.cs" />
+    <Compile Include="Report Benchmarks\DITConstructionAddUnsorted.cs" />
+    <Compile Include="Report Benchmarks\IBSConstructionAddSorted.cs" />
+    <Compile Include="Report Benchmarks\DITConstructionAddSorted.cs" />
+    <Compile Include="Report Benchmarks\IBSConstructionAllInConstructor.cs" />
+    <Compile Include="Report Benchmarks\DITConstructionAllInConstructor.cs" />
     <Compile Include="Benchmarks\IbsAvlOldIntervalSetsBenchmarker.cs" />
     <Compile Include="Benchmarks\DITSearchBenchmark.cs" />
     <Compile Include="Benchmarks\DITSearchIterativeBenchmark.cs" />
     <Compile Include="Benchmarks\DITSearchRecursiveBenchmark.cs" />
     <Compile Include="Benchmarks\DITTrainSearchSelectiveBenchmark.cs" />
     <Compile Include="Benchmarks\IbsAvlIntervalSetsBenchmarker.cs" />
+    <Compile Include="Report Benchmarks\IBSIntervalSetLazy.cs" />
+    <Compile Include="Report Benchmarks\IBSIntervalSetEager.cs" />
     <Compile Include="Benchmarks\IBSSearchBenchmark.cs" />
     <Compile Include="Benchmarks\IBSTrainRemoveBenchmark.cs" />
     <Compile Include="Benchmarks\DITTrainRemoveBenchmark.cs" />
