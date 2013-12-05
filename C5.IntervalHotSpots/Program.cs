@@ -8,13 +8,15 @@ namespace C5.IntervalHotSpots
     {
         static void Main(string[] args)
         {
+            var intervals = BenchmarkTestCases.DataSetB(1000);
             const int repeats = 1000;
-//            IntervalBinarySearchTreeOld<IInterval<int>, int> dummy = null;
-            IntervalBinarySearchTreeAvl<IInterval<int>, int> dummy = null;
+            IntervalBinarySearchTreeOld<IInterval<int>, int> dummy = null;
+//            IntervalBinarySearchTreeAvl<IInterval<int>, int> dummy = null;
             for (var i = 0; i < repeats; i++)
             {
-//                dummy = new IntervalBinarySearchTreeOld<IInterval<int>, int>(BenchmarkTestCases.DataSetB(1000));
-                dummy = new IntervalBinarySearchTreeAvl<IInterval<int>, int>(BenchmarkTestCases.DataSetB(1000));
+                dummy = new IntervalBinarySearchTreeOld<IInterval<int>, int>(intervals);
+//                dummy = new IntervalBinarySearchTreeAvl<IInterval<int>, int>(intervals);
+                intervals.Shuffle();
                 dummy.Clear();
             }
                 

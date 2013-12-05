@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using C5.intervals;
 
@@ -8,28 +9,44 @@ namespace C5.UserGuideExamples.intervals
     public class FeedReader
     {
         /// <summary>
-        /// Creates an interval collection from the intervals found in the calendar at the url. See the calendar at https://www.google.com/calendar/embed?src=bechmellson.com_eoauecnh84i50tbftksd5bfdl4@group.calendar.google.com&ctz=Europe/Copenhagen
+        /// Parses an icalendar (ics) of concerts from the Copenhagen Jazz Festival 2009 and prints some statistics about the festival utilizing an interval data structure.
         /// </summary>
-        public static void Main(string[] args)
+        public static void CopenhagenJazz()
         {
             // TODO: http://www.kanzaki.com/docs/ical/
-
-            string url = "http://www.google.com/calendar/ical/bechmellson.com_eoauecnh84i50tbftksd5bfdl4%40group.calendar.google.com/public/basic.ics";
-
-            // Anders' FaceBook events - see how to get your URL here http://www.askdavetaylor.com/subscribe_to_facebook_calendar_ical/
-            //url = "http://www.facebook.com/ical/u.php?uid=100002201102330&key=AQC8FQYGgkuL2Ajy";
+            const string url = "http://www.gofish.dk/cjf2009.ics"; // Copenhagen Jazz Festival 2009 Concerts
 
             // Parse url
             var events = ParseUrl(url, FeedType.Ics);
 
-            // Print events
-            foreach (var e in events)
-                Console.Out.WriteLine(e);
-            Console.Out.WriteLine();
-
             // Create interval collection
             var coll = new DynamicIntervalTree<CalendarEvent, DateTime>(events);
-            Console.Out.WriteLine(coll.MaximumOverlap);
+
+            // Let us play with the data we have from the Copenhagen Jazzfestival 2009 ical feed.
+            // Startdate of the festival
+            var start = coll.Span.Low;
+            // Instead of using the spans low as start, we build a "clean" date that starts at midnight
+            var startDate = new DateTime(year: start.Year, month:start.Month, day:start.Day);
+            var end = coll.Span.High;
+            // We also build a cleaner end date which ends at midnight on the last day
+            var endDate = new DateTime(year: end.Year, month:end.Month, day:end.Day);
+            
+            // How many days is the festival running
+            var numberOfdays = endDate.Subtract(startDate).Days + 1;
+
+            // Create an array with events spanning each day of the festival
+            var dates = new CalendarEvent[numberOfdays];
+            for (var day = 0; day < numberOfdays; day++)
+                dates[day] = new CalendarEvent("Festival day " + day, startDate.AddDays(day), startDate.AddDays(day + 1));
+            
+            // Print some general statistics
+            Console.Out.WriteLine("Copenhagen Jazzfestival 2009 statistics");
+            Console.Out.WriteLine("Total number of concerts {0}.", coll.Count());
+            Console.Out.WriteLine("The maximum number of overlapping concerts are {0}.", coll.MaximumOverlap);
+
+            // Print statistics for each day of the festival
+            foreach (var day in dates.Select(day => new DynamicIntervalTree<CalendarEvent, DateTime>(coll.FindOverlaps(day))))
+                Console.Out.WriteLine("There are {0,-3} concerts on the {1}. {2, -2} of these are overlapping.",day.Count,day.Choose().Low.ToShortDateString(),day.MaximumOverlap);
             Console.ReadLine();
         }
 
@@ -93,8 +110,10 @@ namespace C5.UserGuideExamples.intervals
                 // Find title
                 var index = vevent.IndexOf("SUMMARY");
                 index = vevent.IndexOf(":", index) + 1;
-                // TODO: Is this the proper way to find the title?
-                var title = vevent.Substring(index, vevent.IndexOf("\r", index) - index);
+                var titlePos = vevent.IndexOf("\r", index);
+                if (titlePos<0)
+                    titlePos = vevent.IndexOf("\n", index);
+                var title = vevent.Substring(index, titlePos - index);
 
                 // Find start time
                 index = vevent.IndexOf("DTSTART");
@@ -121,7 +140,9 @@ namespace C5.UserGuideExamples.intervals
         {
             // TODO: Fix to parse the ICS date/date-time format
             var correctedDateString = dateString.Substring(0, dateString.Length - 3).Insert(4, "-").Insert(7, "-").Insert(13, ":");
-            return DateTime.Parse(correctedDateString).AddHours(1);
+
+            // Adding two hours here to match the Copenhagen Jazzfestival Feed to GMT+1 (Copenhagen Timezone).
+            return DateTime.Parse(correctedDateString).AddHours(2);
         }
     }
 }
