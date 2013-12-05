@@ -1127,8 +1127,7 @@ namespace C5.intervals
                 return updateMaximumOverlap(root.Right, interval) && root.UpdateMaximumOverlap();
 
             // Return true if MNO has changed for either endpoint
-            var update = updateMaximumOverlap(root, interval.Low);
-            return updateMaximumOverlap(root, interval.High) || update;
+            return updateMaximumOverlap(root, interval.High) | updateMaximumOverlap(root, interval.Low);
         }
 
         private static bool updateMaximumOverlap(Node root, T key)
