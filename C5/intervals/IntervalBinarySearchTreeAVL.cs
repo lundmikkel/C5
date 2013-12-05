@@ -556,14 +556,6 @@ namespace C5.intervals
                 Contract.Requires(s1 != null);
                 Contract.Requires(s2 != null);
 
-                // Iterate through the smallest set
-                if (s1.Count > s2.Count)
-                {
-                    var tmp = s1;
-                    s1 = s2;
-                    s2 = tmp;
-                }
-
                 var res = new IntervalSet();
                 foreach (var interval in s1.Where(interval => !s2.Contains(interval)))
                     res.Add(interval);
