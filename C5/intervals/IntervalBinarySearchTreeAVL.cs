@@ -1066,33 +1066,27 @@ namespace C5.intervals
         {
             get
             {
-                return _span ?? (_span = new IntervalBase<T>(lowestLow(_root), highestHigh(_root)));
+                return _span ?? (_span = new IntervalBase<T>(span(_root, true), span(_root, false)));
             }
         }
 
-        private static IInterval<T> lowestLow(Node root)
+        private static IInterval<T> span(Node root, bool findLow)
         {
             Contract.Requires(root != null);
 
-            while (root.Left != null)
-                root = root.Left;
+            // Search for the lowest/highest node
+            if (findLow)
+                while (root.Left != null)
+                    root = root.Left;
+            else
+                while (root.Right != null)
+                    root = root.Right;
 
+            // Check if the lowest/highest endpoint is included
             if (root.Equal != null && !root.Equal.IsEmpty)
                 return root.Equal.Choose();
 
-            return root.IntervalsEndingInNode.Choose();
-        }
-
-        private static IInterval<T> highestHigh(Node root)
-        {
-            Contract.Requires(root != null);
-
-            while (root.Right != null)
-                root = root.Right;
-
-            if (root.Equal != null && !root.Equal.IsEmpty)
-                return root.Equal.Choose();
-
+            // Otherwise pick an excluded one from intervals ending in node
             return root.IntervalsEndingInNode.Choose();
         }
 
