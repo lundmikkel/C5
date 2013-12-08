@@ -30,9 +30,9 @@ namespace C5.UserGuideExamples.intervals
             Console.Out.WriteLine("x.GetHashCode(): {0}", x.GetHashCode()); // 15730764
             Console.Out.WriteLine("y.GetHashCode(): {0}", y.GetHashCode()); // 15760494
 
-            Console.Out.WriteLine("x.ToString(): {0}", x.ToString()); // [1:5)
-            Console.Out.WriteLine("x.ToString(): {0}", y.ToString()); // [2:3]
-            Console.Out.WriteLine("x.ToString(): {0}", z.ToString()); // (3:5)
+            Console.Out.WriteLine("x.ToIntervalString(): {0}", x.ToString()); // [1:5)
+            Console.Out.WriteLine("x.ToIntervalString(): {0}", y.ToString()); // [2:3]
+            Console.Out.WriteLine("x.ToIntervalString(): {0}", z.ToString()); // (3:5)
 
             Console.Read();
         }

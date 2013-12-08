@@ -20,7 +20,7 @@ namespace C5.UserGuideExamples.intervals
         {
             // Return the trains with ressources - number of trains 21998
             return Trains.ParseTrainSetA().SelectMany(col => col).Take(numberOfTrainsToGet).ToArray();
-            
+
             // Return the trains without ressources - number of trains 31156
             return Trains.ParseTrainSetB().Take(numberOfTrainsToGet).ToArray();
         }
@@ -42,8 +42,8 @@ namespace C5.UserGuideExamples.intervals
                 if (i1.High.CompareTo(i2.Low) < 0 && i2.Low.CompareTo(highestHigh) >= 0 && i == sortedTrains.Count - 2)
                     intervalsNotInCollection.Add(new InBetweenTrainRide(i1.High, i2.Low, i1.Track, i1.Train));
             }
-//            Console.Out.WriteLine("There is {0} intervals in the collection.", sortedTrains.Count);
-//            Console.Out.WriteLine("Created {0} intervals that's not in the collection.", intervalsNotInCollection.Count);
+            //            Console.Out.WriteLine("There is {0} intervals in the collection.", sortedTrains.Count);
+            //            Console.Out.WriteLine("Created {0} intervals that's not in the collection.", intervalsNotInCollection.Count);
 
             // Check that we have made intervals that truly don't exist in the collections
             foreach (var interval in intervalsNotInCollection.Where(sortedTrains.Contains))
@@ -69,7 +69,7 @@ namespace C5.UserGuideExamples.intervals
 
             public override string ToString()
             {
-                return IntervalExtensions.ToString(this);
+                return this.ToIntervalString();
             }
         }
 

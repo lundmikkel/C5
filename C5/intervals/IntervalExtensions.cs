@@ -384,7 +384,7 @@ namespace C5.intervals
         /// <remarks>Closed intervals are represented with square brackets [a:b] and open with round brackets (a:b).</remarks>
         /// <returns>The string representation.</returns>
         [Pure]
-        public static string ToString<T>(this IInterval<T> x) where T : IComparable<T>
+        public static string ToIntervalString<T>(this IInterval<T> x) where T : IComparable<T>
         {
             Contract.Requires(x != null);
             Contract.Ensures(Contract.Result<string>().Length > 0);
@@ -491,7 +491,7 @@ namespace C5.intervals
 
         public static IEnumerable<T> ToEnumerable<T>(this IEnumerator<T> enumerator)
         {
-            while (enumerator.MoveNext())       yield return enumerator.Current;
+            while (enumerator.MoveNext()) yield return enumerator.Current;
         }
 
         /// <summary>

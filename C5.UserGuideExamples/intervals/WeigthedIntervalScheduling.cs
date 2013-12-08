@@ -119,7 +119,7 @@ namespace C5.UserGuideExamples.intervals
 
             public override string ToString()
             {
-                return String.Format("{0} ({1})", IntervalExtensions.ToString(this), Weight);
+                return String.Format("{0} ({1})", this.ToIntervalString(), Weight);
             }
         }
     }

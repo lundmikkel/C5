@@ -132,7 +132,7 @@ namespace C5.intervals
         /// <inheritdoc/>
         public override string ToString()
         {
-            return IntervalExtensions.ToString(this);
+            return this.ToIntervalString();
         }
 
         #endregion
