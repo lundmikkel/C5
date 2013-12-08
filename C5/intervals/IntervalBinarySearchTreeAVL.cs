@@ -22,9 +22,9 @@ namespace C5.intervals
 
         private Node _root;
         private int _count;
+        private IInterval<T> _span;
 
         private static readonly IEqualityComparer<I> Comparer = ComparerFactory<I>.CreateEqualityComparer((x, y) => ReferenceEquals(x, y), x => x.GetHashCode());
-        private IInterval<T> _span;
 
         #endregion
 
@@ -421,14 +421,14 @@ namespace C5.intervals
             public Node Left { get; internal set; }
             public Node Right { get; internal set; }
 
+            // Balance - between -2 and +2
+            public sbyte Balance { get; internal set; }
+
             // Fields for Maximum Number of Overlaps
             public int DeltaAt { get; internal set; }
             public int DeltaAfter { get; internal set; }
             public int Sum { get; private set; }
             public int Max { get; private set; }
-
-            // Balance - between -2 and +2
-            public sbyte Balance { get; internal set; }
 
             // Used for printing
             public bool Dummy { get; private set; }
@@ -520,7 +520,7 @@ namespace C5.intervals
                 DeltaAfter = successor.DeltaAfter;
                 DeltaAt = successor.DeltaAt;
 
-                // Reset all values in successor
+                // Reset delta values in successor
                 successor.DeltaAt = successor.DeltaAfter = 0;
             }
 
@@ -530,7 +530,6 @@ namespace C5.intervals
 
         private sealed class IntervalSet : HashSet<I>
         {
-
             public IntervalSet(IEnumerable<I> set)
             {
                 AddAll(set);
@@ -1007,10 +1006,8 @@ namespace C5.intervals
             var set = new IntervalSet();
 
             // TODO: Is Linq version lazy?
-
-            foreach (var interval in intervals(_root))
-                if (set.Add(interval))
-                    yield return interval;
+            foreach (var interval in intervals(_root).Where(set.Add))
+                yield return interval;
         }
 
         /// <summary>
@@ -1028,6 +1025,7 @@ namespace C5.intervals
         [Pure]
         private static IEnumerable<Node> nodes(Node root)
         {
+            // TODO: Make fully iterative
             while (root != null)
             {
                 foreach (var node in nodes(root.Left))
