@@ -5,8 +5,6 @@ using C5.intervals;
 
 namespace C5.UserGuideExamples.intervals
 {
-    using IT = IntervalType;
-
     /// <summary>
     /// The example shows how to use the extension methods from <see cref="C5.intervals"/> to solve
     /// the dynamic programming problem of finding the biggest set of non-overlapping intervals with the
@@ -28,7 +26,8 @@ namespace C5.UserGuideExamples.intervals
 
             var result = CalculateOptimalSolution(intervals);
 
-            Console.Out.Write("The maximum weighted set ({0}) of intervals are: {1}\n", result.Key, result.Value);
+            Console.Out.Write("The maximum weighted set ({0}) of the intervals is: {1}\n", result.Key, result.Value);
+            Console.Read();
         }
 
         // TODO: Find a better name
