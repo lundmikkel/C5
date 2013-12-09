@@ -343,6 +343,22 @@ namespace C5.intervals
         }
 
         /// <summary>
+        /// Check if an interval is valid.
+        /// </summary>
+        /// <param name="x">The interval.</param>
+        /// <typeparam name="T">The endpoint type.</typeparam>
+        /// <returns>True if the interval is valid.</returns>
+        [Pure]
+        public static bool IsValidInterval<T>(this IInterval<T> x) where T : IComparable<T>
+        {
+            if (x.Low == null || x.High == null)
+                return false;
+
+            var compare = x.Low.CompareTo(x.High);
+            return compare < 0 || compare == 0 && x.LowIncluded && x.HighIncluded;
+        }
+
+        /// <summary>
         /// Check if an interval is a point.
         /// </summary>
         /// <param name="x">The interval.</param>

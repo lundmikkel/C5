@@ -30,7 +30,7 @@ namespace C5.intervals
             ComparerFactory<IInterval<T>>.CreateEqualityComparer(ReferenceEquals, x => x.GetHashCode());
 
 #if DEBUG
-        private int _visit = 0;
+        private int _visit;
 #endif
 
         #endregion
@@ -1519,16 +1519,16 @@ namespace C5.intervals
                 return false;
 
             // Remove the interval based on low endpoint
-            var nodeWasDeleted = false;
+            var nodeWasRemoved = false;
             var intervalWasRemoved = false;
-            _root = removeLow(interval, _root, ref nodeWasDeleted, ref intervalWasRemoved);
+            _root = removeLow(interval, _root, ref nodeWasRemoved, ref intervalWasRemoved);
 
             // If the interval was removed, we need to remove the data associated with the high endpoint as well
             if (intervalWasRemoved)
             {
-                nodeWasDeleted = false;
+                nodeWasRemoved = false;
                 var updateSpan = false;
-                _root = removeHigh(interval, _root, ref nodeWasDeleted, ref updateSpan);
+                _root = removeHigh(interval, _root, ref nodeWasRemoved, ref updateSpan);
 
                 // Adjust count and throw event
                 _count--;

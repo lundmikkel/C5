@@ -18,23 +18,23 @@ namespace C5.intervals
         /// <summary>
         /// Create a Binary Interval Search using a collection of intervals.
         /// </summary>
-        /// <param name="intervalEnumerable"></param>
-        public BinaryIntervalSearch(IEnumerable<I> intervalEnumerable)
+        /// <param name="intervals"></param>
+        public BinaryIntervalSearch(IEnumerable<I> intervals)
         {
             // Make intervals to array to allow fast sorting and counting
-            var intervals = intervalEnumerable as I[] ?? intervalEnumerable.ToArray();
+            var intervalArray = intervals as I[] ?? intervals.ToArray();
 
             // Stop if we have no intervals
-            if (!intervals.Any())
+            if (!intervalArray.Any())
                 return;
 
-            _count = intervals.Length;
+            _count = intervalArray.Length;
 
             _lowSorted = new I[_count];
             _highSorted = new I[_count];
 
             for (var i = 0; i < _count; i++)
-                _lowSorted[i] = _highSorted[i] = intervals[i];
+                _lowSorted[i] = _highSorted[i] = intervalArray[i];
 
 
             // Sort intervals

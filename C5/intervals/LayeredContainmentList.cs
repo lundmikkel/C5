@@ -120,21 +120,21 @@ namespace C5.intervals
         /// <summary>
         /// Create a Layered Containment List with a collection of intervals.
         /// </summary>
-        /// <param name="intervalEnumerable">The collection of intervals.</param>
-        public LayeredContainmentList(IEnumerable<I> intervalEnumerable)
+        /// <param name="intervals">The collection of intervals.</param>
+        public LayeredContainmentList(IEnumerable<I> intervals)
         {
-            Contract.Ensures(intervalEnumerable.Count() == Count);
+            Contract.Ensures(intervals.Count() == Count);
 
             // Make intervals to array to allow fast sorting and counting
-            var intervals = intervalEnumerable as I[] ?? intervalEnumerable.ToArray();
+            var intervalArray = intervals as I[] ?? intervals.ToArray();
 
             // Stop if we have no intervals
-            if (!intervals.Any())
+            if (!intervalArray.Any())
                 return;
 
-            _count = intervals.Length;
+            _count = intervalArray.Length;
 
-            var nodeLayers = generateLayers(ref intervals);
+            var nodeLayers = generateLayers(ref intervalArray);
 
             _layerCount = nodeLayers.Count();
             _firstLayerCount = nodeLayers.First.Count;
@@ -288,7 +288,7 @@ namespace C5.intervals
         #region Enumerable
 
         /// <summary>
-        /// Fast enumeration of intervals in arbitrary order, not sorted. For sorted enumerator see <see cref="GetEnumeratorSorted"/> or better <see cref="Sorted"/>.
+        /// Fast enumeration of intervals in arbitrary order, not sorted. For sorted enumerator see <see cref="getEnumeratorSorted()"/> or better <see cref="Sorted"/>.
         /// </summary>
         /// <returns>Enumerator of all intervals in the data structure in arbitrary order.</returns>
         public override IEnumerator<I> GetEnumerator()
@@ -312,29 +312,15 @@ namespace C5.intervals
         }
 
         /// <summary>
-        /// Property exposing the method <see cref="GetEnumeratorSorted"/> as IEnumerable&lt;IInterval&lt;T&gt;&gt;.
-        /// Usefull for loops: foreach (var interval in intervaled.Sorted) { }. 
+        /// Create an enumerable, enumerating all intervals in the collection in sorted order.
         /// </summary>
         public IEnumerable<I> Sorted
         {
             get
             {
-                var iterator = GetEnumeratorSorted();
-                while (iterator.MoveNext())
-                    yield return iterator.Current;
+
+                return sorted(0, _firstLayerCount);
             }
-        }
-
-        /// <summary>
-        /// Enumeration of intervals in sorted order according to <see cref="IntervalExtensions.CompareTo{T}"/>. For a faster, but unsorted, enumerator see <see cref="GetEnumerator"/>.
-        /// </summary>
-        /// <returns>Enumerator of all intervals in the data structure in sorted order</returns>
-        public IEnumerator<I> GetEnumeratorSorted()
-        {
-            if (IsEmpty)
-                return Enumerable.Empty<I>().GetEnumerator();
-
-            return getEnumeratorSorted(0, _firstLayerCount);
         }
 
         /// <summary>
@@ -343,8 +329,11 @@ namespace C5.intervals
         /// <param name="start">The index of the first interval in the first layer</param>
         /// <param name="end">The index after the last interval in the first layer</param>
         /// <returns>Enumerator of all intervals in the data structure in sorted order</returns>
-        private IEnumerator<I> getEnumeratorSorted(int start, int end)
+        private IEnumerable<I> sorted(int start, int end)
         {
+            if (IsEmpty)
+                yield break;
+
             // Create our own stack to avoid stack overflow and to speed up the enumerator
             var stack = new int[_layerCount << 1];
             var i = 0;
@@ -644,7 +633,7 @@ namespace C5.intervals
         /// <returns>All intervals that overlap the query point.</returns>
         public IEnumerable<I> FindOverlapsSorted(T query)
         {
-            Contract.Requires(!ReferenceEquals(query, null));
+            Contract.Requires(query != null);
 
             var queryInterval = new IntervalBase<T>(query);
 
