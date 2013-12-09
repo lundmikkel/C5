@@ -380,6 +380,26 @@ namespace C5.Tests.intervals
             return intervals;
         }
 
+        private static int randomInt()
+        {
+            var bytes = new byte[4];
+            System.Security.Cryptography.RandomNumberGenerator.Create().GetBytes(bytes);
+            return BitConverter.ToInt32(bytes, 0);
+        }
+
+        public static IInterval<int> RandomInterval()
+        {
+            var low = randomInt();
+            var high = randomInt();
+            while (high <= low)
+                high = randomInt();
+            var lowIncluded = randomInt() > 0;
+            var highIncluded = randomInt() > 0;
+            if (low == high)
+                lowIncluded = highIncluded = true;
+            return new IntervalBase<int>(low, high, lowIncluded, highIncluded);
+        }
+
         public static IInterval<int>[] RandomSet(int count)
         {
             const int seed = 0;

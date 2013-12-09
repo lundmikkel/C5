@@ -46,7 +46,7 @@ namespace C5.Performance.Wpf.Benchmarks
                 elapsedTime = elapsedSquaredTime = 0.0;
                 for (var j = 0; j < repeats; j++)
                 {
-                    caller.UpdateRunningLabel("Benchmarking " + count + " calls " + (j + 1) + " of " + repeats + " times");
+                    caller.UpdateRunningLabel(String.Format("Benchmarking {0} calls {1} of {2} times",count, (j + 1),repeats));
                     
                     var t = new Timer();
                     for (var i = 0; i < count; i++)
