@@ -15,9 +15,9 @@ namespace C5.UserGuideExamples.intervals
             Console.Out.WriteLine("MNO of Set B " + new DynamicIntervalTree<TrainRide, Double>(ParseTrainSetB().ToArray()).MaximumOverlap);
 
             var trains = ParseTrainSetA().SelectMany(c => c).ToArray();
-            Console.Out.WriteLine("Found {0} trains in the data file.",trains.Count());
+            Console.Out.WriteLine("Found {0} trains in the data file.", trains.Count());
             var inbetweenTrains = TrainUtilities.FindInbetweenTrains(trains);
-            Console.Out.WriteLine("Found {0} trains to put inbetween the existing trains.",inbetweenTrains.Count());
+            Console.Out.WriteLine("Found {0} trains to put inbetween the existing trains.", inbetweenTrains.Count());
             Console.Out.WriteLine("Press any key to check for collisions...");
             Console.ReadLine();
             var trainz = new ArrayList<TrainRide>();
@@ -118,7 +118,7 @@ namespace C5.UserGuideExamples.intervals
 
             public override string ToString()
             {
-                return IntervalExtensions.ToString(this);
+                return this.ToIntervalString();
             }
         }
 

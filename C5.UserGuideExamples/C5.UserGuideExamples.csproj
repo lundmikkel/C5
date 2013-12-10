@@ -94,6 +94,7 @@
     <Compile Include="GNfaToDfa.cs" />
     <Compile Include="HashCodes.cs" />
     <Compile Include="intervals\FeedReader.cs" />
+    <Compile Include="intervals\IntervalExtensionsExamples.cs" />
     <Compile Include="intervals\TrainUtilities.cs" />
     <Compile Include="intervals\Trains.cs" />
     <Compile Include="intervals\WeigthedIntervalScheduling.cs" />

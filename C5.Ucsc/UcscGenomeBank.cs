@@ -298,7 +298,7 @@ namespace C5.Ucsc
 
             public override string ToString()
             {
-                return String.Format("{0} - {1}", IntervalExtensions.ToString(this), Alignments);
+                return String.Format("{0} - {1}", this.ToIntervalString(), Alignments);
             }
 
             public string CompactFormat()
@@ -361,7 +361,7 @@ namespace C5.Ucsc
 
             public override string ToString()
             {
-                return String.Format("{0}: {1} - Human: {2}", Type, IntervalExtensions.ToString(this), IntervalExtensions.ToString(HumanGene));
+                return String.Format("{0}: {1} - Human: {2}", Type, this.ToIntervalString(), HumanGene.ToIntervalString());
             }
 
             public string CompactFormat()

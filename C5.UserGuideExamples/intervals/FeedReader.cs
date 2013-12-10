@@ -26,11 +26,11 @@ namespace C5.UserGuideExamples.intervals
             // Startdate of the festival
             var start = coll.Span.Low;
             // Instead of using the spans low as start, we build a "clean" date that starts at midnight
-            var startDate = new DateTime(year: start.Year, month:start.Month, day:start.Day);
+            var startDate = new DateTime(year: start.Year, month: start.Month, day: start.Day);
             var end = coll.Span.High;
             // We also build a cleaner end date which ends at midnight on the last day
-            var endDate = new DateTime(year: end.Year, month:end.Month, day:end.Day);
-            
+            var endDate = new DateTime(year: end.Year, month: end.Month, day: end.Day);
+
             // How many days is the festival running
             var numberOfdays = endDate.Subtract(startDate).Days + 1;
 
@@ -38,7 +38,7 @@ namespace C5.UserGuideExamples.intervals
             var dates = new CalendarEvent[numberOfdays];
             for (var day = 0; day < numberOfdays; day++)
                 dates[day] = new CalendarEvent("Festival day " + day, startDate.AddDays(day), startDate.AddDays(day + 1));
-            
+
             // Print some general statistics
             Console.Out.WriteLine("Copenhagen Jazzfestival 2009 statistics");
             Console.Out.WriteLine("Total number of concerts {0}.", coll.Count());
@@ -46,7 +46,7 @@ namespace C5.UserGuideExamples.intervals
 
             // Print statistics for each day of the festival
             foreach (var day in dates.Select(day => new DynamicIntervalTree<CalendarEvent, DateTime>(coll.FindOverlaps(day))))
-                Console.Out.WriteLine("There are {0,-3} concerts on the {1}. {2, -2} of these are overlapping.",day.Count,day.Choose().Low.ToShortDateString(),day.MaximumOverlap);
+                Console.Out.WriteLine("There are {0,-3} concerts on the {1}. {2, -2} of these are overlapping.", day.Count, day.Choose().Low.ToShortDateString(), day.MaximumOverlap);
             Console.ReadLine();
         }
 
@@ -73,7 +73,7 @@ namespace C5.UserGuideExamples.intervals
 
             public override string ToString()
             {
-                return String.Format("{0,-15}: {1} (duration: {2})", Title, IntervalExtensions.ToString(this), Duration);
+                return String.Format("{0,-15}: {1} (duration: {2})", Title, this.ToIntervalString(), Duration);
             }
         }
 
@@ -111,7 +111,7 @@ namespace C5.UserGuideExamples.intervals
                 var index = vevent.IndexOf("SUMMARY");
                 index = vevent.IndexOf(":", index) + 1;
                 var titlePos = vevent.IndexOf("\r", index);
-                if (titlePos<0)
+                if (titlePos < 0)
                     titlePos = vevent.IndexOf("\n", index);
                 var title = vevent.Substring(index, titlePos - index);
 

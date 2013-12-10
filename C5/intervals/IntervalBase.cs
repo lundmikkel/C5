@@ -40,6 +40,8 @@ namespace C5.intervals
         /// <param name="query"></param>
         public IntervalBase(T query)
         {
+            Contract.Requires(query != null);
+
             _low = _high = query;
             _lowIncluded = _highIncluded = true;
         }
@@ -54,8 +56,7 @@ namespace C5.intervals
         /// <exception cref="ArgumentException">Thrown if interval is an empty point set.</exception>
         public IntervalBase(T low, T high, bool lowIncluded = true, bool highIncluded = false)
         {
-            //if (high.CompareTo(low) < 0 || (low.CompareTo(high) == 0 && (!lowIncluded || !highIncluded)))
-            //    throw new ArgumentException("Low must be smaller than high. If low and high are equal, both lowIncluded and highIncluded should be true!");
+            Contract.Requires(low.CompareTo(high) < 0 || low.CompareTo(high) == 0 && lowIncluded && highIncluded);
 
             _low = low;
             _high = high;
@@ -86,6 +87,7 @@ namespace C5.intervals
         public IntervalBase(IInterval<T> i)
         {
             Contract.Requires(i != null);
+            Contract.Requires(i.IsValidInterval());
 
             _low = i.Low;
             _high = i.High;
@@ -102,6 +104,7 @@ namespace C5.intervals
         {
             Contract.Requires(low != null);
             Contract.Requires(high != null);
+            Contract.Requires(low.Low.CompareTo(high.High) < 0 || low.Low.CompareTo(high.High) == 0 && low.LowIncluded && high.HighIncluded);
 
             _low = low.Low;
             _lowIncluded = low.LowIncluded;
@@ -132,7 +135,7 @@ namespace C5.intervals
         /// <inheritdoc/>
         public override string ToString()
         {
-            return IntervalExtensions.ToString(this);
+            return this.ToIntervalString();
         }
 
         #endregion

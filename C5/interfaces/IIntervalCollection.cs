@@ -211,7 +211,7 @@ namespace C5
 
         public IEnumerable<I> FindOverlaps(T query)
         {
-            // Stabbing value cannot be null
+            // Query point cannot be null
             Contract.Requires(query != null);
 
             // The collection of intervals that overlap the query must be equal to the result
@@ -224,7 +224,7 @@ namespace C5
 
         public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
-            // Stabbing value cannot be null
+            // Query interval cannot be null
             Contract.Requires(query != null);
 
             // The collection of intervals that overlap the query must be equal to the result
@@ -428,7 +428,6 @@ namespace C5
 
     class IntervalCollectionRegions
     {
-
         #region Contructors
         #endregion
 
