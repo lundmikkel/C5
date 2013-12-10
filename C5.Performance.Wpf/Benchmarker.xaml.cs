@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Threading;
 using C5.Performance.Wpf.Benchmarks;
 using C5.Performance.Wpf.Report_Benchmarks;
+using C5.Tests.intervals;
 using Microsoft.Win32;
 
 namespace C5.Performance.Wpf
@@ -26,25 +27,97 @@ namespace C5.Performance.Wpf
         private int _repeats = 1;
         private bool _runSequential;
         private bool _runWarmups = false;
+        private static readonly Func<int, IInterval<int>[]> A = BenchmarkTestCases.DataSetA;
+        private static readonly Func<int, IInterval<int>[]> B = BenchmarkTestCases.DataSetB;
+        private static readonly Func<int, IInterval<int>[]> C = BenchmarkTestCases.DataSetC;
+        private static readonly Func<int, IInterval<int>[]> D = BenchmarkTestCases.DataSetD;
+        private static readonly Func<IInterval<int>[], IIntervalCollection<IInterval<int>, int>> DIT = IntervalBenchmarkable.DIT;
+        private static readonly Func<IInterval<int>[], IIntervalCollection<IInterval<int>, int>> IBS = IntervalBenchmarkable.IBS;
 
         // These are the benchmarks that will be run by the benchmarker.
         private static Benchmarkable[] Benchmarks
         {
+            
             get
             {
                 return new Benchmarkable[]
                 {
-//                    new DITConstructionAllInConstructor(), 
-//                    new DITConstructionAddSorted(), 
-//                    new DITConstructionAddUnsorted(),
-                    new DITQueryStabbing(), 
-                    new DITQueryRange(), 
-//                    new IBSConstructionAllInConstructor(), 
-//                    new IBSConstructionAddSorted(), 
-//                    new IBSConstructionAddUnsorted(), 
-                    new IBSQueryStabbing(), 
-                    new IBSQueryRange(), 
-                    
+                    // Count
+                    new Count(A,DIT),
+                    new Count(B,DIT),
+                    new Count(C,DIT),
+                    new Count(D,DIT),
+
+                    new Count(A,IBS),
+                    new Count(B,IBS),
+                    new Count(C,IBS),
+                    new Count(D,IBS),
+
+                    // Construct Add All In Constructor
+                    new ConstructAddAllInConstructor(A,DIT), 
+                    new ConstructAddAllInConstructor(B,DIT), 
+                    new ConstructAddAllInConstructor(C,DIT), 
+                    new ConstructAddAllInConstructor(D,DIT), 
+
+                    new ConstructAddAllInConstructor(A,IBS), 
+                    new ConstructAddAllInConstructor(B,IBS), 
+                    new ConstructAddAllInConstructor(C,IBS), 
+                    new ConstructAddAllInConstructor(D,IBS), 
+
+                    // Construct Add Sorted
+                    new ConstructAddSorted(A, DIT), 
+                    new ConstructAddSorted(B, DIT), 
+                    new ConstructAddSorted(C, DIT), 
+                    new ConstructAddSorted(D, DIT), 
+
+                    new ConstructAddSorted(A, IBS), 
+                    new ConstructAddSorted(B, IBS), 
+                    new ConstructAddSorted(C, IBS), 
+                    new ConstructAddSorted(D, IBS), 
+
+                    // Construct Add Unsorted
+                    new ConstructAddUnsorted(A, DIT), 
+                    new ConstructAddUnsorted(B, DIT), 
+                    new ConstructAddUnsorted(C, DIT), 
+                    new ConstructAddUnsorted(D, DIT), 
+
+                    new ConstructAddUnsorted(A, IBS), 
+                    new ConstructAddUnsorted(B, IBS), 
+                    new ConstructAddUnsorted(C, IBS), 
+                    new ConstructAddUnsorted(D, IBS), 
+
+                    // Query Stabbing
+                    new QueryStabbing(A, DIT), 
+                    new QueryStabbing(B, DIT), 
+                    new QueryStabbing(C, DIT), 
+                    new QueryStabbing(D, DIT), 
+
+                    new QueryStabbing(A, IBS), 
+                    new QueryStabbing(B, IBS), 
+                    new QueryStabbing(C, IBS), 
+                    new QueryStabbing(D, IBS), 
+
+                    // Query Range
+                    new QueryRange(A, DIT), 
+                    new QueryRange(B, DIT), 
+                    new QueryRange(C, DIT), 
+                    new QueryRange(D, DIT), 
+
+                    new QueryRange(A, IBS), 
+                    new QueryRange(B, IBS), 
+                    new QueryRange(C, IBS), 
+                    new QueryRange(D, IBS), 
+
+                    // Query Range Span
+                    new QueryRangeSpan(A, DIT), 
+                    new QueryRangeSpan(B, DIT), 
+                    new QueryRangeSpan(C, DIT), 
+                    new QueryRangeSpan(D, DIT), 
+
+                    new QueryRangeSpan(A, IBS), 
+                    new QueryRangeSpan(B, IBS), 
+                    new QueryRangeSpan(C, IBS), 
+                    new QueryRangeSpan(D, IBS), 
                 };
             }
         }
