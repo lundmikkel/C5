@@ -3,6 +3,7 @@ using System.IO;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
+using System.Xml.Serialization;
 
 namespace C5.Performance.Wpf
 {
@@ -55,7 +56,7 @@ namespace C5.Performance.Wpf
                 {
                     Position = AxisPosition.Left,
                     AxisTitleDistance = 10,
-                    Title = "Execution Time in seconds",
+                    Title = "Execution Time in nanoseconds",
                     MajorGridlineStyle = LineStyle.Solid,
                     MinorGridlineStyle = LineStyle.Dot
                 };
@@ -79,18 +80,45 @@ namespace C5.Performance.Wpf
         /// </summary>
         /// <param name="indexOfAreaSeries">Index of the graph you wish to add data to</param>
         /// <param name="benchmark">Benchmark containing the data to be added</param>
-        public void AddDataPoint(int indexOfAreaSeries, Benchmark benchmark)
+        public void AddDataPoint(int indexOfAreaSeries, Benchmark benchmark, bool serialize)
         {
+            if (serialize)
+                writeBenchmarkToDisk(benchmark);
             var areaSeries = PlotModel.Series[indexOfAreaSeries] as AreaSeries;
             if (areaSeries != null)
             {
                 areaSeries.Points.Add(new DataPoint(benchmark.CollectionSize,
-                    (benchmark.MeanTime + benchmark.StandardDeviation) / 10e8));
+                    (benchmark.MeanTime + benchmark.StandardDeviation)));
                 areaSeries.Points2.Add(new DataPoint(benchmark.CollectionSize,
-                    (benchmark.MeanTime - benchmark.StandardDeviation) / 10e8));
+                    (benchmark.MeanTime - benchmark.StandardDeviation)));
             }
             PlotModel.RefreshPlot(true);
+        }
 
+        private int benchmarkCounter = 0;
+        readonly XmlSerializer x = new XmlSerializer(typeof(Benchmark));
+        private static string path = "benchmarks/benchmark";
+        private void writeBenchmarkToDisk(Benchmark benchmark)
+        {
+            x.Serialize(File.CreateText(path + (benchmarkCounter++) + ".xml"), benchmark);
+        }
+
+        public Benchmark ReadBenchmarkFromDisk(int number)
+        {
+            return (Benchmark) x.Deserialize(File.OpenText(path+number+".xml"));
+        }
+
+        public void WriteDataToDisk(int indexOfAreaSeries, Benchmark benchmark)
+        {
+            
+            var areaSeries = PlotModel.Series[indexOfAreaSeries] as AreaSeries;
+            if (areaSeries != null)
+            {
+                areaSeries.Points.Add(new DataPoint(benchmark.CollectionSize,
+                    (benchmark.MeanTime + benchmark.StandardDeviation)));
+                areaSeries.Points2.Add(new DataPoint(benchmark.CollectionSize,
+                    (benchmark.MeanTime - benchmark.StandardDeviation)));
+            }
         }
 
         /// <summary>

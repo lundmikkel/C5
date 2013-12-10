@@ -67,7 +67,7 @@ namespace C5.Performance.Wpf
                     // Construct Add Sorted
                     new ConstructAddSorted(A, DIT), 
                     new ConstructAddSorted(B, DIT), 
-                    new ConstructAddSorted(C, DIT), 
+                    new ConstructAddSorted(C, DIT),
                     new ConstructAddSorted(D, DIT), 
 
                     new ConstructAddSorted(A, IBS), 
@@ -80,7 +80,7 @@ namespace C5.Performance.Wpf
                     new ConstructAddUnsorted(B, DIT), 
                     new ConstructAddUnsorted(C, DIT), 
                     new ConstructAddUnsorted(D, DIT), 
-
+                    
                     new ConstructAddUnsorted(A, IBS), 
                     new ConstructAddUnsorted(B, IBS), 
                     new ConstructAddUnsorted(C, IBS), 
@@ -133,17 +133,25 @@ namespace C5.Performance.Wpf
         #endregion
 
         #region Benchmark Running
+
+        private Boolean serializeToDisk = true;
+        private Boolean runFromDisk = true;
         // Method that gets called when the benchmark button is used.
         private void benchmarkStart(object sender, RoutedEventArgs e)
         {
             runSequentialCheckBox.IsEnabled = false;
 
-            // This benchmark is the one we use to compare with Sestoft's cmd line version of the tool
-            var thread = _runSequential
-                ? new Thread(() => runBenchmarks(Benchmarks))
-                : new Thread(() => runBenchmarksParallel(Benchmarks));
-            //CheckBox checkbox = (CheckBox)this.Controls.Find("checkBox" + input.toString())[0];
-            thread.Start();
+            if (runFromDisk)
+                redBenchmarksFromDisk(Benchmarks); // Is only reliable if you have serialized a sequential run
+            else
+            {
+                // This benchmark is the one we use to compare with Sestoft's cmd line version of the tool
+                var thread = _runSequential
+                    ? new Thread(() => runBenchmarks(Benchmarks))
+                    : new Thread(() => runBenchmarksParallel(Benchmarks));
+                //CheckBox checkbox = (CheckBox)this.Controls.Find("checkBox" + input.toString())[0];
+                thread.Start();
+            }
         }
 
         // Sequential run of all the benchmarks.
@@ -160,7 +168,7 @@ namespace C5.Performance.Wpf
                     updateStatusLabel("Running " + b.BenchMarkName() + " with collection size " + b.CollectionSize);
                     var benchmark = b.Benchmark(_maxCount, _repeats, MaxExecutionTimeInSeconds, this, _runWarmups);
                     Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
-                        _plotter.AddDataPoint(_lineSeriesIndex, benchmark)));
+                        _plotter.AddDataPoint(_lineSeriesIndex, benchmark, serializeToDisk)));
                     Thread.Sleep(100);
                     updateProgressBar(benchmarks.Length);
                 }
@@ -170,6 +178,31 @@ namespace C5.Performance.Wpf
             updateStatusLabel("Finished");
             Thread.Sleep(1000);
             updateStatusLabel("");
+        }
+
+        // Sequential run from disk
+        private void redBenchmarksFromDisk(params Benchmarkable[] benchmarks)
+        {
+            var benchmarkCounter = 0;
+            //runSequential;
+            foreach (var b in benchmarks)
+            {
+                _plotter.AddAreaSeries(b.BenchMarkName());
+                for (b.CollectionSize = MinCollectionSize;
+                    b.CollectionSize < MaxCollectionSize;
+                    b.CollectionSize *= CollectionMultiplier)
+                {
+                    updateStatusLabel("Running " + b.BenchMarkName() + " with collection size " + b.CollectionSize);
+                    var benchmark = _plotter.ReadBenchmarkFromDisk(benchmarkCounter++);
+                    Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
+                        _plotter.AddDataPoint(_lineSeriesIndex, benchmark, false)));
+                    Thread.Sleep(100);
+                    updateProgressBar(benchmarks.Length);
+                }
+                _lineSeriesIndex++;
+            }
+            UpdateRunningLabel("");
+            updateStatusLabel("Finished");
         }
 
         // "Parallel" run of all the benchmarks. Each benchmarkable will get 1 run after another. Making it easier to compare benchmarks as they run.
@@ -187,7 +220,7 @@ namespace C5.Performance.Wpf
                     updateStatusLabel("Running " + b.BenchMarkName() + " with collection size " + collectionSize);
                     var benchmark = b.Benchmark(_maxCount, _repeats, MaxExecutionTimeInSeconds, this, _runWarmups);
                     Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
-                        _plotter.AddDataPoint(_lineSeriesIndex, benchmark)));
+                        _plotter.AddDataPoint(_lineSeriesIndex, benchmark, false)));
                     Thread.Sleep(100);
                     _lineSeriesIndex++;
                     updateProgressBar(benchmarks.Length);
@@ -197,7 +230,6 @@ namespace C5.Performance.Wpf
             UpdateRunningLabel("");
             updateStatusLabel("Finished");
             Thread.Sleep(1000);
-            updateStatusLabel("");
         }
         #endregion
 

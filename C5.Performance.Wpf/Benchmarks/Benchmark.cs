@@ -5,11 +5,14 @@ namespace C5.Performance
 {
     public class Benchmark
     {
-        public string BenchmarkName { get; private set; }
-        public int CollectionSize { get; private set; }
-        public int NumberOfRuns { get; private set; }
-        public double MeanTime { get; private set; }
-        public double StandardDeviation { get; private set; }
+        public string BenchmarkName { get; set; }
+        public int CollectionSize { get; set; }
+        public int NumberOfRuns { get; set; }
+        public double MeanTime { get; set; }
+        public double StandardDeviation { get; set; }
+
+        public Benchmark()
+        {}
 
         public Benchmark(String benchmarkName, int collectionSize, double meanTime, double standardDeviation, int numberOfRuns)
         {
