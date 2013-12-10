@@ -16,12 +16,12 @@ namespace C5.UserGuideExamples.intervals
         {
             // Intervals (here sorted by weight)
             var intervals = new[] {
-                    new WeightedInterval(1.0, 10, 13, true, true),
-                    new WeightedInterval(2.0,  1,  4, true, true),
-                    new WeightedInterval(2.0,  9, 12, true, true),
-                    new WeightedInterval(4.0,  5,  8, true, true),
-                    new WeightedInterval(4.0,  2,  7, true, true),
-                    new WeightedInterval(7.0,  3, 11, true, true)
+                    new WeightedInterval(1.0, 10, 13),
+                    new WeightedInterval(2.0,  1,  4),
+                    new WeightedInterval(2.0,  9, 12),
+                    new WeightedInterval(4.0,  5,  8),
+                    new WeightedInterval(4.0,  2,  7),
+                    new WeightedInterval(7.0,  3, 11)
                 };
 
             var result = CalculateOptimalSolution(intervals);
@@ -55,6 +55,8 @@ namespace C5.UserGuideExamples.intervals
             int j;
             for (j = 0; j < count; j++)
                 p[j] = findP(ref intervals, j);
+
+            var p2 = findP(intervals);
 
             // Iteratively calculate the solution for each subproblem
             var opt = new double[count];
@@ -96,24 +98,31 @@ namespace C5.UserGuideExamples.intervals
             return j;
         }
 
+        private static int findP(WeightedInterval[] intervals)
+        {
+            for (var i = intervals.Length - 1; i >= 0; i--)
+            {
+
+            }
+            return 0;
+        }
+
         /// <summary>
         /// An interval with a floating point weight as implementation of <see cref="IInterval{T}"/>.
         /// </summary>
         public class WeightedInterval : IInterval<int>
         {
-            public WeightedInterval(double weight, int low, int high, bool lowIncluded = true, bool highIncluded = false)
+            public WeightedInterval(double weight, int low, int high)
             {
                 Weight = weight;
-                HighIncluded = highIncluded;
-                LowIncluded = lowIncluded;
                 High = high;
                 Low = low;
             }
 
             public int Low { get; private set; }
             public int High { get; private set; }
-            public bool LowIncluded { get; private set; }
-            public bool HighIncluded { get; private set; }
+            public bool LowIncluded { get { return true; } }
+            public bool HighIncluded { get { return true; } }
             public double Weight { get; private set; }
 
             public override string ToString()
