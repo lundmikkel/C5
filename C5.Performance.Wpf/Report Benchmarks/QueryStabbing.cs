@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using C5.Performance.Wpf.Benchmarks;
+using C5.Tests.intervals;
 
 namespace C5.Performance.Wpf.Report_Benchmarks
 {
@@ -21,7 +22,9 @@ namespace C5.Performance.Wpf.Report_Benchmarks
         }
 
         public override void Setup()
-        {}
+        {
+            ItemsArray.Shuffle();
+        }
 
         public override double Call(int i)
         {

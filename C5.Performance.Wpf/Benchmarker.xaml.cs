@@ -86,7 +86,7 @@ namespace C5.Performance.Wpf
                     new ConstructAddUnsorted(C, IBS), 
                     new ConstructAddUnsorted(D, IBS), 
 
-                    // Query Stabbing
+//                     Query Stabbing
                     new QueryStabbing(A, DIT), 
                     new QueryStabbing(B, DIT), 
                     new QueryStabbing(C, DIT), 
@@ -97,7 +97,7 @@ namespace C5.Performance.Wpf
                     new QueryStabbing(C, IBS), 
                     new QueryStabbing(D, IBS), 
 
-                    // Query Range
+//                     Query Range
                     new QueryRange(A, DIT), 
                     new QueryRange(B, DIT), 
                     new QueryRange(C, DIT), 
@@ -108,7 +108,7 @@ namespace C5.Performance.Wpf
                     new QueryRange(C, IBS), 
                     new QueryRange(D, IBS), 
 
-                    // Query Range Span
+//                     Query Range Span
                     new QueryRangeSpan(A, DIT), 
                     new QueryRangeSpan(B, DIT), 
                     new QueryRangeSpan(C, DIT), 
@@ -135,7 +135,7 @@ namespace C5.Performance.Wpf
         #region Benchmark Running
 
         private Boolean serializeToDisk = true;
-        private Boolean runFromDisk = true;
+        private Boolean runFromDisk = false;
         // Method that gets called when the benchmark button is used.
         private void benchmarkStart(object sender, RoutedEventArgs e)
         {
@@ -146,7 +146,7 @@ namespace C5.Performance.Wpf
             else
             {
                 // This benchmark is the one we use to compare with Sestoft's cmd line version of the tool
-                var thread = _runSequential
+                var thread = _runSequential || serializeToDisk
                     ? new Thread(() => runBenchmarks(Benchmarks))
                     : new Thread(() => runBenchmarksParallel(Benchmarks));
                 //CheckBox checkbox = (CheckBox)this.Controls.Find("checkBox" + input.toString())[0];
