@@ -95,7 +95,7 @@ namespace C5.Performance.Wpf
             PlotModel.RefreshPlot(true);
         }
 
-        private int benchmarkCounter = 0;
+        private int benchmarkCounter;
         readonly XmlSerializer x = new XmlSerializer(typeof(Benchmark));
         private static string path = "benchmarks/benchmark";
         private void writeBenchmarkToDisk(Benchmark benchmark)
