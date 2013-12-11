@@ -34,11 +34,10 @@ namespace C5
 
         /// <summary>
         /// The maximum number of intervals overlapping at a single point in the collection.
-        /// <remarks>The point of maximum overlap may not be representable with an endpoint value, as it could be between two descrete values.</remarks>
         /// </summary>
+        /// <remarks>The point of maximum depth may not be representable with an endpoint value, as it could be between two descrete values.</remarks>
         [Pure]
-        // TODO: Rename to MaximumDepth?
-        int MaximumOverlap { get; }
+        int MaximumDepth { get; }
 
         /// <summary>
         /// Indicates if the collection supports object duplicates based on reference equality.
@@ -185,7 +184,7 @@ namespace C5
             }
         }
 
-        public int MaximumOverlap
+        public int MaximumDepth
         {
             // TODO: Returns 1 when the collection is not empty, but still has no overlaps. Find a better name?
             get
@@ -196,7 +195,7 @@ namespace C5
                 Contract.Ensures(IsEmpty || Contract.Result<int>() > 0);
                 // Result cannot be larger than collection size
                 Contract.Ensures(Contract.Result<int>() <= Count);
-                // Check MNO
+                // Check result
                 Contract.Ensures(Contract.Result<int>() == IntervalCollectionContractHelper.MNO<I, T>(this));
 
                 throw new NotImplementedException();
@@ -437,7 +436,7 @@ namespace C5
 
         #endregion
 
-        #region Maximum Overlap
+        #region Maximum Depth
         #endregion
 
         #region Allows Reference Duplicates
@@ -604,7 +603,7 @@ namespace C5
         {
             Contract.Requires(intervals != null);
 
-            // Check MNO is correct
+            // Check Maximum Depth is correct
             var max = 0;
 
             // Get intervals and sort them by low, then high, endpoint

@@ -53,7 +53,7 @@ namespace C5.intervals
             // Check nodes are sorted
             Contract.Invariant(nodes(_root).IsSorted());
 
-            // Check that the MNO variables are correct for all nodes
+            // Check that the maximum depth variables are correct for all nodes
             Contract.Invariant(contractHelperCheckMnoForEachNode(_root));
         }
 
@@ -548,7 +548,7 @@ namespace C5.intervals
             public IntervalList IncludedList { get; private set; }
             public IntervalList ExcludedList { get; private set; }
 
-            // Fields for Maximum Number of Overlaps
+            // Fields for Maximum Depth
             internal int DeltaAt { get; private set; }
             internal int DeltaAfter { get; private set; }
             public int Sum { get; private set; }
@@ -572,7 +572,7 @@ namespace C5.intervals
                 Key = key;
 
                 AddHighToDelta(highIncluded);
-                UpdateMaximumOverlap();
+                UpdateMaximumDepth();
             }
 
             public Node(I interval)
@@ -592,7 +592,7 @@ namespace C5.intervals
                 AddIntervalToList(interval);
 
                 UpdateSpan();
-                UpdateMaximumOverlap();
+                UpdateMaximumDepth();
             }
 
             public Node()
@@ -661,11 +661,7 @@ namespace C5.intervals
                 }
             }
 
-            /// <summary>
-            /// Update the maximum overlap value for the successor.
-            /// </summary>
-            /// <returns>True if value changed.</returns>
-            public void UpdateMaximumOverlap()
+            public void UpdateMaximumDepth()
             {
                 // Set Max to Left's Max
                 Max = Left != null ? Left.Max : 0;
@@ -854,11 +850,11 @@ namespace C5.intervals
 
             root.Right = node.Left;
             root.UpdateSpan();
-            root.UpdateMaximumOverlap();
+            root.UpdateMaximumDepth();
 
             node.Left = root;
             node.UpdateSpan();
-            node.UpdateMaximumOverlap();
+            node.UpdateMaximumDepth();
 
             return node;
         }
@@ -875,11 +871,11 @@ namespace C5.intervals
 
             root.Left = node.Right;
             root.UpdateSpan();
-            root.UpdateMaximumOverlap();
+            root.UpdateMaximumDepth();
 
             node.Right = root;
             node.UpdateSpan();
-            node.UpdateMaximumOverlap();
+            node.UpdateMaximumDepth();
 
             return node;
         }
@@ -1194,7 +1190,7 @@ namespace C5.intervals
         public IInterval<T> Span { get { return new IntervalBase<T>(_root.Span); } }
 
         /// <inheritdoc/>
-        public int MaximumOverlap
+        public int MaximumDepth
         {
             get
             {
@@ -1450,7 +1446,7 @@ namespace C5.intervals
             if (intervalWasAdded)
             {
                 root.UpdateSpan();
-                root.UpdateMaximumOverlap();
+                root.UpdateMaximumDepth();
             }
 
             // Tree might be unbalanced after root was added, so we rotate
@@ -1497,8 +1493,8 @@ namespace C5.intervals
             if (updateSpan)
                 root.UpdateSpan();
 
-            // Update MNO
-            root.UpdateMaximumOverlap();
+            // Update maximum depth
+            root.UpdateMaximumDepth();
 
             // Tree might be unbalanced after root was added, so we rotate
             if (nodeWasAdded)
@@ -1609,7 +1605,7 @@ namespace C5.intervals
             if (intervalWasRemoved)
             {
                 root.UpdateSpan();
-                root.UpdateMaximumOverlap();
+                root.UpdateMaximumDepth();
             }
 
             // Rotate if necessary
@@ -1683,7 +1679,7 @@ namespace C5.intervals
             if (updateSpan)
                 root.UpdateSpan();
 
-            root.UpdateMaximumOverlap();
+            root.UpdateMaximumDepth();
 
             // Rotate if necessary
             if (nodeWasDeleted)
@@ -1842,6 +1838,7 @@ namespace C5.intervals
                         e.VertexFormatter.Record.Cells.Add(cell);
                     }
                 };
+
                 gw.FormatEdge += delegate(object sender, FormatEdgeEventArgs<Node, Edge<Node>> e)
                 {
                     e.EdgeFormatter.Label = new GraphvizEdgeLabel

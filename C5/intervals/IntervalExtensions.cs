@@ -496,6 +496,49 @@ namespace C5.intervals
 
             return new IntervalBase<T>(low, high);
         }
+
+        [Pure]
+        public static int MaximumDepth<I, T>(this IEnumerable<I> intervals, ref IInterval<T> intervalOfMaximumDepth, bool isSorted = true)
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            Contract.Requires(intervals != null);
+            Contract.Requires(!isSorted || intervals.IsSorted(IntervalExtensions.CreateComparer<I, T>()));
+            Contract.Ensures(Contract.Result<int>() >= 0);
+            Contract.Ensures(Contract.Result<int>() == 0 || IntervalCollectionContractHelper.CountOverlaps(((IEnumerable<IInterval<T>>) intervals), Contract.ValueAtReturn(out intervalOfMaximumDepth)) == Contract.Result<int>());
+
+            var sortedIntervals = intervals as I[] ?? intervals.ToArray();
+
+            if (!isSorted)
+                Sorting.InsertionSort(sortedIntervals, 0, sortedIntervals.Length, CreateComparer<I, T>());
+
+            var max = 0;
+
+            // Create queue sorted on high intervals
+            var comparer = ComparerFactory<IInterval<T>>.CreateComparer(CompareHigh);
+            var queue = new IntervalHeap<IInterval<T>>(comparer);
+
+            // Loop through intervals in sorted order
+            foreach (var interval in sortedIntervals)
+            {
+                // Remove all intervals from the queue not overlapping the current interval
+                while (!queue.IsEmpty && interval.CompareLowHigh(queue.FindMin()) > 0)
+                    queue.DeleteMin();
+
+                queue.Add(interval);
+
+                if (queue.Count > max)
+                {
+                    max = queue.Count;
+                    // Create a new interval when new maximum is found.
+                    // The low is the current intervals low due to the intervals being sorted.
+                    // The high is the smallest high in the queue.
+                    intervalOfMaximumDepth = new IntervalBase<T>(interval, queue.FindMin());
+                }
+            }
+
+            return max;
+        }
     }
 
     /// <summary>

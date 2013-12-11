@@ -80,10 +80,8 @@ namespace C5.intervals
             root.Equal.RemoveAll(node.Greater);
             root.Greater.RemoveAll(node.Greater);
 
-
-            // Update PMO
-            root.UpdateMaximumOverlap();
-            node.UpdateMaximumOverlap();
+            root.UpdateMaximumDepth();
+            node.UpdateMaximumDepth();
 
             return node;
         }
@@ -116,8 +114,8 @@ namespace C5.intervals
 
 
             // Update PMO
-            root.UpdateMaximumOverlap();
-            node.UpdateMaximumOverlap();
+            root.UpdateMaximumDepth();
+            node.UpdateMaximumDepth();
 
             return node;
         }
@@ -169,7 +167,7 @@ namespace C5.intervals
                 Color = RED;
             }
 
-            public void UpdateMaximumOverlap()
+            public void UpdateMaximumDepth()
             {
                 // Set Max to Left's Max
                 Max = Left != null ? Left.Max : 0;
@@ -328,7 +326,7 @@ namespace C5.intervals
             root = rotate(root);
 
             // Update PMO
-            root.UpdateMaximumOverlap();
+            root.UpdateMaximumDepth();
 
             return root;
         }
@@ -377,7 +375,7 @@ namespace C5.intervals
 
             // TODO: Figure out if this is still the correct place to put update
             // Update PMO
-            root.UpdateMaximumOverlap();
+            root.UpdateMaximumDepth();
 
             return root;
         }
@@ -451,7 +449,7 @@ namespace C5.intervals
             }
 
             // Update PMO
-            root.UpdateMaximumOverlap();
+            root.UpdateMaximumDepth();
 
             return root;
         }
@@ -495,7 +493,7 @@ namespace C5.intervals
                 root.Right = removeByHigh(root.Right, root, interval);
             }
             // Update PMO
-            root.UpdateMaximumOverlap();
+            root.UpdateMaximumDepth();
 
             return root;
         }
@@ -1243,7 +1241,7 @@ namespace C5.intervals
         }
 
         /// <inheritdoc/>
-        public int MaximumOverlap
+        public int MaximumDepth
         {
             get { return _root != null ? _root.Max : 0; }
         }

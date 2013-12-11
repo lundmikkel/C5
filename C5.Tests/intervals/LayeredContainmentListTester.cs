@@ -27,7 +27,7 @@ namespace C5.Tests.intervals
                 );
 
                 var interval = new IntervalBase<int>(1, 2, false);
-                Assert.AreEqual(interval, intervaled.IntervalOfMaximumOverlap);
+                Assert.AreEqual(interval, intervaled.IntervalOfMaximumDepth);
             }
         }
 
@@ -306,10 +306,10 @@ namespace C5.Tests.intervals
                 }
 
                 [Test]
-                public void MaximumOverlap_EmptyCollection_Returns9()
+                public void MaximumDepth_EmptyCollection_Returns9()
                 {
 
-                    Assert.AreEqual(9, ((LayeredContainmentList<IInterval<int>, int>) _intervalCollection).MaximumOverlap);
+                    Assert.AreEqual(9, ((LayeredContainmentList<IInterval<int>, int>) _intervalCollection).MaximumDepth);
                 }
             }
 

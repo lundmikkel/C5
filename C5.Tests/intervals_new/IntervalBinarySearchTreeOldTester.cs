@@ -137,7 +137,7 @@ namespace C5.Tests.intervals_new
             #region Intervals
             #endregion
 
-            #region UpdateMaximumOverlap
+            #region UpdateMaximumDepth
             #endregion
 
             #region CompareTo
@@ -222,7 +222,7 @@ namespace C5.Tests.intervals_new
 
             #endregion
 
-            #region Maximum Overlap
+            #region Maximum Depth
 
             #endregion
 

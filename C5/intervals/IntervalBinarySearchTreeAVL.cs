@@ -40,7 +40,7 @@ namespace C5.intervals
             // Check nodes are sorted
             Contract.Invariant(contractHelperCheckNodesAreSorted(_root));
 
-            // Check that the MNO variables are correct for all nodes
+            // Check that the maximum depth variables are correct for all nodes
             Contract.Invariant(contractHelperCheckMnoAndIntervalsEndingInNodeForEachNode(_root));
 
             // Check that the IBS tree invariants from the Hanson article holds.
@@ -424,7 +424,7 @@ namespace C5.intervals
             // Balance - between -2 and +2
             public sbyte Balance { get; internal set; }
 
-            // Fields for Maximum Number of Overlaps
+            // Fields for Maximum Depth
             public int DeltaAt { get; internal set; }
             public int DeltaAfter { get; internal set; }
             public int Sum { get; private set; }
@@ -461,10 +461,10 @@ namespace C5.intervals
             #region Public Methods
 
             /// <summary>
-            /// Update the maximum overlap value for the node.
+            /// Update the maximum depth value for the node.
             /// </summary>
             /// <returns>True if value changed.</returns>
-            public bool UpdateMaximumOverlap()
+            public bool UpdateMaximumDepth()
             {
                 Contract.Ensures(Contract.Result<bool>() == (Contract.OldValue(Max) != Max || Contract.OldValue(Sum) != Sum));
 
@@ -793,9 +793,9 @@ namespace C5.intervals
                     root.Equal.RemoveAll(node.Greater);
             }
 
-            // Update MNO
-            root.UpdateMaximumOverlap();
-            node.UpdateMaximumOverlap();
+            // Update maximum depth
+            root.UpdateMaximumDepth();
+            node.UpdateMaximumDepth();
 
             return node;
         }
@@ -871,9 +871,9 @@ namespace C5.intervals
                     root.Equal.RemoveAll(node.Less);
             }
 
-            // Update MNO
-            root.UpdateMaximumOverlap();
-            node.UpdateMaximumOverlap();
+            // Update maximum depth
+            root.UpdateMaximumDepth();
+            node.UpdateMaximumDepth();
 
             return node;
         }
@@ -1090,54 +1090,54 @@ namespace C5.intervals
 
         #endregion
 
-        #region MNO
+        #region maximum depth
 
         /// <inheritdoc/>
-        public int MaximumOverlap
+        public int MaximumDepth
         {
             get { return _root != null ? _root.Max : 0; }
         }
 
         /// <summary>
-        /// Recursively search for the split node, while updating the maximum overlap on the way
+        /// Recursively search for the split node, while updating the maximum depth on the way
         /// back if necessary.
         /// </summary>
         /// <param name="root">The root for the tree to search.</param>
         /// <param name="interval">The interval whose endpoints we search for.</param>
-        /// <returns>True if we need to update the maximum overlap for the parent node.</returns>
-        private static bool updateMaximumOverlap(Node root, IInterval<T> interval)
+        /// <returns>True if we need to update the maximum depth for the parent node.</returns>
+        private static bool updateMaximumDepth(Node root, IInterval<T> interval)
         {
             Contract.Requires(root != null);
             Contract.Requires(interval != null);
 
-            // Search left for split node and update MNO if necessary
+            // Search left for split node and update maximum depth if necessary
             if (interval.High.CompareTo(root.Key) < 0)
-                return updateMaximumOverlap(root.Left, interval) && root.UpdateMaximumOverlap();
+                return updateMaximumDepth(root.Left, interval) && root.UpdateMaximumDepth();
 
-            // Search right for split node and update MNO if necessary
+            // Search right for split node and update maximum depth if necessary
             if (interval.Low.CompareTo(root.Key) > 0)
-                return updateMaximumOverlap(root.Right, interval) && root.UpdateMaximumOverlap();
+                return updateMaximumDepth(root.Right, interval) && root.UpdateMaximumDepth();
 
-            // Return true if MNO has changed for either endpoint
-            return updateMaximumOverlap(root, interval.High) | updateMaximumOverlap(root, interval.Low);
+            // Return true if maximum depth has changed for either endpoint
+            return updateMaximumDepth(root, interval.High) | updateMaximumDepth(root, interval.Low);
         }
 
-        private static bool updateMaximumOverlap(Node root, T key)
+        private static bool updateMaximumDepth(Node root, T key)
         {
             Contract.Requires(root != null);
 
             var compare = key.CompareTo(root.Key);
 
-            // Search left for key and update MNO if necessary
+            // Search left for key and update maximum depth if necessary
             if (compare < 0)
-                return updateMaximumOverlap(root.Left, key) && root.UpdateMaximumOverlap();
+                return updateMaximumDepth(root.Left, key) && root.UpdateMaximumDepth();
 
-            // Search right for key and update MNO if necessary
+            // Search right for key and update maximum depth if necessary
             if (compare > 0)
-                return updateMaximumOverlap(root.Right, key) && root.UpdateMaximumOverlap();
+                return updateMaximumDepth(root.Right, key) && root.UpdateMaximumDepth();
 
-            // Update MNO when low is found
-            return root.UpdateMaximumOverlap();
+            // Update maximum depth when low is found
+            return root.UpdateMaximumDepth();
         }
 
         #endregion
@@ -1481,20 +1481,20 @@ namespace C5.intervals
                 if (_span != null && !_span.Contains(interval))
                     _span = _span.JoinedSpan(interval);
 
-                // Update MNO delta for low
+                // Update maximum depth delta for low
                 if (interval.LowIncluded)
                     lowNode.DeltaAt++;
                 else
                     lowNode.DeltaAfter++;
 
-                // Update MNO delta for high
+                // Update maximum depth delta for high
                 if (!interval.HighIncluded)
                     highNode.DeltaAt--;
                 else
                     highNode.DeltaAfter--;
 
-                // Update MNO
-                updateMaximumOverlap(_root, interval);
+                // Update maximum depth
+                updateMaximumDepth(_root, interval);
 
                 lowNode.IntervalsEndingInNode.Add(interval);
                 highNode.IntervalsEndingInNode.Add(interval);
@@ -1503,7 +1503,7 @@ namespace C5.intervals
                 raiseForAdd(interval);
             }
 
-            // TODO: Add event for change in MNO
+            // TODO: Add event for change in maximum depth
 
             return intervalWasAdded;
         }
@@ -1730,12 +1730,12 @@ namespace C5.intervals
                 if (!_span.StrictlyContains(interval))
                     _span = null;
 
-                // Update MNO delta for low
+                // Update maximum depth delta for low
                 if (interval.LowIncluded)
                     lowNode.DeltaAt--;
                 else
                     lowNode.DeltaAfter--;
-                // Update MNO delta for high
+                // Update maximum depth delta for high
                 if (!interval.HighIncluded)
                     highNode.DeltaAt++;
                 else
@@ -1744,8 +1744,8 @@ namespace C5.intervals
                 lowNode.IntervalsEndingInNode.Remove(interval);
                 highNode.IntervalsEndingInNode.Remove(interval);
 
-                // Update MNO
-                updateMaximumOverlap(_root, interval);
+                // Update maximum depth
+                updateMaximumDepth(_root, interval);
 
                 // Check for unnecessary endpoint nodes, if interval was actually removed
                 if (lowNode.IntervalsEndingInNode.IsEmpty)
@@ -1770,7 +1770,7 @@ namespace C5.intervals
                 raiseForRemove(interval);
             }
 
-            // TODO: Add event for change in MNO
+            // TODO: Add event for change in maximum depth
 
             return intervalWasRemoved;
         }
@@ -1912,7 +1912,7 @@ namespace C5.intervals
                 // Swap root and successor nodes
                 root.Swap(successor);
 
-                updateMaximumOverlap(root.Right, successor.Key);
+                updateMaximumDepth(root.Right, successor.Key);
 
                 // Remove the successor node
                 updateBalance = false;
@@ -1930,7 +1930,7 @@ namespace C5.intervals
                         addHigh(interval, root, leftUp);
                 }
 
-                root.UpdateMaximumOverlap();
+                root.UpdateMaximumDepth();
             }
             else
             {

@@ -24,7 +24,7 @@ namespace C5.Ucsc
             var lclist = new LayeredContainmentList<UcscHumanGenomeParser.SequenceInterval, int>(intervals);
             Console.Out.WriteLine(lclist.Count);
             Console.Out.WriteLine(lclist.ContainmentDegree);
-            Console.Out.WriteLine(lclist.MaximumOverlap);
+            Console.Out.WriteLine(lclist.MaximumDepth);
             Console.Out.WriteLine(lclist.CountOverlaps(270000000));
             //*/
 

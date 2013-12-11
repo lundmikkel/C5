@@ -13,7 +13,7 @@ namespace C5.intervals
         private readonly I[] _lowSorted, _highSorted;
         private readonly int _count;
         private readonly IInterval<T> _span;
-        private int _maximumNumberOfOverlaps = -1;
+        private int _maximumDepth = -1;
 
         /// <summary>
         /// Create a Binary Interval Search using a collection of intervals.
@@ -101,20 +101,19 @@ namespace C5.intervals
         public IInterval<T> Span { get { return _span; } }
 
         /// <inheritdoc/>
-        public int MaximumOverlap
+        public int MaximumDepth
         {
             get
             {
-                if (_maximumNumberOfOverlaps < 0)
-                    _maximumNumberOfOverlaps = findMaximumOverlap();
+                if (_maximumDepth < 0)
+                    _maximumDepth = findMaximumDepth();
 
-                return _maximumNumberOfOverlaps;
+                return _maximumDepth;
             }
         }
 
-        private int findMaximumOverlap()
+        private int findMaximumDepth()
         {
-            // Check MNO is correct
             var max = 0;
 
             // Get intervals and sort them by low, then high, endpoint

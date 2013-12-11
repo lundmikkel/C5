@@ -11,8 +11,8 @@ namespace C5.UserGuideExamples.intervals
         public static void Main(string[] args)
         {
             Console.Out.WriteLine(train());
-            Console.Out.WriteLine("MNO of Set A " + new DynamicIntervalTree<TrainRide, Double>(ParseTrainSetA().SelectMany(c => c).ToArray()).MaximumOverlap);
-            Console.Out.WriteLine("MNO of Set B " + new DynamicIntervalTree<TrainRide, Double>(ParseTrainSetB().ToArray()).MaximumOverlap);
+            Console.Out.WriteLine("Maximum depth of Set A " + new DynamicIntervalTree<TrainRide, Double>(ParseTrainSetA().SelectMany(c => c).ToArray()).MaximumDepth);
+            Console.Out.WriteLine("Maximum depth of Set B " + new DynamicIntervalTree<TrainRide, Double>(ParseTrainSetB().ToArray()).MaximumDepth);
 
             var trains = ParseTrainSetA().SelectMany(c => c).ToArray();
             Console.Out.WriteLine("Found {0} trains in the data file.", trains.Count());

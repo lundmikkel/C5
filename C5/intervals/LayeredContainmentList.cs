@@ -29,10 +29,9 @@ namespace C5.intervals
 
         private readonly IInterval<T> _span;
 
-        // MNO
-        private int _maximumNumberOfOverlaps = -1;
-        private IInterval<T> _intervalOfMaximumOverlap;
-        readonly IComparer<IInterval<T>> _comparer = ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareHigh);
+        // Maximum Depth
+        private int _maximumDepth = -1;
+        private IInterval<T> _intervalOfMaximumDepth;
 
         #endregion
 
@@ -382,39 +381,38 @@ namespace C5.intervals
         /// <inheritdoc/>
         public IInterval<T> Span { get { return _span; } }
 
-        #region MNO
+        #region Maximum Depth
 
         /// <inheritdoc/>
-        public int MaximumOverlap
+        public int MaximumDepth
         {
             get
             {
                 Contract.Ensures(Contract.Result<int>() >= _layerCount);
 
-                if (_maximumNumberOfOverlaps < 0)
-                    _maximumNumberOfOverlaps = findMaximumOverlap(Sorted, ref _intervalOfMaximumOverlap);
+                if (_maximumDepth < 0)
+                    _maximumDepth = Sorted.MaximumDepth(ref _intervalOfMaximumDepth);
 
-                return _maximumNumberOfOverlaps;
+                return _maximumDepth;
             }
         }
 
         /// <summary>
-        /// Get the interval in which the maximum number of overlaps is.
+        /// Get the interval in which the maximum depth is.
         /// </summary>
-        /// <exception cref="InvalidOperationException">If collection is empty.</exception>
-        public IInterval<T> IntervalOfMaximumOverlap
+        public IInterval<T> IntervalOfMaximumDepth
         {
             get
             {
-                Contract.Ensures(_maximumNumberOfOverlaps >= _layerCount);
+                Contract.Ensures(_maximumDepth >= _layerCount);
 
-                // If the MNO is below 0, then the interval of maximum overlap has not been set yet
-                Contract.Assert(_maximumNumberOfOverlaps >= 0 || _intervalOfMaximumOverlap == null);
+                // If the Maximum Depth is below 0, then the interval of maximum depth has not been set yet
+                Contract.Assert(_maximumDepth >= 0 || _intervalOfMaximumDepth == null);
 
-                if (_maximumNumberOfOverlaps < 0)
-                    _maximumNumberOfOverlaps = findMaximumOverlap(Sorted, ref _intervalOfMaximumOverlap);
+                if (_maximumDepth < 0)
+                    _maximumDepth = Sorted.MaximumDepth(ref _intervalOfMaximumDepth);
 
-                return _intervalOfMaximumOverlap;
+                return _intervalOfMaximumDepth;
             }
         }
 
@@ -422,84 +420,50 @@ namespace C5.intervals
         /// Find the maximum number of overlaps for all intervals overlapping the query interval.
         /// </summary>
         /// <param name="query">The query interval.</param>
-        /// <remarks>The query interval is not in the maximum number of overlaps. If only one interval
+        /// <remarks>The query interval is not in the maximum depth. If only one interval
         /// overlaps the query, the result will therefore be 1.</remarks>
-        /// <returns>The maximum number of overlaps</returns>
-        public int FindMaximumOverlap(IInterval<T> query)
+        /// <returns>The maximum depth.</returns>
+        public int FindMaximumDepth(IInterval<T> query)
         {
             Contract.Requires(query != null);
             Contract.Ensures(Contract.Result<int>() >= 0);
 
-            IInterval<T> intervalOfMaximumOverlap = null;
-            return findMaximumOverlap(FindOverlapsSorted(query), ref intervalOfMaximumOverlap);
+            IInterval<T> intervalOfMaximumDepth = null;
+            return FindOverlapsSorted(query).MaximumDepth(ref intervalOfMaximumDepth);
         }
 
         /// <summary>
-        /// Find the maximum number of overlaps for all intervals that match the filter and overlap the query interval.
+        /// Find the maximum depth for all intervals that match the filter and overlap the query interval.
         /// </summary>
         /// <param name="query">The query interval.</param>
         /// <param name="filter">A filter.</param>
-        /// <remarks>The query interval is not in the maximum number of overlaps. If only one interval
+        /// <remarks>The query interval is not in the maximum depth. If only one interval
         /// overlaps the query, the result will therefore be 1.</remarks>
-        /// <returns>The maximum number of overlaps</returns>
-        public int FindMaximumOverlap(IInterval<T> query, Func<I, bool> filter)
+        /// <returns>The maximum depth.</returns>
+        public int FindMaximumDepth(IInterval<T> query, Func<I, bool> filter)
         {
             Contract.Requires(query != null);
             Contract.Requires(filter != null);
             Contract.Ensures(Contract.Result<int>() >= 0);
 
-            IInterval<T> intervalOfMaximumOverlap = null;
-            return findMaximumOverlap(FindOverlapsSorted(query).Where(filter), ref intervalOfMaximumOverlap);
+            IInterval<T> intervalOfMaximumDepth = null;
+            return FindOverlapsSorted(query).Where(filter).MaximumDepth(ref intervalOfMaximumDepth);
         }
 
         /// <summary>
-        /// Find the maximum number of overlaps for all intervals that match the filter.
+        /// Find the maximum depth for all intervals that match the filter.
         /// </summary>
         /// <param name="filter">A filter.</param>
-        /// <remarks>The query interval is not in the maximum number of overlaps. If only one interval
+        /// <remarks>The query interval is not in the maximum depth. If only one interval
         /// overlaps the query, the result will therefore be 1.</remarks>
-        /// <returns>The maximum number of overlaps</returns>
-        public int FindMaximumOverlap(Func<I, bool> filter)
+        /// <returns>The maximum depth.</returns>
+        public int FindMaximumDepth(Func<I, bool> filter)
         {
             Contract.Requires(filter != null);
             Contract.Ensures(Contract.Result<int>() >= 0);
 
-            IInterval<T> intervalOfMaximumOverlap = null;
-            return findMaximumOverlap(Sorted.Where(filter), ref intervalOfMaximumOverlap);
-        }
-
-        private int findMaximumOverlap(IEnumerable<I> sortedIntervals, ref IInterval<T> intervalOfMaximumOverlap)
-        {
-            Contract.Requires(sortedIntervals != null);
-            Contract.Requires(_comparer != null);
-            Contract.Ensures(Contract.Result<int>() >= 0);
-            Contract.Ensures(Contract.Result<int>() == 0 || IntervalCollectionContractHelper.CountOverlaps((IEnumerable<IInterval<T>>) this, Contract.ValueAtReturn(out intervalOfMaximumOverlap)) == Contract.Result<int>());
-
-            var max = 0;
-
-            // Create queue sorted on high intervals
-            var queue = new IntervalHeap<IInterval<T>>(_comparer);
-
-            // Loop through intervals in sorted order
-            foreach (var interval in sortedIntervals)
-            {
-                // Remove all intervals from the queue not overlapping the current interval
-                while (!queue.IsEmpty && interval.CompareLowHigh(queue.FindMin()) > 0)
-                    queue.DeleteMin();
-
-                queue.Add(interval);
-
-                if (queue.Count > max)
-                {
-                    max = queue.Count;
-                    // Create a new interval when new maximum is found.
-                    // The low is the current intervals low due to the intervals being sorted.
-                    // The high is the smallest high in the queue.
-                    intervalOfMaximumOverlap = new IntervalBase<T>(interval, queue.FindMin());
-                }
-            }
-
-            return max;
+            IInterval<T> intervalOfMaximumDepth = null;
+            return Sorted.Where(filter).MaximumDepth(ref intervalOfMaximumDepth);
         }
 
         #endregion

@@ -186,7 +186,7 @@ namespace C5.intervals
         public IInterval<T> Span { get { return _span; } }
 
         /// <inheritdoc/>
-        public int MaximumOverlap
+        public int MaximumDepth
         {
             get { throw new NotSupportedException(); }
         }

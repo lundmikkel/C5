@@ -588,60 +588,60 @@ namespace C5.Tests.intervals_new
 
         #endregion
 
-        #region Maximum Overlap
+        #region Maximum Depth
 
         [Test]
-        [Category("Maximum Overlap")]
-        public void MaximumOverlap_EmptyCollection_Zero()
+        [Category("Maximum Depth")]
+        public void MaximumDepth_EmptyCollection_Zero()
         {
             var collection = CreateEmptyCollection<Interval, int>();
 
-            Assert.AreEqual(0, collection.MaximumOverlap);
+            Assert.AreEqual(0, collection.MaximumDepth);
         }
 
         [Test]
-        [Category("Maximum Overlap")]
-        public void MaximumOverlap_SingleInterval_One()
+        [Category("Maximum Depth")]
+        public void MaximumDepth_SingleInterval_One()
         {
             var interval = SingleInterval();
             var collection = CreateCollection<Interval, int>(interval);
 
-            Assert.AreEqual(1, collection.MaximumOverlap);
+            Assert.AreEqual(1, collection.MaximumDepth);
         }
 
         [Test]
-        [Category("Maximum Overlap")]
-        public void MaximumOverlap_SingleObject_CountOrOne()
+        [Category("Maximum Depth")]
+        public void MaximumDepth_SingleObject_CountOrOne()
         {
             var intervals = SingleObject();
             var collection = CreateCollection<Interval, int>(intervals);
 
-            Assert.AreEqual(collection.AllowsReferenceDuplicates ? Count : 1, collection.MaximumOverlap);
+            Assert.AreEqual(collection.AllowsReferenceDuplicates ? Count : 1, collection.MaximumDepth);
         }
 
         [Test]
-        [Category("Maximum Overlap")]
-        public void MaximumOverlap_DuplicateIntervals_Count()
+        [Category("Maximum Depth")]
+        public void MaximumDepth_DuplicateIntervals_Count()
         {
             var intervals = DuplicateIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
 
-            Assert.AreEqual(Count, collection.MaximumOverlap);
+            Assert.AreEqual(Count, collection.MaximumDepth);
         }
 
         [Test]
-        [Category("Maximum Overlap")]
-        public void MaximumOverlap_NonOverlappingIntervals_One()
+        [Category("Maximum Depth")]
+        public void MaximumDepth_NonOverlappingIntervals_One()
         {
             var intervals = NonOverlappingIntervals(Count);
             var collection = CreateCollection<Interval, int>(intervals);
 
-            Assert.AreEqual(1, collection.MaximumOverlap);
+            Assert.AreEqual(1, collection.MaximumDepth);
         }
 
         [Test]
-        [Category("Maximum Overlap")]
-        public void MaximumOverlap_BetweenDescreteValues_Two()
+        [Category("Maximum Depth")]
+        public void MaximumDepth_BetweenDescreteValues_Two()
         {
             var intervals = new[]
                 {
@@ -650,12 +650,12 @@ namespace C5.Tests.intervals_new
                 };
             var collection = CreateCollection<Interval, int>(intervals);
 
-            Assert.AreEqual(2, collection.MaximumOverlap);
+            Assert.AreEqual(2, collection.MaximumDepth);
         }
 
         [Test]
-        [Category("Maximum Overlap")]
-        public void MaximumOverlap_ManyOverlappingIntervals_Four()
+        [Category("Maximum Depth")]
+        public void MaximumDepth_ManyOverlappingIntervals_Four()
         {
             // 0    5   10   15
             //             |
@@ -689,12 +689,12 @@ namespace C5.Tests.intervals_new
                 };
             var collection = CreateCollection<Interval, int>(intervals);
 
-            Assert.AreEqual(4, collection.MaximumOverlap);
+            Assert.AreEqual(4, collection.MaximumDepth);
         }
 
         [Test]
-        [Category("Maximum Overlap")]
-        public void MaximumOverlap_AllContainedIntervals_Count()
+        [Category("Maximum Depth")]
+        public void MaximumDepth_AllContainedIntervals_Count()
         {
             // 0    5   10   15   20
             // 
@@ -711,7 +711,7 @@ namespace C5.Tests.intervals_new
             var intervals = Enumerable.Range(0, 10).Select(i => new Interval(i, 20 - i, IntervalType.Closed)).ToArray();
             var collection = CreateCollection<Interval, int>(intervals);
 
-            Assert.AreEqual(collection.Count, collection.MaximumOverlap);
+            Assert.AreEqual(collection.Count, collection.MaximumDepth);
         }
 
         #endregion
@@ -1645,7 +1645,7 @@ namespace C5.Tests.intervals_new
             var span = new Interval(int.MinValue, 20, false, true);
             Assert.True(span.IntervalEquals(collection.Span));
 
-            Assert.AreEqual(5, collection.MaximumOverlap);
+            Assert.AreEqual(5, collection.MaximumDepth);
 
             if (!collection.IsReadOnly)
             {
@@ -1692,7 +1692,7 @@ namespace C5.Tests.intervals_new
 
                     interval = set.Choose();
                     var span = collection.Span;
-                    var mno = collection.MaximumOverlap;
+                    var mno = collection.MaximumDepth;
                     Assert.AreEqual(collection.FindOverlaps(interval).Count(), collection.CountOverlaps(interval));
                     Assert.AreEqual(collection.FindOverlaps(interval.Low).Count(), collection.CountOverlaps(interval.Low));
                     sum += collection.FindOverlaps(interval).Count();

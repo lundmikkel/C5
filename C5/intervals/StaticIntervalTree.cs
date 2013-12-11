@@ -51,7 +51,9 @@ namespace C5.intervals
         private readonly Node _root;
         private readonly int _count;
         private readonly IInterval<T> _span;
-        private int _maximumOverlap = -1;
+        private int _maximumDepth = -1;
+        // TODO: Expose in a property
+        private IInterval<T> _intervalOfMaximumDepth;
 
         #endregion
 
@@ -300,43 +302,18 @@ namespace C5.intervals
 
         #endregion
 
-        #region MNO
+        #region Maximum Depth
 
         /// <inheritdoc/>
-        public int MaximumOverlap
+        public int MaximumDepth
         {
             get
             {
-                if (_maximumOverlap < 0)
-                    _maximumOverlap = findMaximumOverlap();
+                if (_maximumDepth < 0)
+                    _maximumDepth = ToArray().MaximumDepth(ref _intervalOfMaximumDepth, false);
 
-                return _maximumOverlap;
+                return _maximumDepth;
             }
-        }
-
-        private int findMaximumOverlap()
-        {
-            // Check MNO is correct
-            var max = 0;
-
-            // Create queue sorted on high intervals
-            var highComparer = ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareHigh);
-            var queue = new IntervalHeap<IInterval<T>>(highComparer);
-
-            // Loop through intervals in sorted order
-            foreach (var interval in ToArray())
-            {
-                // Remove all intervals from the queue not overlapping the current interval
-                while (!queue.IsEmpty && interval.CompareLowHigh(queue.FindMin()) > 0)
-                    queue.DeleteMin();
-
-                queue.Add(interval);
-
-                if (queue.Count > max)
-                    max = queue.Count;
-            }
-
-            return max;
         }
 
         #endregion
