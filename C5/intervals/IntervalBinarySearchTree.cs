@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using QuickGraph;
-using QuickGraph.Graphviz;
-using QuickGraph.Graphviz.Dot;
 
 namespace C5.intervals
 {
@@ -772,129 +769,6 @@ namespace C5.intervals
                 set.Add(enumerator.Current);
 
             return set.GetEnumerator();
-        }
-
-        #endregion
-
-        #region GraphViz
-
-        private static IEnumerable<Node> nodeEnumerator(Node root)
-        {
-            if (root == null)
-                yield break;
-
-            foreach (var node in nodeEnumerator(root.Left))
-                yield return node;
-
-            yield return root;
-
-            foreach (var node in nodeEnumerator(root.Right))
-                yield return node;
-        }
-
-        /// <summary>
-        /// Get a string representation of the tree in GraphViz dot format using QuickGraph.
-        /// </summary>
-        /// <returns>GraphViz string.</returns>
-        public string QuickGraph()
-        {
-            var graph = new AdjacencyGraph<Node, Edge<Node>>();
-
-            if (_root != null)
-            {
-                var node = new Node(default(T));
-                graph.AddVertex(node);
-                graph.AddEdge(new Edge<Node>(node, _root));
-            }
-
-            foreach (var node in nodeEnumerator(_root))
-            {
-                graph.AddVertex(node);
-
-                if (node.Left != null)
-                {
-                    graph.AddVertex(node.Left);
-                    graph.AddEdge(new Edge<Node>(node, node.Left));
-                }
-
-                if (node.Right != null)
-                {
-                    graph.AddVertex(node.Right);
-                    graph.AddEdge(new Edge<Node>(node, node.Right));
-                }
-            }
-
-            var gw = new GraphvizAlgorithm<Node, Edge<Node>>(graph);
-
-            gw.FormatVertex += delegate(object sender, FormatVertexEventArgs<Node> e)
-            {
-                e.VertexFormatter.Shape = GraphvizVertexShape.Record;
-                e.VertexFormatter.Style = GraphvizVertexStyle.Rounded;
-                e.VertexFormatter.Font = new GraphvizFont("consola", 12);
-
-                // Generate main cell
-                var cell = new GraphvizRecordCell();
-                // Add Key in top cell
-                cell.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Key.ToString() });
-                // Add CheckIBSLessInvariant, Equal and Greater set in bottom cell
-                var bottom = new GraphvizRecordCell();
-                bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Less.ToString() });
-                bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Equal.ToString() });
-                bottom.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Greater.ToString() });
-                cell.Cells.Add(bottom);
-                // Add cell to record
-                e.VertexFormatter.Record.Cells.Add(cell);
-            };
-            gw.FormatEdge += delegate(object sender, FormatEdgeEventArgs<Node, Edge<Node>> e)
-                {
-                    e.EdgeFormatter.Label = new GraphvizEdgeLabel { Value = e.Edge.Target.Balance.ToString() };
-                };
-
-
-            return gw.Generate();
-        }
-
-        /// <summary>
-        /// Print the tree structure in Graphviz format
-        /// </summary>
-        /// <returns></returns>
-        public string Graphviz()
-        {
-            return "digraph IntervalBinarySearchTree {\n"
-                + "\tnode [shape=record, style=rounded];\n"
-                + graphviz(_root, "root", null)
-                + "}\n";
-        }
-
-        private int nodeCounter;
-        private int nullCounter;
-
-        private string graphviz(Node root, string parent, string direction)
-        {
-            int id;
-            if (root == null)
-            {
-                id = nullCounter++;
-                return String.Format("\tleaf{0} [shape=point];\n", id) +
-                    String.Format("\t{0}:{1} -> leaf{2};\n", parent, direction, id);
-            }
-
-            id = nodeCounter++;
-            var color = isRed(root) ? "red" : "black";
-            var rootString = direction == null ? "" : String.Format("\t{0} -> struct{1}:n [color={2}];\n", parent, id, color);
-
-            return
-                // Creates the structid: structid [label="<key> keyValue|{lessSet|equalSet|greaterSet}|{<idleft> leftChild|<idright> rightChild}"];
-                String.Format("\tstruct{0} [fontname=consola, label=\"{{<key> {1}|{{{2}|{3}|{4}}}}}\"];\n", id, root.Key, root.Less, root.Equal, root.Greater)
-
-                // Links the parents leftChild to nodeid: parent:left -> structid:key;
-                + rootString
-
-                // Calls graphviz() recursively on leftChild
-                + graphviz(root.Left, "struct" + id, "left")
-
-                // Calls graphviz() recursively on rightChild
-                + graphviz(root.Right, "struct" + id, "right");
         }
 
         #endregion

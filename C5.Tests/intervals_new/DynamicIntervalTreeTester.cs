@@ -112,7 +112,6 @@ namespace C5.Tests.intervals_new
                 _collection.Add(new IntervalBase<int>(12));
                 _collection.FindOverlaps(new IntervalBase<int>(9, 12, IntervalType.LowIncluded));
 
-                Console.Out.WriteLine(_collection.QuickGraph);
             }
         }
 
@@ -168,8 +167,6 @@ namespace C5.Tests.intervals_new
                 foreach (var interval in intervals)
                     collection.Add(interval);
 
-                Console.Out.WriteLine(collection.QuickGraph);
-
                 Assert.AreEqual(0, collection.FindOverlaps(-1).Count());
                 Assert.AreEqual(0, collection.FindOverlaps(count * 2 + 2).Count());
             }
@@ -191,70 +188,60 @@ namespace C5.Tests.intervals_new
             public void FindOverlaps_Middle()
             {
                 _collection.FindOverlaps(new IntervalBase<int>(30, 32));
-                Console.Out.WriteLine(_collection.QuickGraph);
             }
 
             [Test]
             public void FindOverlaps_RightLeft()
             {
                 _collection.FindOverlaps(new IntervalBase<int>(32, 33));
-                Console.Out.WriteLine(_collection.QuickGraph);
             }
 
             [Test]
             public void FindOverlaps_RightOff()
             {
                 _collection.FindOverlaps(new IntervalBase<int>(61, 62));
-                Console.Out.WriteLine(_collection.QuickGraph);
             }
 
             [Test]
             public void FindOverlaps_Right()
             {
                 _collection.FindOverlaps(new IntervalBase<int>(60, 61));
-                Console.Out.WriteLine(_collection.QuickGraph);
             }
 
             [Test]
             public void FindOverlaps_LeftMiddle()
             {
                 _collection.FindOverlaps(new IntervalBase<int>(22, 24));
-                Console.Out.WriteLine(_collection.QuickGraph);
             }
 
             [Test]
             public void FindOverlapsStabbing_LeftMiddle()
             {
                 _collection.FindOverlaps(new IntervalBase<int>(23));
-                Console.Out.WriteLine(_collection.QuickGraph);
             }
 
             [Test]
             public void FindOverlapsStabbing_Middle()
             {
                 _collection.FindOverlaps(new IntervalBase<int>(31));
-                Console.Out.WriteLine(_collection.QuickGraph);
             }
 
             [Test]
             public void FindOverlaps_LeftRightLeft()
             {
                 _collection.FindOverlaps(new IntervalBase<int>(16, 17));
-                Console.Out.WriteLine(_collection.QuickGraph);
             }
 
             [Test]
             public void FindOverlaps_Left()
             {
                 _collection.FindOverlaps(new IntervalBase<int>(0, 1));
-                Console.Out.WriteLine(_collection.QuickGraph);
             }
 
             [Test]
             public void FindOverlaps_RightMiddle()
             {
                 _collection.FindOverlaps(new IntervalBase<int>(38, 40));
-                Console.Out.WriteLine(_collection.QuickGraph);
             }
         }
 
