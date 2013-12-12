@@ -134,19 +134,19 @@ namespace C5.Performance.Wpf
 
         #region Benchmark Running
 
-        private Boolean serializeToDisk = true;
-        private Boolean runFromDisk = false;
+        private Boolean SerializeToDisk = true;
+        private Boolean RunFromDisk = false;
         // Method that gets called when the benchmark button is used.
         private void benchmarkStart(object sender, RoutedEventArgs e)
         {
             runSequentialCheckBox.IsEnabled = false;
 
-            if (runFromDisk)
+            if (RunFromDisk)
                 redBenchmarksFromDisk(Benchmarks); // Is only reliable if you have serialized a sequential run
             else
             {
                 // This benchmark is the one we use to compare with Sestoft's cmd line version of the tool
-                var thread = _runSequential || serializeToDisk
+                var thread = _runSequential || SerializeToDisk
                     ? new Thread(() => runBenchmarks(Benchmarks))
                     : new Thread(() => runBenchmarksParallel(Benchmarks));
                 //CheckBox checkbox = (CheckBox)this.Controls.Find("checkBox" + input.toString())[0];
@@ -168,7 +168,7 @@ namespace C5.Performance.Wpf
                     updateStatusLabel("Running " + b.BenchMarkName() + " with collection size " + b.CollectionSize);
                     var benchmark = b.Benchmark(_maxCount, _repeats, MaxExecutionTimeInSeconds, this, _runWarmups);
                     Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
-                        _plotter.AddDataPoint(_lineSeriesIndex, benchmark, serializeToDisk)));
+                        _plotter.AddDataPoint(_lineSeriesIndex, benchmark, SerializeToDisk)));
                     Thread.Sleep(100);
                     updateProgressBar(benchmarks.Length);
                 }

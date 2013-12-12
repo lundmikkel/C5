@@ -1282,7 +1282,6 @@ namespace C5.intervals
                     if (root.Greater != null && !root.Greater.IsEmpty)
                         foreach (var interval in root.Greater)
                             yield return interval;
-
                     // Iteratively travese right subtree
                     root = root.Right;
                 }
@@ -1719,7 +1718,7 @@ namespace C5.intervals
             // Remove high endpoint
             removeHigh(interval, _root, null, ref intervalWasRemoved, ref highNode);
 
-            // Increase counters and raise event if interval was added
+            // Increase counters and raise event if interval was removed
             if (intervalWasRemoved)
             {
                 // Invalidate span if necessary
@@ -1753,7 +1752,8 @@ namespace C5.intervals
                     Contract.Assert(!Contract.Exists(nodes(_root), n => n.Key.Equals(interval.Low)));
                 }
 
-                if (highNode.IntervalsEndingInNode.IsEmpty)
+                // Do not try to remove the interval again if it is a closed interval over just one key
+                if (highNode.IntervalsEndingInNode.IsEmpty && !(interval.LowIncluded && interval.HighIncluded && interval.CompareEndpointsValues() == 0))
                 {
                     var updateBalanace = false;
                     _root = removeNodeWithKey(interval.High, _root, ref updateBalanace);
