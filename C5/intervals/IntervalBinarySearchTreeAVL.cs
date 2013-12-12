@@ -1288,17 +1288,8 @@ namespace C5.intervals
                 // Search in left subtree
                 else if (compareTo < 0)
                 {
-                    if (root.Less != null && !root.Less.IsEmpty)
-                        foreach (var interval in root.Less)
-                            yield return interval;
-
-                    if (root.Equal != null && !root.Equal.IsEmpty)
-                        foreach (var interval in root.Equal)
-                            yield return interval;
-
-                    if (root.Greater != null && !root.Greater.IsEmpty)
-                        foreach (var interval in root.Greater)
-                            yield return interval;
+                    foreach (var interval in root.IntervalsEndingInNode)
+                        yield return interval;
 
                     // Recursively add all intervals in right subtree as they must be
                     // contained by [root.Key:splitNode]
@@ -1351,17 +1342,8 @@ namespace C5.intervals
                 {
                     // As our query interval contains the interval [root.Key:splitNode]
                     // all intervals in root can be returned without any checks
-                    if (root.Less != null && !root.Less.IsEmpty)
-                        foreach (var interval in root.Less)
-                            yield return interval;
-
-                    if (root.Equal != null && !root.Equal.IsEmpty)
-                        foreach (var interval in root.Equal)
-                            yield return interval;
-
-                    if (root.Greater != null && !root.Greater.IsEmpty)
-                        foreach (var interval in root.Greater)
-                            yield return interval;
+                    foreach (var interval in root.IntervalsEndingInNode)
+                        yield return interval;
 
                     // Recursively add all intervals in right subtree as they must be
                     // contained by [root.Key:splitNode]
