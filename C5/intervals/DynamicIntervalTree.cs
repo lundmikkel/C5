@@ -1228,6 +1228,8 @@ namespace C5.intervals
             while (i > 0)
             {
                 var root = stack[--i];
+                // Set to null to avoid memory leak
+                stack[i] = null;
 
 #if DEBUG
                 root.Visit = _visit;
@@ -1281,6 +1283,8 @@ namespace C5.intervals
             while (i > 0)
             {
                 var root = stack[--i];
+                // Set to null to avoid memory leak
+                stack[i] = null;
 
 #if DEBUG
                 root.Visit = _visit;

@@ -1086,7 +1086,7 @@ namespace C5.intervals
 
         #endregion
 
-        #region maximum depth
+        #region Maximum Depth
 
         /// <inheritdoc/>
         public int MaximumDepth
@@ -1282,6 +1282,7 @@ namespace C5.intervals
                     if (root.Greater != null && !root.Greater.IsEmpty)
                         foreach (var interval in root.Greater)
                             yield return interval;
+
                     // Iteratively travese right subtree
                     root = root.Right;
                 }
