@@ -1752,8 +1752,8 @@ namespace C5.intervals
                     Contract.Assert(!Contract.Exists(nodes(_root), n => n.Key.Equals(interval.Low)));
                 }
 
-                // Do not try to remove the interval again if it is a closed interval over just one key
-                if (highNode.IntervalsEndingInNode.IsEmpty && !(interval.LowIncluded && interval.HighIncluded && interval.CompareEndpointsValues() == 0))
+                // Skip if low and high are equal (true for point intervals)
+                if (highNode.IntervalsEndingInNode.IsEmpty && lowNode != highNode)
                 {
                     var updateBalanace = false;
                     _root = removeNodeWithKey(interval.High, _root, ref updateBalanace);
