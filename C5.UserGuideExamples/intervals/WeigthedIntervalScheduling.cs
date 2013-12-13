@@ -30,7 +30,6 @@ namespace C5.UserGuideExamples.intervals
             Console.Read();
         }
 
-        // TODO: Find a better name
         public static KeyValuePair<double, IEnumerable<WeightedInterval>> CalculateOptimalSolution(IEnumerable<WeightedInterval> intervalEnumerable)
         {
             // Make intervals to array to allow fast sorting and counting
@@ -51,60 +50,63 @@ namespace C5.UserGuideExamples.intervals
             Sorting.IntroSort(intervals, 0, count, comparer);
 
             // Calculate the previous non-overlapping interval for all intervals
-            var p = new int[count];
-            int j;
-            for (j = 0; j < count; j++)
-                p[j] = findP(ref intervals, j);
-
-            var p2 = findP(intervals);
+            var p = findP(intervals);
 
             // Iteratively calculate the solution for each subproblem
             var opt = new double[count];
             var includeInterval = new bool[count];
-            for (j = 0; j < count; j++)
+            for (var i = 0; i < count; i++)
             {
-                var included = intervals[j].Weight + (p[j] < 0 ? 0 : opt[p[j]]);
-                var notIncluded = j - 1 < 0 ? 0 : opt[j - 1];
+                var included = intervals[i].Weight + (p[i] < 0 ? 0 : opt[p[i]]);
+                var notIncluded = i - 1 < 0 ? 0 : opt[i - 1];
 
                 var include = included >= notIncluded;
 
-                opt[j] = include ? included : notIncluded;
-                includeInterval[j] = include;
+                opt[i] = include ? included : notIncluded;
+                includeInterval[i] = include;
             }
 
             // Back-trace the solution
             var set = new ArrayList<WeightedInterval>();
-            j = count - 1;
-            while (j >= 0)
+            for (var i = count - 1; i >= 0; )
             {
-                if (includeInterval[j])
+                if (includeInterval[i])
                 {
-                    set.Add(intervals[j]);
-                    j = p[j];
+                    set.Add(intervals[i]);
+                    i = p[i];
                 }
                 else
-                    j--;
+                    i--;
             }
 
             return new KeyValuePair<double, IEnumerable<WeightedInterval>>(opt[count - 1], set);
         }
 
-        // TODO: Make logarithmic with search from LCList
-        private static int findP(ref WeightedInterval[] intervals, int j)
+        private static int[] findP(WeightedInterval[] intervals)
         {
-            var interval = intervals[j--];
-            while (j >= 0 && intervals[j].Overlaps(interval))
-                j--;
-            return j;
-        }
+            var p = new int[intervals.Length];
 
-        private static int findP(WeightedInterval[] intervals)
-        {
+            // Create queue sorted on low endpoints
+            var comparer = ComparerFactory<KeyValuePair<IInterval<int>, int>>.CreateComparer((x, y) => y.Key.CompareLow(x.Key));
+            var queue = new IntervalHeap<KeyValuePair<IInterval<int>, int>>(comparer);
+
             for (var i = intervals.Length - 1; i >= 0; i--)
             {
+                var interval = intervals[i];
 
+                // Remove all intervals from the queue not overlapping the current interval
+                while (!queue.IsEmpty && interval.CompareHighLow(queue.FindMin().Key) < 0)
+                    // Save the index for the non-overlapping interval
+                    p[queue.DeleteMin().Value] = i;
+
+                queue.Add(new KeyValuePair<IInterval<int>, int>(interval, i));
             }
-            return 0;
+
+            // The remaining intervals in the queue all overlap the previous intervals
+            while (!queue.IsEmpty)
+                p[queue.DeleteMin().Value] = -1;
+
+            return p;
         }
 
         /// <summary>

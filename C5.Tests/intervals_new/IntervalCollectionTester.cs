@@ -1636,7 +1636,7 @@ namespace C5.Tests.intervals_new
 
             var collection = CreateCollection<Interval, int>(intervals);
 
-            foreach (var point in intervals.UniqueEndpoints())
+            foreach (var point in intervals.UniqueEndpointValues())
             {
                 var expected = intervals.Where(x => x.Overlaps(point));
                 CollectionAssert.AreEquivalent(expected, collection.FindOverlaps(point));

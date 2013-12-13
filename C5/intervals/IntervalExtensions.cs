@@ -40,30 +40,9 @@ namespace C5.intervals
         public static bool Overlaps<T>(this IInterval<T> x, T p) where T : IComparable<T>
         {
             Contract.Requires(x != null);
-            Contract.Requires(!ReferenceEquals(p, null));
+            Contract.Requires(p != null);
 
             return Overlaps(x, new IntervalBase<T>(p));
-        }
-
-        /// <summary>
-        /// Check if one interval strictly contains another interval. The container interval
-        /// contains all of the contained interval without sharing endpoints.
-        /// </summary>
-        /// <param name="x">Container interval.</param>
-        /// <param name="y">Contained interval.</param>
-        /// <returns>True if y is strictly contained in x.</returns>
-        [Pure]
-        public static bool StrictlyContains<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
-        {
-            Contract.Requires(x != null);
-            Contract.Requires(y != null);
-            Contract.Ensures(Contract.Result<bool>() == (x.CompareLow(y) < 0 && y.CompareHigh(x) < 0));
-
-            // Save compare values to avoid comparing twice in case CompareTo() should be expensive
-            int lowCompare = x.Low.CompareTo(y.Low), highCompare = y.High.CompareTo(x.High);
-            return
-                (lowCompare < 0 || (lowCompare == 0 && x.LowIncluded && !y.LowIncluded))
-                && (highCompare < 0 || (highCompare == 0 && !y.HighIncluded && x.HighIncluded));
         }
 
         /// <summary>
@@ -85,6 +64,27 @@ namespace C5.intervals
             return
                 (lowCompare < 0 || lowCompare == 0 && (x.LowIncluded || !y.LowIncluded))
                 && (highCompare < 0 || highCompare == 0 && (!y.HighIncluded || x.HighIncluded));
+        }
+
+        /// <summary>
+        /// Check if one interval strictly contains another interval. The container interval
+        /// contains all of the contained interval without sharing endpoints.
+        /// </summary>
+        /// <param name="x">Container interval.</param>
+        /// <param name="y">Contained interval.</param>
+        /// <returns>True if y is strictly contained in x.</returns>
+        [Pure]
+        public static bool StrictlyContains<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            Contract.Ensures(Contract.Result<bool>() == (x.CompareLow(y) < 0 && y.CompareHigh(x) < 0));
+
+            // Save compare values to avoid comparing twice in case CompareTo() should be expensive
+            int lowCompare = x.Low.CompareTo(y.Low), highCompare = y.High.CompareTo(x.High);
+            return
+                (lowCompare < 0 || (lowCompare == 0 && x.LowIncluded && !y.LowIncluded))
+                && (highCompare < 0 || (highCompare == 0 && !y.HighIncluded && x.HighIncluded));
         }
 
         /// <summary>
@@ -327,22 +327,6 @@ namespace C5.intervals
         }
 
         /// <summary>
-        /// Check if the interval has the value as its low or high endpoint value.
-        /// </summary>
-        /// <param name="x">The interval.</param>
-        /// <param name="endpoint">The endpoint value.</param>
-        /// <typeparam name="T">The interval endpoint value type.</typeparam>
-        /// <returns>True if either Low or High is equal to the endpoint.</returns>
-        [Pure]
-        public static bool HasEndpoint<T>(this IInterval<T> x, T endpoint) where T : IComparable<T>
-        {
-            Contract.Requires(x != null);
-            Contract.Requires(!ReferenceEquals(endpoint, null));
-
-            return x.Low.CompareTo(endpoint) == 0 || x.High.CompareTo(endpoint) == 0;
-        }
-
-        /// <summary>
         /// Check if an interval is valid.
         /// </summary>
         /// <param name="x">The interval.</param>
@@ -379,7 +363,7 @@ namespace C5.intervals
         /// <typeparam name="T">The endpoint type.</typeparam>
         /// <returns>The hashcode based on the interval.</returns>
         [Pure]
-        public static int GetHashCode<T>(this IInterval<T> x) where T : IComparable<T>
+        public static int GetIntervalHashCode<T>(this IInterval<T> x) where T : IComparable<T>
         {
             Contract.Requires(x != null);
 
@@ -433,7 +417,7 @@ namespace C5.intervals
         /// <typeparam name="T">The endpoint type.</typeparam>
         /// <returns>Unique endpoints from intervals.</returns>
         [Pure]
-        public static IEnumerable<T> UniqueEndpoints<T>(this IEnumerable<IInterval<T>> intervals)
+        public static IEnumerable<T> UniqueEndpointValues<T>(this IEnumerable<IInterval<T>> intervals)
             where T : IComparable<T>
         {
             var array = intervals as IInterval<T>[] ?? intervals.ToArray();
@@ -497,6 +481,16 @@ namespace C5.intervals
             return new IntervalBase<T>(low, high);
         }
 
+        /// <summary>
+        /// The maximum number of intervals overlapping at a single point in the collection.
+        /// </summary>
+        /// <remarks>The point of maximum depth may not be representable with an endpoint value, as it could be between two descrete values.</remarks>
+        /// <param name="intervals">The collection of intervals.</param>
+        /// <param name="intervalOfMaximumDepth">The interval in which the maximum depth is.</param>
+        /// <param name="isSorted">True if the intervals are sorted based on low then high endpoint. If false the collection will be sorted.</param>
+        /// <typeparam name="I">The interval type.</typeparam>
+        /// <typeparam name="T">The endpoint type.</typeparam>
+        /// <returns>The maximum depth.</returns>
         [Pure]
         public static int MaximumDepth<I, T>(this IEnumerable<I> intervals, ref IInterval<T> intervalOfMaximumDepth, bool isSorted = true)
             where I : IInterval<T>
@@ -548,7 +542,10 @@ namespace C5.intervals
     public static class C5Extensions
     {
 
-        public static IEnumerable<T> ToEnumerable<T>(this IEnumerator<T> enumerator)
+        /// <summary>
+        /// Convert an IEnumerator to an IEnumerable.
+        /// </summary>
+        public static IEnumerable<T> AsEnumerable<T>(this IEnumerator<T> enumerator)
         {
             while (enumerator.MoveNext()) yield return enumerator.Current;
         }

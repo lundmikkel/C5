@@ -129,7 +129,7 @@ namespace C5.intervals
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return IntervalExtensions.GetHashCode(this);
+            return IntervalExtensions.GetIntervalHashCode(this);
         }
 
         /// <inheritdoc/>
