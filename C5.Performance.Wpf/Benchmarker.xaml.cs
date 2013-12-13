@@ -23,7 +23,8 @@ namespace C5.Performance.Wpf
         internal int MaxIterations;
         // Every time we benchmark we count this up in order to get a new color for every benchmark
         private int _lineSeriesIndex;
-        private int _maxCount = Int32.MaxValue / 1000;
+        private const int OriginalMax = Int32.MaxValue / 10;
+        private static int _maxCount = OriginalMax;
         private int _repeats = 1;
         private bool _runSequential;
         private bool _runWarmups = false;
@@ -86,7 +87,7 @@ namespace C5.Performance.Wpf
                     new ConstructAddUnsorted(C, IBS), 
                     new ConstructAddUnsorted(D, IBS), 
 
-//                     Query Stabbing
+                    //   Query Stabbing
                     new QueryStabbing(A, DIT), 
                     new QueryStabbing(B, DIT), 
                     new QueryStabbing(C, DIT), 
@@ -97,7 +98,7 @@ namespace C5.Performance.Wpf
                     new QueryStabbing(C, IBS), 
                     new QueryStabbing(D, IBS), 
 
-//                     Query Range
+                    // Query Range
                     new QueryRange(A, DIT), 
                     new QueryRange(B, DIT), 
                     new QueryRange(C, DIT), 
@@ -108,7 +109,7 @@ namespace C5.Performance.Wpf
                     new QueryRange(C, IBS), 
                     new QueryRange(D, IBS), 
 
-//                     Query Range Span
+                    // Query Range Span
                     new QueryRangeSpan(A, DIT), 
                     new QueryRangeSpan(B, DIT), 
                     new QueryRangeSpan(C, DIT), 
@@ -129,12 +130,13 @@ namespace C5.Performance.Wpf
             MaxIterations = Convert.ToInt32(Math.Round(Math.Log(MaxCollectionSize)));
             _plotter = Plotter.CreatePlotter();
             DataContext = _plotter;
+            Console.Out.WriteLine();
         }
         #endregion
 
         #region Benchmark Running
 
-        private Boolean SerializeToDisk = true;
+        private Boolean SerializeToDisk = false;
         private Boolean RunFromDisk = false;
         // Method that gets called when the benchmark button is used.
         private void benchmarkStart(object sender, RoutedEventArgs e)
@@ -283,13 +285,13 @@ namespace C5.Performance.Wpf
         private void CheckBox_Checked_RunQuick(object sender, RoutedEventArgs e)
         {
             _repeats = 1;
-            _maxCount = Int32.MaxValue / 1000;
+            _maxCount = OriginalMax / 100;
         }
 
         private void CheckBox_Unchecked_RunQuick(object sender, RoutedEventArgs e)
         {
             _repeats = StandardRepeats;
-            _maxCount = Int32.MaxValue / 10;
+            _maxCount = OriginalMax;
         }
 
         private void CheckBox_Checked_LogarithmicXAxis(object sender, RoutedEventArgs e)
