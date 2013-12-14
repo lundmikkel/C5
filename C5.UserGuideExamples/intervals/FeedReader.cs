@@ -42,7 +42,7 @@ namespace C5.UserGuideExamples.intervals
             // Print some general statistics
             Console.Out.WriteLine("Copenhagen Jazz Festival 2009 statistics");
             Console.Out.WriteLine("Total number of concerts {0}.", coll.Count());
-            Console.Out.WriteLine("The maximum number of simultaneous concerts are {0}.", coll.MaximumDepth);
+            Console.Out.WriteLine("The maximum number of simultaneous concerts is {0}.", coll.MaximumDepth);
 
             // Print statistics for each day of the festival
             foreach (var day in dates.Select(day => new DynamicIntervalTree<CalendarEvent, DateTime>(coll.FindOverlaps(day))))
