@@ -6,13 +6,13 @@ namespace C5.Performance.Wpf.Benchmarks
 {
     public class IbsAvlRandomRemoveBenchmarker : Benchmarkable
     {
-        private IntervalBinarySearchTreeAvl<IInterval<int>, int> _collection;
+        private IntervalBinarySearchTree<IInterval<int>, int> _collection;
         private IList<IInterval<int>> _intervals;
         private readonly Random _random = new Random(0);
 
         public override void CollectionSetup()
         {
-            _collection = new IntervalBinarySearchTreeAvl<IInterval<int>, int>();
+            _collection = new IntervalBinarySearchTree<IInterval<int>, int>();
             _intervals = new ArrayList<IInterval<int>>(CollectionSize);
             _intervals.AddAll(BenchmarkTestCases.DataSetB(CollectionSize));
             _intervals.Shuffle(_random);

@@ -149,13 +149,12 @@
     <Compile Include="interfaces\IInterval.cs" />
     <Compile Include="interfaces\IIntervalCollection.cs" />
     <Compile Include="intervals\BinaryIntervalSearch.cs" />
-    <Compile Include="intervals\IntervalBinarySearchTreeAvl.cs" />
+    <Compile Include="intervals\IntervalBinarySearchTree.cs" />
     <Compile Include="intervals\IntervalBinarySearchTreeOld.cs" />
     <Compile Include="intervals\IntervalRelations.cs" />
     <Compile Include="intervals\IntervalType.cs" />
     <Compile Include="intervals\LayeredContainmentList.cs" />
     <Compile Include="intervals\IntervalBase.cs" />
-    <Compile Include="intervals\IntervalBinarySearchTree.cs" />
     <Compile Include="intervals\IntervalExtensions.cs" />
     <Compile Include="intervals\NestedContainmentList.cs" />
     <Compile Include="intervals\NestedContainmentList2.cs" />

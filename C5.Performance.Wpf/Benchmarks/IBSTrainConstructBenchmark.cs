@@ -6,12 +6,12 @@ namespace C5.Performance.Wpf.Benchmarks
     public class IBSTrainConstructBenchmark : Benchmarkable
     {
         private Trains.TrainRide[] _trains;
-        private IntervalBinarySearchTreeAvl<Trains.TrainRide, double> _intervalTrains;
+        private IntervalBinarySearchTree<Trains.TrainRide, double> _intervalTrains;
 
 
         private int trainConstruct(int trainId)
         {
-            _intervalTrains = new IntervalBinarySearchTreeAvl<Trains.TrainRide, double>(_trains);
+            _intervalTrains = new IntervalBinarySearchTree<Trains.TrainRide, double>(_trains);
             return 1;
         }
 

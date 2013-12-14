@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace C5.intervals
 {
-    // TODO: Finish data strucutre
+    // TODO: Finish data structure
     public class BinaryIntervalSearch<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
         where I : IInterval<T>
         where T : IComparable<T>

@@ -8,7 +8,7 @@ namespace C5.Performance.Wpf.Benchmarks
     {
         private Trains.TrainRide[] _trains;
         private TrainUtilities.InBetweenTrainRide[] _trainsNotInCollection;
-        private IntervalBinarySearchTreeAvl<Trains.TrainRide, double> _intervalTrains;
+        private IntervalBinarySearchTree<Trains.TrainRide, double> _intervalTrains;
 
 
         private int trainSearch(int trainId)
@@ -31,7 +31,7 @@ namespace C5.Performance.Wpf.Benchmarks
             // Create collection of trains that is not in the collection to have unsuccesfull searches
             _trainsNotInCollection = TrainUtilities.FindInbetweenTrains(_trains).ToArray();
 
-            _intervalTrains = new IntervalBinarySearchTreeAvl<Trains.TrainRide, double>();
+            _intervalTrains = new IntervalBinarySearchTree<Trains.TrainRide, double>();
             /*
              * Setup an items array with things to look for.
              * Fill in random numbers from 0 to the number of trains plus the number of trains not in the collection.

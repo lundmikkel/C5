@@ -52,7 +52,7 @@ namespace C5.UserGuideExamples.intervals
                     if (resources[resource] == null)
                     {
                         /*
-                            resources[resource] = new IntervalBinarySearchTreeAvl<TrainRide, double>();
+                            resources[resource] = new IntervalBinarySearchTree<TrainRide, double>();
                         /*/
                         resources[resource] = new ArrayList<TrainRide>();
                         //*/

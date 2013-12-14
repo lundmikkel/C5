@@ -7,7 +7,7 @@ namespace C5.Performance.Wpf.Report_Benchmarks
     public class IBSIntervalSetLazy : Benchmarkable
     {
         private IInterval<int>[] _intervals;
-        private IntervalBinarySearchTreeAvl<IInterval<int>, int> _intervalCollection; 
+        private IntervalBinarySearchTree<IInterval<int>, int> _intervalCollection; 
 
         private int intervalSearch(int intervalId)
         {
@@ -19,7 +19,7 @@ namespace C5.Performance.Wpf.Report_Benchmarks
         {
             _intervals = BenchmarkTestCases.DataSetB(CollectionSize);
             _intervalCollection.AddAll(_intervals);
-            _intervalCollection = new IntervalBinarySearchTreeAvl<IInterval<int>, int>(_intervals);
+            _intervalCollection = new IntervalBinarySearchTree<IInterval<int>, int>(_intervals);
 
             /*
              * Setup an items array with things to look for.

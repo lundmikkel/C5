@@ -14,7 +14,7 @@ namespace C5.Tests.intervals_new
         {
             protected override Type GetCollectionType()
             {
-                return typeof(IntervalBinarySearchTreeAvl<,>);
+                return typeof(IntervalBinarySearchTree<,>);
             }
 
             protected override Speed CountSpeed()
@@ -56,9 +56,9 @@ namespace C5.Tests.intervals_new
             #region Helpers
             // TODO: Builder pattern
 
-            private static IntervalBinarySearchTreeAvl<IInterval<int>, int> _createIBS(params IInterval<int>[] intervals)
+            private static IntervalBinarySearchTree<IInterval<int>, int> _createIBS(params IInterval<int>[] intervals)
             {
-                return new IntervalBinarySearchTreeAvl<IInterval<int>, int>(intervals);
+                return new IntervalBinarySearchTree<IInterval<int>, int>(intervals);
             }
 
             private static IInterval<int>[] Ø
@@ -1019,7 +1019,7 @@ namespace C5.Tests.intervals_new
             {
                 var interval = new IntervalBase<int>(1, 2);
 
-                var collection = new IntervalBinarySearchTreeAvl<IntervalBase<int>, int>
+                var collection = new IntervalBinarySearchTree<IntervalBase<int>, int>
                     {
                         interval,
                         new IntervalBase<int>(3,4),
@@ -1034,7 +1034,7 @@ namespace C5.Tests.intervals_new
             [Test]
             public void Span_RetrievSpanFromNodeWithEmptyIntervalSets()
             {
-                var collection = new IntervalBinarySearchTreeAvl<IntervalBase<int>, int>
+                var collection = new IntervalBinarySearchTree<IntervalBase<int>, int>
                     {
                         new IntervalBase<int>(3,4, IntervalType.HighIncluded)
                     };

@@ -1,17 +1,12 @@
-﻿using System;
-
-namespace C5.Profiling
+﻿namespace C5.Profiling
 {
     class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            var test = new C5.Tests.intervals.IntervalBinarySearchTreeAVL.RandomRemove();
+            var test = new Tests.intervals.IntervalBinarySearchTree.RandomRemove();
             test.SetUp();
             test.AddAndRemove();
-
-            // var test = new C5.Tests.intervals.IntervalBinarySearchTreeAVL.BensTest();
-            // test.MaximumDepth_BensCollection_Returns2();
         }
     }
 }

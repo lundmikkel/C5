@@ -179,7 +179,6 @@
     <Compile Include="Benchmarks\IBSTrainConstructBenchmark.cs" />
     <Compile Include="Benchmarks\DITTrainConstructBenchmark.cs" />
     <Compile Include="Benchmarks\IBSTrainSearchBenchmark.cs" />
-    <Compile Include="Benchmarks\IbsAddBenchmarker.cs" />
     <Compile Include="Benchmarks\IbsAvlRandomRemoveBenchmarker.cs" />
     <Compile Include="Benchmarks\IbsAvlAddBenchmarker.cs" />
     <Compile Include="Benchmarks\LCListEnumeratorSorted.cs" />

@@ -4,13 +4,13 @@ namespace C5.Performance.Wpf.Benchmarks
 {
     public class IbsAvlIntervalSetsBenchmarker : Benchmarkable
     {
-        private IntervalBinarySearchTreeAvl<IInterval<int>, int> _collection;
+        private IntervalBinarySearchTree<IInterval<int>, int> _collection;
         private IInterval<int>[] _intervals;
 
         public override void CollectionSetup()
         {
             _intervals = Tests.intervals.BenchmarkTestCases.DataSetA(CollectionSize);
-            _collection = new IntervalBinarySearchTreeAvl<IInterval<int>, int>();
+            _collection = new IntervalBinarySearchTree<IInterval<int>, int>();
             ItemsArray = SearchAndSort.FillIntArray(CollectionSize);
             SearchAndSort.Shuffle(ItemsArray);
         }
@@ -35,7 +35,7 @@ namespace C5.Performance.Wpf.Benchmarks
 
     public class IbsAvlIntervalSetsPrebuildBenchmarker : Benchmarkable
     {
-        private IntervalBinarySearchTreeAvl<IInterval<int>, int> _collection;
+        private IntervalBinarySearchTree<IInterval<int>, int> _collection;
         private IInterval<int>[] _intervals;
 
         public override void CollectionSetup()
@@ -51,7 +51,7 @@ namespace C5.Performance.Wpf.Benchmarks
 
         public override double Call(int i)
         {
-            _collection = new IntervalBinarySearchTreeAvl<IInterval<int>, int>(_intervals);
+            _collection = new IntervalBinarySearchTree<IInterval<int>, int>(_intervals);
             return _collection.Count;
         }
 

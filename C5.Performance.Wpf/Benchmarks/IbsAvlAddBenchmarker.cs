@@ -4,13 +4,13 @@ namespace C5.Performance.Wpf.Benchmarks
 {
     public class IbsAvlAddBenchmarker : Benchmarkable
     {
-        private IntervalBinarySearchTreeAvl<IInterval<int>, int> _collection;
+        private IntervalBinarySearchTree<IInterval<int>, int> _collection;
         private IInterval<int>[] _intervals;
 
         public override void CollectionSetup()
         {
             _intervals = Tests.intervals.BenchmarkTestCases.DataSetC(CollectionSize);
-            _collection = new IntervalBinarySearchTreeAvl<IInterval<int>, int>();
+            _collection = new IntervalBinarySearchTree<IInterval<int>, int>();
             ItemsArray = SearchAndSort.FillIntArray(CollectionSize);
             SearchAndSort.Shuffle(ItemsArray);
         }

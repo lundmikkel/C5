@@ -8,7 +8,7 @@ namespace C5.Performance.Wpf.Benchmarks
     {
         private IInterval<int>[] _intervals;
         private IInterval<int>[] _intervalsNot;
-        private IntervalBinarySearchTreeAvl<IInterval<int>, int> _intervalCollection; 
+        private IntervalBinarySearchTree<IInterval<int>, int> _intervalCollection; 
 
         private int intervalSearch(int intervalId)
         {
@@ -21,7 +21,7 @@ namespace C5.Performance.Wpf.Benchmarks
         {
             _intervals = BenchmarkTestCases.DataSetA(CollectionSize);
             _intervalsNot = BenchmarkTestCases.DataSetNotA(CollectionSize);
-            _intervalCollection = new IntervalBinarySearchTreeAvl<IInterval<int>, int>(_intervals);
+            _intervalCollection = new IntervalBinarySearchTree<IInterval<int>, int>(_intervals);
 
             /*
              * Setup an items array with things to look for.

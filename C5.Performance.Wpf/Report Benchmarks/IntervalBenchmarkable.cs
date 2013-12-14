@@ -45,7 +45,7 @@ namespace C5.Performance.Wpf.Report_Benchmarks
         
         public static IIntervalCollection<IInterval<int>, int> IBS(IInterval<int>[] intervals)
         {
-            return !intervals.Any() ? new IntervalBinarySearchTreeAvl<IInterval<int>, int>() : new IntervalBinarySearchTreeAvl<IInterval<int>, int>(intervals);
+            return !intervals.Any() ? new IntervalBinarySearchTree<IInterval<int>, int>() : new IntervalBinarySearchTree<IInterval<int>, int>(intervals);
         }
 
         protected IntervalBenchmarkable(Func<int, IInterval<int>[]> intervalConstruction, Func<IInterval<int>[], IIntervalCollection<IInterval<int>, int>> intervalCollectionConstruction)
