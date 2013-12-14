@@ -7,10 +7,12 @@ using System.Text;
 
 namespace C5.intervals
 {
-
     /// <summary>
-    /// Key Tree class
+    /// An implementation of the Dynamic Interval Tree.
     /// </summary>
+    /// <remarks>It is important to implement a proper hashing method for <see cref="I"/> not based on endpoints. Failing to do so will result in worse runtimes for interval duplicate objects.</remarks>
+    /// <typeparam name="I">The interval type.</typeparam>
+    /// <typeparam name="T">The interval endpoint type.</typeparam>
     public class DynamicIntervalTree<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
         where I : IInterval<T>
         where T : IComparable<T>
