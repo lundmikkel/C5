@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using C5.intervals;
+using C5.intervals.@static;
 using NUnit.Framework;
 using System.Linq;
 

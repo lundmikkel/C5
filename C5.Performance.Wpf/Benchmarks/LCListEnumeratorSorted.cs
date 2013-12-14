@@ -1,5 +1,6 @@
 ﻿using C5.intervals;
 using C5.Tests.intervals;
+using C5.intervals.@static;
 
 namespace C5.Performance.Wpf.Benchmarks
 {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using C5.Tests.intervals.Generic;
 using C5.intervals;
+using C5.intervals.@static;
 using NUnit.Framework;
 
 namespace C5.Tests.intervals

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using C5.Tests.intervals.Generic;
 using C5.intervals;
+using C5.intervals.@static;
 using NUnit.Framework;
 
 namespace C5.Tests.intervals

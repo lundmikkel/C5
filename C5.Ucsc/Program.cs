@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using C5.intervals;
+using C5.intervals.@static;
 
 namespace C5.Ucsc
 {
