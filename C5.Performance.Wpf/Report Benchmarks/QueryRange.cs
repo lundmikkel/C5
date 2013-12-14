@@ -7,8 +7,6 @@ namespace C5.Performance.Wpf.Report_Benchmarks
 {
     class QueryRange : IntervalBenchmarkable
     {
-        private IInterval<int>[] _intervalsNotInCollection;
-
         public QueryRange(Func<int, IInterval<int>[]> intervalConstruction, Func<IInterval<int>[], IIntervalCollection<IInterval<int>, int>> intervalCollectionConstruction)
             : base(intervalConstruction, intervalCollectionConstruction)
         {}
@@ -17,8 +15,7 @@ namespace C5.Performance.Wpf.Report_Benchmarks
         {
             Intervals = IntervalConstruction(CollectionSize);
             IntervalCollection = IntervalCollectionConstruction(Intervals);
-            _intervalsNotInCollection = IntervalsNotInCollection(IntervalCollection);
-            ItemsArray = SearchAndSort.FillIntArrayRandomly(CollectionSize, 0, CollectionSize * 2);
+            ItemsArray = SearchAndSort.FillIntArray(CollectionSize);
         }
 
         public override void Setup()
@@ -28,8 +25,7 @@ namespace C5.Performance.Wpf.Report_Benchmarks
 
         public override double Call(int i)
         {
-            var stabbing = i < CollectionSize ? Intervals[i] : _intervalsNotInCollection[i - CollectionSize];
-            var success = IntervalCollection.FindOverlaps(stabbing);
+            var success = IntervalCollection.FindOverlaps(Intervals[i]);
             return success.Count();
         }
     }
