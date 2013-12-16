@@ -40,13 +40,13 @@ namespace C5.UserGuideExamples.intervals
                 dates[day] = new CalendarEvent("Festival day " + day, startDate.AddDays(day), startDate.AddDays(day + 1));
 
             // Print some general statistics
-            Console.Out.WriteLine("Copenhagen Jazzfestival 2009 statistics");
+            Console.Out.WriteLine("Copenhagen Jazz Festival 2009 statistics");
             Console.Out.WriteLine("Total number of concerts {0}.", coll.Count());
-            Console.Out.WriteLine("The maximum number of overlapping concerts are {0}.", coll.MaximumDepth);
+            Console.Out.WriteLine("The maximum number of simultaneous concerts is {0}.", coll.MaximumDepth);
 
             // Print statistics for each day of the festival
             foreach (var day in dates.Select(day => new DynamicIntervalTree<CalendarEvent, DateTime>(coll.FindOverlaps(day))))
-                Console.Out.WriteLine("There are {0,-3} concerts on the {1}. {2, -2} of these are overlapping.", day.Count, day.Choose().Low.ToShortDateString(), day.MaximumDepth);
+                Console.Out.WriteLine("There are {0,-3} concerts on the {1}. {2, -2} of these are simultaneous.", day.Count, day.Choose().Low.ToShortDateString(), day.MaximumDepth);
             Console.ReadLine();
         }
 
