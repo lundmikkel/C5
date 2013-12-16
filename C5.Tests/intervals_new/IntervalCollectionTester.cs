@@ -1672,6 +1672,14 @@ namespace C5.Tests.intervals_new
 
         [Test]
         [Category("Large Scale")]
+        public void Random_CallWholeInterface_FixedSeed()
+        {
+            updateRandom(1065643459);
+            Random_CallWholeInterface();
+        }
+
+        [Test]
+        [Category("Large Scale")]
         public void Random_CallWholeInterface()
         {
             var collection = CreateEmptyCollection<Interval, int>();
