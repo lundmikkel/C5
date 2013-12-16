@@ -1234,7 +1234,6 @@ namespace C5.intervals
                 // Update split node
                 setSplitNode(root);
 
-
                 // Interval is lower than root, go left
                 var compareHigh = query.High.CompareTo(root.Key);
                 int compareLow;
@@ -1300,7 +1299,7 @@ namespace C5.intervals
                         yield return interval;
 
                     // Recursively add all intervals in right subtree as they must be
-                    // contained by [root.Key:splitNode]
+                    // contained by (root.Key:splitNode.Key)
                     foreach (var interval in intervals(root.Right))
                         yield return interval;
 
@@ -1309,11 +1308,12 @@ namespace C5.intervals
                 }
                 else
                 {
-                    // Add all intersecting intervals from right list
+                    // Add all intervals from greater
                     if (root.Greater != null && !root.Greater.IsEmpty)
                         foreach (var interval in root.Greater)
                             yield return interval;
 
+                    // Add all intervals from Equal if query overlaps
                     if (query.LowIncluded && root.Equal != null && !root.Equal.IsEmpty)
                         foreach (var interval in root.Equal)
                             yield return interval;
@@ -1354,7 +1354,7 @@ namespace C5.intervals
                         yield return interval;
 
                     // Recursively add all intervals in right subtree as they must be
-                    // contained by [root.Key:splitNode]
+                    // contained by (splitNode.Key:root.Key)
                     foreach (var interval in intervals(root.Left))
                         yield return interval;
 
@@ -1560,7 +1560,7 @@ namespace C5.intervals
 
         private static Node addLow(I interval, Node root, Node rightUp, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node lowNode)
         {
-            Contract.Requires(!ReferenceEquals(interval, null));
+            Contract.Requires(interval != null);
 
             // No node existed for the low endpoint
             if (root == null)
@@ -1652,7 +1652,7 @@ namespace C5.intervals
 
         private static Node addHigh(I interval, Node root, Node leftUp, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node highNode)
         {
-            Contract.Requires(!ReferenceEquals(interval, null));
+            Contract.Requires(interval != null);
 
             // No node existed for the high endpoint
             if (root == null)
