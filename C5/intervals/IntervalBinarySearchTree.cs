@@ -1424,7 +1424,56 @@ namespace C5.intervals
         /// <inheritdoc/>
         public int CountOverlaps(T query)
         {
-            return FindOverlaps(query).Count();
+            // Break if the query is outside the collections span
+            if (_span != null && !_span.Overlaps(query))
+                return 0;
+
+            return countOverlaps(query, _root);
+        }
+
+        private static int countOverlaps(T query, Node root)
+        {
+            var count = 0;
+
+            // Search the tree until we reach the bottom of the tree    
+            while (root != null)
+            {
+                // Store compare value as we need it twice
+                var compare = query.CompareTo(root.Key);
+
+                // Query is to the left of the current node
+                if (compare < 0)
+                {
+                    // Add set count to total
+                    if (root.Less != null)
+                        count += root.Less.Count;
+
+                    // Move left
+                    root = root.Left;
+                }
+                // Query is to the right of the current node
+                else if (compare > 0)
+                {
+                    // Add set count to total
+                    if (root.Greater != null)
+                        count += root.Greater.Count;
+
+                    // Move right
+                    root = root.Right;
+                }
+                // Node with query value found
+                else
+                {
+                    // Add set count to total
+                    if (root.Equal != null)
+                        count += root.Equal.Count;
+
+                    // Stop as the search is done
+                    break;
+                }
+            }
+
+            return count;
         }
 
         /// <inheritdoc/>
