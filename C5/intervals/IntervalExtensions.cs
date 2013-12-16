@@ -501,10 +501,13 @@ namespace C5.intervals
             Contract.Ensures(Contract.Result<int>() >= 0);
             Contract.Ensures(Contract.Result<int>() == 0 || IntervalCollectionContractHelper.CountOverlaps(((IEnumerable<IInterval<T>>) intervals), Contract.ValueAtReturn(out intervalOfMaximumDepth)) == Contract.Result<int>());
 
-            var sortedIntervals = intervals as I[] ?? intervals.ToArray();
-
+            // Sort the intervals if necessary
             if (!isSorted)
+            {
+                var sortedIntervals = intervals as I[] ?? intervals.ToArray();
                 Sorting.InsertionSort(sortedIntervals, 0, sortedIntervals.Length, CreateComparer<I, T>());
+                intervals = sortedIntervals;
+            }
 
             var max = 0;
 
@@ -513,7 +516,7 @@ namespace C5.intervals
             var queue = new IntervalHeap<IInterval<T>>(comparer);
 
             // Loop through intervals in sorted order
-            foreach (var interval in sortedIntervals)
+            foreach (var interval in intervals)
             {
                 // Remove all intervals from the queue not overlapping the current interval
                 while (!queue.IsEmpty && interval.CompareLowHigh(queue.FindMin()) > 0)
