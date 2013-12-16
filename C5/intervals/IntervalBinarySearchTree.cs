@@ -1148,34 +1148,11 @@ namespace C5.intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
+            // Break if the query is outside the collections span
+            if (_span != null && !_span.Overlaps(query))
+                return Enumerable.Empty<I>();
+
             return findOverlaps(_root, query);
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<I> FindOverlaps(IInterval<T> query)
-        {
-            // Break if collection is empty or the query is outside the collections span
-            if (IsEmpty || !Span.Overlaps(query))
-                yield break;
-
-            var set = new IntervalSet();
-
-            var splitNode = _root;
-
-            // Use a lambda instead of out, as out or ref isn't allowed for iterators
-            foreach (var interval in findSplitNode(_root, query, n => { splitNode = n; }).Where(set.Add))
-                yield return interval;
-
-            // Find all intersecting intervals in left subtree
-            if (query.Low.CompareTo(splitNode.Key) < 0)
-                foreach (var interval in findLeft(splitNode.Left, query).Where(set.Add))
-                    yield return interval;
-
-
-            // Find all intersecting intervals in right subtree
-            if (splitNode.Key.CompareTo(query.High) < 0)
-                foreach (var interval in findRight(splitNode.Right, query).Where(set.Add))
-                    yield return interval;
         }
 
         private static IEnumerable<I> findOverlaps(Node root, T query)
@@ -1184,10 +1161,10 @@ namespace C5.intervals
             while (root != null)
             {
                 // Store compare value as we need it twice
-                var compareTo = query.CompareTo(root.Key);
+                var compare = query.CompareTo(root.Key);
 
                 // Query is to the left of the current node
-                if (compareTo < 0)
+                if (compare < 0)
                 {
                     // Return all intervals in Less
                     if (root.Less != null && !root.Less.IsEmpty)
@@ -1198,7 +1175,7 @@ namespace C5.intervals
                     root = root.Left;
                 }
                 // Query is to the right of the current node
-                else if (compareTo > 0)
+                else if (compare > 0)
                 {
                     // Return all intervals in Greater
                     if (root.Greater != null && !root.Greater.IsEmpty)
@@ -1222,8 +1199,33 @@ namespace C5.intervals
             }
         }
 
+        /// <inheritdoc/>
+        public IEnumerable<I> FindOverlaps(IInterval<T> query)
+        {
+            // Break if the collection is empty or the query is outside the collections span
+            if (IsEmpty || _span != null && !_span.Overlaps(query))
+                yield break;
+
+            var set = new IntervalSet();
+            var splitNode = _root;
+
+            // Use a lambda instead of out, as out or ref isn't allowed for iterators
+            foreach (var interval in findSplitNode(_root, query, n => { splitNode = n; }).Where(set.Add))
+                yield return interval;
+
+            // Find all intersecting intervals in left subtree
+            if (query.Low.CompareTo(splitNode.Key) < 0)
+                foreach (var interval in findLeft(splitNode.Left, query).Where(set.Add))
+                    yield return interval;
+
+            // Find all intersecting intervals in right subtree
+            if (splitNode.Key.CompareTo(query.High) < 0)
+                foreach (var interval in findRight(splitNode.Right, query).Where(set.Add))
+                    yield return interval;
+        }
+
         /// <summary>
-        /// Create an enumerable, enumerating all intersecting intervals on the path to the split node. Returns the split node in splitNode.
+        /// Create an enumerable, enumerating all intersecting intervals on the path to the split node. Returns the split node with setSplitNode.
         /// </summary>
         private static IEnumerable<I> findSplitNode(Node root, IInterval<T> query, Action<Node> setSplitNode)
         {
@@ -1232,8 +1234,12 @@ namespace C5.intervals
                 // Update split node
                 setSplitNode(root);
 
+
                 // Interval is lower than root, go left
-                if (query.High.CompareTo(root.Key) < 0)
+                var compareHigh = query.High.CompareTo(root.Key);
+                int compareLow;
+
+                if (compareHigh < 0)
                 {
                     if (root.Less != null && !root.Less.IsEmpty)
                         foreach (var interval in root.Less)
@@ -1243,7 +1249,7 @@ namespace C5.intervals
                     root = root.Left;
                 }
                 // Interval is higher than root, go right
-                else if (root.Key.CompareTo(query.Low) < 0)
+                else if ((compareLow = query.Low.CompareTo(root.Key)) > 0)
                 {
                     if (root.Greater != null && !root.Greater.IsEmpty)
                         foreach (var interval in root.Greater)
@@ -1255,14 +1261,15 @@ namespace C5.intervals
                 // Otherwise add overlapping nodes in split node
                 else
                 {
-                    if (root.Less != null && !root.Less.IsEmpty)
-                        foreach (var interval in root.Less.Where(i => query.Overlaps(i)))
+                    if (root.Less != null && !root.Less.IsEmpty && compareLow < 0)
+                        foreach (var interval in root.Less)
                             yield return interval;
-                    if (root.Equal != null && !root.Equal.IsEmpty)
-                        foreach (var interval in root.Equal.Where(i => query.Overlaps(i)))
+                    if (root.Equal != null && !root.Equal.IsEmpty &&
+                        ((compareLow < 0 || query.LowIncluded) && (compareHigh > 0 || query.HighIncluded)))
+                        foreach (var interval in root.Equal)
                             yield return interval;
-                    if (root.Greater != null && !root.Greater.IsEmpty)
-                        foreach (var interval in root.Greater.Where(i => query.Overlaps(i)))
+                    if (root.Greater != null && !root.Greater.IsEmpty && compareHigh > 0)
+                        foreach (var interval in root.Greater)
                             yield return interval;
 
                     yield break;
