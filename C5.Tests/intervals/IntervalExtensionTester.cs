@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using C5.Tests.intervals.LayeredContainmentList;
 using C5.intervals;
 using NUnit.Framework;
@@ -37,8 +38,6 @@ namespace C5.Tests.intervals
             var intervals = this.intervals(count);
             var span = intervals.Span();
 
-            CollectionAssert.IsEmpty(intervals.Gaps());
-
             var input = new ArrayList<IInterval<int>>();
             var expected = new ArrayList<IInterval<int>>();
 
@@ -54,7 +53,44 @@ namespace C5.Tests.intervals
             CollectionAssert.AreEquivalent(input, expected.Gaps());
         }
 
-        private IInterval<int>[] intervals(int count = 100, int length = 10)
+        [Test]
+        public void Gaps_NoGaps()
+        {
+            CollectionAssert.IsEmpty(intervals().Gaps());
+        }
+
+        [Test, Combinatorial]
+        public void GapsSpan_MatchCounterpart(
+            [Values(0, 1)] int count,
+            [Values(true, false)] bool add)
+        {
+            var intervals = this.intervals(100 + count);
+            var span = intervals.Span();
+
+            var expected = new ArrayList<IInterval<int>>();
+            var input = new ArrayList<IInterval<int>>();
+
+            foreach (var interval in intervals)
+                ((add = !add) ? expected : input).Add(interval);
+
+            CollectionAssert.AreEquivalent(expected, input.Gaps(span));
+        }
+
+        [Test, Combinatorial]
+        public void Gaps_MatchCounterpart()
+        {
+            var intervals = this.intervals();
+
+            var expected = new ArrayList<IInterval<int>>();
+            var input = new ArrayList<IInterval<int>>();
+            var add = true;
+            foreach (var interval in intervals)
+                ((add = !add) ? expected : input).Add(interval);
+
+            CollectionAssert.AreEquivalent(expected, input.Gaps());
+        }
+
+        private IInterval<int>[] intervals(int count = 101, int length = 10)
         {
             var intervals = new IInterval<int>[count];
 
