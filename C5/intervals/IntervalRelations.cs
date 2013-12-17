@@ -145,6 +145,7 @@ namespace C5.intervals
             var compareLow = x.CompareLow(y);
             var compareHigh = x.CompareHigh(y);
 
+            // TODO: Update to say [a:b) and [b:c) meet, but [a:b] and [b:c) overlap
             // Compare Low and High when dealing with points
             if (compareAfter == 0 && compareLow > 0 && compareHigh > 0)
                 return IntervalRelation.MetBy;

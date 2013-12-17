@@ -317,7 +317,6 @@ namespace C5.intervals.@static
         {
             get
             {
-
                 return sorted(0, _firstLayerCount);
             }
         }

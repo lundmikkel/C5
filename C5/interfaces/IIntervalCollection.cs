@@ -158,6 +158,7 @@ namespace C5
         #endregion
     }
 
+    // TODO: Add helpful strings to code contracts instead of displaying the actual contract
     [ContractClassFor(typeof(IIntervalCollection<,>))]
     abstract class IntervalCollectionContract<I, T> : IIntervalCollection<I, T>
         where I : IInterval<T>
