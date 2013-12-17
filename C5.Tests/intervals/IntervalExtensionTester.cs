@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using C5.Tests.intervals.LayeredContainmentList;
 using C5.intervals;
 using NUnit.Framework;
 using NUnit.Framework.Constraints;
@@ -20,6 +22,50 @@ namespace C5.Tests.intervals
             Assert.AreEqual(interval1, interval2);
             Assert.AreNotEqual(interval1, interval3);
             Assert.AreNotEqual(interval1, interval4);
+        }
+    }
+
+    [TestFixture]
+    public class Gaps
+    {
+        readonly Random _random = new Random();
+
+        [Test]
+        public void Test()
+        {
+            const int count = 101;
+            var intervals = this.intervals(count);
+            var span = intervals.Span();
+
+            CollectionAssert.IsEmpty(intervals.Gaps());
+
+            var input = new ArrayList<IInterval<int>>();
+            var expected = new ArrayList<IInterval<int>>();
+
+            for (var i = 0; i < count; i++)
+                if (i % 2 == 0)
+                    expected.Add(intervals[i]);
+                else
+                    input.Add(intervals[i]);
+
+            Assert.True(span.StrictlyContains(input.Span()));
+
+            CollectionAssert.AreEquivalent(expected, input.Gaps(span));
+            CollectionAssert.AreEquivalent(input, expected.Gaps());
+        }
+
+        private IInterval<int>[] intervals(int count = 100, int length = 10)
+        {
+            var intervals = new IInterval<int>[count];
+
+            intervals[0] = new IntervalBase<int>(0, _random.Next(1, 1 + length));
+            for (var i = 1; i < count; i++)
+            {
+                var lastHigh = intervals[i - 1].High;
+                intervals[i] = new IntervalBase<int>(lastHigh, _random.Next(lastHigh + 1, lastHigh + 1 + length));
+            }
+
+            return intervals;
         }
     }
 

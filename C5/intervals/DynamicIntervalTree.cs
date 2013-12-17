@@ -1802,7 +1802,7 @@ namespace C5.intervals
                 // Each gap will be meet an interval in the collection
                 Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => this.Any(y => x.High.CompareTo(y.Low) == 0 && x.HighIncluded != y.LowIncluded)));
 
-                return sortedNodes(_root).Select(n => n.LocalSpan).Where(x => x != null).Gaps<IInterval<T>, T>();
+                return sortedNodes(_root).Select(n => n.LocalSpan).Where(x => x != null).Gaps();
             }
         }
 
