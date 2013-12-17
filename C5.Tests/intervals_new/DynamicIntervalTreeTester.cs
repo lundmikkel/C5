@@ -245,6 +245,57 @@ namespace C5.Tests.intervals_new
             }
         }
 
+        [TestFixture]
+        class Gap
+        {
+
+            [Test]
+            public void Test()
+            {
+                var weld1 = new[]
+                    {
+                        new IntervalBase<int>(  0,  30),
+                        new IntervalBase<int>( 50,  60),
+                        new IntervalBase<int>(100, 150),
+                        new IntervalBase<int>(200, 210)
+                    };
+                var weld2 = new[]
+                    {
+                        new IntervalBase<int>( 10,  20),
+                        new IntervalBase<int>( 40,  70)
+                    };
+                var paint = new[]
+                    {
+                        new IntervalBase<int>( 20,  40),
+                        new IntervalBase<int>( 60, 100),
+                        new IntervalBase<int>(120, 130),
+                        new IntervalBase<int>(160, 190)
+                    };
+
+                var weld1Paint = new DynamicIntervalTree<IInterval<int>, int>(weld1);
+                weld1Paint.AddAll(paint);
+                var weld1Result = new[]
+                    {
+                        new IntervalBase<int>(40, 50),
+                        new IntervalBase<int>(150, 160),
+                        new IntervalBase<int>(190, 200),
+                    };
+                CollectionAssert.AreEquivalent(weld1Result, weld1Paint.Gaps);
+                // TODO: Fix contract exception!!
+                //weld1Paint.AddAll(paint);
+
+
+                var weld2Paint = new DynamicIntervalTree<IInterval<int>, int>(weld2);
+                weld2Paint.AddAll(paint);
+                var weld2Result = new[]
+                    {
+                        new IntervalBase<int>(100, 120),
+                        new IntervalBase<int>(130, 160)
+                    };
+                CollectionAssert.AreEquivalent(weld2Result, weld2Paint.Gaps);
+            }
+        }
+
         #endregion
     }
 }
