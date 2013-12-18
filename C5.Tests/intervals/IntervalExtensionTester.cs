@@ -54,15 +54,17 @@ namespace C5.Tests.intervals
         }
 
         [Test]
-        public void Gaps_NoGaps()
+        public void Gaps_NoGaps([Values(true, false)] bool isSorted)
         {
-            CollectionAssert.IsEmpty(intervals().Gaps());
+            CollectionAssert.IsEmpty(intervals().Gaps(isSorted));
         }
 
         [Test, Combinatorial]
         public void GapsSpan_MatchCounterpart(
             [Values(0, 1)] int count,
-            [Values(true, false)] bool add)
+            [Values(true, false)] bool add,
+            [Values(true, false)] bool isSorted
+            )
         {
             var intervals = this.intervals(100 + count);
             var span = intervals.Span();
@@ -73,11 +75,11 @@ namespace C5.Tests.intervals
             foreach (var interval in intervals)
                 ((add = !add) ? expected : input).Add(interval);
 
-            CollectionAssert.AreEquivalent(expected, input.Gaps(span));
+            CollectionAssert.AreEquivalent(expected, input.Gaps(span, isSorted));
         }
 
         [Test, Combinatorial]
-        public void Gaps_MatchCounterpart()
+        public void Gaps_MatchCounterpart([Values(true, false)] bool isSorted)
         {
             var intervals = this.intervals();
 
@@ -87,7 +89,7 @@ namespace C5.Tests.intervals
             foreach (var interval in intervals)
                 ((add = !add) ? expected : input).Add(interval);
 
-            CollectionAssert.AreEquivalent(expected, input.Gaps());
+            CollectionAssert.AreEquivalent(expected, input.Gaps(isSorted));
         }
 
         private IInterval<int>[] intervals(int count = 101, int length = 10)
