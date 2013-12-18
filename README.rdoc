@@ -8,6 +8,13 @@ The C5 library provides a wide range of classic data
 structures, rich funcionality, the best possible asumptotic time complexity,
 documented performance, and a thoroughly tested implementation.
 
+== Why this fork? C5 Intervals, that's why!
+
+The C5 library contains a lot of advanced generic data structures for the everyday
+use. What it does not contain is data structures for interval data. C5 Intervals
+add both dynamic and static interval data structures to the library. Data structures
+that will live up to the high standard of C5.
+
 == Goals of the C5 library
 
 The overall goal is for C5 to be a generic collection library for the C#
