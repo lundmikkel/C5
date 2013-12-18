@@ -25,6 +25,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.Performance.Wpf", "C5.Performance.Wpf\C5.Performance.Wpf.csproj", "{2FDF20F0-55AF-4A44-90ED-E658ADD5D500}"
+	ProjectSection(ProjectDependencies) = postProject
+		{651F7788-6152-4DCB-9588-44552DCD48E2} = {651F7788-6152-4DCB-9588-44552DCD48E2}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.Ucsc", "C5.Ucsc\C5.Ucsc.csproj", "{2B89EBFA-7CBC-46B3-943F-10209C906294}"
 EndProject
@@ -33,6 +36,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.UserGuideExampleRunner", "C5.UserGuideExampleRunner\C5.UserGuideExampleRunner.csproj", "{651F7788-6152-4DCB-9588-44552DCD48E2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.IntervalHotSpots", "C5.IntervalHotSpots\C5.IntervalHotSpots.csproj", "{FF3DEB1E-D19F-49B4-A73D-CA8544F9B113}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.ForNPerf", "C5.ForNPerf\C5.ForNPerf.csproj", "{958F7D62-E140-4578-B0C8-2C14902F592E}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
@@ -75,6 +80,10 @@ Global
 		{FF3DEB1E-D19F-49B4-A73D-CA8544F9B113}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF3DEB1E-D19F-49B4-A73D-CA8544F9B113}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF3DEB1E-D19F-49B4-A73D-CA8544F9B113}.Release|Any CPU.Build.0 = Release|Any CPU
+		{958F7D62-E140-4578-B0C8-2C14902F592E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{958F7D62-E140-4578-B0C8-2C14902F592E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{958F7D62-E140-4578-B0C8-2C14902F592E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{958F7D62-E140-4578-B0C8-2C14902F592E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
