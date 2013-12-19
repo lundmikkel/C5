@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using QuickGraph;
+using QuickGraph.Graphviz;
+using QuickGraph.Graphviz.Dot;
+
 namespace C5.intervals
 {
     /// <summary>
@@ -2030,5 +2034,128 @@ namespace C5.intervals
         #endregion
 
         #endregion
+
+        #region QuickGraph
+
+        /// <summary>
+        /// Get a string representation of the tree in GraphViz dot format using QuickGraph.
+        /// </summary>
+        /// <returns>GraphViz string.</returns>
+        public string QuickGraph
+        {
+            get
+            {
+                var graph = new AdjacencyGraph<Node, Edge<Node>>();
+
+                if (_root != null)
+                {
+                    var node = new Node();
+                    graph.AddVertex(node);
+                    graph.AddEdge(new Edge<Node>(node, _root));
+                }
+
+                foreach (var node in nodes(_root))
+                {
+                    graph.AddVertex(node);
+
+                    if (node.Left != null)
+                    {
+                        graph.AddVertex(node.Left);
+                        graph.AddEdge(new Edge<Node>(node, node.Left));
+                    }
+                    else
+                    {
+                        var dummy = new Node();
+                        graph.AddVertex(dummy);
+                        graph.AddEdge(new Edge<Node>(node, dummy));
+                    }
+
+                    if (node.Right != null)
+                    {
+                        graph.AddVertex(node.Right);
+                        graph.AddEdge(new Edge<Node>(node, node.Right));
+                    }
+                    else
+                    {
+                        var dummy = new Node();
+                        graph.AddVertex(dummy);
+                        graph.AddEdge(new Edge<Node>(node, dummy));
+                    }
+                }
+
+                var gw = new GraphvizAlgorithm<Node, Edge<Node>>(graph);
+
+                gw.FormatVertex += delegate(object sender, FormatVertexEventArgs<Node> e)
+                {
+                    if (e.Vertex.Dummy)
+                    {
+                        e.VertexFormatter.Shape = GraphvizVertexShape.Point;
+                    }
+                    else
+                    {
+                        e.VertexFormatter.Shape = GraphvizVertexShape.Record;
+                        e.VertexFormatter.Style = GraphvizVertexStyle.Rounded;
+                        e.VertexFormatter.Font = new GraphvizFont("consola", 12);
+
+                        // Generate main cell
+                        var cell = new GraphvizRecordCell();
+                        // Add Key in top cell
+                        cell.Cells.Add(new GraphvizRecordCell { Text = e.Vertex.Key.ToString() });
+                        /*// Add Less, Equal and Greater set in bottom cell
+                        var bottom = new GraphvizRecordCell();
+
+                        const string emptyString = "()"; // "{}" would have been better - but they mess with the output.
+                        const string nullString = "Ø";
+                        bottom.Cells.Add(new GraphvizRecordCell
+                        {
+                            Text = e.Vertex.Less != null && !e.Vertex.Less.IsEmpty ?
+                            e.Vertex.Less.ToString() : e.Vertex.Less != null && e.Vertex.Less.IsEmpty ?
+                            emptyString : nullString
+                        });
+                        bottom.Cells.Add(new GraphvizRecordCell
+                        {
+                            Text = e.Vertex.Equal != null && !e.Vertex.Equal.IsEmpty ?
+                            e.Vertex.Equal.ToString() : e.Vertex.Equal != null && e.Vertex.Equal.IsEmpty ?
+                            emptyString : nullString
+                        });
+                        bottom.Cells.Add(new GraphvizRecordCell
+                        {
+                            Text = e.Vertex.Greater != null && !e.Vertex.Greater.IsEmpty ?
+                            e.Vertex.Greater.ToString() : e.Vertex.Greater != null && e.Vertex.Greater.IsEmpty ?
+                            emptyString : nullString
+                        });
+
+                        cell.Cells.Add(bottom);
+
+                        /*
+                        cell.Cells.Add(new GraphvizRecordCell
+                        {
+                            Text = String.Format("dAt: {0}, dAfter: {1}, Sum: {2}, Max: {3}", e.Vertex.DeltaAt, e.Vertex.DeltaAfter, e.Vertex.Sum, e.Vertex.Max)
+                        });
+                        //*
+
+                        */
+                        // Add cell to record
+                        e.VertexFormatter.Record.Cells.Add(cell);
+
+                    }
+                };
+                gw.FormatEdge += delegate(object sender, FormatEdgeEventArgs<Node, Edge<Node>> e)
+                {
+                    e.EdgeFormatter.Label = new GraphvizEdgeLabel
+                    {
+                        Value = !e.Edge.Target.Dummy
+                            ? ((e.Edge.Target.Balance > 0 ? "+" : "") + e.Edge.Target.Balance + " / " + e.Edge.Target.Height)
+                            : ""
+                    };
+                };
+
+
+                return gw.Generate();
+            }
+        }
+
+        #endregion
+
     }
 }
