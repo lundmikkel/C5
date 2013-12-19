@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Linq;
-using C5.Tests.intervals;
 using C5.intervals;
 using NUnit.Framework;
 
