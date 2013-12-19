@@ -48,6 +48,27 @@ namespace C5.intervals
 
             // Check that the intervals are correctly placed
             Contract.Invariant(contractHelperConfirmIntervalPlacement(_root));
+
+            // There is no set with more intervals than the maximum depth
+            Contract.Invariant(contractHelperGetMaximumSetCount(_root) <= MaximumDepth);
+        }
+
+        [Pure]
+        private static int contractHelperGetMaximumSetCount(Node root)
+        {
+            var max = 0;
+
+            foreach (var node in nodes(root))
+            {
+                if (node.Less != null && node.Less.Count > max)
+                    max = node.Less.Count;
+                if (node.Equal != null && node.Equal.Count > max)
+                    max = node.Equal.Count;
+                if (node.Greater != null && node.Greater.Count > max)
+                    max = node.Greater.Count;
+            }
+
+            return max;
         }
 
         [Pure]
