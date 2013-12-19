@@ -322,16 +322,22 @@ namespace C5.intervals
         [Pure]
         private static int contractHelperHeight(Node node, ref bool result)
         {
+            // TODO: Make return type bool and ref int
             if (node == null)
                 return 0;
 
             var heightLeft = contractHelperHeight(node.Left, ref result);
             var heightRight = contractHelperHeight(node.Right, ref result);
 
+            var height = Math.Max(heightLeft, heightRight) + 1;
+
+            if (node.Height != height)
+                result = false;
+
             if (node.Balance != heightRight - heightLeft)
                 result = false;
 
-            return Math.Max(heightLeft, heightRight) + 1;
+            return height;
         }
 
         [Pure]
@@ -408,8 +414,6 @@ namespace C5.intervals
             {
                 // The key cannot be null
                 Contract.Invariant(Key != null);
-                // Balance never has an absolute value greater than 2
-                Contract.Invariant(-2 <= Balance && Balance <= 2);
             }
 
             #endregion
@@ -421,8 +425,10 @@ namespace C5.intervals
             public Node Left { get; internal set; }
             public Node Right { get; internal set; }
 
-            // Balance - between -2 and +2
-            public sbyte Balance { get; internal set; }
+            // The height of the subtree root in the node
+            public int Height { get; private set; }
+            // Balance
+            public int Balance { get { return (Right != null ? Right.Height : 0) - (Left != null ? Left.Height : 0); } }
 
             // Fields for Maximum Depth
             public int DeltaAt { get; internal set; }
@@ -449,6 +455,7 @@ namespace C5.intervals
 
                 Key = key;
                 IntervalsEndingInNode = new IntervalSet();
+                Height = 1;
             }
 
             public Node()
@@ -459,6 +466,14 @@ namespace C5.intervals
             #endregion
 
             #region Public Methods
+
+            public void UpdateHeight()
+            {
+                var leftHeight = Left != null ? Left.Height : 0;
+                var rightHeight = Right != null ? Right.Height : 0;
+
+                Height = Math.Max(leftHeight, rightHeight) + 1;
+            }
 
             /// <summary>
             /// Update the maximum depth value for the node.
@@ -592,18 +607,12 @@ namespace C5.intervals
                         // Left Left Case
                         case -1:
                             root = rotateRight(root);
-                            root.Balance = root.Right.Balance = 0;
                             break;
 
                         // Left Right Case
                         case +1:
                             root.Left = rotateLeft(root.Left);
                             root = rotateRight(root);
-
-                            // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (sbyte) (root.Balance == +1 ? -1 : 0);
-                            root.Right.Balance = (sbyte) (root.Balance == -1 ? +1 : 0);
-                            root.Balance = 0;
                             break;
                     }
                     updateBalance = false;
@@ -616,18 +625,12 @@ namespace C5.intervals
                         // Right Right Case
                         case +1:
                             root = rotateLeft(root);
-                            root.Balance = root.Left.Balance = 0;
                             break;
 
                         // Right Left Case
                         case -1:
                             root.Right = rotateRight(root.Right);
                             root = rotateLeft(root);
-
-                            // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (sbyte) (root.Balance == +1 ? -1 : 0);
-                            root.Right.Balance = (sbyte) (root.Balance == -1 ? +1 : 0);
-                            root.Balance = 0;
                             break;
                     }
 
@@ -665,13 +668,10 @@ namespace C5.intervals
                         // Left Left Case
                         case -1:
                             root = rotateRight(root);
-                            root.Balance = root.Right.Balance = 0;
                             break;
 
                         case 0:
                             root = rotateRight(root);
-                            root.Right.Balance = -1;
-                            root.Balance = +1;
                             updateBalance = false;
                             break;
 
@@ -679,11 +679,6 @@ namespace C5.intervals
                         case +1:
                             root.Left = rotateLeft(root.Left);
                             root = rotateRight(root);
-
-                            // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (sbyte) ((root.Balance == +1) ? -1 : 0);
-                            root.Right.Balance = (sbyte) ((root.Balance == -1) ? +1 : 0);
-                            root.Balance = 0;
                             break;
                     }
                     break;
@@ -695,13 +690,10 @@ namespace C5.intervals
                         // Right Right Case
                         case +1:
                             root = rotateLeft(root);
-                            root.Balance = root.Left.Balance = 0;
                             break;
 
                         case 0:
                             root = rotateLeft(root);
-                            root.Left.Balance = 1;
-                            root.Balance = -1;
                             updateBalance = false;
                             break;
 
@@ -709,11 +701,6 @@ namespace C5.intervals
                         case -1:
                             root.Right = rotateRight(root.Right);
                             root = rotateLeft(root);
-
-                            // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (sbyte) (root.Balance == +1 ? -1 : 0);
-                            root.Right.Balance = (sbyte) (root.Balance == -1 ? +1 : 0);
-                            root.Balance = 0;
                             break;
                     }
                     break;
@@ -726,6 +713,8 @@ namespace C5.intervals
         {
             Contract.Requires(root != null);
             Contract.Requires(root.Left != null);
+
+            // TODO: Optimize to do it in a mirrored way
 
             // Rotate
             var node = root.Left;
@@ -792,6 +781,10 @@ namespace C5.intervals
                 if (root.Equal != null && !root.Equal.IsEmpty)
                     root.Equal.RemoveAll(node.Greater);
             }
+
+            // Update height
+            root.UpdateHeight();
+            node.UpdateHeight();
 
             // Update maximum depth
             root.UpdateMaximumDepth();
@@ -871,6 +864,10 @@ namespace C5.intervals
                     root.Equal.RemoveAll(node.Less);
             }
 
+            // Update height
+            root.UpdateHeight();
+            node.UpdateHeight();
+
             // Update maximum depth
             root.UpdateMaximumDepth();
             node.UpdateMaximumDepth();
@@ -926,27 +923,23 @@ namespace C5.intervals
                 if (endpointCount == 0 || uniqueEndpoints[endpointCount - 1].CompareTo(endpoint) < 0)
                     uniqueEndpoints[endpointCount++] = endpoint;
 
-            var height = 0;
-            _root = createNodes(ref uniqueEndpoints, 0, endpointCount - 1, ref height);
+            _root = createNodes(ref uniqueEndpoints, 0, endpointCount - 1);
         }
 
-        private Node createNodes(ref T[] endpoints, int lower, int upper, ref int height)
+        private Node createNodes(ref T[] endpoints, int lower, int upper)
         {
             if (lower > upper)
                 return null;
 
             var mid = lower + (upper - lower >> 1);
 
-            var node = new Node(endpoints[mid]);
-            var leftHeight = 0;
-            var rightHeight = 0;
+            var node = new Node(endpoints[mid])
+                {
+                    Left = createNodes(ref endpoints, lower, mid - 1),
+                    Right = createNodes(ref endpoints, mid + 1, upper)
+                };
 
-            node.Left = createNodes(ref endpoints, lower, mid - 1, ref leftHeight);
-            node.Right = createNodes(ref endpoints, mid + 1, upper, ref rightHeight);
-
-            node.Balance = (sbyte) (rightHeight - leftHeight);
-
-            height = Math.Max(leftHeight, rightHeight) + 1;
+            node.UpdateHeight();
 
             return node;
         }
@@ -1584,7 +1577,7 @@ namespace C5.intervals
 
                 // Adjust node balance, if node was added
                 if (nodeWasAdded)
-                    root.Balance++;
+                    root.UpdateHeight();
             }
             else if (compare < 0)
             {
@@ -1612,7 +1605,7 @@ namespace C5.intervals
 
                 // Adjust node balance, if node was added
                 if (nodeWasAdded)
-                    root.Balance--;
+                    root.UpdateHeight();
             }
             else
             {
@@ -1676,7 +1669,7 @@ namespace C5.intervals
 
                 // Adjust node balance, if node was added
                 if (nodeWasAdded)
-                    root.Balance--;
+                    root.UpdateHeight();
             }
             else if (compare > 0)
             {
@@ -1704,7 +1697,7 @@ namespace C5.intervals
 
                 // Adjust node balance, if node was added
                 if (nodeWasAdded)
-                    root.Balance++;
+                    root.UpdateHeight();
             }
             else
             {
@@ -1916,7 +1909,7 @@ namespace C5.intervals
                 root.Right = removeNodeWithKey(key, root.Right, ref updateBalance, root, rightUp);
 
                 if (updateBalance)
-                    root.Balance--;
+                    root.UpdateHeight();
             }
             // Remove node from left subtree
             else if (compare < 0)
@@ -1924,7 +1917,7 @@ namespace C5.intervals
                 root.Left = removeNodeWithKey(key, root.Left, ref updateBalance, leftUp, root);
 
                 if (updateBalance)
-                    root.Balance++;
+                    root.UpdateHeight();
             }
             // Node found
             // Replace node with successor
@@ -1958,7 +1951,7 @@ namespace C5.intervals
                 root.Right = removeNodeWithKey(successor.Key, root.Right, ref updateBalance, leftUp, rightUp);
 
                 if (updateBalance)
-                    root.Balance--;
+                    root.UpdateHeight();
 
                 // Reinsert marks for intervals in successor
                 foreach (var interval in intervalsNeedingReinsertion)
