@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
+using C5.Tests.intervals;
 using C5.intervals;
 using NUnit.Framework;
 
@@ -139,7 +140,7 @@ namespace C5.Tests.intervals_new
             {
                 get
                 {
-                    return new IInterval<int>[] { new IntervalBase<int>(1, 1,true,true), new IntervalBase<int>(3, 5) };
+                    return new IInterval<int>[] { new IntervalBase<int>(1, 1, true, true), new IntervalBase<int>(3, 5) };
                 }
             }
 
@@ -151,7 +152,7 @@ namespace C5.Tests.intervals_new
                     for (var i = 1; i < 7 + 1; i++)
                     {
                         // Create [i;i]..[7;7] intervals
-                        if (i!=6) // Don't create [6;6]
+                        if (i != 6) // Don't create [6;6]
                             intervals.Add(new IntervalBase<int>(i, i, true, true));
 
                         // Create (i;i+1)..(3;4)
@@ -765,8 +766,8 @@ namespace C5.Tests.intervals_new
             public void FindOverlapsRange_RootMultiples()
             {
                 var inputDataSet = _createIBS(F);
-                inputDataSet.Add(new IntervalBase<int>(6,7,false));
-                inputDataSet.Add(new IntervalBase<int>(7,7,true,true));
+                inputDataSet.Add(new IntervalBase<int>(6, 7, false));
+                inputDataSet.Add(new IntervalBase<int>(7, 7, true, true));
                 var inputContents = new IntervalBase<int>(1, 7, true, true);
                 CollectionAssert.AreEquivalent(inputDataSet, inputDataSet.FindOverlaps(inputContents));
             }
@@ -900,7 +901,7 @@ namespace C5.Tests.intervals_new
             public void FindOverlapsRange_RootRightMultiple()
             {
                 var inputDataSet = _createIBS(F);
-                var inputContents = new IntervalBase<int>(2, 7,true,true);
+                var inputContents = new IntervalBase<int>(2, 7, true, true);
                 var result = inputDataSet.Filter(i => i.Overlaps(inputContents));
                 CollectionAssert.AreEquivalent(result, inputDataSet.FindOverlaps(inputContents));
             }
