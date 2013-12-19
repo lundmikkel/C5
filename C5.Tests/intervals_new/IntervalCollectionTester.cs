@@ -94,7 +94,7 @@ namespace C5.Tests.intervals_new
 
         public Interval SingleInterval()
         {
-            var low = Random.Next(Int32.MinValue, Int32.MaxValue);
+            var low = Random.Next(Int32.MinValue, Int32.MaxValue - 3);
             var high = Random.Next(low + 2, Int32.MaxValue);
 
             return new Interval(low, high, (IntervalType) Random.Next(0, 4));
@@ -107,7 +107,25 @@ namespace C5.Tests.intervals_new
             if (count < 0)
                 count = Count;
 
-            return Enumerable.Range(0, count).Select(i => SingleInterval()).ToArray();
+            return Normalize(Enumerable.Range(0, count).Select(i => SingleInterval()).ToArray());
+        }
+
+        private Interval[] Normalize(Interval[] intervals)
+        {
+            var endpoints = intervals.UniqueEndpointValues();
+            var map = new HashDictionary<int, int>();
+            var counter = 0;
+            foreach (var endpoint in endpoints)
+                map.Add(endpoint, counter++);
+
+            var normalizedIntervals = new Interval[intervals.Length];
+            for (int i = 0; i < intervals.Length; i++)
+            {
+                var interval = intervals[i];
+
+                normalizedIntervals[i] = new Interval(map[interval.Low], map[interval.High]);
+            }
+            return normalizedIntervals;
         }
 
         public Interval[] DuplicateIntervals()
@@ -1055,6 +1073,14 @@ namespace C5.Tests.intervals_new
 
         [Test]
         [Category("Find Overlap Range")]
+        public void FindOverlapRange_ManyIntervals_ChooseOverlapsInCollection_FixedSeed()
+        {
+            updateRandom(-1590477799);
+            FindOverlapRange_ManyIntervals_ChooseOverlapsInCollection();
+        }
+
+        [Test]
+        [Category("Find Overlap Range")]
         public void FindOverlapRange_ManyIntervals_ChooseOverlapsInCollection()
         {
             var intervals = ManyIntervals();
@@ -1674,6 +1700,8 @@ namespace C5.Tests.intervals_new
         [Category("Large Scale")]
         public void Random_CallWholeInterface_FixedSeed()
         {
+            updateRandom(267138595);
+            Random_CallWholeInterface();
             updateRandom(1065643459);
             Random_CallWholeInterface();
         }
