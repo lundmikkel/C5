@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -380,19 +381,20 @@ namespace C5.intervals
             var compare = root.Key.CompareTo(interval.Low);
             if (compare == 0)
             {
-                if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0)
-                    result &= root.Greater.Contains(interval);
-                if (interval.LowIncluded)
-                    result &= root.Equal.Contains(interval);
+                if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0 && !root.Greater.Contains(interval))
+                    return false;
+                if (interval.LowIncluded && !root.Equal.Contains(interval))
+                    return false;
             }
             else if (compare < 0)
                 return contractHelperConfirmLowPlacement(interval, root.Right, rightUp, result);
             else if (compare > 0)
             {
-                if (root.Key.CompareTo(interval.High) < 0)
-                    result &= root.Equal.Contains(interval);
-                if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0)
-                    result &= root.Greater.Contains(interval);
+                if (root.Key.CompareTo(interval.High) < 0 && !root.Equal.Contains(interval))
+                    return false;
+                if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0 && !root.Greater.Contains(interval))
+                    return false;
+
                 return contractHelperConfirmLowPlacement(interval, root.Left, root, result);
             }
             return result;
@@ -502,7 +504,7 @@ namespace C5.intervals
             /// <returns>True if value changed.</returns>
             public bool UpdateMaximumDepth()
             {
-                Contract.Ensures(Contract.Result<bool>() == (Contract.OldValue(Max) != Max || Contract.OldValue(Sum) != Sum));
+                //Contract.Ensures(Contract.Result<bool>() == (Contract.OldValue(Max) != Max || Contract.OldValue(Sum) != Sum));
 
                 // Cache values
                 var oldMax = Max;
@@ -531,7 +533,7 @@ namespace C5.intervals
                     Max = value;
 
                 // Return true if either Max or Sum changed
-                return oldMax != Max || oldSum != Sum;
+                return true;// oldMax != Max || oldSum != Sum;
             }
 
             public int CompareTo(Node other)
@@ -602,7 +604,7 @@ namespace C5.intervals
 
         #region AVL Tree Methods
 
-        private static Node rotateForAdd(Node root, ref bool updateBalance)
+        private static Node rotateForAdd(Node root, ref int rotationsNeeded)
         {
             Contract.Requires(root != null);
 
@@ -616,53 +618,57 @@ namespace C5.intervals
 
             switch (root.Balance)
             {
-                // Node is balanced after the node was added
+                // Node is balanced after a node was added
                 case 0:
-                    updateBalance = false;
+                    rotationsNeeded--;
                     break;
 
                 // Node is unbalanced, so we rotate
                 case -2:
                     switch (root.Left.Balance)
                     {
-                        // Left Left Case
-                        case -1:
-                            root = rotateRight(root);
-                            break;
-
                         // Left Right Case
                         case +1:
                             root.Left = rotateLeft(root.Left);
                             root = rotateRight(root);
                             break;
+
+                        // Left Left Case
+                        case 0:
+                        case -1:
+                            root = rotateRight(root);
+                            break;
                     }
-                    updateBalance = false;
+
+                    rotationsNeeded--;
                     break;
 
                 // Node is unbalanced, so we rotate
                 case +2:
                     switch (root.Right.Balance)
                     {
-                        // Right Right Case
-                        case +1:
-                            root = rotateLeft(root);
-                            break;
-
                         // Right Left Case
                         case -1:
                             root.Right = rotateRight(root.Right);
+                            // TODO: Remove rotateLeft and use it from the next one...
+                            root = rotateLeft(root);
+                            break;
+
+                        // Right Right Case
+                        case 0:
+                        case +1:
                             root = rotateLeft(root);
                             break;
                     }
 
-                    updateBalance = false;
+                    rotationsNeeded--;
                     break;
             }
 
             return root;
         }
 
-        private static Node rotateForRemove(Node root, ref bool updateBalance)
+        private static Node rotateForRemove(Node root, ref int rotationsNeeded)
         {
             Contract.Requires(root != null);
 
@@ -679,7 +685,7 @@ namespace C5.intervals
                 // High will not change for parent, so we can stop here
                 case -1:
                 case +1:
-                    updateBalance = false;
+                    rotationsNeeded--;
                     break;
 
                 // Node is unbalanced, so we rotate
@@ -693,7 +699,7 @@ namespace C5.intervals
 
                         case 0:
                             root = rotateRight(root);
-                            updateBalance = false;
+                            rotationsNeeded--;
                             break;
 
                         // Left Right Case
@@ -715,7 +721,7 @@ namespace C5.intervals
 
                         case 0:
                             root = rotateLeft(root);
-                            updateBalance = false;
+                            rotationsNeeded--;
                             break;
 
                         // Right Left Case
@@ -1512,6 +1518,8 @@ namespace C5.intervals
         /// <inheritdoc/>
         public bool Add(I interval)
         {
+            return NewAdd(interval);
+
             // References to endpoint nodes needed when maintaining Interval
             Node lowNode = null, highNode = null;
 
@@ -1519,12 +1527,12 @@ namespace C5.intervals
             var intervalWasAdded = false;
 
             // Insert low endpoint
-            var nodeWasAdded = false;
-            _root = addLow(interval, _root, null, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
+            var rotationsNeeded = 0;
+            _root = addLow(interval, _root, null, ref rotationsNeeded, ref intervalWasAdded, ref lowNode);
 
             // Insert high endpoint
-            nodeWasAdded = false;
-            _root = addHigh(interval, _root, null, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
+            rotationsNeeded = 0;
+            _root = addHigh(interval, _root, null, ref rotationsNeeded, ref intervalWasAdded, ref highNode);
 
             // Increase counters and raise event if interval was added
             if (intervalWasAdded)
@@ -1560,6 +1568,102 @@ namespace C5.intervals
             return intervalWasAdded;
         }
 
+        private bool NewAdd(I interval)
+        {
+            var rotationsNeeded = 0;
+            var intervalWasAdded = false;
+            var updateMaximumDepth = false;
+            _root = add(interval, _root, null, null, ref rotationsNeeded, ref intervalWasAdded, ref updateMaximumDepth);
+
+            // Increase counters and raise event if interval was added
+            if (intervalWasAdded)
+            {
+                // Update span if necessary
+                if (_span != null && !_span.Contains(interval))
+                    _span = _span.JoinedSpan(interval);
+
+                _count++;
+                raiseForAdd(interval);
+            }
+
+            // TODO: Add event for change in MNO
+
+            return intervalWasAdded;
+        }
+
+        private static Node add(I interval, Node root, Node rightUp, Node leftUp, ref int rotationsNeeded, ref bool intervalWasAdded, ref bool updateMaximumDepth)
+        {
+            // Interval is higher than root, go right
+            if (root != null && interval.Low.CompareTo(root.Key) > 0)
+            {
+                root.Right = add(interval, root.Right, rightUp, root, ref rotationsNeeded, ref intervalWasAdded, ref updateMaximumDepth);
+
+                root.UpdateHeight();
+
+                if (rotationsNeeded > 0)
+                    root = rotateForAdd(root, ref rotationsNeeded);
+
+                if (updateMaximumDepth)
+                    updateMaximumDepth = root.UpdateMaximumDepth();
+            }
+            // Interval is lower than root, go left
+            else if (root != null && interval.High.CompareTo(root.Key) < 0)
+            {
+                root.Left = add(interval, root.Left, root, leftUp, ref rotationsNeeded, ref intervalWasAdded, ref updateMaximumDepth);
+
+                root.UpdateHeight();
+
+                if (rotationsNeeded > 0)
+                    root = rotateForAdd(root, ref rotationsNeeded);
+
+                if (updateMaximumDepth)
+                    updateMaximumDepth = root.UpdateMaximumDepth();
+            }
+            // Split node found
+            else
+            {
+                // References to endpoint nodes needed when maintaining Interval
+                Node lowNode = null, highNode = null;
+
+                // Insert low endpoint
+                var lowRotationsNeeded = 0;
+                root = addLow(interval, root, rightUp, ref lowRotationsNeeded, ref intervalWasAdded, ref lowNode);
+
+                // Insert high endpoint
+                var highRotationsNeeded = 0;
+                root = addHigh(interval, root, leftUp, ref highRotationsNeeded, ref intervalWasAdded, ref highNode);
+
+                if (intervalWasAdded)
+                {
+                    // Update delta for low
+                    if (interval.LowIncluded)
+                        lowNode.DeltaAt++;
+                    else
+                        lowNode.DeltaAfter++;
+
+                    // Update delta for high
+                    if (!interval.HighIncluded)
+                        highNode.DeltaAt--;
+                    else
+                        highNode.DeltaAfter--;
+
+                    // Update maximum overlap for both endpoints
+                    // TODO: Confirm this value
+                    IntervalBinarySearchTree<I, T>.updateMaximumDepth(root, interval);
+                    updateMaximumDepth = root.UpdateMaximumDepth();
+
+                    lowNode.IntervalsEndingInNode.Add(interval);
+                    highNode.IntervalsEndingInNode.Add(interval);
+
+                    rotationsNeeded = lowRotationsNeeded + highRotationsNeeded;
+                }
+            }
+
+            return root;
+        }
+
+
+
         /// <inheritdoc/>
         public void AddAll(IEnumerable<I> intervals)
         {
@@ -1570,13 +1674,13 @@ namespace C5.intervals
 
         private static void addLow(I interval, Node root, Node rightUp)
         {
-            var nodeWasAdded = false;
+            var rotationsNeeded = 0;
             var intervalWasAdded = false;
             Node lowNode = null;
-            addLow(interval, root, rightUp, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
+            addLow(interval, root, rightUp, ref rotationsNeeded, ref intervalWasAdded, ref lowNode);
         }
 
-        private static Node addLow(I interval, Node root, Node rightUp, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node lowNode)
+        private static Node addLow(I interval, Node root, Node rightUp, ref int rotationsNeeded, ref bool intervalWasAdded, ref Node lowNode)
         {
             Contract.Requires(interval != null);
 
@@ -1584,21 +1688,20 @@ namespace C5.intervals
             if (root == null)
             {
                 root = new Node(interval.Low);
-                nodeWasAdded = true;
+                rotationsNeeded++;
                 intervalWasAdded = true;
             }
-
-            Contract.Assert(root != null);
 
             var compare = interval.Low.CompareTo(root.Key);
 
             if (compare > 0)
             {
-                root.Right = addLow(interval, root.Right, rightUp, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
+                root.Right = addLow(interval, root.Right, rightUp, ref rotationsNeeded, ref intervalWasAdded, ref lowNode);
 
                 // Adjust node balance, if node was added
-                if (nodeWasAdded)
-                    root.UpdateHeight();
+                // TODO: Check if there is a correlation between the rotationsNeeded and the change in height. Probably not...
+                //if (rotationsNeeded > 0)
+                root.UpdateHeight();
             }
             else if (compare < 0)
             {
@@ -1622,11 +1725,11 @@ namespace C5.intervals
                         return root;
                 }
 
-                root.Left = addLow(interval, root.Left, root, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
+                root.Left = addLow(interval, root.Left, root, ref rotationsNeeded, ref intervalWasAdded, ref lowNode);
 
                 // Adjust node balance, if node was added
-                if (nodeWasAdded)
-                    root.UpdateHeight();
+                //if (rotationsNeeded > 0)
+                root.UpdateHeight();
             }
             else
             {
@@ -1654,21 +1757,21 @@ namespace C5.intervals
             }
 
             // Tree might be unbalanced after node was added, so we rotate
-            if (nodeWasAdded && compare != 0)
-                root = rotateForAdd(root, ref nodeWasAdded);
+            if (rotationsNeeded > 0 && compare != 0)
+                root = rotateForAdd(root, ref rotationsNeeded);
 
             return root;
         }
 
         private static void addHigh(I interval, Node root, Node leftUp)
         {
-            var nodeWasAdded = false;
+            var rotationsNeeded = 0;
             var intervalWasAdded = false;
             Node highNode = null;
-            addHigh(interval, root, leftUp, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
+            addHigh(interval, root, leftUp, ref rotationsNeeded, ref intervalWasAdded, ref highNode);
         }
 
-        private static Node addHigh(I interval, Node root, Node leftUp, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node highNode)
+        private static Node addHigh(I interval, Node root, Node leftUp, ref int rotationsNeeded, ref bool intervalWasAdded, ref Node highNode)
         {
             Contract.Requires(interval != null);
 
@@ -1676,7 +1779,7 @@ namespace C5.intervals
             if (root == null)
             {
                 root = new Node(interval.High);
-                nodeWasAdded = true;
+                rotationsNeeded++;
                 intervalWasAdded = true;
             }
 
@@ -1686,11 +1789,11 @@ namespace C5.intervals
 
             if (compare < 0)
             {
-                root.Left = addHigh(interval, root.Left, leftUp, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
+                root.Left = addHigh(interval, root.Left, leftUp, ref rotationsNeeded, ref intervalWasAdded, ref highNode);
 
                 // Adjust node balance, if node was added
-                if (nodeWasAdded)
-                    root.UpdateHeight();
+                //if (rotationsNeeded > 0)
+                root.UpdateHeight();
             }
             else if (compare > 0)
             {
@@ -1714,11 +1817,11 @@ namespace C5.intervals
                         return root;
                 }
 
-                root.Right = addHigh(interval, root.Right, root, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
+                root.Right = addHigh(interval, root.Right, root, ref rotationsNeeded, ref intervalWasAdded, ref highNode);
 
                 // Adjust node balance, if node was added
-                if (nodeWasAdded)
-                    root.UpdateHeight();
+                //if (rotationsNeeded > 0)
+                root.UpdateHeight();
             }
             else
             {
@@ -1746,8 +1849,8 @@ namespace C5.intervals
             }
 
             // Tree might be unbalanced after node was added, so we rotate
-            if (nodeWasAdded && compare != 0)
-                root = rotateForAdd(root, ref nodeWasAdded);
+            if (rotationsNeeded > 0 && compare != 0)
+                root = rotateForAdd(root, ref rotationsNeeded);
 
             return root;
         }
@@ -1802,8 +1905,8 @@ namespace C5.intervals
                 // Check for unnecessary endpoint nodes, if interval was actually removed
                 if (lowNode.IntervalsEndingInNode.IsEmpty)
                 {
-                    var updateBalanace = false;
-                    _root = removeNodeWithKey(interval.Low, _root, ref updateBalanace);
+                    var rotationsNeeded = 0;
+                    _root = removeNodeWithKey(interval.Low, _root, ref rotationsNeeded);
 
                     // Check that the node does not exist anymore
                     Contract.Assert(!Contract.Exists(nodes(_root), n => n.Key.Equals(interval.Low)));
@@ -1812,8 +1915,8 @@ namespace C5.intervals
                 // Skip if low and high are equal (true for point intervals)
                 if (highNode.IntervalsEndingInNode.IsEmpty && lowNode != highNode)
                 {
-                    var updateBalanace = false;
-                    _root = removeNodeWithKey(interval.High, _root, ref updateBalanace);
+                    var rotationsNeeded = 0;
+                    _root = removeNodeWithKey(interval.High, _root, ref rotationsNeeded);
 
                     // Check that the node does not exist anymore
                     Contract.Assert(!Contract.Exists(nodes(_root), n => n.Key.Equals(interval.High)));
@@ -1916,7 +2019,7 @@ namespace C5.intervals
             }
         }
 
-        private static Node removeNodeWithKey(T key, Node root, ref bool updateBalance, Node leftUp = null, Node rightUp = null)
+        private static Node removeNodeWithKey(T key, Node root, ref int rotationsNeeded, Node leftUp = null, Node rightUp = null)
         {
             Contract.Requires(root != null);
             Contract.Requires(Contract.Exists(nodes(root), n => n.Key.Equals(key)));
@@ -1927,18 +2030,18 @@ namespace C5.intervals
             if (compare > 0)
             {
                 // Update left parent
-                root.Right = removeNodeWithKey(key, root.Right, ref updateBalance, root, rightUp);
+                root.Right = removeNodeWithKey(key, root.Right, ref rotationsNeeded, root, rightUp);
 
-                if (updateBalance)
-                    root.UpdateHeight();
+                //if (rotationsNeeded > 0)
+                root.UpdateHeight();
             }
             // Remove node from left subtree
             else if (compare < 0)
             {
-                root.Left = removeNodeWithKey(key, root.Left, ref updateBalance, leftUp, root);
+                root.Left = removeNodeWithKey(key, root.Left, ref rotationsNeeded, leftUp, root);
 
-                if (updateBalance)
-                    root.UpdateHeight();
+                //if (rotationsNeeded > 0)
+                root.UpdateHeight();
             }
             // Node found
             // Replace node with successor
@@ -1968,11 +2071,10 @@ namespace C5.intervals
                 updateMaximumDepth(root.Right, successor.Key);
 
                 // Remove the successor node
-                updateBalance = false;
-                root.Right = removeNodeWithKey(successor.Key, root.Right, ref updateBalance, leftUp, rightUp);
+                root.Right = removeNodeWithKey(successor.Key, root.Right, ref rotationsNeeded, leftUp, rightUp);
 
-                if (updateBalance)
-                    root.UpdateHeight();
+                //if (rotationsNeeded > 0)
+                root.UpdateHeight();
 
                 // Reinsert marks for intervals in successor
                 foreach (var interval in intervalsNeedingReinsertion)
@@ -1987,14 +2089,14 @@ namespace C5.intervals
             }
             else
             {
-                updateBalance = true;
+                rotationsNeeded++;
 
                 // Return Left if not null, otherwise Right
                 return root.Left ?? root.Right;
             }
 
-            if (updateBalance)
-                root = rotateForRemove(root, ref updateBalance);
+            if (rotationsNeeded > 0)
+                root = rotateForRemove(root, ref rotationsNeeded);
 
             return root;
         }
@@ -2141,14 +2243,14 @@ namespace C5.intervals
 
                         cell.Cells.Add(bottom);
 
-                        /*
+                        */
+                        //*
                         cell.Cells.Add(new GraphvizRecordCell
                         {
                             Text = String.Format("dAt: {0}, dAfter: {1}, Sum: {2}, Max: {3}", e.Vertex.DeltaAt, e.Vertex.DeltaAfter, e.Vertex.Sum, e.Vertex.Max)
                         });
-                        //*
+                        //*/
 
-                        */
                         // Add cell to record
                         e.VertexFormatter.Record.Cells.Add(cell);
 

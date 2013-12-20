@@ -1971,7 +1971,6 @@ namespace C5.intervals
                 updateMaximumDepth(root.Right, successor.Key);
 
                 // Remove the successor node
-                updateBalance = false;
                 root.Right = removeNodeWithKey(successor.Key, root.Right, ref updateBalance, leftUp, rightUp);
 
                 if (updateBalance)

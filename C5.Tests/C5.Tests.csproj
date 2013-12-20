@@ -124,6 +124,7 @@
     <Compile Include="intervals\Benchmarker.cs" />
     <Compile Include="intervals\DynamicIntervalTreeTester.cs" />
     <Compile Include="intervals_new\BinaryIntervalSearchTester.cs" />
+    <Compile Include="intervals_new\IntervalBinarySearchTreeRegularTester.cs" />
     <Compile Include="intervals_new\IntervalBinarySearchTreeOldTester.cs" />
     <Compile Include="intervals_new\StaticIntervalTreeTester.cs" />
     <Compile Include="intervals_new\IntervalCollectionTester.cs" />
