@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
@@ -552,23 +553,54 @@ namespace C5.intervals
 
         }
 
-        private sealed class IntervalSet : HashSet<I>
+        private sealed class IntervalSet : IEnumerable<I>
         {
+            private HashSet<I> _set;
+
+            #region Constructor
+
             public IntervalSet(IEnumerable<I> set)
             {
-                AddAll(set);
+                _set = new HashSet<I>(Comparer);
+                _set.AddAll(set);
             }
 
             public IntervalSet()
-                : base(Comparer)
             {
+                _set = new HashSet<I>(Comparer);
             }
+
+            #endregion
+
+            #region Enumerator
+
+            public IEnumerator<I> GetEnumerator()
+            {
+                return _set.GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            #endregion
+
+            public bool IsEmpty { get { return _set.IsEmpty; } }
+            public int Count { get { return _set.Count; } }
+            public I Choose() { return _set.Choose(); }
+
+            public bool Add(I interval) { return _set.Add(interval); }
+            public void AddAll(IEnumerable<I> intervals) { _set.AddAll(intervals); }
+
+            public bool Remove(I interval) { return _set.Remove(interval); }
+            public void RemoveAll(IEnumerable<I> intervals) { _set.RemoveAll(intervals); }
 
             public override string ToString()
             {
                 var s = new ArrayList<string>();
 
-                foreach (var interval in this)
+                foreach (var interval in _set)
                     s.Add(interval.ToString());
 
                 return s.IsEmpty ? String.Empty : String.Join(", ", s.ToArray());
@@ -923,7 +955,7 @@ namespace C5.intervals
             Contract.Requires(intervals != null);
 
             if (preconstructTree)
-                    preconstructNodeStructure(intervals);
+                preconstructNodeStructure(intervals);
 
             // TODO: Insert from splitnode
             AddAll(intervals);
