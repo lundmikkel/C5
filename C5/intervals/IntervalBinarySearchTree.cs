@@ -46,7 +46,7 @@ namespace C5.intervals
             Contract.Invariant(contractHelperCheckMnoAndIntervalsEndingInNodeForEachNode(_root));
 
             // Check that the IBS tree invariants from the Hanson article holds.
-            Contract.Invariant(Contract.ForAll(nodes(_root), contractHelperCheckIbsInvariants));
+            Contract.Invariant(Contract.ForAll(nodesStatic(_root), contractHelperCheckIbsInvariants));
 
             // Check that the intervals are correctly placed
             Contract.Invariant(contractHelperConfirmIntervalPlacement(_root));
@@ -58,7 +58,7 @@ namespace C5.intervals
         [Pure]
         private static bool contractHelperCheckNodesAreSorted(Node root)
         {
-            return nodes(root).IsSorted();
+            return nodesStatic(root).IsSorted();
         }
 
         [Pure]
@@ -407,7 +407,7 @@ namespace C5.intervals
         {
             var max = 0;
 
-            foreach (var node in nodes(root))
+            foreach (var node in nodesStatic(root))
             {
                 if (node.Less != null && node.Less.Count > max)
                     max = node.Less.Count;
@@ -1081,6 +1081,8 @@ namespace C5.intervals
         /// <inheritdoc/>
         public override IEnumerator<I> GetEnumerator()
         {
+            // TODO: Make sorted on endpoint inclusion as well
+
             return nodes(_root)
                 .SelectMany(node => node
                     .IntervalsEndingInNode
@@ -1096,17 +1098,49 @@ namespace C5.intervals
         /// <returns>An enumerable of intervals</returns>
         private static IEnumerable<I> intervals(Node root)
         {
-            // TODO: Is this lazy?
-            return nodes(root).SelectMany(node => node.IntervalsEndingInNode);
+            return nodesStatic(root).SelectMany(node => node.IntervalsEndingInNode);
         }
 
         [Pure]
-        private static IEnumerable<Node> nodes(Node root)
+        private IEnumerable<Node> nodes(Node root)
+        {
+            if (IsEmpty)
+                yield break;
+
+            var height = calcHeight(_count);
+
+            var stack = new Node[height];
+            var i = 0;
+
+            var current = root;
+            while (i > 0 || current != null)
+            {
+                if (current != null)
+                {
+                    stack[i++] = current;
+                    current = current.Left;
+                }
+                else
+                {
+                    current = stack[--i];
+                    yield return current;
+                    current = current.Right;
+                }
+            }
+        }
+
+        private static int calcHeight(int count)
+        {
+            return (int) Math.Ceiling(1.44 * Math.Log(count * 2 + 2, 2) - 0.328 + 2);
+        }
+
+        [Pure]
+        private static IEnumerable<Node> nodesStatic(Node root)
         {
             // TODO: Make fully iterative
             while (root != null)
             {
-                foreach (var node in nodes(root.Left))
+                foreach (var node in nodesStatic(root.Left))
                     yield return node;
 
                 yield return root;
@@ -1871,7 +1905,7 @@ namespace C5.intervals
                     _root = removeNodeWithKey(interval.Low, _root, ref rotationNeeded);
 
                     // Check that the node does not exist anymore
-                    Contract.Assert(!Contract.Exists(nodes(_root), n => n.Key.Equals(interval.Low)));
+                    Contract.Assert(!Contract.Exists(nodesStatic(_root), n => n.Key.Equals(interval.Low)));
                 }
 
                 // Skip if low and high are equal (true for point intervals)
@@ -1881,7 +1915,7 @@ namespace C5.intervals
                     _root = removeNodeWithKey(interval.High, _root, ref rotationNeeded);
 
                     // Check that the node does not exist anymore
-                    Contract.Assert(!Contract.Exists(nodes(_root), n => n.Key.Equals(interval.High)));
+                    Contract.Assert(!Contract.Exists(nodesStatic(_root), n => n.Key.Equals(interval.High)));
                 }
 
                 _count--;
@@ -1984,7 +2018,7 @@ namespace C5.intervals
         private static Node removeNodeWithKey(T key, Node root, ref bool rotationNeeded, Node leftUp = null, Node rightUp = null)
         {
             Contract.Requires(root != null);
-            Contract.Requires(Contract.Exists(nodes(root), n => n.Key.Equals(key)));
+            Contract.Requires(Contract.Exists(nodesStatic(root), n => n.Key.Equals(key)));
 
             var compare = key.CompareTo(root.Key);
 
@@ -2071,7 +2105,7 @@ namespace C5.intervals
         {
             Contract.Requires(node != null);
             Contract.Ensures(Contract.Result<Node>() != null);
-            Contract.Ensures(Contract.Result<Node>() == nodes(Contract.OldValue(node)).First());
+            Contract.Ensures(Contract.Result<Node>() == nodesStatic(Contract.OldValue(node)).First());
 
             while (node.Left != null)
                 node = node.Left;
@@ -2129,7 +2163,7 @@ namespace C5.intervals
                     graph.AddVertex(node);
                     graph.AddEdge(new Edge<Node>(node, _root));
                 }
-                foreach (var node in nodes(_root))
+                foreach (var node in nodesStatic(_root))
                 {
                     graph.AddVertex(node);
                     if (node.Left != null)
