@@ -1079,14 +1079,13 @@ namespace C5.intervals
         #region Enumerable
 
         /// <inheritdoc/>
-        public override IEnumerator<I>
-            GetEnumerator()
+        public override IEnumerator<I> GetEnumerator()
         {
-            var set = new IntervalSet();
-
-            // TODO: Is Linq version lazy?
-            foreach (var interval in intervals(_root).Where(set.Add))
-                yield return interval;
+            return nodes(_root)
+                .SelectMany(node => node
+                    .IntervalsEndingInNode
+                    .Where(interval => interval.Low.CompareTo(node.Key) == 0)
+                ).GetEnumerator();
         }
 
         /// <summary>
