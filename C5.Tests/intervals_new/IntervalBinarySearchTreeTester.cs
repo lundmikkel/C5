@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
+using C5.Tests.intervals;
 using C5.intervals;
 using NUnit.Framework;
 
@@ -27,7 +29,7 @@ namespace C5.Tests.intervals_new
             }
         }
 
-        class IntervalBinarySearchTreeTesterPreConstruct_BlackBox : IntervalBinarySearchTreeTester_BlackBox
+        class IntervalBinarySearchTreeTesterPreConstructBlackBox : IntervalBinarySearchTreeTester_BlackBox
         {
             protected override object[] AdditionalParameters()
             {
@@ -35,7 +37,7 @@ namespace C5.Tests.intervals_new
             }
         }
 
-        class IntervalBinarySearchTreeTesterRegular_BlackBox : IntervalBinarySearchTreeTester_BlackBox
+        class IntervalBinarySearchTreeTesterBlackBox : IntervalBinarySearchTreeTester_BlackBox
         {
             protected override object[] AdditionalParameters()
             {
