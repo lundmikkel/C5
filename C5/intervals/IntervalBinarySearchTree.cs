@@ -955,10 +955,168 @@ namespace C5.intervals
             Contract.Requires(intervals != null);
 
             if (preconstructTree)
+            {
                 preconstructNodeStructure(intervals);
 
-            // TODO: Insert from splitnode
-            AddAll(intervals);
+                foreach (var interval in intervals)
+                    addToPreconstructedTree(interval, _root, null, null);
+            }
+            else
+                AddAll(intervals);
+        }
+
+        private bool addToPreconstructedTree(I interval, Node root, Node leftUp, Node rightUp)
+        {
+            // Search left
+            if (interval.High.CompareTo(root.Key) < 0)
+            {
+                return addToPreconstructedTree(interval, root.Left, leftUp, root) && root.UpdateMaximumDepth();
+            }
+            // Search right
+            else if (interval.Low.CompareTo(root.Key) > 0)
+            {
+                return addToPreconstructedTree(interval, root.Right, root, rightUp) && root.UpdateMaximumDepth();
+            }
+            // Splitnode found
+            else
+            {
+                var intervalWasAdded = false;
+
+                // Insert low endpoint
+                addLowToPreconstructedTree(interval, root, rightUp, ref intervalWasAdded);
+
+                // Insert high endpoint
+                addHighToPreconstructedTree(interval, root, leftUp, ref intervalWasAdded);
+
+                if (intervalWasAdded)
+                    _count++;
+
+                return intervalWasAdded;
+            }
+        }
+
+        private static void addLowToPreconstructedTree(I interval, Node root, Node rightUp, ref bool intervalWasAdded)
+        {
+            var compare = interval.Low.CompareTo(root.Key);
+
+            if (compare > 0)
+            {
+                addLowToPreconstructedTree(interval, root.Right, rightUp, ref intervalWasAdded);
+            }
+            else if (compare < 0)
+            {
+                // Everything in the right subtree of root will lie within the interval
+                if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0)
+                {
+                    if (root.Greater == null)
+                        root.Greater = new IntervalSet();
+
+                    if (!(intervalWasAdded |= root.Greater.Add(interval))) return;
+                }
+
+                // root key is between interval.low and interval.high
+                if (root.Key.CompareTo(interval.High) < 0)
+                {
+                    if (root.Equal == null)
+                        root.Equal = new IntervalSet();
+
+                    if (!(intervalWasAdded |= root.Equal.Add(interval))) return;
+                }
+
+                addLowToPreconstructedTree(interval, root.Left, root, ref intervalWasAdded);
+            }
+            else
+            {
+                // If everything in the right subtree of root will lie within the interval
+                if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0)
+                {
+                    if (root.Greater == null)
+                        root.Greater = new IntervalSet();
+
+                    if (!(intervalWasAdded |= root.Greater.Add(interval))) return;
+                }
+
+                if (interval.LowIncluded)
+                {
+                    if (root.Equal == null)
+                        root.Equal = new IntervalSet();
+
+                    if (!(intervalWasAdded |= root.Equal.Add(interval))) return;
+                }
+
+                // If added successfully, we have a new node, and we can update delta values
+                if (intervalWasAdded |= root.IntervalsEndingInNode.Add(interval))
+                    // Update maximum depth delta for low
+                    if (interval.LowIncluded)
+                        root.DeltaAt++;
+                    else
+                        root.DeltaAfter++;
+            }
+
+            if (intervalWasAdded)
+                root.UpdateMaximumDepth();
+        }
+
+        private static void addHighToPreconstructedTree(I interval, Node root, Node leftUp, ref bool intervalWasAdded)
+        {
+            var compare = interval.High.CompareTo(root.Key);
+
+            if (compare < 0)
+            {
+                addHighToPreconstructedTree(interval, root.Left, leftUp, ref intervalWasAdded);
+            }
+            else if (compare > 0)
+            {
+                // Everything in the right subtree of root will lie within the interval
+                if (leftUp != null && leftUp.Key.CompareTo(interval.Low) >= 0)
+                {
+                    if (root.Less == null)
+                        root.Less = new IntervalSet();
+
+                    if (!(intervalWasAdded |= root.Less.Add(interval))) return;
+                }
+
+                // root key is between interval.low and interval.high
+                if (root.Key.CompareTo(interval.Low) > 0)
+                {
+                    if (root.Equal == null)
+                        root.Equal = new IntervalSet();
+
+                    if (!(intervalWasAdded |= root.Equal.Add(interval))) return;
+                }
+
+                addHighToPreconstructedTree(interval, root.Right, root, ref intervalWasAdded);
+            }
+            else
+            {
+                // If everything in the right subtree of root will lie within the interval
+                if (leftUp != null && leftUp.Key.CompareTo(interval.Low) >= 0)
+                {
+                    if (root.Less == null)
+                        root.Less = new IntervalSet();
+
+                    if (!(intervalWasAdded |= root.Less.Add(interval))) return;
+                }
+
+                if (interval.HighIncluded)
+                {
+                    if (root.Equal == null)
+                        root.Equal = new IntervalSet();
+
+                    if (!(intervalWasAdded |= root.Equal.Add(interval))) return;
+                }
+
+                // If added successfully, we have a new node, and we can update delta values
+                if (intervalWasAdded |= root.IntervalsEndingInNode.Add(interval))
+                    // Update maximum depth delta for high
+                    if (!interval.HighIncluded)
+                        root.DeltaAt--;
+                    else
+                        root.DeltaAfter--;
+            }
+
+            if (intervalWasAdded)
+                root.UpdateMaximumDepth();
         }
 
         private void preconstructNodeStructure(IEnumerable<I> intervalsEnumerable)
@@ -969,17 +1127,17 @@ namespace C5.intervals
             var intervalCount = intervals.Length;
 
             // Save all endpoints to array
-            var endpoints = new T[intervalCount * 2];
+            var endpoints = new List<T>(intervalCount * 2);
             for (var i = 0; i < intervalCount; i++)
             {
                 var interval = intervals[i];
 
-                endpoints[i * 2] = interval.Low;
-                endpoints[i * 2 + 1] = interval.High;
+                endpoints.Add(interval.Low);
+                endpoints.Add(interval.High);
             }
 
             // Sort endpoints
-            Sorting.IntroSort(endpoints);
+            endpoints.Sort();
 
             // Remove duplicate endpoints
             var uniqueEndpoints = new T[intervalCount * 2];
