@@ -553,21 +553,183 @@ namespace C5.intervals
 
         }
 
+        /*
+
         private sealed class IntervalSet : IEnumerable<I>
         {
-            private HashSet<I> _set;
+            private const int Size = 6;
+            private int _count;
+            private bool _useHashSet;
+            private I[] _list;
+            private System.Collections.Generic.HashSet<I> _set;
+
+            #region Constructor
+
+            public IntervalSet(IntervalSet set)
+            {
+                Contract.Requires(set != null);
+
+                if (set.Count > 5)
+                    initHashSet(set);
+                else
+                {
+                    _list = new I[Size];
+                    foreach (var interval in set)
+                        Add(interval);
+                }
+            }
+
+            public IntervalSet()
+            {
+                _list = new I[Size];
+            }
+
+            private void initHashSet(IEnumerable<I> intervals = null)
+            {
+                _useHashSet = true;
+                _set = new System.Collections.Generic.HashSet<I>(Comparer);
+
+                // Copy from list to set
+                foreach (var interval in (intervals ?? _list.Take(_count)))
+                    _set.Add(interval);
+
+                _list = null;
+            }
+
+            #endregion
+
+            #region Enumerator
+
+            public IEnumerator<I> GetEnumerator()
+            {
+                return _useHashSet ? _set.GetEnumerator() : _list.Take(_count).GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            #endregion
+
+            public bool IsEmpty
+            {
+                get
+                {
+                    return Count == 0;
+                }
+            }
+
+            public int Count
+            {
+                get
+                {
+                    return _useHashSet ? _set.Count : _count;
+                }
+            }
+
+            public I Choose()
+            {
+                if (IsEmpty)
+                    throw new NoSuchItemException();
+
+                return _useHashSet ? _set.First() : _list[0];
+            }
+
+            public bool Contains(I interval)
+            {
+                return _useHashSet ? _set.Contains(interval) : _list.Take(_count).Any(x => ReferenceEquals(x, interval));
+            }
+
+            public bool Add(I interval)
+            {
+                if (_useHashSet)
+                    return _set.Add(interval);
+
+                // Switch to hashset if list is full
+                if (_count == Size)
+                {
+                    initHashSet();
+                    return _set.Add(interval);
+                }
+
+                if (Contains(interval))
+                    return false;
+
+                // Add if not found
+                _list[_count++] = interval;
+                return true;
+            }
+
+            public void AddAll(IEnumerable<I> intervals)
+            {
+                foreach (var interval in intervals)
+                    Add(interval);
+            }
+
+            public bool Remove(I interval)
+            {
+                if (_useHashSet)
+                    return _set.Remove(interval);
+
+                for (var i = 0; i < _count; i++)
+                    if (ReferenceEquals(_list[i], interval))
+                    {
+                        _list[i] = _list[--_count];
+                        _list[_count] = default(I);
+                        return true;
+                    }
+
+                return false;
+            }
+
+            public void RemoveAll(IEnumerable<I> intervals)
+            {
+                foreach (var interval in intervals)
+                    Remove(interval);
+            }
+
+            public override string ToString()
+            {
+                var s = new string[Count];
+
+                var i = 0;
+                foreach (var interval in this)
+                    s[i++] = interval.ToString();
+
+                return String.Join(", ", s.ToArray());
+            }
+
+            public static IntervalSet operator -(IntervalSet s1, IntervalSet s2)
+            {
+                Contract.Requires(s1 != null);
+                Contract.Requires(s2 != null);
+
+                var res = new IntervalSet();
+                foreach (var interval in s1.Where(interval => !s2.Contains(interval)))
+                    res.Add(interval);
+                return res;
+            }
+        }
+
+        /*/
+
+        private sealed class IntervalSet : IEnumerable<I>
+        {
+            private readonly System.Collections.Generic.HashSet<I> _set;
 
             #region Constructor
 
             public IntervalSet(IEnumerable<I> set)
             {
-                _set = new HashSet<I>(Comparer);
-                _set.AddAll(set);
+                _set = new System.Collections.Generic.HashSet<I>(Comparer);
+                foreach (var interval in set)
+                    _set.Add(interval);
             }
 
             public IntervalSet()
             {
-                _set = new HashSet<I>(Comparer);
+                _set = new System.Collections.Generic.HashSet<I>(Comparer);
             }
 
             #endregion
@@ -586,15 +748,23 @@ namespace C5.intervals
 
             #endregion
 
-            public bool IsEmpty { get { return _set.IsEmpty; } }
+            public bool IsEmpty { get { return _set.Count == 0; } }
             public int Count { get { return _set.Count; } }
-            public I Choose() { return _set.Choose(); }
+            public I Choose() { return _set.First(); }
 
             public bool Add(I interval) { return _set.Add(interval); }
-            public void AddAll(IEnumerable<I> intervals) { _set.AddAll(intervals); }
+            public void AddAll(IEnumerable<I> intervals)
+            {
+                foreach (var interval in intervals)
+                    _set.Add(interval);
+            }
 
             public bool Remove(I interval) { return _set.Remove(interval); }
-            public void RemoveAll(IEnumerable<I> intervals) { _set.RemoveAll(intervals); }
+            public void RemoveAll(IEnumerable<I> intervals)
+            {
+                foreach (var interval in intervals)
+                    _set.Remove(interval);
+            }
 
             public override string ToString()
             {
@@ -617,6 +787,8 @@ namespace C5.intervals
                 return res;
             }
         }
+
+        //*/
 
         #endregion
 
