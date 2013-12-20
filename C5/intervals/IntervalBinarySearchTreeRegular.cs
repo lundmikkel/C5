@@ -589,7 +589,7 @@ namespace C5.intervals
 
         #region AVL Tree Methods
 
-        private static Node rotateForAdd(Node root, ref bool updateBalance)
+        private static Node rotateForAdd(Node root, ref bool rotationNeeded)
         {
             Contract.Requires(root != null);
 
@@ -605,7 +605,7 @@ namespace C5.intervals
             {
                 // Node is balanced after the node was added
                 case 0:
-                    updateBalance = false;
+                    rotationNeeded = false;
                     break;
 
                 // Node is unbalanced, so we rotate
@@ -629,7 +629,7 @@ namespace C5.intervals
                             root.Balance = 0;
                             break;
                     }
-                    updateBalance = false;
+                    rotationNeeded = false;
                     break;
 
                 // Node is unbalanced, so we rotate
@@ -654,14 +654,14 @@ namespace C5.intervals
                             break;
                     }
 
-                    updateBalance = false;
+                    rotationNeeded = false;
                     break;
             }
 
             return root;
         }
 
-        private static Node rotateForRemove(Node root, ref bool updateBalance)
+        private static Node rotateForRemove(Node root, ref bool rotationNeeded)
         {
             Contract.Requires(root != null);
 
@@ -678,7 +678,7 @@ namespace C5.intervals
                 // High will not change for parent, so we can stop here
                 case -1:
                 case +1:
-                    updateBalance = false;
+                    rotationNeeded = false;
                     break;
 
                 // Node is unbalanced, so we rotate
@@ -695,7 +695,7 @@ namespace C5.intervals
                             root = rotateRight(root);
                             root.Right.Balance = -1;
                             root.Balance = +1;
-                            updateBalance = false;
+                            rotationNeeded = false;
                             break;
 
                         // Left Right Case
@@ -725,7 +725,7 @@ namespace C5.intervals
                             root = rotateLeft(root);
                             root.Left.Balance = 1;
                             root.Balance = -1;
-                            updateBalance = false;
+                            rotationNeeded = false;
                             break;
 
                         // Right Left Case
@@ -1528,12 +1528,12 @@ namespace C5.intervals
             var intervalWasAdded = false;
 
             // Insert low endpoint
-            var nodeWasAdded = false;
-            _root = addLow(interval, _root, null, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
+            var rotationNeeded = false;
+            _root = addLow(interval, _root, null, ref rotationNeeded, ref intervalWasAdded, ref lowNode);
 
             // Insert high endpoint
-            nodeWasAdded = false;
-            _root = addHigh(interval, _root, null, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
+            rotationNeeded = false;
+            _root = addHigh(interval, _root, null, ref rotationNeeded, ref intervalWasAdded, ref highNode);
 
             // Increase counters and raise event if interval was added
             if (intervalWasAdded)
@@ -1579,13 +1579,13 @@ namespace C5.intervals
 
         private static void addLow(I interval, Node root, Node rightUp)
         {
-            var nodeWasAdded = false;
+            var rotationNeeded = false;
             var intervalWasAdded = false;
             Node lowNode = null;
-            addLow(interval, root, rightUp, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
+            addLow(interval, root, rightUp, ref rotationNeeded, ref intervalWasAdded, ref lowNode);
         }
 
-        private static Node addLow(I interval, Node root, Node rightUp, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node lowNode)
+        private static Node addLow(I interval, Node root, Node rightUp, ref bool rotationNeeded, ref bool intervalWasAdded, ref Node lowNode)
         {
             Contract.Requires(interval != null);
 
@@ -1593,7 +1593,7 @@ namespace C5.intervals
             if (root == null)
             {
                 root = new Node(interval.Low);
-                nodeWasAdded = true;
+                rotationNeeded = true;
                 intervalWasAdded = true;
             }
 
@@ -1603,10 +1603,10 @@ namespace C5.intervals
 
             if (compare > 0)
             {
-                root.Right = addLow(interval, root.Right, rightUp, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
+                root.Right = addLow(interval, root.Right, rightUp, ref rotationNeeded, ref intervalWasAdded, ref lowNode);
 
                 // Adjust node balance, if node was added
-                if (nodeWasAdded)
+                if (rotationNeeded)
                     root.Balance++;
             }
             else if (compare < 0)
@@ -1631,10 +1631,10 @@ namespace C5.intervals
                         return root;
                 }
 
-                root.Left = addLow(interval, root.Left, root, ref nodeWasAdded, ref intervalWasAdded, ref lowNode);
+                root.Left = addLow(interval, root.Left, root, ref rotationNeeded, ref intervalWasAdded, ref lowNode);
 
                 // Adjust node balance, if node was added
-                if (nodeWasAdded)
+                if (rotationNeeded)
                     root.Balance--;
             }
             else
@@ -1663,21 +1663,21 @@ namespace C5.intervals
             }
 
             // Tree might be unbalanced after node was added, so we rotate
-            if (nodeWasAdded && compare != 0)
-                root = rotateForAdd(root, ref nodeWasAdded);
+            if (rotationNeeded && compare != 0)
+                root = rotateForAdd(root, ref rotationNeeded);
 
             return root;
         }
 
         private static void addHigh(I interval, Node root, Node leftUp)
         {
-            var nodeWasAdded = false;
+            var rotationNeeded = false;
             var intervalWasAdded = false;
             Node highNode = null;
-            addHigh(interval, root, leftUp, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
+            addHigh(interval, root, leftUp, ref rotationNeeded, ref intervalWasAdded, ref highNode);
         }
 
-        private static Node addHigh(I interval, Node root, Node leftUp, ref bool nodeWasAdded, ref bool intervalWasAdded, ref Node highNode)
+        private static Node addHigh(I interval, Node root, Node leftUp, ref bool rotationNeeded, ref bool intervalWasAdded, ref Node highNode)
         {
             Contract.Requires(interval != null);
 
@@ -1685,7 +1685,7 @@ namespace C5.intervals
             if (root == null)
             {
                 root = new Node(interval.High);
-                nodeWasAdded = true;
+                rotationNeeded = true;
                 intervalWasAdded = true;
             }
 
@@ -1695,10 +1695,10 @@ namespace C5.intervals
 
             if (compare < 0)
             {
-                root.Left = addHigh(interval, root.Left, leftUp, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
+                root.Left = addHigh(interval, root.Left, leftUp, ref rotationNeeded, ref intervalWasAdded, ref highNode);
 
                 // Adjust node balance, if node was added
-                if (nodeWasAdded)
+                if (rotationNeeded)
                     root.Balance--;
             }
             else if (compare > 0)
@@ -1723,10 +1723,10 @@ namespace C5.intervals
                         return root;
                 }
 
-                root.Right = addHigh(interval, root.Right, root, ref nodeWasAdded, ref intervalWasAdded, ref highNode);
+                root.Right = addHigh(interval, root.Right, root, ref rotationNeeded, ref intervalWasAdded, ref highNode);
 
                 // Adjust node balance, if node was added
-                if (nodeWasAdded)
+                if (rotationNeeded)
                     root.Balance++;
             }
             else
@@ -1755,8 +1755,8 @@ namespace C5.intervals
             }
 
             // Tree might be unbalanced after node was added, so we rotate
-            if (nodeWasAdded && compare != 0)
-                root = rotateForAdd(root, ref nodeWasAdded);
+            if (rotationNeeded && compare != 0)
+                root = rotateForAdd(root, ref rotationNeeded);
 
             return root;
         }
@@ -1811,8 +1811,8 @@ namespace C5.intervals
                 // Check for unnecessary endpoint nodes, if interval was actually removed
                 if (lowNode.IntervalsEndingInNode.IsEmpty)
                 {
-                    var updateBalanace = false;
-                    _root = removeNodeWithKey(interval.Low, _root, ref updateBalanace);
+                    var rotationNeeded = false;
+                    _root = removeNodeWithKey(interval.Low, _root, ref rotationNeeded);
 
                     // Check that the node does not exist anymore
                     Contract.Assert(!Contract.Exists(nodes(_root), n => n.Key.Equals(interval.Low)));
@@ -1821,8 +1821,8 @@ namespace C5.intervals
                 // Skip if low and high are equal (true for point intervals)
                 if (highNode.IntervalsEndingInNode.IsEmpty && lowNode != highNode)
                 {
-                    var updateBalanace = false;
-                    _root = removeNodeWithKey(interval.High, _root, ref updateBalanace);
+                    var rotationNeeded = false;
+                    _root = removeNodeWithKey(interval.High, _root, ref rotationNeeded);
 
                     // Check that the node does not exist anymore
                     Contract.Assert(!Contract.Exists(nodes(_root), n => n.Key.Equals(interval.High)));
@@ -1925,7 +1925,7 @@ namespace C5.intervals
             }
         }
 
-        private static Node removeNodeWithKey(T key, Node root, ref bool updateBalance, Node leftUp = null, Node rightUp = null)
+        private static Node removeNodeWithKey(T key, Node root, ref bool rotationNeeded, Node leftUp = null, Node rightUp = null)
         {
             Contract.Requires(root != null);
             Contract.Requires(Contract.Exists(nodes(root), n => n.Key.Equals(key)));
@@ -1936,17 +1936,17 @@ namespace C5.intervals
             if (compare > 0)
             {
                 // Update left parent
-                root.Right = removeNodeWithKey(key, root.Right, ref updateBalance, root, rightUp);
+                root.Right = removeNodeWithKey(key, root.Right, ref rotationNeeded, root, rightUp);
 
-                if (updateBalance)
+                if (rotationNeeded)
                     root.Balance--;
             }
             // Remove node from left subtree
             else if (compare < 0)
             {
-                root.Left = removeNodeWithKey(key, root.Left, ref updateBalance, leftUp, root);
+                root.Left = removeNodeWithKey(key, root.Left, ref rotationNeeded, leftUp, root);
 
-                if (updateBalance)
+                if (rotationNeeded)
                     root.Balance++;
             }
             // Node found
@@ -1977,9 +1977,9 @@ namespace C5.intervals
                 updateMaximumDepth(root.Right, successor.Key);
 
                 // Remove the successor node
-                root.Right = removeNodeWithKey(successor.Key, root.Right, ref updateBalance, leftUp, rightUp);
+                root.Right = removeNodeWithKey(successor.Key, root.Right, ref rotationNeeded, leftUp, rightUp);
 
-                if (updateBalance)
+                if (rotationNeeded)
                     root.Balance--;
 
                 // Reinsert marks for intervals in successor
@@ -1995,14 +1995,14 @@ namespace C5.intervals
             }
             else
             {
-                updateBalance = true;
+                rotationNeeded = true;
 
                 // Return Left if not null, otherwise Right
                 return root.Left ?? root.Right;
             }
 
-            if (updateBalance)
-                root = rotateForRemove(root, ref updateBalance);
+            if (rotationNeeded)
+                root = rotateForRemove(root, ref rotationNeeded);
 
             return root;
         }
