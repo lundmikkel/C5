@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using QuickGraph;
@@ -906,27 +907,37 @@ namespace C5.intervals
         #region Constructors
 
         /// <summary>
+        /// Create empty Interval Binary Search Tree.
+        /// </summary>
+        public IntervalBinarySearchTree()
+        {
+        }
+
+        /// <summary>
         /// Create an Interval Binary Search Tree with a collection of intervals.
         /// </summary>
         /// <param name="intervals">The collection of intervals.</param>
         /// <param name="preconstructTree">True if a balanced tree structure should be preconstructed, before inserting the intervals.</param>
-        public IntervalBinarySearchTree(IEnumerable<I> intervals, bool preconstructTree = true)
+        public IntervalBinarySearchTree(IEnumerable<I> intervals, bool preconstructTree = true, bool isSorted = false)
         {
             Contract.Requires(intervals != null);
 
-            var intervalArray = intervals as I[] ?? intervals.ToArray();
-
             if (preconstructTree)
-                preconstructNodeStructure(intervalArray);
+                if (isSorted)
+                    preconstructPresortedNodeStructure(intervals);
+                else
+                    preconstructNodeStructure(intervals);
 
-            foreach (var interval in intervalArray)
-                Add(interval);
+            // TODO: Insert from splitnode
+            AddAll(intervals);
         }
 
-        private void preconstructNodeStructure(I[] intervals)
+        private void preconstructNodeStructure(IEnumerable<I> intervalsEnumerable)
         {
 
-            var intervalCount = intervals.Count();
+            var intervals = intervalsEnumerable as I[] ?? intervalsEnumerable.ToArray();
+
+            var intervalCount = intervals.Length;
 
             // Save all endpoints to array
             var endpoints = new T[intervalCount * 2];
@@ -950,10 +961,33 @@ namespace C5.intervals
                     uniqueEndpoints[endpointCount++] = endpoint;
 
             var height = 0;
-            _root = createNodes(ref uniqueEndpoints, 0, endpointCount - 1, ref height);
+            _root = createNodes(uniqueEndpoints, 0, endpointCount - 1, ref height);
         }
 
-        private Node createNodes(ref T[] endpoints, int lower, int upper, ref int height)
+        private void preconstructPresortedNodeStructure(IEnumerable<I> intervalsEnumerable)
+        {
+            // TODO: Sort endpoints using same approach as maximum depth
+
+            var intervals = intervalsEnumerable as I[] ?? intervalsEnumerable.ToArray();
+
+            var intervalCount = intervals.Length;
+
+            // Save all endpoints to array
+            var endpoints = new T[intervalCount * 2];
+
+            for (var i = 0; i < intervalCount; i++)
+            {
+                var interval = intervals[i];
+
+                endpoints[i * 2] = interval.Low;
+                endpoints[i * 2 + 1] = interval.High;
+            }
+
+            var height = 0;
+            _root = createNodes(endpoints, 0, intervalCount * 2 - 1, ref height);
+        }
+
+        private Node createNodes(T[] endpoints, int lower, int upper, ref int height)
         {
             if (lower > upper)
                 return null;
@@ -964,21 +998,14 @@ namespace C5.intervals
             var leftHeight = 0;
             var rightHeight = 0;
 
-            node.Left = createNodes(ref endpoints, lower, mid - 1, ref leftHeight);
-            node.Right = createNodes(ref endpoints, mid + 1, upper, ref rightHeight);
+            node.Left = createNodes(endpoints, lower, mid - 1, ref leftHeight);
+            node.Right = createNodes(endpoints, mid + 1, upper, ref rightHeight);
 
             node.Balance = (sbyte) (rightHeight - leftHeight);
 
             height = Math.Max(leftHeight, rightHeight) + 1;
 
             return node;
-        }
-
-        /// <summary>
-        /// Create empty Interval Binary Search Tree.
-        /// </summary>
-        public IntervalBinarySearchTree()
-        {
         }
 
         #endregion
