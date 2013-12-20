@@ -918,14 +918,11 @@ namespace C5.intervals
         /// </summary>
         /// <param name="intervals">The collection of intervals.</param>
         /// <param name="preconstructTree">True if a balanced tree structure should be preconstructed, before inserting the intervals.</param>
-        public IntervalBinarySearchTree(IEnumerable<I> intervals, bool preconstructTree = true, bool isSorted = false)
+        public IntervalBinarySearchTree(IEnumerable<I> intervals, bool preconstructTree = true)
         {
             Contract.Requires(intervals != null);
 
             if (preconstructTree)
-                if (isSorted)
-                    preconstructPresortedNodeStructure(intervals);
-                else
                     preconstructNodeStructure(intervals);
 
             // TODO: Insert from splitnode
@@ -1641,6 +1638,7 @@ namespace C5.intervals
                 // Everything in the right subtree of root will lie within the interval
                 if (rightUp != null && rightUp.Key.CompareTo(interval.High) <= 0)
                 {
+                    // TODO: Optimize this
                     if (root.Greater == null)
                         root.Greater = new IntervalSet();
 
