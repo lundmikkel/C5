@@ -722,14 +722,12 @@ namespace C5.intervals
 
             public IntervalSet(IEnumerable<I> set)
             {
-                _set = new System.Collections.Generic.HashSet<I>(Comparer);
-                foreach (var interval in set)
-                    _set.Add(interval);
+                _set = new System.Collections.Generic.HashSet<I>(set, Comparer);
             }
 
             public IntervalSet()
             {
-                _set = new System.Collections.Generic.HashSet<I>(Comparer);
+                _set = new System.Collections.Generic.HashSet<I>(null, Comparer);
             }
 
             #endregion
@@ -753,18 +751,12 @@ namespace C5.intervals
             public I Choose() { return _set.First(); }
 
             public bool Add(I interval) { return _set.Add(interval); }
-            public void AddAll(IEnumerable<I> intervals)
-            {
-                foreach (var interval in intervals)
-                    _set.Add(interval);
-            }
+            public void AddAll(IEnumerable<I> intervals) { foreach (var interval in intervals)_set.Add(interval); }
 
             public bool Remove(I interval) { return _set.Remove(interval); }
-            public void RemoveAll(IEnumerable<I> intervals)
-            {
-                foreach (var interval in intervals)
-                    _set.Remove(interval);
-            }
+            public void RemoveAll(IEnumerable<I> intervals) { foreach (var interval in intervals)_set.Remove(interval); }
+
+            public void Clear() { _set.Clear(); }
 
             public override string ToString()
             {
@@ -778,12 +770,9 @@ namespace C5.intervals
 
             public static IntervalSet operator -(IntervalSet s1, IntervalSet s2)
             {
-                Contract.Requires(s1 != null);
-                Contract.Requires(s2 != null);
-
-                var res = new IntervalSet();
+                IntervalSet res = null;
                 foreach (var interval in s1.Where(interval => !s2.Contains(interval)))
-                    res.Add(interval);
+                    (res ?? (res = new IntervalSet())).Add(interval);
                 return res;
             }
         }
@@ -983,31 +972,41 @@ namespace C5.intervals
                     ? node.Greater
                     : node.Greater - root.Greater;
 
-                // root.Less = root.Less U unique
-                if (root.Less != null)
-                    root.Less.AddAll(uniqueInNodeGreater);
-                else
+                var count = uniqueInNodeGreater == null ? 0 : uniqueInNodeGreater.Count;
+
+                if (count > 0)
                 {
-                    // If root.Greater is all unique
-                    if (uniqueInNodeGreater.Count == node.Greater.Count)
-                    {
-                        // Swap references
-                        root.Less = node.Greater;
-                        node.Greater = null;
-                    }
+                    // root.Less = root.Less U unique
+                    if (root.Less != null)
+                        root.Less.AddAll(uniqueInNodeGreater);
                     else
                     {
-                        // If root.Greater is empty, uniqueInNodeGreater is a pointer to the set node.Greater
-                        // We don't want root.Less and node.Greater to be the same IntervalSet object, so we duplicate it
-                        root.Less = rootGreaterIsEmpty ? new IntervalSet(uniqueInNodeGreater) : uniqueInNodeGreater;
-                    }
-                }
+                        // If root.Greater is all unique
+                        if (count == node.Greater.Count)
+                        {
+                            Contract.Assert(root.Less == null);
 
-                // node.Greater = node.Greater - unique
-                if (rootGreaterIsEmpty)
-                    node.Greater = null;
-                else if (node.Greater != null)
-                    node.Greater.RemoveAll(uniqueInNodeGreater);
+                            // Swap references
+                            root.Less = node.Greater;
+                            node.Greater = null;
+                        }
+                        else
+                        {
+                            // If root.Greater is empty, uniqueInNodeGreater is a pointer to the set node.Greater
+                            // We don't want root.Less and node.Greater to be the same IntervalSet object, so we duplicate it
+                            root.Less = new IntervalSet(uniqueInNodeGreater);
+                        }
+                    }
+
+                    // node.Greater = node.Greater - unique
+                    if (rootGreaterIsEmpty)
+                    {
+                        if (node.Greater != null)
+                            node.Greater.Clear();
+                    }
+                    else if (node.Greater != null)
+                        node.Greater.RemoveAll(uniqueInNodeGreater);
+                }
             }
 
             if (node.Greater != null && !node.Greater.IsEmpty)
@@ -1061,31 +1060,41 @@ namespace C5.intervals
                     ? node.Less
                     : node.Less - root.Less;
 
-                // root.Greater = root.Greater U unique
-                if (root.Greater != null)
-                    root.Greater.AddAll(uniqueInNodeLess);
-                else
+                var count = uniqueInNodeLess == null ? 0 : uniqueInNodeLess.Count;
+
+                if (count > 0)
                 {
-                    // If root.Less is all unique
-                    if (uniqueInNodeLess.Count == node.Less.Count)
-                    {
-                        // Swap references
-                        root.Greater = node.Less;
-                        node.Less = null;
-                    }
+                    // root.Greater = root.Greater U unique
+                    if (root.Greater != null)
+                        root.Greater.AddAll(uniqueInNodeLess);
                     else
                     {
-                        // If root.Less is empty, uniqueInNodeLess is a pointer to the set node.Less
-                        // We don't want root.Greater and node.Less to be the same IntervalSet object, so we duplicate it
-                        root.Greater = rootLessIsEmpty ? new IntervalSet(uniqueInNodeLess) : uniqueInNodeLess;
-                    }
-                }
+                        // If root.Less is all unique
+                        if (count == node.Less.Count)
+                        {
+                            Contract.Assert(root.Greater == null);
 
-                // node.Less = node.Less - unique
-                if (rootLessIsEmpty)
-                    node.Less = null;
-                else if (node.Less != null)
-                    node.Less.RemoveAll(uniqueInNodeLess);
+                            // Swap references
+                            root.Greater = node.Less;
+                            node.Less = null;
+                        }
+                        else
+                        {
+                            // If root.Less is empty, uniqueInNodeLess is a pointer to the set node.Less
+                            // We don't want root.Greater and node.Less to be the same IntervalSet object, so we duplicate it
+                            root.Greater = new IntervalSet(uniqueInNodeLess);
+                        }
+                    }
+
+                    // node.Less = node.Less - unique
+                    if (rootLessIsEmpty)
+                    {
+                        if (node.Less != null)
+                            node.Less.Clear();
+                    }
+                    else if (node.Less != null)
+                        node.Less.RemoveAll(uniqueInNodeLess);
+                }
             }
 
             if (node.Less != null && !node.Less.IsEmpty)
