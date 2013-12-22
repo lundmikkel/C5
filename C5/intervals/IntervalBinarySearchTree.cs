@@ -1189,6 +1189,82 @@ namespace C5.intervals
                 AddAll(intervals);
         }
 
+        private void preconstructNodeStructure(IEnumerable<I> intervalsEnumerable)
+        {
+
+            var intervals = intervalsEnumerable as I[] ?? intervalsEnumerable.ToArray();
+
+            var intervalCount = intervals.Length;
+
+            // Save all endpoints to array
+            var endpoints = new List<T>(intervalCount * 2);
+            for (var i = 0; i < intervalCount; i++)
+            {
+                var interval = intervals[i];
+
+                endpoints.Add(interval.Low);
+                endpoints.Add(interval.High);
+            }
+
+            // Sort endpoints
+            endpoints.Sort();
+
+            // Remove duplicate endpoints
+            var uniqueEndpoints = new T[intervalCount * 2];
+            var endpointCount = 0;
+
+            foreach (var endpoint in endpoints)
+                if (endpointCount == 0 || uniqueEndpoints[endpointCount - 1].CompareTo(endpoint) < 0)
+                    uniqueEndpoints[endpointCount++] = endpoint;
+
+            var height = 0;
+            _root = createNodes(uniqueEndpoints, 0, endpointCount - 1, ref height);
+        }
+
+        private void preconstructPresortedNodeStructure(IEnumerable<I> intervalsEnumerable)
+        {
+            // TODO: Sort endpoints using same approach as maximum depth
+
+            var intervals = intervalsEnumerable as I[] ?? intervalsEnumerable.ToArray();
+
+            var intervalCount = intervals.Length;
+
+            // Save all endpoints to array
+            var endpoints = new T[intervalCount * 2];
+
+            for (var i = 0; i < intervalCount; i++)
+            {
+                var interval = intervals[i];
+
+                endpoints[i * 2] = interval.Low;
+                endpoints[i * 2 + 1] = interval.High;
+            }
+
+            var height = 0;
+            _root = createNodes(endpoints, 0, intervalCount * 2 - 1, ref height);
+        }
+
+        private Node createNodes(T[] endpoints, int lower, int upper, ref int height)
+        {
+            if (lower > upper)
+                return null;
+
+            var mid = lower + (upper - lower >> 1);
+
+            var node = new Node(endpoints[mid]);
+            var leftHeight = 0;
+            var rightHeight = 0;
+
+            node.Left = createNodes(endpoints, lower, mid - 1, ref leftHeight);
+            node.Right = createNodes(endpoints, mid + 1, upper, ref rightHeight);
+
+            node.Balance = (sbyte) (rightHeight - leftHeight);
+
+            height = Math.Max(leftHeight, rightHeight) + 1;
+
+            return node;
+        }
+
         private bool addToPreconstructedTree(I interval, Node root, Node leftUp, Node rightUp)
         {
             // Search left
@@ -1345,82 +1421,6 @@ namespace C5.intervals
 
             root.Sum--;
             root.UpdateMaximum();
-        }
-
-        private void preconstructNodeStructure(IEnumerable<I> intervalsEnumerable)
-        {
-
-            var intervals = intervalsEnumerable as I[] ?? intervalsEnumerable.ToArray();
-
-            var intervalCount = intervals.Length;
-
-            // Save all endpoints to array
-            var endpoints = new List<T>(intervalCount * 2);
-            for (var i = 0; i < intervalCount; i++)
-            {
-                var interval = intervals[i];
-
-                endpoints.Add(interval.Low);
-                endpoints.Add(interval.High);
-            }
-
-            // Sort endpoints
-            endpoints.Sort();
-
-            // Remove duplicate endpoints
-            var uniqueEndpoints = new T[intervalCount * 2];
-            var endpointCount = 0;
-
-            foreach (var endpoint in endpoints)
-                if (endpointCount == 0 || uniqueEndpoints[endpointCount - 1].CompareTo(endpoint) < 0)
-                    uniqueEndpoints[endpointCount++] = endpoint;
-
-            var height = 0;
-            _root = createNodes(uniqueEndpoints, 0, endpointCount - 1, ref height);
-        }
-
-        private void preconstructPresortedNodeStructure(IEnumerable<I> intervalsEnumerable)
-        {
-            // TODO: Sort endpoints using same approach as maximum depth
-
-            var intervals = intervalsEnumerable as I[] ?? intervalsEnumerable.ToArray();
-
-            var intervalCount = intervals.Length;
-
-            // Save all endpoints to array
-            var endpoints = new T[intervalCount * 2];
-
-            for (var i = 0; i < intervalCount; i++)
-            {
-                var interval = intervals[i];
-
-                endpoints[i * 2] = interval.Low;
-                endpoints[i * 2 + 1] = interval.High;
-            }
-
-            var height = 0;
-            _root = createNodes(endpoints, 0, intervalCount * 2 - 1, ref height);
-        }
-
-        private Node createNodes(T[] endpoints, int lower, int upper, ref int height)
-        {
-            if (lower > upper)
-                return null;
-
-            var mid = lower + (upper - lower >> 1);
-
-            var node = new Node(endpoints[mid]);
-            var leftHeight = 0;
-            var rightHeight = 0;
-
-            node.Left = createNodes(endpoints, lower, mid - 1, ref leftHeight);
-            node.Right = createNodes(endpoints, mid + 1, upper, ref rightHeight);
-
-            node.Balance = (sbyte) (rightHeight - leftHeight);
-
-            height = Math.Max(leftHeight, rightHeight) + 1;
-
-            return node;
         }
 
         #endregion
