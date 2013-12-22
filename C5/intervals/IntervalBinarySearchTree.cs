@@ -452,7 +452,7 @@ namespace C5.intervals
             // Fields for Maximum Depth
             public int DeltaAt { get; internal set; }
             public int DeltaAfter { get; internal set; }
-            public int Sum { get; private set; }
+            public int Sum { get; set; }
             public int Max { get; private set; }
 
             // Used for printing
@@ -484,6 +484,49 @@ namespace C5.intervals
             #endregion
 
             #region Public Methods
+
+            public bool UpdateMaximumLeft()
+            {
+                if (Left.Max > Max)
+                {
+                    Max = Left.Max;
+                    return true;
+                }
+                return false;
+            }
+
+            public bool UpdateMaximumRight()
+            {
+                var value = (Left != null ? Left.Sum : 0) + DeltaAt + DeltaAfter + Right.Max;
+                if (value > Max)
+                {
+                    Max = value;
+                    return true;
+                }
+                return false;
+            }
+
+            public void UpdateMaximum()
+            {
+                // Set Max to Left's Max
+                Max = Left != null ? Left.Max : 0;
+
+                // Start building up the other possible Max sums
+                var value = (Left != null ? Left.Sum : 0) + DeltaAt;
+                // And check if they are higher the previously found max
+                if (value > Max)
+                    Max = value;
+
+                // Add DeltaAfter and check for new max
+                value += DeltaAfter;
+                if (value > Max)
+                    Max = value;
+
+                // Add Right's max and check for new max
+                value += Right != null ? Right.Max : 0;
+                if (value > Max)
+                    Max = value;
+            }
 
             /// <summary>
             /// Update the maximum depth value for the node.
@@ -727,7 +770,7 @@ namespace C5.intervals
 
             public IntervalSet()
             {
-                _set = new System.Collections.Generic.HashSet<I>(null, Comparer);
+                _set = new System.Collections.Generic.HashSet<I>(Comparer);
             }
 
             #endregion
@@ -1151,12 +1194,12 @@ namespace C5.intervals
             // Search left
             if (interval.High.CompareTo(root.Key) < 0)
             {
-                return addToPreconstructedTree(interval, root.Left, leftUp, root) && root.UpdateMaximumDepth();
+                return addToPreconstructedTree(interval, root.Left, leftUp, root) && root.UpdateMaximumLeft();
             }
             // Search right
             else if (interval.Low.CompareTo(root.Key) > 0)
             {
-                return addToPreconstructedTree(interval, root.Right, root, rightUp) && root.UpdateMaximumDepth();
+                return addToPreconstructedTree(interval, root.Right, root, rightUp) && root.UpdateMaximumRight();
             }
             // Splitnode found
             else
@@ -1166,8 +1209,9 @@ namespace C5.intervals
                 // Insert low endpoint
                 addLowToPreconstructedTree(interval, root, rightUp, ref intervalWasAdded);
 
-                // Insert high endpoint
-                addHighToPreconstructedTree(interval, root, leftUp, ref intervalWasAdded);
+                if (intervalWasAdded)
+                    // Insert high endpoint
+                    addHighToPreconstructedTree(interval, root, leftUp);
 
                 if (intervalWasAdded)
                     _count++;
@@ -1235,16 +1279,19 @@ namespace C5.intervals
             }
 
             if (intervalWasAdded)
-                root.UpdateMaximumDepth();
+            {
+                root.Sum++;
+                root.UpdateMaximum();
+            }
         }
 
-        private static void addHighToPreconstructedTree(I interval, Node root, Node leftUp, ref bool intervalWasAdded)
+        private static void addHighToPreconstructedTree(I interval, Node root, Node leftUp)
         {
             var compare = interval.High.CompareTo(root.Key);
 
             if (compare < 0)
             {
-                addHighToPreconstructedTree(interval, root.Left, leftUp, ref intervalWasAdded);
+                addHighToPreconstructedTree(interval, root.Left, leftUp);
             }
             else if (compare > 0)
             {
@@ -1254,7 +1301,7 @@ namespace C5.intervals
                     if (root.Less == null)
                         root.Less = new IntervalSet();
 
-                    if (!(intervalWasAdded |= root.Less.Add(interval))) return;
+                    root.Less.Add(interval);
                 }
 
                 // root key is between interval.low and interval.high
@@ -1263,10 +1310,10 @@ namespace C5.intervals
                     if (root.Equal == null)
                         root.Equal = new IntervalSet();
 
-                    if (!(intervalWasAdded |= root.Equal.Add(interval))) return;
+                    root.Equal.Add(interval);
                 }
 
-                addHighToPreconstructedTree(interval, root.Right, root, ref intervalWasAdded);
+                addHighToPreconstructedTree(interval, root.Right, root);
             }
             else
             {
@@ -1276,7 +1323,7 @@ namespace C5.intervals
                     if (root.Less == null)
                         root.Less = new IntervalSet();
 
-                    if (!(intervalWasAdded |= root.Less.Add(interval))) return;
+                    root.Less.Add(interval);
                 }
 
                 if (interval.HighIncluded)
@@ -1284,20 +1331,20 @@ namespace C5.intervals
                     if (root.Equal == null)
                         root.Equal = new IntervalSet();
 
-                    if (!(intervalWasAdded |= root.Equal.Add(interval))) return;
+                    root.Equal.Add(interval);
                 }
 
-                // If added successfully, we have a new node, and we can update delta values
-                if (intervalWasAdded |= root.IntervalsEndingInNode.Add(interval))
-                    // Update maximum depth delta for high
-                    if (!interval.HighIncluded)
-                        root.DeltaAt--;
-                    else
-                        root.DeltaAfter--;
+                root.IntervalsEndingInNode.Add(interval);
+
+                // Update maximum depth delta for high
+                if (!interval.HighIncluded)
+                    root.DeltaAt--;
+                else
+                    root.DeltaAfter--;
             }
 
-            if (intervalWasAdded)
-                root.UpdateMaximumDepth();
+            root.Sum--;
+            root.UpdateMaximum();
         }
 
         private void preconstructNodeStructure(IEnumerable<I> intervalsEnumerable)
