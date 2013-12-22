@@ -424,7 +424,7 @@ namespace C5.intervals
 
         #region Inner Classes
 
-        class Node : IComparable<Node>
+        private class Node : IComparable<Node>
         {
             #region Code Contracts
 
@@ -483,7 +483,7 @@ namespace C5.intervals
 
             #endregion
 
-            #region Public Methods
+            #region Maximum Depth
 
             public bool UpdateMaximumLeft()
             {
@@ -566,6 +566,10 @@ namespace C5.intervals
                 return oldMax != Max || oldSum != Sum;
             }
 
+            #endregion
+
+            #region Public Methods
+
             public int CompareTo(Node other)
             {
                 return Key.CompareTo(other.Key);
@@ -593,7 +597,6 @@ namespace C5.intervals
             }
 
             #endregion
-
         }
 
         /*
