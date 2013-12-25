@@ -439,30 +439,30 @@ namespace C5.intervals
 
             #endregion
 
-            #region Properties
+            #region Fields
 
-            public T Key { get; private set; }
+            public T Key;
 
-            public Node Left { get; internal set; }
-            public Node Right { get; internal set; }
+            public Node Left;
+            public Node Right;
 
             // Balance - between -2 and +2
-            public sbyte Balance { get; internal set; }
+            public sbyte Balance;
 
             // Fields for Maximum Depth
-            public int DeltaAt { get; internal set; }
-            public int DeltaAfter { get; internal set; }
-            public int Sum { get; set; }
-            public int Max { get; private set; }
+            public int DeltaAt;
+            public int DeltaAfter;
+            public int Sum;
+            public int Max;
 
             // Used for printing
-            public bool Dummy { get; private set; }
+            public bool Dummy;
 
-            public IntervalSet Less { get; set; }
-            public IntervalSet Equal { get; set; }
-            public IntervalSet Greater { get; set; }
+            public IntervalSet Less;
+            public IntervalSet Equal;
+            public IntervalSet Greater;
 
-            public IntervalSet IntervalsEndingInNode { get; private set; }
+            public IntervalSet IntervalsEndingInNode;
 
             #endregion
 
