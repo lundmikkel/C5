@@ -2009,13 +2009,13 @@ namespace C5.intervals
             var rotationNeeded = false;
             _root = addLow(interval, _root, null, ref rotationNeeded, ref intervalWasAdded, ref lowNode);
 
-            // Insert high endpoint
-            rotationNeeded = false;
-            _root = addHigh(interval, _root, null, ref rotationNeeded, ref intervalWasAdded, ref highNode);
-
             // Increase counters and raise event if interval was added
             if (intervalWasAdded)
             {
+                // Insert high endpoint
+                rotationNeeded = false;
+                _root = addHigh(interval, _root, null, ref rotationNeeded, ref highNode);
+
                 // Update span if necessary
                 if (_span != null && !_span.Contains(interval))
                     _span = _span.JoinedSpan(interval);
@@ -2034,9 +2034,6 @@ namespace C5.intervals
 
                 // Update maximum depth
                 updateMaximumDepth(_root, interval);
-
-                lowNode.IntervalsEndingInNode.Add(interval);
-                highNode.IntervalsEndingInNode.Add(interval);
 
                 _count++;
                 raiseForAdd(interval);
@@ -2061,6 +2058,7 @@ namespace C5.intervals
             var intervalWasAdded = false;
             Node lowNode = null;
             addLow(interval, root, rightUp, ref rotationNeeded, ref intervalWasAdded, ref lowNode);
+            Contract.Assert(!rotationNeeded);
         }
 
         private static Node addLow(I interval, Node root, Node rightUp, ref bool rotationNeeded, ref bool intervalWasAdded, ref Node lowNode)
@@ -2139,6 +2137,8 @@ namespace C5.intervals
 
                 // Save reference to endpoint node
                 lowNode = root;
+
+                intervalWasAdded |= root.IntervalsEndingInNode.Add(interval);
             }
 
             // Tree might be unbalanced after node was added, so we rotate
@@ -2151,12 +2151,12 @@ namespace C5.intervals
         private static void addHigh(I interval, Node root, Node leftUp)
         {
             var rotationNeeded = false;
-            var intervalWasAdded = false;
             Node highNode = null;
-            addHigh(interval, root, leftUp, ref rotationNeeded, ref intervalWasAdded, ref highNode);
+            addHigh(interval, root, leftUp, ref rotationNeeded, ref highNode);
+            Contract.Assert(!rotationNeeded);
         }
 
-        private static Node addHigh(I interval, Node root, Node leftUp, ref bool rotationNeeded, ref bool intervalWasAdded, ref Node highNode)
+        private static Node addHigh(I interval, Node root, Node leftUp, ref bool rotationNeeded, ref Node highNode)
         {
             Contract.Requires(interval != null);
 
@@ -2165,7 +2165,6 @@ namespace C5.intervals
             {
                 root = new Node(interval.High);
                 rotationNeeded = true;
-                intervalWasAdded = true;
             }
 
             Contract.Assert(root != null);
@@ -2174,7 +2173,7 @@ namespace C5.intervals
 
             if (compare < 0)
             {
-                root.Left = addHigh(interval, root.Left, leftUp, ref rotationNeeded, ref intervalWasAdded, ref highNode);
+                root.Left = addHigh(interval, root.Left, leftUp, ref rotationNeeded, ref highNode);
 
                 // Adjust node balance, if node was added
                 if (rotationNeeded)
@@ -2188,8 +2187,7 @@ namespace C5.intervals
                     if (root.Less == null)
                         root.Less = new IntervalSet();
 
-                    if (!(intervalWasAdded |= root.Less.Add(interval)))
-                        return root;
+                    root.Less.Add(interval);
                 }
 
                 // root key is between interval.low and interval.high
@@ -2198,11 +2196,10 @@ namespace C5.intervals
                     if (root.Equal == null)
                         root.Equal = new IntervalSet();
 
-                    if (!(intervalWasAdded |= root.Equal.Add(interval)))
-                        return root;
+                    root.Equal.Add(interval);
                 }
 
-                root.Right = addHigh(interval, root.Right, root, ref rotationNeeded, ref intervalWasAdded, ref highNode);
+                root.Right = addHigh(interval, root.Right, root, ref rotationNeeded, ref highNode);
 
                 // Adjust node balance, if node was added
                 if (rotationNeeded)
@@ -2216,8 +2213,7 @@ namespace C5.intervals
                     if (root.Less == null)
                         root.Less = new IntervalSet();
 
-                    if (!(intervalWasAdded |= root.Less.Add(interval)))
-                        return root;
+                    root.Less.Add(interval);
                 }
 
                 if (interval.HighIncluded)
@@ -2225,12 +2221,13 @@ namespace C5.intervals
                     if (root.Equal == null)
                         root.Equal = new IntervalSet();
 
-                    if (!(intervalWasAdded |= root.Equal.Add(interval)))
-                        return root;
+                    root.Equal.Add(interval);
                 }
 
                 // Save reference to endpoint node
                 highNode = root;
+
+                root.IntervalsEndingInNode.Add(interval);
             }
 
             // Tree might be unbalanced after node was added, so we rotate
