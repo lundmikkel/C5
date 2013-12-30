@@ -468,6 +468,9 @@ namespace C5.intervals.@static
         #endregion
 
         /// <inheritdoc/>
+        public bool AllowsOverlaps { get { return true; } }
+
+        /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get { return true; } }
 
         #endregion

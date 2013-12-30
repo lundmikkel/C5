@@ -1236,6 +1236,9 @@ namespace C5.intervals
         }
 
         /// <inheritdoc/>
+        public bool AllowsOverlaps { get { return true; } }
+
+        /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get; private set; }
 
         #endregion

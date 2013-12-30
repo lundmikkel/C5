@@ -192,6 +192,9 @@ namespace C5.intervals.@static
         }
 
         /// <inheritdoc/>
+        public bool AllowsOverlaps { get { return true; } }
+
+        /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get { return true; } }
 
         /// <inheritdoc/>
