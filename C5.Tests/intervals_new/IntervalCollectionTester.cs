@@ -1001,7 +1001,7 @@ namespace C5.Tests.intervals_new
             var collection = CreateCollection<Interval, int>(intervals);
             var interval = collection.Choose();
             var overlaps = collection.FindOverlaps(interval);
-            Assert.True(overlaps.Any());
+            Assert.True(overlaps.Count() > 0);
         }
 
         [Test]
