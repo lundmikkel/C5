@@ -40,7 +40,7 @@ namespace C5.intervals
             Contract.Invariant(contractHelperConfirmBalance(_root));
 
             // Check nodes are sorted
-            Contract.Invariant(contractHelperCheckNodesAreSorted(_root));
+            Contract.Invariant(nodesStatic(_root).IsSorted());
 
             // Check that the maximum depth variables are correct for all nodes
             Contract.Invariant(contractHelperCheckMnoAndIntervalsEndingInNodeForEachNode(_root));
@@ -53,12 +53,6 @@ namespace C5.intervals
 
             // There is no set with more intervals than the maximum depth
             Contract.Invariant(contractHelperGetMaximumSetCount(_root) <= MaximumDepth);
-        }
-
-        [Pure]
-        private static bool contractHelperCheckNodesAreSorted(Node root)
-        {
-            return nodesStatic(root).IsSorted();
         }
 
         [Pure]
