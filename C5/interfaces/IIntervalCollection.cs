@@ -335,7 +335,7 @@ namespace C5
                 Contract.Ensures(!IsEmpty);
 
                 // The collection contains the interval
-            Contract.Ensures(Contract.Exists(this, x => ReferenceEquals(x, interval)));
+                Contract.Ensures(!AllowsOverlaps || Contract.Exists(this, x => ReferenceEquals(x, interval)));
                 // If the interval was added, the number of object with the same reference goes up by one
                 Contract.Ensures(!Contract.Result<bool>() || this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval))) + 1);
                 // If the interval wasn't added, the number of object with the same reference stays the same
@@ -348,7 +348,7 @@ namespace C5
                 // If the collection allows reference duplicates, the object will always be added
                 Contract.Ensures(!AllowsReferenceDuplicates || Contract.Result<bool>());
                 // If the collection doesn't allow reference duplicates, the object should only be added if it didn't contain the object
-            Contract.Ensures(AllowsReferenceDuplicates || Contract.Result<bool>() != Contract.OldValue(Contract.Exists(this, x => ReferenceEquals(x, interval))));
+                Contract.Ensures(AllowsReferenceDuplicates || !AllowsOverlaps || Contract.Result<bool>() != Contract.OldValue(Contract.Exists(this, x => ReferenceEquals(x, interval))));
 
                 throw new NotImplementedException();
             }
