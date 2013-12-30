@@ -264,7 +264,7 @@ namespace C5.intervals
         /// <returns>An interval of intersection.</returns>
         /// <exception cref="ArgumentException">If the intervals do not overlap.</exception>
         [Pure]
-        public static IInterval<T> OverlapWith<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        public static IInterval<T> Overlap<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             Contract.Requires(x != null);
             Contract.Requires(y != null);
