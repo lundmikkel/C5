@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
-using C5.intervals;
 
 namespace C5
 {
-
+    namespace intervals
+    {
     /// <summary>
     /// A collection that allows fast overlap queries on collections of intervals.
     /// </summary>
@@ -633,5 +633,6 @@ namespace C5
 
             return max;
         }
+    }
     }
 }

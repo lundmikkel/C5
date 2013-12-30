@@ -5,6 +5,7 @@ using System.Windows.Threading;
 using C5.Performance.Wpf.Benchmarks;
 using C5.Performance.Wpf.Report_Benchmarks;
 using C5.Tests.intervals;
+using C5.intervals;
 using Microsoft.Win32;
 
 namespace C5.Performance.Wpf
@@ -38,7 +39,7 @@ namespace C5.Performance.Wpf
         // These are the benchmarks that will be run by the benchmarker.
         private static Benchmarkable[] Benchmarks
         {
-            
+
             get
             {
                 return new Benchmarkable[]

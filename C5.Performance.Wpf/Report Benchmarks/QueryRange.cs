@@ -2,6 +2,7 @@
 using System.Linq;
 using C5.Performance.Wpf.Benchmarks;
 using C5.Tests.intervals;
+using C5.intervals;
 
 namespace C5.Performance.Wpf.Report_Benchmarks
 {
@@ -9,7 +10,7 @@ namespace C5.Performance.Wpf.Report_Benchmarks
     {
         public QueryRange(Func<int, IInterval<int>[]> intervalConstruction, Func<IInterval<int>[], IIntervalCollection<IInterval<int>, int>> intervalCollectionConstruction)
             : base(intervalConstruction, intervalCollectionConstruction)
-        {}
+        { }
 
         public override void CollectionSetup()
         {
