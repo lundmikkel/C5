@@ -122,6 +122,8 @@ namespace C5.Tests.intervals_new
 
         private Interval[] Normalize(Interval[] intervals)
         {
+            return intervals;
+
             var endpoints = intervals.UniqueEndpointValues();
             var map = new HashDictionary<int, int>();
             var counter = 0;
@@ -521,6 +523,13 @@ namespace C5.Tests.intervals_new
         #region Properties
 
         #region Span
+
+        [Test]
+        public void Span_EmptyCollection_Exception_FixedSeed()
+        {
+            updateRandom(-1498148951);
+            Span_EmptyCollection_Exception();
+        }
 
         [Test]
         [Category("Span")]
@@ -1311,6 +1320,8 @@ namespace C5.Tests.intervals_new
 
         #region Add All
 
+        // TODO: Make more generic tests for AddAll
+
         [Test]
         [Category("Add All")]
         public void AddAll_IsReadOnly_Exception()
@@ -1382,6 +1393,7 @@ namespace C5.Tests.intervals_new
 
             if (!collection.IsReadOnly)
             {
+                Assert.False(collection.Remove(new Interval(singleInterval)));
                 Assert.True(collection.Remove(singleInterval));
                 Assert.False(collection.Remove(singleInterval));
             }
@@ -1407,7 +1419,10 @@ namespace C5.Tests.intervals_new
                 for (var i = 0; i < Count; i++)
                 {
                     if (i == 0)
+                    {
+                        Assert.False(collection.Remove(new Interval(intervals[i])));
                         Assert.True(collection.Remove(intervals[i]));
+                    }
                     else
                         Assert.AreEqual(collection.AllowsReferenceDuplicates, collection.Remove(intervals[i]));
                 }
@@ -1435,6 +1450,7 @@ namespace C5.Tests.intervals_new
             {
                 foreach (var interval in (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)))
                 {
+                    Assert.False(collection.Remove(new Interval(interval)));
                     Assert.True(collection.Remove(interval));
                     Assert.False(collection.Remove(interval));
                 }
@@ -1464,6 +1480,7 @@ namespace C5.Tests.intervals_new
             {
                 foreach (var interval in (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)))
                 {
+                    Assert.False(collection.Remove(new Interval(interval)));
                     Assert.True(collection.Remove(interval));
                     Assert.False(collection.Remove(interval));
                 }
