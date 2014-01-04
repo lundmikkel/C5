@@ -45,9 +45,9 @@ namespace C5.UserGuideExamples.intervals
             Console.Out.WriteLine("x.IntervalEquals(x): {0}", x.IntervalEquals(x)); // true
             Console.Out.WriteLine("x.IntervalEquals(a): {0}\n", x.IntervalEquals(a)); // true
 
-            Console.Out.WriteLine("x.OverlapWith(y): {0}", x.OverlapWith(y)); // [2:3]
-            Console.Out.WriteLine("x.OverlapWith(z): {0}\n", x.OverlapWith(z)); // (3:5)
-            //Console.Out.WriteLine("y.OverlapWith(z): {0}", y.OverlapWith(z)); // Exception - no overlap
+            Console.Out.WriteLine("x.Overlap(y): {0}", x.Overlap(y)); // [2:3]
+            Console.Out.WriteLine("x.Overlap(z): {0}\n", x.Overlap(z)); // (3:5)
+            //Console.Out.WriteLine("y.Overlap(z): {0}", y.Overlap(z)); // Exception - no overlap
 
             Console.Out.WriteLine("x.JoinedSpan(y): {0}", x.JoinedSpan(y)); // [1:5)
             Console.Out.WriteLine("y.JoinedSpan(z): {0}\n", y.JoinedSpan(z)); // [2:5)
