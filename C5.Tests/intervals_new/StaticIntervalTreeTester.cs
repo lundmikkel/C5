@@ -1,6 +1,6 @@
 ﻿using System;
-using C5.intervals;
 using C5.intervals.@static;
+
 
 namespace C5.Tests.intervals_new
 {
@@ -31,6 +31,8 @@ namespace C5.Tests.intervals_new
         #region White-box
 
         #region Legacy Tests
+
+
 
         /*
         // Removed as method is private.
