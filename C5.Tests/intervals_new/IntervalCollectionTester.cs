@@ -3,11 +3,47 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using C5.intervals;
+using C5.Tests.intervals.LayeredContainmentList;
 using NUnit.Framework;
 
 namespace C5.Tests.intervals_new
 {
-    using Interval = TestInterval<int>;
+    internal class Interval : TestInterval<int>
+    {
+        public Interval(int query)
+            : base(query)
+        {
+        }
+
+        public Interval(int low, int high, bool lowIncluded = true, bool highIncluded = false)
+            : base(low, high, lowIncluded, highIncluded)
+        {
+        }
+
+        public Interval(int low, int high, IntervalType type)
+            : base(low, high, type)
+        {
+        }
+
+        public Interval(IInterval<int> i)
+            : base(i)
+        {
+        }
+
+        public Interval(IInterval<int> low, IInterval<int> high)
+            : base(low, high)
+        {
+        }
+
+        public override string ToString()
+        {
+            return String.Format("{0}{1:#,0} : {2:#,0}{3}",
+                LowIncluded ? "[" : "(",
+                Low,
+                High,
+                HighIncluded ? "]" : ")");
+        }
+    }
 
     internal class TestInterval<T> : IntervalBase<T> where T : IComparable<T>
     {
@@ -118,6 +154,27 @@ namespace C5.Tests.intervals_new
                 list.Add(interval);
 
             return list.ToArray();
+        }
+
+        private Interval[] MeetingIntervals(int count = 101, int length = 10)
+        {
+            var intervals = new Interval[count];
+
+            var lastInterval = intervals[0] = new Interval(0, Random.Next(1, 1 + length), (IntervalType) Random.Next(0, 4));
+            for (var i = 1; i < count; i++)
+            {
+                lastInterval = intervals[i] = new Interval(lastInterval.High, Random.Next(lastInterval.High + 1, lastInterval.High + 1 + length), !lastInterval.HighIncluded, Convert.ToBoolean(Random.Next(0, 2)));
+            }
+
+            return intervals;
+        }
+
+        private static void SingleIntervalEquals(Interval query, IEnumerable<IInterval<int>> gaps)
+        {
+            var enumerator = gaps.GetEnumerator();
+            Assert.True(enumerator.MoveNext());
+            Assert.True(query.IntervalEquals(enumerator.Current));
+            Assert.False(enumerator.MoveNext());
         }
 
         private Interval[] Normalize(Interval[] intervals)
@@ -1186,6 +1243,269 @@ namespace C5.Tests.intervals_new
             Assert.AreEqual(0, collection.CountOverlaps(interval));
         }
 
+        #endregion
+
+        #endregion
+
+        #region Gaps
+
+        #region Gaps
+
+        [Test]
+        [Category("Gaps")]
+        public void Gaps_EmptyCollection_Empty()
+        {
+            var collection = CreateEmptyCollection<Interval, int>();
+
+            CollectionAssert.IsEmpty(collection.Gaps);
+        }
+
+        [Test]
+        [Category("Gaps")]
+        public void Gaps_SingleInterval_Empty()
+        {
+            var interval = SingleInterval();
+            var collection = CreateCollection<Interval, int>(interval);
+
+            CollectionAssert.IsEmpty(collection.Gaps);
+        }
+
+        [Test]
+        [Category("Gaps")]
+        public void Gaps_SingleObject_Empty()
+        {
+            var intervals = SingleObject();
+            var collection = CreateCollection<Interval, int>(intervals);
+
+            CollectionAssert.IsEmpty(collection.Gaps);
+        }
+
+        [Test]
+        [Category("Gaps")]
+        public void Gaps_DuplicateIntervals_Empty()
+        {
+            var intervals = DuplicateIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+
+            CollectionAssert.IsEmpty(collection.Gaps);
+        }
+
+        [Test]
+        [Category("Gaps")]
+        public void Gaps_ManyIntervals_Gaps()
+        {
+            var intervals = DuplicateIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+
+            var gaps = collection.Gaps;
+
+            foreach (var gap in gaps)
+            {
+                Assert.False(collection.Any(x => x.Overlaps(gap)));
+            }
+        }
+
+        [Test]
+        [Category("Gaps")]
+        public void Gaps_MeetingIntervals_Gaps()
+        {
+            var count = Count;
+            count += count % 2 + 1;
+            var add = false;
+            var intervals = MeetingIntervals(count);
+
+            var expected = new ArrayList<Interval>();
+            var input = new ArrayList<Interval>();
+
+            foreach (var interval in intervals)
+                ((add = !add) ? input : expected).Add(interval);
+
+            var collection = CreateCollection<Interval, int>(input.ToArray());
+
+            var gapsArray = collection.Gaps.ToArray();
+            var expectedArray = expected.ToArray();
+
+            for (int i = 0; i < count / 2; i++)
+                Assert.True(expectedArray[i].IntervalEquals(gapsArray[i]));
+        }
+
+        [Test]
+        [Category("Gaps")]
+        public void Gaps_OverlappingIntervals_NoGaps()
+        {
+            var interval = SingleInterval();
+            var interval2 = SingleInterval();
+            while (!interval.Overlaps(interval2))
+                interval2 = SingleInterval();
+            Assert.True(interval.Overlaps(interval2));
+
+            var collection = CreateCollection<Interval, int>(interval, interval2);
+
+            CollectionAssert.IsEmpty(collection.Gaps);
+        }
+
+        [Test]
+        [Category("Gaps")]
+        public void Gaps_MeetingIntervals_NoGaps()
+        {
+            var interval = new Interval(0, 1, IntervalType.LowIncluded);
+            var interval2 = new Interval(1, 2, IntervalType.LowIncluded);
+
+            var collection = CreateCollection<Interval, int>(interval, interval2);
+
+            CollectionAssert.IsEmpty(collection.Gaps);
+
+
+            interval = new Interval(0, 1, IntervalType.HighIncluded);
+            interval2 = new Interval(1, 2, IntervalType.HighIncluded);
+
+            collection = CreateCollection<Interval, int>(interval, interval2);
+
+            CollectionAssert.IsEmpty(collection.Gaps);
+        }
+
+        [Test]
+        [Category("Gaps")]
+        public void Gaps_MeetingIntervals_PointGap()
+        {
+            var interval = new Interval(0, 1, IntervalType.LowIncluded);
+            var interval2 = new Interval(1, 2, IntervalType.HighIncluded);
+
+            var collection = CreateCollection<Interval, int>(interval, interval2);
+
+            var gaps = collection.Gaps;
+            Assert.AreEqual(1, gaps.Count());
+            Assert.True((new Interval(1)).IntervalEquals(gaps.First()));
+        }
+
+        #endregion
+
+        #region Find Gaps
+
+        [Test]
+        [Category("Find Gaps")]
+        public void FindGaps_EmptyCollection_GapMatchesQuery()
+        {
+            var query = SingleInterval();
+            var collection = CreateEmptyCollection<Interval, int>();
+
+            var gaps = collection.FindGaps(query);
+
+            SingleIntervalEquals(query, gaps);
+        }
+
+        [Test]
+        [Category("Find Gaps")]
+        public void FindGaps_SingleInterval_QueryWithIntervalEmpty()
+        {
+            var interval = SingleInterval();
+            var collection = CreateCollection<Interval, int>(interval);
+
+            CollectionAssert.IsEmpty(collection.FindGaps(interval));
+        }
+
+        [Test]
+        [Category("Find Gaps")]
+        public void FindGaps_SingleInterval_QueryWithNoOverlap()
+        {
+            var interval = SingleInterval();
+            var query = SingleInterval();
+            while (interval.Overlaps(query)) query = SingleInterval();
+            var collection = CreateCollection<Interval, int>(interval);
+
+            SingleIntervalEquals(query, collection.FindGaps(query));
+        }
+
+        [Test]
+        [Category("Find Gaps")]
+        public void FindGaps_SingleObject_QueryWithIntervalEmpty()
+        {
+            var intervals = SingleObject();
+            var collection = CreateCollection<Interval, int>(intervals);
+
+            CollectionAssert.IsEmpty(collection.FindGaps(intervals.First()));
+        }
+
+        [Test]
+        [Category("Find Gaps")]
+        public void FindGaps_SingleObject_QueryWithNoOverlap()
+        {
+            var intervals = SingleObject();
+            var query = SingleInterval();
+            while (intervals.First().Overlaps(query)) query = SingleInterval();
+            var collection = CreateCollection<Interval, int>(intervals);
+
+            SingleIntervalEquals(query, collection.FindGaps(query));
+        }
+
+        [Test]
+        [Category("Find Gaps")]
+        public void FindGaps_DuplicateIntervals_QueryWithIntervalEmpty()
+        {
+            var interval = DuplicateIntervals();
+            var collection = CreateCollection<Interval, int>(interval);
+
+            CollectionAssert.IsEmpty(collection.FindGaps(interval.First()));
+        }
+
+        [Test]
+        [Category("Find Gaps")]
+        public void FindGaps_DuplicateIntervals_QueryWithNoOverlap()
+        {
+            var intervals = DuplicateIntervals();
+            var query = SingleInterval();
+            while (intervals.First().Overlaps(query)) query = SingleInterval();
+            var collection = CreateCollection<Interval, int>(intervals);
+
+            var gaps = collection.FindGaps(query);
+            SingleIntervalEquals(query, gaps);
+        }
+
+        [Test]
+        [Category("Find Gaps")]
+        public void FindGaps_ManyIntervals_Gaps()
+        {
+            var intervals = DuplicateIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+            var span = collection.Span;
+
+            var gaps = collection.FindGaps(span);
+
+            foreach (var gap in gaps)
+            {
+                Assert.False(collection.Any(x => x.Overlaps(gap)));
+                Assert.True(span.Contains(gap));
+            }
+        }
+
+        [Test]
+        [Category("Find Gaps")]
+        [Combinatorial]
+        public void FindGaps_MeetingIntervals_Gaps(
+            [Values(0, 1)] int count,
+            [Values(true, false)] bool add)
+        {
+            var intervals = MeetingIntervals(100 + count);
+            var span = intervals.Span();
+
+            var expected = new ArrayList<Interval>();
+            var input = new ArrayList<Interval>();
+
+            foreach (var interval in intervals)
+                ((add = !add) ? expected : input).Add(interval);
+
+            var collection = CreateCollection<Interval, int>(input.ToArray());
+
+            var gaps = collection.FindGaps(span);
+
+            Assert.False(gaps.Any(x => x.OverlapsAny(collection)));
+
+            Assert.True(expected.Zip(gaps, (x, y) => x.IntervalEquals(y)).All(b => b));
+        }
+
+        #endregion
+
+        #region Find Gap
         #endregion
 
         #endregion

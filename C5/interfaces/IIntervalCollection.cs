@@ -124,6 +124,33 @@ namespace C5
 
             #endregion
 
+            #region Gaps
+
+            // TODO: Improve documentation
+
+            /// <summary>
+            /// Find all gaps between the intervals in the collection. The gaps will have no
+            /// overlaps with the collection, and all gaps will be contained in the span of the collection.
+            /// </summary>
+            [Pure]
+            IEnumerable<IInterval<T>> Gaps { get; }
+
+            /// <summary>
+            /// Find all gaps between the intervals in the collection that overlap the query
+            /// interval. The gaps will have no overlaps with the collection, and all gaps will be
+            /// contained in the query interval.
+            /// </summary>
+            /// <param name="query">
+            /// Query interval that determines within which intervals the gaps must be.
+            /// </param>
+            /// <returns>
+            /// Gaps contained in the query interval, not overlapping any of the intervals in the collection.
+            /// </returns>
+            [Pure]
+            IEnumerable<IInterval<T>> FindGaps(IInterval<T> query);
+
+            #endregion
+
             #region Extensible
 
             /// <summary>
@@ -317,6 +344,81 @@ namespace C5
 
                 throw new NotImplementedException();
             }
+
+            #endregion
+
+            #region Gaps
+
+            // TODO: Make a contract that ensures all gaps have been found. Maybe something with collection + gaps = no gaps
+
+            /// <inheritdoc/>
+            public IEnumerable<IInterval<T>> Gaps
+            {
+                get
+                {
+                    Contract.Ensures(Contract.Result<IEnumerable<IInterval<T>>>() != null);
+                    // If the collection has one or fewer intervals, the result is empty
+                    Contract.Ensures(Count > 1 || !Contract.Result<IEnumerable<IInterval<T>>>().Any());
+                    // The gaps don't overlap any interval in the collection
+                    Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => !x.OverlapsAny(this)));
+                    // The gaps are contained in the span
+                    Contract.Ensures(IsEmpty || Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), Span.Contains));
+                    // Each gap is met by an interval in the collection
+                    Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => IntervalCollectionContractHelper.MetByAny(x, this.Cast<IInterval<T>>())));
+                    // Each gap meets an interval in the collection
+                    Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => IntervalCollectionContractHelper.MeetsAny(x, this.Cast<IInterval<T>>())));
+                    // Gaps are sorted
+                    Contract.Ensures(Contract.Result<IEnumerable<IInterval<T>>>().IsSorted(IntervalExtensions.CreateComparer<IInterval<T>, T>()));
+                    // Gaps do not overlap
+                    Contract.Ensures(Contract.Result<IEnumerable<IInterval<T>>>().ForAllConsecutiveElements((x, y) => !x.Overlaps(y)));
+
+                    throw new NotImplementedException();
+                }
+            }
+
+            /// <inheritdoc/>
+            public IEnumerable<IInterval<T>> FindGaps(IInterval<T> query)
+            {
+                Contract.Requires(query != null);
+
+                Contract.Ensures(Contract.Result<IEnumerable<IInterval<T>>>() != null);
+                // The gaps don't overlap any interval in the collection
+                Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => !x.OverlapsAny(this)));
+                // The gaps are contained in the query
+                Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), query.Contains));
+                // Each gap is met by an interval in the collection
+                Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => x.CompareLow(query) == 0 || IntervalCollectionContractHelper.MetByAny(x, this.Cast<IInterval<T>>())));
+                // Each gap meets an interval in the collection
+                Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => x.CompareHigh(query) == 0 || IntervalCollectionContractHelper.MeetsAny(x, this.Cast<IInterval<T>>())));
+                // Gaps are sorted
+                Contract.Ensures(Contract.Result<IEnumerable<IInterval<T>>>().IsSorted(IntervalExtensions.CreateComparer<IInterval<T>, T>()));
+                // Gaps do not overlap
+                Contract.Ensures(Contract.Result<IEnumerable<IInterval<T>>>().ForAllConsecutiveElements((x, y) => !x.Overlaps(y)));
+
+                throw new NotImplementedException();
+            }
+
+            /*
+            /// <inheritdoc/>
+            public bool FindGap(IInterval<T> query, ref IInterval<T> gap)
+            {
+                Contract.Requires(query != null);
+
+                // A found gap is not null
+                Contract.Ensures(!Contract.Result<bool>() || Contract.ValueAtReturn(out gap) != null);
+                // A found gap is contained in query
+                Contract.Ensures(!Contract.Result<bool>() || query.Contains(Contract.ValueAtReturn(out gap)));
+                // A found gap doesn't overlap any interval in the collection
+                Contract.Ensures(!Contract.Result<bool>() || Contract.ValueAtReturn(out gap).OverlapsAny(this));
+
+                // A found gap will be met by an interval in the collection
+                Contract.Ensures(!Contract.Result<bool>() || IntervalCollectionContractHelper.MetByAny(Contract.ValueAtReturn(out gap), this.Cast<IInterval<T>>()));
+                // A found gap will meet an interval in the collection
+                Contract.Ensures(!Contract.Result<bool>() || IntervalCollectionContractHelper.MeetsAny(Contract.ValueAtReturn(out gap), this.Cast<IInterval<T>>()));
+
+                throw new NotImplementedException();
+            }
+            */
 
             #endregion
 
@@ -564,6 +666,16 @@ namespace C5
                 Contract.Requires(intervals != null);
 
                 return intervals.Count(x => x.Overlaps(query));
+            }
+
+            public static bool MetByAny<T>(IInterval<T> interval, IEnumerable<IInterval<T>> intervals) where T : IComparable<T>
+            {
+                return intervals.Any(y => y.High.CompareTo(interval.Low) == 0 && y.HighIncluded != interval.LowIncluded);
+            }
+
+            public static bool MeetsAny<T>(IInterval<T> interval, IEnumerable<IInterval<T>> intervals) where T : IComparable<T>
+            {
+                return intervals.Any(y => interval.High.CompareTo(y.Low) == 0 && interval.HighIncluded != y.LowIncluded);
             }
 
             public static bool ConfirmAddAll<I, T>(I[] oldCollection, I[] newCollection, IEnumerable<I> intervalsAdded, bool allowsReferenceDuplicates)

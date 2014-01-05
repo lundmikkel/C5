@@ -341,6 +341,22 @@ namespace C5.intervals.@static
             return FindOverlaps(query).Count();
         }
 
+        #region Gaps
+
+        /// <inheritdoc/>
+        public IEnumerable<IInterval<T>> Gaps
+        {
+            get { return IntervalExtensions.Gaps(this.Cast<IInterval<T>>(), false); }
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<IInterval<T>> FindGaps(IInterval<T> query)
+        {
+            return FindOverlaps(query).Cast<IInterval<T>>().Gaps(query, false);
+        }
+
+        #endregion
+
         #endregion
 
         #region Extensible

@@ -35,7 +35,7 @@ namespace C5.Tests.intervals_new
         #endregion
 
         [TestFixture]
-        class DoublyLinkedBinarySearchTreeTester
+        class DoublyLinkedFiniteIntervalTreeTester
         {
             [Test]
             public void Add()

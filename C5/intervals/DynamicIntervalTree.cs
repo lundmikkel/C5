@@ -1416,6 +1416,23 @@ namespace C5.intervals
 
         #endregion
 
+        #region Gaps
+
+        /// <inheritdoc/>}
+        public IEnumerable<IInterval<T>> Gaps
+        {
+            get { return sortedNodes(_root).Select(n => n.LocalSpan).Where(x => x != null).Gaps(); }
+        }
+
+
+        /// <inheritdoc/>
+        public IEnumerable<IInterval<T>> FindGaps(IInterval<T> query)
+        {
+            return FindOverlaps(query).Cast<IInterval<T>>().Gaps(query, false);
+        }
+
+        #endregion
+
         #region Extensible
 
         /// <inheritdoc/>
@@ -1790,24 +1807,6 @@ namespace C5.intervals
 
         #region Interval Methods
 
-        /// <summary>
-        /// Find the gaps between the intervals in the collection. The gaps will have no overlaps with the collection, and all gaps will be contained in the span of the collection.
-        /// </summary>
-        public IEnumerable<IInterval<T>> Gaps
-        {
-            get
-            {
-                Contract.Ensures(Contract.Result<IEnumerable<IInterval<T>>>() != null);
-                // The gaps don't overlap the collection and they are within the span
-                Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => !this.Any(y => x.Overlaps(y)) && Span.Contains(x)));
-                // Each gap will be met by an interval in the collection
-                Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => this.Any(y => x.Low.CompareTo(y.High) == 0 && x.LowIncluded != y.HighIncluded)));
-                // Each gap will be meet an interval in the collection
-                Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => this.Any(y => x.High.CompareTo(y.Low) == 0 && x.HighIncluded != y.LowIncluded)));
-
-                return sortedNodes(_root).Select(n => n.LocalSpan).Where(x => x != null).Gaps();
-            }
-        }
 
         #endregion
     }

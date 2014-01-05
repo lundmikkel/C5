@@ -690,6 +690,22 @@ namespace C5.intervals
 
         #endregion
 
+        #region Gaps
+
+        /// <inheritdoc/>
+        public IEnumerable<IInterval<T>> Gaps
+        {
+            get { return this.Cast<IInterval<T>>().Gaps(); }
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<IInterval<T>> FindGaps(IInterval<T> query)
+        {
+            return FindOverlaps(query).Cast<IInterval<T>>().Gaps(query);
+        }
+
+        #endregion
+
         #region Extensible
 
         /// <inheritdoc/>
@@ -877,42 +893,6 @@ namespace C5.intervals
         #endregion
 
         #endregion
-
-        #endregion
-
-        #region Interval Methods
-
-        /// <summary>
-        /// Find the gaps between the intervals in the collection. The gaps will have no overlaps with the collection, and all gaps will be contained in the span of the collection.
-        /// </summary>
-        public IEnumerable<IInterval<T>> Gaps
-        {
-            get
-            {
-                // Get enumerator
-                var enumerator = GetEnumerator();
-
-                // Stop if the collection is empty
-                if (!enumerator.MoveNext())
-                    yield break;
-
-                // Get the first interval to start with
-                var previous = enumerator.Current;
-
-                // Loop through the intervals
-                while (enumerator.MoveNext())
-                {
-                    var current = enumerator.Current;
-
-                    // If the last high is less than the current low, we have a gap
-                    if (previous.High.CompareTo(current.Low) < 0)
-                        yield return new IntervalBase<T>(previous.High, current.Low, !previous.HighIncluded, !current.LowIncluded);
-
-                    // Save previous interval
-                    previous = current;
-                }
-            }
-        }
 
         #endregion
 

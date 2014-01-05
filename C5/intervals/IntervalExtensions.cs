@@ -45,6 +45,14 @@ namespace C5.intervals
             return Overlaps(x, new IntervalBase<T>(p));
         }
 
+        // TODO: Document
+        public static bool OverlapsAny<I, T>(this IInterval<T> interval, IEnumerable<I> intervals)
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            return intervals.Any(x => x.Overlaps(interval));
+        }
+
         /// <summary>
         /// Check if one interval contains another interval. The container interval
         /// contains all of the contained interval possibly sharing endpoints.
@@ -616,9 +624,14 @@ namespace C5.intervals
             // Get the node enumerator
             var enumerator = intervals.GetEnumerator();
 
-            // Check if it is empty
+            // Check if empty
             if (!enumerator.MoveNext())
+            {
+                // Return span as whole span will be a gap
+                yield return new IntervalBase<T>(span);
+                // Break as no more gaps can exist
                 yield break;
+            }
 
             // Get the first local span (which cannot be null!)
             IInterval<T> highestHigh = enumerator.Current;
@@ -719,6 +732,32 @@ namespace C5.intervals
                     var current = enumerator.Current;
 
                     if (comparer.Compare(previous, current) > 0)
+                        return false;
+
+                    previous = current;
+                }
+            }
+
+            return true;
+        }
+
+        [Pure]
+        public static bool ForAllConsecutiveElements<T>(this IEnumerable<T> collection, Func<T, T, bool> predicate)
+        {
+            Contract.Requires(collection != null);
+            Contract.Requires(predicate != null);
+
+            var enumerator = collection.GetEnumerator();
+
+            if (enumerator.MoveNext())
+            {
+                var previous = enumerator.Current;
+
+                while (enumerator.MoveNext())
+                {
+                    var current = enumerator.Current;
+
+                    if (!predicate(previous, current))
                         return false;
 
                     previous = current;
