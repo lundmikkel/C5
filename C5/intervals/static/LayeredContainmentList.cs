@@ -467,9 +467,11 @@ namespace C5.intervals.@static
 
         #endregion
 
+        // TODO: Support user setting the value
         /// <inheritdoc/>
         public bool AllowsOverlaps { get { return true; } }
 
+        // TODO: Support user setting the value
         /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get { return true; } }
 
