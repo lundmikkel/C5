@@ -1464,7 +1464,7 @@ namespace C5.intervals
         /// <inheritdoc/>
         public override IEnumerator<I> GetEnumerator()
         {
-            // TODO: Make sorted on endpoint inclusion as well
+            // TODO: Sort IntervalsEndingInNode to make whole iteration sorted
 
             return nodes(_root)
                 .SelectMany(node => node

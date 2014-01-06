@@ -12,7 +12,7 @@ namespace C5
         /// <summary>
         /// A collection that allows fast overlap queries on collections of intervals.
         /// </summary>
-        /// <remarks>The data structures do not support updates on its intervals' values. If you wish to change an interval's endpoints or their inclusion, the interval should be removed from the data structure first, changed and then added agian.</remarks>
+        /// <remarks>The data structures do not support updates on its intervals' values. If you wish to change an interval's endpoints or their inclusion, the interval should be removed from the data structure first, changed and then added again.</remarks>
         /// <typeparam name="I">The interval type in the collection. Especially used for return types for enumeration.</typeparam>
         /// <typeparam name="T">The interval's endpoint values.</typeparam>
         [ContractClass(typeof(IntervalCollectionContract<,>))]
