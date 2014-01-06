@@ -209,11 +209,11 @@ namespace C5
                     // Span is not null
                     Contract.Ensures(Contract.Result<IInterval<T>>() != null);
                     // Span contains all intervals
-                    Contract.Ensures(IsEmpty || Contract.ForAll(this, x => Contract.Result<IInterval<T>>().Contains(x)));
+                    Contract.Ensures(Contract.ForAll(this, x => Contract.Result<IInterval<T>>().Contains(x)));
                     // There is an interval that has the same low as span
-                    Contract.Ensures(IsEmpty || Contract.Exists(this, x => Contract.Result<IInterval<T>>().CompareLow(x) == 0));
+                    Contract.Ensures(Contract.Exists(this, x => Contract.Result<IInterval<T>>().CompareLow(x) == 0));
                     // There is an interval that has the same high as span
-                    Contract.Ensures(IsEmpty || Contract.Exists(this, x => Contract.Result<IInterval<T>>().CompareHigh(x) == 0));
+                    Contract.Ensures(Contract.Exists(this, x => Contract.Result<IInterval<T>>().CompareHigh(x) == 0));
 
                     throw new NotImplementedException();
                 }
@@ -226,7 +226,7 @@ namespace C5
                     // Result must be non-negative
                     Contract.Ensures(Contract.Result<int>() >= 0);
                     // Must be at least one if collection is not empty
-                    Contract.Ensures(IsEmpty || Contract.Result<int>() > 0);
+                    Contract.Ensures(IsEmpty ^ Contract.Result<int>() > 0);
                     // If no overlaps are allowed the maximum depth will always be 1, if not empty
                     Contract.Ensures(AllowsOverlaps || Contract.Result<int>() == (IsEmpty ? 0 : 1));
                     // Result cannot be larger than collection size
@@ -326,7 +326,7 @@ namespace C5
                 // Result cannot be larger than collection size
                 Contract.Ensures(Contract.Result<int>() <= Count);
                 // Result is equal to the number of intervals in the collection that overlap the query
-                Contract.Ensures(Contract.Result<int>() == Enumerable.Count(this, x => x.Overlaps(query)));
+                Contract.Ensures(Contract.Result<int>() == this.Count(x => IntervalExtensions.Overlaps(x, query)));
 
                 throw new NotImplementedException();
             }
@@ -340,7 +340,7 @@ namespace C5
                 // Result cannot be larger than collection size
                 Contract.Ensures(Contract.Result<int>() <= Count);
                 // Result is equal to the number of intervals in the collection that overlap the query
-                Contract.Ensures(Contract.Result<int>() == Enumerable.Count(this, x => x.Overlaps(query)));
+                Contract.Ensures(Contract.Result<int>() == this.Count(x => IntervalExtensions.Overlaps(x, query)));
 
                 throw new NotImplementedException();
             }
@@ -439,13 +439,13 @@ namespace C5
                 // The collection contains the interval
                 Contract.Ensures(!AllowsOverlaps || Contract.Exists(this, x => ReferenceEquals(x, interval)));
                 // If the interval was added, the number of object with the same reference goes up by one
-                Contract.Ensures(!Contract.Result<bool>() || this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval))) + 1);
+                Contract.Ensures(Contract.Result<bool>() == (this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval))) + 1));
                 // If the interval wasn't added, the number of object with the same reference stays the same
-                Contract.Ensures(Contract.Result<bool>() || this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval))));
+                Contract.Ensures(Contract.Result<bool>() != (this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval)))));
                 // If the interval is added the count goes up by one
-                Contract.Ensures(!Contract.Result<bool>() || Count == Contract.OldValue(Count) + 1);
+                Contract.Ensures(Contract.Result<bool>() == (Count == Contract.OldValue(Count) + 1));
                 // If the interval is not added the count stays the same
-                Contract.Ensures(Contract.Result<bool>() || Count == Contract.OldValue(Count));
+                Contract.Ensures(Contract.Result<bool>() != (Count == Contract.OldValue(Count)));
 
                 // If the collection allows reference duplicates, the object will always be added
                 Contract.Ensures(!AllowsReferenceDuplicates || Contract.Result<bool>());
@@ -488,13 +488,13 @@ namespace C5
                 Contract.Ensures(!Contract.OldValue(IsEmpty) || !Contract.Result<bool>());
 
                 // If the interval is removed the count goes down by one
-                Contract.Ensures(!Contract.Result<bool>() || Count == Contract.OldValue(Count) - 1);
+                Contract.Ensures(Contract.Result<bool>() == (Count == Contract.OldValue(Count) - 1));
                 // If the interval isn't removed the count stays the same
-                Contract.Ensures(Contract.Result<bool>() || Count == Contract.OldValue(Count));
+                Contract.Ensures(Contract.Result<bool>() != (Count == Contract.OldValue(Count)));
                 // If the interval was removed, the number of object with the same reference goes down by one
-                Contract.Ensures(!Contract.Result<bool>() || this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval))) - 1);
+                Contract.Ensures(Contract.Result<bool>() == (this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval))) - 1));
                 // If the interval wasn't removed, the number of object with the same reference stays the same
-                Contract.Ensures(Contract.Result<bool>() || this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval))));
+                Contract.Ensures(Contract.Result<bool>() != (this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval)))));
 
                 // The result is true if the collection contained the interval
                 Contract.Ensures(Contract.Result<bool>() == Contract.OldValue(Contract.Exists(this, x => ReferenceEquals(x, interval))));
