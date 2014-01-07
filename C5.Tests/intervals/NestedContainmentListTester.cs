@@ -104,6 +104,7 @@ namespace C5.Tests.intervals
         namespace Count
         {
             // TODO: Test with open intervals as well
+            // TODO: Move to general test suite
 
             [TestFixture]
             public class NoContainments

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using C5.intervals;
-using C5.Tests.intervals.LayeredContainmentList;
 using NUnit.Framework;
 
 namespace C5.Tests.intervals_new
@@ -143,7 +142,7 @@ namespace C5.Tests.intervals_new
             if (count < 0)
                 count = Count;
 
-            return Normalize(Enumerable.Range(0, count).Select(i => SingleInterval()).ToArray());
+            return Enumerable.Range(0, count).Select(i => SingleInterval()).ToArray();
         }
 
         public Interval[] NonOverlapping(IEnumerable<Interval> intervals)
@@ -179,8 +178,6 @@ namespace C5.Tests.intervals_new
 
         private Interval[] Normalize(Interval[] intervals)
         {
-            return intervals;
-
             var endpoints = intervals.UniqueEndpointValues();
             var map = new HashDictionary<int, int>();
             var counter = 0;
