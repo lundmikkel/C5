@@ -6,7 +6,7 @@ using System.Linq;
 namespace C5.intervals.@static
 {
     /// <summary>
-    /// An implementation of the Layered Containment List by Mikkel Riise Lund using two seperate
+    /// An implementation of the Layered Containment List by Mikkel Riise Lund using two separate
     /// arrays for intervals and pointers.
     /// </summary>
     /// <typeparam name="I">The interval type.</typeparam>
@@ -286,10 +286,7 @@ namespace C5.intervals.@static
 
         #region Enumerable
 
-        /// <summary>
-        /// Fast enumeration of intervals in arbitrary order, not sorted. For sorted enumerator see <see cref="getEnumeratorSorted()"/> or better <see cref="Sorted"/>.
-        /// </summary>
-        /// <returns>Enumerator of all intervals in the data structure in arbitrary order.</returns>
+        /// <inheritdoc/>
         public override IEnumerator<I> GetEnumerator()
         {
             return getEnumerator();

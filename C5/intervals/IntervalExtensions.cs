@@ -670,7 +670,7 @@ namespace C5.intervals
         /// <summary>
         /// Convert an IEnumerator to an IEnumerable.
         /// </summary>
-        public static IEnumerable<T> AsEnumerable<T>(this IEnumerator<T> enumerator)
+        public static IEnumerable<T> ToEnumerable<T>(this IEnumerator<T> enumerator)
         {
             while (enumerator.MoveNext()) yield return enumerator.Current;
         }

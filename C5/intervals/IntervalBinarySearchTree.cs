@@ -26,7 +26,7 @@ namespace C5.intervals
         private int _count;
         private IInterval<T> _span;
 
-        private static readonly IEqualityComparer<I> Comparer = ComparerFactory<I>.CreateEqualityComparer((x, y) => ReferenceEquals(x, y), x => x.GetHashCode());
+        private static readonly IEqualityComparer<I> EqualityComparer = ComparerFactory<I>.CreateEqualityComparer((x, y) => ReferenceEquals(x, y), x => x.GetHashCode());
 
         #endregion
 
@@ -627,7 +627,7 @@ namespace C5.intervals
             private void initHashSet(IEnumerable<I> intervals = null)
             {
                 _useHashSet = true;
-                _set = new System.Collections.Generic.HashSet<I>(Comparer);
+                _set = new System.Collections.Generic.HashSet<I>(EqualityComparer);
 
                 // Copy from list to set
                 foreach (var interval in (intervals ?? _list.Take(_count)))
@@ -762,12 +762,12 @@ namespace C5.intervals
 
             public IntervalSet(IEnumerable<I> set)
             {
-                _set = new System.Collections.Generic.HashSet<I>(set, Comparer);
+                _set = new System.Collections.Generic.HashSet<I>(set, EqualityComparer);
             }
 
             public IntervalSet()
             {
-                _set = new System.Collections.Generic.HashSet<I>(Comparer);
+                _set = new System.Collections.Generic.HashSet<I>(EqualityComparer);
             }
 
             #endregion

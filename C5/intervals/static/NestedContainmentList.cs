@@ -145,12 +145,12 @@ namespace C5.intervals.@static
         // TODO: Test the order is still the same as when sorted with IntervalComparer. This should be that case!
         public override IEnumerator<I> GetEnumerator()
         {
-            return getEnumerator(_mainList);
+            return getEnumerator(_mainList).GetEnumerator();
         }
 
         // TODO: Test the order is still the same as when sorted with IntervalComparer. This should be that case!
 
-        private IEnumerator<I> getEnumerator(Sublist sublist)
+        private IEnumerable<I> getEnumerator(Sublist sublist)
         {
             // Just for good measures
             if (_list == null || sublist.Length == 0)
@@ -164,12 +164,8 @@ namespace C5.intervals.@static
                 yield return node.Interval;
 
                 if (node.Sublist.Length > 0)
-                {
-                    var child = getEnumerator(node.Sublist);
-
-                    while (child.MoveNext())
-                        yield return child.Current;
-                }
+                    foreach (var interval in getEnumerator(node.Sublist))
+                        yield return interval;
             }
         }
 
