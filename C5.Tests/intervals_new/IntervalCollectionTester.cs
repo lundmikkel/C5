@@ -810,6 +810,10 @@ namespace C5.Tests.intervals_new
 
         #endregion
 
+        #region Allows Overlaps
+        // TODO
+        #endregion
+
         #region Allows Reference Duplicates
 
         protected abstract bool AllowsReferenceDuplicates();

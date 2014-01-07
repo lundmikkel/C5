@@ -45,6 +45,7 @@ namespace C5
             /// with the same endpoints and inclusions.
             /// </summary>
             /// <value>True if this collection allows overlapping intervals.</value>
+            [Pure]
             bool AllowsOverlaps { get; }
 
             /// <summary>
