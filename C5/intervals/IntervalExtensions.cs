@@ -660,6 +660,49 @@ namespace C5.intervals
             if (span != null && highestHigh.CompareHigh(span) < 0)
                 yield return new IntervalBase<T>(highestHigh.High, span.High, !highestHigh.HighIncluded, span.HighIncluded);
         }
+
+
+        public static void OverlapsToAction<I, T>(this IEnumerable<I> intervals, Action<IEnumerable<I>> action, bool isSorted = true)
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            Contract.Requires(intervals != null);
+            // Intervals must be sorted
+            Contract.Requires(!isSorted || intervals.IsSorted(IntervalExtensions.CreateComparer<I, T>()));
+
+            // Sort the intervals if necessary
+            if (!isSorted)
+            {
+                var sortedIntervals = intervals as I[] ?? intervals.ToArray();
+                Sorting.InsertionSort(sortedIntervals, 0, sortedIntervals.Length, CreateComparer<I, T>());
+                intervals = sortedIntervals;
+            }
+
+            // Create queue sorted on high intervals
+            var comparer = ComparerFactory<I>.CreateComparer((x, y) => x.CompareHigh(y));
+            var queue = new IntervalHeap<I>(comparer);
+
+            // Loop through intervals in sorted order
+            foreach (var interval in intervals)
+            {
+                var callAction = true;
+
+                // Remove all intervals from the queue not overlapping the current interval
+                while (!queue.IsEmpty && interval.CompareLowHigh(queue.FindMin()) > 0)
+                {
+                    if (callAction)
+                    {
+                        action(queue);
+                        callAction = false;
+                    }
+                    queue.DeleteMin();
+                }
+
+                queue.Add(interval);
+
+                Contract.Assert(Contract.ForAll(queue, x => Contract.ForAll(queue, y => x.Overlaps(y))));
+            }
+        }
     }
 
     /// <summary>
