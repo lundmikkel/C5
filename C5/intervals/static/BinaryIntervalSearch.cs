@@ -148,6 +148,9 @@ namespace C5.intervals.@static
         /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get { return true; } }
 
+        /// <inheritdoc/>
+        public IEnumerable<I> Sorted { get { return IsEmpty ? Enumerable.Empty<I>() : _lowSorted; } }
+
         #endregion
 
         #region Find Overlaps

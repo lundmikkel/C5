@@ -303,6 +303,35 @@ namespace C5.intervals.@static
         /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get { return true; } }
 
+        /// <inheritdoc/>
+        public IEnumerable<I> Sorted
+        {
+            get
+            {
+                // Create queue sorted on high intervals
+                var queue = new IntervalHeap<I>(IntervalExtensions.CreateComparer<I, T>());
+
+                return sorted(_root, queue);
+            }
+        }
+
+        private IEnumerable<I> sorted(Node root, IPriorityQueue<I> queue)
+        {
+            // All all intervals in the node
+            queue.AddAll(root.LeftList);
+
+            if (root.Left != null)
+                foreach (var interval in sorted(root.Left, queue))
+                    yield return interval;
+
+            while (!queue.IsEmpty && queue.FindMin().Low.CompareTo(root.Key) <= 0)
+                yield return queue.DeleteMin();
+
+            if (root.Right != null)
+                foreach (var interval in sorted(root.Right, queue))
+                    yield return interval;
+        }
+
         #endregion
 
         #region Find Overlaps

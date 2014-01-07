@@ -846,6 +846,46 @@ namespace C5.Tests.intervals_new
 
         #endregion
 
+        #region Sorted
+
+        [Test]
+        [Category("Sorted")]
+        public void Sorted_LCListTrickyCase_Sorted()
+        {
+            var collection = CreateCollection<Interval, int>(
+                new Interval(0, 8),
+                new Interval(1, 7),
+                new Interval(2, 3),
+                new Interval(4, 9),
+                new Interval(5, 6)
+            );
+
+            Assert.True(collection.Sorted.IsSorted(IntervalExtensions.CreateComparer<Interval, int>()));
+        }
+
+        [Test]
+        [Category("Sorted")]
+        public void Sorted_ManyIntervals_Sorted_FixedSeed()
+        {
+            updateRandom(36342054);
+            Sorted_ManyIntervals_Sorted();
+            updateRandom(-1127807792);
+            Sorted_ManyIntervals_Sorted();
+        }
+
+        [Test]
+        [Category("Sorted")]
+        public void Sorted_ManyIntervals_Sorted()
+        {
+            var intervals = Normalize(ManyIntervals());
+            var collection = CreateCollection<Interval, int>(intervals);
+
+            Assert.AreEqual(collection.Count, collection.Sorted.Count());
+            Assert.True(collection.Sorted.IsSorted(IntervalExtensions.CreateComparer<Interval, int>()));
+        }
+
+        #endregion
+
         #endregion
 
         #region Find Overlaps

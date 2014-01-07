@@ -210,6 +210,9 @@ namespace C5.intervals.@static
         /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get { return true; } }
 
+        /// <inheritdoc/>
+        public IEnumerable<I> Sorted { get { return getEnumerator(_mainList); } }
+
         #endregion
 
         #region Find Overlaps

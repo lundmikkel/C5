@@ -20,6 +20,8 @@ namespace C5.intervals
         private Node _root;
         private int _count;
 
+        private static readonly IComparer<I> Comparer = IntervalExtensions.CreateComparer<I, T>();
+
         #endregion
 
         #region Code Contracts
@@ -1062,6 +1064,9 @@ namespace C5.intervals
 
         /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get { return false; } }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> Sorted { get { return this.OrderBy(x => x, Comparer); } }
 
         #endregion
 

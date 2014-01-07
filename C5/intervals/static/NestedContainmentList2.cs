@@ -194,6 +194,9 @@ namespace C5.intervals.@static
         public bool AllowsReferenceDuplicates { get { return true; } }
 
         /// <inheritdoc/>
+        public IEnumerable<I> Sorted { get { return getEnumerator(_list); } }
+
+        /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
             if (ReferenceEquals(query, null))

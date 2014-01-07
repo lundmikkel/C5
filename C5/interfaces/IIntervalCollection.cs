@@ -54,7 +54,17 @@ namespace C5
             /// <value>True if this collection allows reference duplicates.</value>
             bool AllowsReferenceDuplicates { get; }
 
+            /// <summary>
+            /// Create an enumerable, enumerating all intervals in the collection in sorted order.
+            /// This might be slower than using the normal enumerator, but it ensures that the
+            /// intervals are sorted.
+            /// </summary>
+            [Pure]
+            IEnumerable<I> Sorted { get; }
+
             #endregion
+
+            //TODO: Add a Enumerable group documenting the behavior!
 
             #region Find Overlaps
 
@@ -247,6 +257,21 @@ namespace C5
                 {
                     // If the collection doesn't support overlaps it can't support reference duplicates either
                     Contract.Ensures(!Contract.Result<bool>() || AllowsOverlaps);
+
+                    throw new NotImplementedException();
+                }
+            }
+
+            public IEnumerable<I> Sorted
+            {
+                get
+                {
+                    Contract.Ensures(IsEmpty != Contract.Result<IEnumerable<I>>().Any());
+
+                    // The intervals are sorted
+                    Contract.Ensures(Contract.Result<IEnumerable<I>>().IsSorted(IntervalExtensions.CreateComparer<I, T>()));
+                    // The enumerator is equal to the normal enumerator
+                    Contract.Ensures(IntervalCollectionContractHelper.CollectionEquals(this, Contract.Result<IEnumerable<I>>()));
 
                     throw new NotImplementedException();
                 }

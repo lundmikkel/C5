@@ -307,16 +307,8 @@ namespace C5.intervals.@static
             }
         }
 
-        /// <summary>
-        /// Create an enumerable, enumerating all intervals in the collection in sorted order.
-        /// </summary>
-        public IEnumerable<I> Sorted
-        {
-            get
-            {
-                return sorted(0, _firstLayerCount);
-            }
-        }
+        /// <inheritdoc/>
+        public IEnumerable<I> Sorted { get { return sorted(0, _firstLayerCount); } }
 
         /// <summary>
         /// Enumerate intervals in sorted order using the pointers
@@ -326,6 +318,8 @@ namespace C5.intervals.@static
         /// <returns>Enumerator of all intervals in the data structure in sorted order</returns>
         private IEnumerable<I> sorted(int start, int end)
         {
+            // TODO: Fix!
+
             if (IsEmpty)
                 yield break;
 
@@ -627,6 +621,8 @@ namespace C5.intervals.@static
 
         private IEnumerable<I> findOverlapsSorted(IInterval<T> query)
         {
+            // TODO: Fix! See Sorted enumerator
+
             // Create our own stack to avoid stack overflow and to speed up the enumerator
             var stack = new int[_layerCount << 1];
             var i = 0;

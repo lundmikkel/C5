@@ -448,7 +448,7 @@ namespace C5.intervals
         /// <inheritdoc/>
         public override IEnumerator<I> GetEnumerator()
         {
-            return nextNodes(_first.Next).Select(node => node.Key).GetEnumerator();
+            return Sorted.GetEnumerator();
         }
 
         /// <summary>
@@ -514,6 +514,9 @@ namespace C5.intervals
 
         /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get { return false; } }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> Sorted { get { return nextNodes(_first.Next).Select(node => node.Key); } }
 
         #endregion
 

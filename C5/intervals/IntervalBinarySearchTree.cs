@@ -26,6 +26,7 @@ namespace C5.intervals
         private int _count;
         private IInterval<T> _span;
 
+        private static readonly IComparer<I> Comparer = IntervalExtensions.CreateComparer<I, T>();
         private static readonly IEqualityComparer<I> EqualityComparer = ComparerFactory<I>.CreateEqualityComparer((x, y) => ReferenceEquals(x, y), x => x.GetHashCode());
 
         #endregion
@@ -1642,6 +1643,20 @@ namespace C5.intervals
 
         /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get { return false; } }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> Sorted
+        {
+            get
+            {
+                return nodes(_root)
+                    .SelectMany(node => node
+                        .IntervalsEndingInNode
+                        .Where(interval => interval.Low.CompareTo(node.Key) == 0)
+                        .OrderBy(x => x, Comparer)
+                    );
+            }
+        }
 
         #endregion
 
