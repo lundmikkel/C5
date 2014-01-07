@@ -389,17 +389,19 @@ namespace C5.intervals
         /// Create a string representing the interval.
         /// </summary>
         /// <param name="x">The interval.</param>
+        /// <param name="delimiter">The delimiter separating the low and high endpoint value.</param>
         /// <remarks>Closed intervals are represented with square brackets [a:b] and open with round brackets (a:b).</remarks>
         /// <returns>The string representation.</returns>
         [Pure]
-        public static string ToIntervalString<T>(this IInterval<T> x) where T : IComparable<T>
+        public static string ToIntervalString<T>(this IInterval<T> x, string delimiter = ":") where T : IComparable<T>
         {
             Contract.Requires(x != null);
             Contract.Ensures(Contract.Result<string>().Length > 0);
 
-            return String.Format("{0}{1}:{2}{3}",
+            return String.Format("{0}{1}{2}{3}{4}",
                 x.LowIncluded ? "[" : "(",
                 x.Low,
+                delimiter,
                 x.High,
                 x.HighIncluded ? "]" : ")");
         }
@@ -602,9 +604,9 @@ namespace C5.intervals
         public static IEnumerable<IInterval<T>> Gaps<T>(this IEnumerable<IInterval<T>> intervals, IInterval<T> span, bool isSorted = true)
             where T : IComparable<T>
         {
+            Contract.Requires(intervals != null);
             // Intervals must be sorted
             Contract.Requires(!isSorted || intervals.IsSorted(IntervalExtensions.CreateComparer<IInterval<T>, T>()));
-            Contract.Requires(intervals != null);
             // The gaps don't overlap the collection and they are within the span
             Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => span.Overlaps(x)));
             Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => !intervals.Any(y => x.Overlaps(y))));
