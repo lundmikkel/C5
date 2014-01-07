@@ -5,39 +5,6 @@ using System.Linq;
 namespace C5.intervals.@static
 {
     /// <summary>
-    /// Extension methods used to find the median endpoint
-    /// </summary>
-    static class StaticIntervalTreeExtensions
-    {
-        /// <summary>
-        /// Randomly shuffles a list in linear time
-        /// </summary>
-        /// <param name="list">The list</param>
-        /// <typeparam name="T">The element type</typeparam>
-        public static void Shuffle<T>(this T[] list)
-        {
-            var random = new Random();
-            var n = list.Length;
-            while (--n > 0)
-                list.Swap(random.Next(n + 1), n);
-        }
-
-        /// <summary>
-        /// Swaps two elements in a list
-        /// </summary>
-        /// <param name="list">The list</param>
-        /// <param name="i">The index of the first element</param>
-        /// <param name="j">The index of the second element</param>
-        /// <typeparam name="T">The element type</typeparam>
-        public static void Swap<T>(this T[] list, int i, int j)
-        {
-            var tmp = list[i];
-            list[i] = list[j];
-            list[j] = tmp;
-        }
-    }
-
-    /// <summary>
     /// An implementation of a classic static interval tree as described by Berg et. al in "Computational Geometry - Algorithms and Applications"
     /// </summary>
     /// <typeparam name="I">The interval type.</typeparam>
@@ -49,11 +16,15 @@ namespace C5.intervals.@static
         #region Fields
 
         private readonly Node _root;
+        private readonly int _height;
         private readonly int _count;
         private readonly IInterval<T> _span;
         private int _maximumDepth = -1;
         // TODO: Expose in a property
         private IInterval<T> _intervalOfMaximumDepth;
+
+        private static readonly IComparer<I> LeftComparer = IntervalExtensions.CreateComparer<I, T>();
+        private static readonly IComparer<I> RightComparer = IntervalExtensions.CreateReversedComparer<I, T>();
 
         #endregion
 
@@ -63,22 +34,19 @@ namespace C5.intervals.@static
         {
             #region Fields
 
-            internal T Key { get; private set; }
+            internal readonly T Key;
             // Left and right subtree
-            internal Node Left { get; private set; }
-            internal Node Right { get; private set; }
+            internal readonly Node Left;
+            internal readonly Node Right;
             // Left and right list of intersecting intervals for Key
-            internal I[] LeftList { get; private set; }
-            internal I[] RightList { get; private set; }
-
-            private static IComparer<I> LeftComparer = IntervalExtensions.CreateComparer<I, T>();
-            private static IComparer<I> RightComparer = IntervalExtensions.CreateReversedComparer<I, T>();
+            internal readonly I[] LeftList;
+            internal readonly I[] RightList;
 
             #endregion
 
             #region Constructor
 
-            internal Node(I[] intervals, ref IInterval<T> span)
+            internal Node(I[] intervals, ref IInterval<T> span, ref int height)
             {
                 Key = getKey(intervals);
 
@@ -134,12 +102,17 @@ namespace C5.intervals.@static
                 if (span.CompareHigh(highestInterval) < 0)
                     span = new IntervalBase<T>(span, highestInterval);
 
+                var leftHeight = 0;
+                var rightHeight = 0;
+
                 // Construct interval tree recursively for Left and Right subtrees
                 if (lefts != null)
-                    Left = new Node(lefts.ToArray(), ref span);
+                    Left = new Node(lefts.ToArray(), ref span, ref leftHeight);
 
                 if (rights != null)
-                    Right = new Node(rights.ToArray(), ref span);
+                    Right = new Node(rights.ToArray(), ref span, ref rightHeight);
+
+                height = Math.Max(leftHeight, rightHeight) + 1;
             }
 
             #endregion
@@ -163,7 +136,7 @@ namespace C5.intervals.@static
             _count = intervalArray.Count();
 
             _span = new IntervalBase<T>(intervalArray.First());
-            _root = new Node(intervalArray, ref _span);
+            _root = new Node(intervalArray, ref _span, ref _height);
         }
 
         #endregion
@@ -240,32 +213,38 @@ namespace C5.intervals.@static
             return getEnumerator(_root);
         }
 
-        private static IEnumerator<I> getEnumerator(Node node)
+        private IEnumerable<Node> nodes(Node root)
         {
-            // Just return if tree is empty
-            if (node == null)
+            if (IsEmpty)
                 yield break;
 
-            // Recursively retrieve intervals in left subtree
-            if (node.Left != null)
-            {
-                var child = getEnumerator(node.Left);
+            var stack = new Node[_height];
+            var i = 0;
 
-                while (child.MoveNext())
-                    yield return child.Current;
+            var current = root;
+            while (i > 0 || current != null)
+            {
+                if (current != null)
+                {
+                    stack[i++] = current;
+                    current = current.Left;
+                }
+                else
+                {
+                    current = stack[--i];
+                    yield return current;
+                    current = current.Right;
+                }
             }
+        }
 
-            // Go through all intervals in the node
-            foreach (var interval in node.LeftList)
-                yield return interval;
-
-            // Recursively retrieve intervals in right subtree
-            if (node.Right != null)
+        private IEnumerator<I> getEnumerator(Node root)
+        {
+            foreach (var node in nodes(root))
             {
-                var child = getEnumerator(node.Right);
-
-                while (child.MoveNext())
-                    yield return child.Current;
+                // Go through all intervals in the node
+                foreach (var interval in node.LeftList)
+                    yield return interval;
             }
         }
 
@@ -428,7 +407,7 @@ namespace C5.intervals.@static
             }
         }
 
-        private static IEnumerable<I> findLeft(Node root, IInterval<T> query)
+        private IEnumerable<I> findLeft(Node root, IInterval<T> query)
         {
             // If root is null we have reached the end
             while (root != null)
@@ -480,7 +459,7 @@ namespace C5.intervals.@static
             }
         }
 
-        private static IEnumerable<I> findRight(Node root, IInterval<T> query)
+        private IEnumerable<I> findRight(Node root, IInterval<T> query)
         {
             while (root != null)
             {
@@ -675,5 +654,38 @@ namespace C5.intervals.@static
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// Extension methods used to find the median endpoint
+    /// </summary>
+    static class StaticIntervalTreeExtensions
+    {
+        /// <summary>
+        /// Randomly shuffles a list in linear time
+        /// </summary>
+        /// <param name="list">The list</param>
+        /// <typeparam name="T">The element type</typeparam>
+        public static void Shuffle<T>(this T[] list)
+        {
+            var random = new Random();
+            var n = list.Length;
+            while (--n > 0)
+                list.Swap(random.Next(n + 1), n);
+        }
+
+        /// <summary>
+        /// Swaps two elements in a list
+        /// </summary>
+        /// <param name="list">The list</param>
+        /// <param name="i">The index of the first element</param>
+        /// <param name="j">The index of the second element</param>
+        /// <typeparam name="T">The element type</typeparam>
+        public static void Swap<T>(this T[] list, int i, int j)
+        {
+            var tmp = list[i];
+            list[i] = list[j];
+            list[j] = tmp;
+        }
     }
 }
