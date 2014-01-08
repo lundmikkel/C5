@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using NUnit.Framework;
 using C5.intervals;
 using C5.Tests.intervals;
+using NUnit.Framework.Constraints;
 
 namespace C5.Tests.intervals_new
 {
@@ -11,6 +13,8 @@ namespace C5.Tests.intervals_new
     {
         using Interval = IntervalBase<int>;
 
+        // TODO: Re-enable all black-box tests
+        /*
         #region Black-box
 
         class DoublyLinkedFiniteIntervalTreeTester_BlackBox : IntervalCollectionTester
@@ -32,12 +36,175 @@ namespace C5.Tests.intervals_new
         }
 
         #endregion
+        */
 
         #region White-box
 
         [TestFixture]
         class DoublyLinkedFiniteIntervalTreeTester_WhiteBox
         {
+            #region Meta
+
+            EqualConstraint IsZero
+            {
+                get
+                {
+                    return Is.EqualTo(0);
+                }
+            }
+
+            EqualConstraint IsOne
+            {
+                get
+                {
+                    return Is.EqualTo(1);
+                }
+            }
+
+            class Collection
+            {
+                private IEnumerable<Interval> _intervals;
+                private int? _count;
+                private Random _random;
+
+                public Collection()
+                {
+                    // TODO: Should this be a fix seed to ensure repeatability?
+                    _random = new Random(0);
+                }
+
+                public Collection(Random random)
+                {
+                    _random = random;
+                }
+
+                public Collection ThatIsEmpty()
+                {
+                    _count = 0;
+
+                    return this;
+                }
+
+                public Collection WithIntervals(IEnumerable<Interval> intervals)
+                {
+                    _intervals = intervals;
+
+                    return this;
+                }
+
+                public Collection WithIntervals(params Interval[] intervals)
+                {
+                    _intervals = intervals;
+
+                    return this;
+                }
+
+                public Collection WithCount(int count)
+                {
+                    _count = count;
+
+                    return this;
+                }
+
+                public DoublyLinkedFiniteIntervalTree<Interval, int> Build()
+                {
+                    if (_count != null && _count == 0)
+                        return new DoublyLinkedFiniteIntervalTree<Interval, int>();
+
+                    // No specific intervals selected
+                    else
+                    {
+                        if (_count == null)
+                            _count = _count ?? _random.Next(10, 20);
+
+                        _intervals = Enumerable.Range(0, (int) _count).Select(x => new IntervalBuilder().Build());
+
+                        return new DoublyLinkedFiniteIntervalTree<Interval, int>(_intervals);
+                    }
+                }
+
+                public Collection WithOneInterval()
+                {
+                    _count = 1;
+
+                    return this;
+                }
+
+                public Collection WithManyIntervals(int? count = null)
+                {
+                    _count = count;
+
+                    // TODO: Generate random intervals
+
+                    return this;
+                }
+            }
+
+            class IntervalBuilder
+            {
+                private int? _low;
+                private int? _high;
+                private bool? _lowIncluded;
+                private bool? _highIncluded;
+
+                public IntervalBuilder() { }
+
+                public IntervalBuilder WithLow(int low)
+                {
+                    _low = low;
+
+                    return this;
+                }
+
+                public IntervalBuilder WithHigh(int high)
+                {
+                    _high = high;
+
+                    return this;
+                }
+
+                public IntervalBuilder Closed()
+                {
+                    _lowIncluded = _highIncluded = true;
+
+                    return this;
+                }
+
+                public IntervalBuilder Open()
+                {
+                    _lowIncluded = _highIncluded = false;
+
+                    return this;
+                }
+
+                public IntervalBuilder LeftClosed()
+                {
+                    _lowIncluded = true;
+                    _highIncluded = false;
+
+                    return this;
+                }
+
+                public Interval Build()
+                {
+                    Contract.Ensures(Contract.Result<Interval>().IsValidInterval());
+
+                    // TODO: Generate interval from endpoint values
+                    var low = _low ?? 0;
+                    var high = _high ?? 1;
+                    var lowIncluded = _lowIncluded ?? true;
+                    var highIncluded = _highIncluded ?? false;
+
+                    return new Interval(low, high, lowIncluded, highIncluded);
+                }
+
+                public static implicit operator Interval(IntervalBuilder intervalBuilder)
+                {
+                    return intervalBuilder.Build();
+                }
+            }
+
+            #endregion
 
             #region Code Contracts
             // TODO
@@ -76,15 +243,59 @@ namespace C5.Tests.intervals_new
             #endregion
 
             #region Maximum Depth
-            // TODO
+
+            [Test]
+            [Category("Maximum Depth")]
+            public void MaximumDepth_EmptyCollection_Zero()
+            {
+                var collection = new Collection().ThatIsEmpty().Build();
+
+                Assert.That(collection.MaximumDepth, IsZero);
+            }
+
+            [Test]
+            [Category("Maximum Depth")]
+            public void MaximumDepth_SingleIntervalCollection_One()
+            {
+                var collection = new Collection().WithOneInterval().Build();
+
+                Assert.That(collection.MaximumDepth, IsOne);
+            }
+
+            [Test]
+            [Category("Maximum Depth")]
+            public void MaximumDepth_NonEmptyCollection_One()
+            {
+                var collection = new Collection().WithManyIntervals().Build();
+
+                Assert.That(collection.MaximumDepth, IsOne);
+            }
+
             #endregion
 
             #region Allows Overlaps
-            // TODO
+
+            [Test]
+            [Category("Allows Overlaps")]
+            public void AllowsOverlaps()
+            {
+                var collection = new Collection().ThatIsEmpty().Build();
+
+                Assert.That(collection.AllowsOverlaps, Is.False);
+            }
+
             #endregion
 
             #region Allows Reference Duplicates
-            // TODO
+
+            [Test]
+            [Category("Allows Reference Duplicates")]
+            public void AllowsReferenceDuplicates()
+            {
+                var collection = new Collection().ThatIsEmpty().Build();
+
+                Assert.That(collection.AllowsReferenceDuplicates, Is.False);
+            }
             #endregion
 
             #region Sorted
@@ -112,7 +323,16 @@ namespace C5.Tests.intervals_new
             #region Extensible
 
             #region Is Read Only
-            // TODO
+
+            [Test]
+            [Category("Is Read Only")]
+            public void IsReadOnly()
+            {
+                var collection = new Collection().ThatIsEmpty().Build();
+
+                Assert.That(collection.IsReadOnly, Is.Not.True);
+            }
+
             #endregion
 
             #region Add
@@ -124,7 +344,64 @@ namespace C5.Tests.intervals_new
             #endregion
 
             #region Clear
-            // TODO
+
+            [Test]
+            [Category("Clear")]
+            public void Clear_IfIsEmpty_True()
+            {
+                var collection = new Collection().ThatIsEmpty().Build();
+
+                collection.Clear();
+
+                Assert.That(collection.IsEmpty, Is.True);
+            }
+
+            [Test]
+            [Category("Clear")]
+            public void Clear_IfActiveEventsAndEventTypeEnumClearedAndChangedIsNotZero_False()
+            {
+                var eventWasRaised = false;
+                var collection = new Collection().WithManyIntervals().Build();
+
+                collection.ItemsAdded += (c, args) => eventWasRaised = true;
+                collection.ItemsRemoved += (c, args) => eventWasRaised = true;
+
+                collection.Clear();
+
+                Assert.That(collection.IsEmpty, Is.True);
+                Assert.That(eventWasRaised, Is.False);
+            }
+
+            [Test]
+            [Category("Clear")]
+            public void Clear_IfActiveEventsAndEventTypeEnumClearedIsNotZero_True()
+            {
+                var eventWasRaised = false;
+                var collection = new Collection().WithManyIntervals().Build();
+
+                collection.CollectionCleared += (sender, args) => eventWasRaised = true;
+
+                collection.Clear();
+
+                Assert.That(collection.IsEmpty, Is.True);
+                Assert.That(eventWasRaised, Is.True);
+            }
+
+            [Test]
+            [Category("Clear")]
+            public void Clear_IfActiveEventsAndEventTypeEnumChangedIsNotZero_True()
+            {
+                var eventWasRaised = false;
+                var collection = new Collection().WithManyIntervals().Build();
+
+                collection.CollectionChanged += sender => eventWasRaised = true;
+
+                collection.Clear();
+
+                Assert.That(collection.IsEmpty, Is.True);
+                Assert.That(eventWasRaised, Is.True);
+            }
+
             #endregion
 
             #endregion
@@ -136,6 +413,7 @@ namespace C5.Tests.intervals_new
             #endregion
         }
 
+        /*
         [TestFixture]
         class DoublyLinkedFiniteIntervalTreeTester
         {
@@ -291,6 +569,7 @@ namespace C5.Tests.intervals_new
 #endif
             }
         }
+        */
 
         #endregion
     }
