@@ -147,10 +147,29 @@ namespace C5.Tests.intervals_new
 
         public Interval[] NonOverlapping(IEnumerable<Interval> intervals)
         {
-            var list = new ArrayList<Interval>();
+            var enumerator = intervals.OrderBy(x => x, IntervalExtensions.CreateComparer<Interval, int>()).GetEnumerator();
+            enumerator.MoveNext();
 
-            foreach (var interval in intervals.Where(interval => !list.Any(x => x.Overlaps(interval))))
+            var list = new List<Interval> { enumerator.Current };
+            // Save the first interval to list and as previous
+            var previous = enumerator.Current;
+
+            while (enumerator.MoveNext())
+            {
+                var interval = enumerator.Current;
+
+                // Check if interval overlaps the previous interval
+                if (interval.Overlaps(previous))
+                    // If overlaps should be disregarded skip to the next one
+                    continue;
+
+                // Add the interval and store it as the previous
                 list.Add(interval);
+                previous = interval;
+            }
+
+            // TODO: Fix when default behavior has been decided on
+            // foreach (var interval in intervals.Where(interval => !list.Any(x => x.Overlaps(interval))))
 
             return list.ToArray();
         }
@@ -2074,7 +2093,8 @@ namespace C5.Tests.intervals_new
                 CollectionAssert.AreEquivalent(expected, collection.FindOverlaps(point));
             }
 
-            var span = collection.AllowsOverlaps ? new Interval(int.MinValue, 20, IntervalType.HighIncluded) : new Interval(2, 19, IntervalType.Closed);
+            // TODO: Fix when default behavior has been decided on
+            var span = /*collection.AllowsOverlaps ?*/ new Interval(int.MinValue, 20, IntervalType.HighIncluded) /*: new Interval(2, 19, IntervalType.Closed)*/;
             Assert.True(span.IntervalEquals(collection.Span));
 
             Assert.AreEqual(collection.AllowsOverlaps ? 5 : 1, collection.MaximumDepth);

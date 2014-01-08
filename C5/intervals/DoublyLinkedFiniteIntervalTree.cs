@@ -400,7 +400,8 @@ namespace C5.intervals
         {
             Contract.Requires(intervals != null);
 
-            foreach (var interval in intervals)
+            // TODO: Remove ordering as soon as default behavior has been decided on
+            foreach (var interval in intervals.OrderBy(x => x, IntervalExtensions.CreateComparer<I, T>()))
                 Add(interval);
         }
 

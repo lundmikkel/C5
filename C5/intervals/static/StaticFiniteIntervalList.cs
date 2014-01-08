@@ -22,11 +22,8 @@ namespace C5.intervals.@static
         [ContractInvariantMethod]
         private void invariant()
         {
-            // Layer count is equal to the number of layers of intervals and pointers
-            Contract.Invariant(IsEmpty || _count == _intervals.Length);
-
             // Each layer is sorted
-            Contract.Invariant(IsEmpty || _intervals.IsSorted(IntervalExtensions.CreateComparer<I, T>()));
+            Contract.Invariant(IsEmpty || this.IsSorted(IntervalExtensions.CreateComparer<I, T>()));
         }
 
         #endregion
@@ -37,7 +34,7 @@ namespace C5.intervals.@static
         /// Create a Layered Containment List with a collection of intervals.
         /// </summary>
         /// <param name="intervals">The collection of intervals.</param>
-        public StaticFiniteIntervalList(IEnumerable<I> intervals)
+        public StaticFiniteIntervalList(IEnumerable<I> intervals, bool RemoveOverlapsInSortingOrder = false)
         {
             Contract.Requires(intervals != null);
 
@@ -48,18 +45,44 @@ namespace C5.intervals.@static
             if (!list.Any())
                 return;
 
-            _count = list.Count;
-
+            // Make sure the list is sorted
             var comparer = IntervalExtensions.CreateComparer<I, T>();
             if (!list.IsSorted(comparer))
                 list.Sort(comparer);
 
-            if (!list.ForAllConsecutiveElements((x, y) => !x.Overlaps(y)))
-                throw new ArgumentException("Overlapping intervals are not allowed!");
+            // Create an array based on the current list count
+            _intervals = new I[list.Count];
 
-            _intervals = list.ToArray();
+            var enumerator = list.GetEnumerator();
+            enumerator.MoveNext();
 
-            _span = new IntervalBase<T>(_intervals[0], _intervals[_count - 1]);
+            var i = 0;
+            // Save the first interval to list and as previous
+            var previous = _intervals[i++] = enumerator.Current;
+
+            while (enumerator.MoveNext())
+            {
+                var interval = enumerator.Current;
+
+                // TODO: Fix when default behavior has been decided on
+                // Check if interval overlaps the previous interval
+                if (interval.Overlaps(previous))
+                    // If overlaps should be disregarded skip to the next one
+                    if (RemoveOverlapsInSortingOrder)
+                        continue;
+                    // Otherwise throw an error
+                    else
+                        throw new ArgumentException("Overlapping intervals are not allowed!");
+
+                // Add the interval and store it as the previous
+                previous = _intervals[i++] = interval;
+            }
+
+            // Update count based on the actual number of intervals added to the list
+            _count = i;
+
+            // Cache the collection span
+            _span = new IntervalBase<T>(_intervals[0], previous);
         }
 
         #endregion
@@ -116,8 +139,8 @@ namespace C5.intervals.@static
                 if (IsEmpty)
                     yield break;
 
-                foreach (var interval in _intervals)
-                    yield return interval;
+                for (var i = 0; i < _count; i++)
+                    yield return _intervals[i];
             }
         }
 
