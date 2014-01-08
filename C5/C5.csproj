@@ -156,10 +156,12 @@
     <Compile Include="interfaces\IIntervalCollection.cs" />
     <Compile Include="intervals\DoublyLinkedFiniteIntervalTree.cs" />
     <Compile Include="intervals\IntervalBinarySearchTree.cs" />
+    <Compile Include="intervals\IntervalCollectionFactory.cs" />
     <Compile Include="intervals\static\BinaryIntervalSearch.cs" />
     <Compile Include="intervals\IntervalBinarySearchTreeOld.cs" />
     <Compile Include="intervals\IntervalRelations.cs" />
     <Compile Include="intervals\IntervalType.cs" />
+    <Compile Include="intervals\static\StaticFiniteIntervalList.cs" />
     <Compile Include="intervals\static\LayeredContainmentList.cs" />
     <Compile Include="intervals\IntervalBase.cs" />
     <Compile Include="intervals\IntervalExtensions.cs" />

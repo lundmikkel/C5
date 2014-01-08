@@ -127,6 +127,7 @@
     <Compile Include="intervals_new\DoublyLinkedFiniteIntervalTreeTester.cs" />
     <Compile Include="intervals_new\IntervalBinarySearchTreeTester.cs" />
     <Compile Include="intervals_new\IntervalBinarySearchTreeOldTester.cs" />
+    <Compile Include="intervals_new\StaticFiniteIntervalListTester.cs" />
     <Compile Include="intervals_new\StaticIntervalTreeTester.cs" />
     <Compile Include="intervals_new\IntervalCollectionTester.cs" />
     <Compile Include="intervals\IntervalBinarySearchTreeTester.cs" />
