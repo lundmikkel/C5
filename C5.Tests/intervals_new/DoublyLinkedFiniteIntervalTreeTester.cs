@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using C5.Tests.intervals;
 using NUnit.Framework;
-using C5;
 using C5.intervals;
+using C5.Tests.intervals;
 
 namespace C5.Tests.intervals_new
 {
@@ -33,6 +32,109 @@ namespace C5.Tests.intervals_new
         }
 
         #endregion
+
+        #region White-box
+
+        [TestFixture]
+        class DoublyLinkedFiniteIntervalTreeTester_WhiteBox
+        {
+
+            #region Code Contracts
+            // TODO
+            #endregion
+
+            #region Inner Classes - Node
+
+            #region Constructors
+            // TODO
+            #endregion
+
+            #region Public Methods
+            // TODO
+            #endregion
+
+            #endregion
+
+            #region Constructors
+            // TODO
+            #endregion
+
+            #region Collection Value
+            // TODO
+            #endregion
+
+            #region Enumerable
+            // TODO
+            #endregion
+
+            #region Interval Collection
+
+            #region Properties
+
+            #region Span
+            // TODO
+            #endregion
+
+            #region Maximum Depth
+            // TODO
+            #endregion
+
+            #region Allows Overlaps
+            // TODO
+            #endregion
+
+            #region Allows Reference Duplicates
+            // TODO
+            #endregion
+
+            #region Sorted
+            // TODO
+            #endregion
+
+            #endregion
+
+            #region Find Overlaps
+            // TODO
+            #endregion
+
+            #region Find Overlap
+            // TODO
+            #endregion
+
+            #region Count Overlaps
+            // TODO
+            #endregion
+
+            #region Gaps
+            // TODO
+            #endregion
+
+            #region Extensible
+
+            #region Is Read Only
+            // TODO
+            #endregion
+
+            #region Add
+            // TODO
+            #endregion
+
+            #region Remove
+            // TODO
+            #endregion
+
+            #region Clear
+            // TODO
+            #endregion
+
+            #endregion
+
+            #endregion
+
+            #region QuickGraph
+            // TODO
+            #endregion
+        }
 
         [TestFixture]
         class DoublyLinkedFiniteIntervalTreeTester
@@ -189,5 +291,7 @@ namespace C5.Tests.intervals_new
 #endif
             }
         }
+
+        #endregion
     }
 }
