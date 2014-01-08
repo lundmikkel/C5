@@ -289,14 +289,14 @@ namespace C5.intervals.@static
         /// <inheritdoc/>
         public override IEnumerator<I> GetEnumerator()
         {
-            return getEnumerator();
+            return getEnumerable().GetEnumerator();
         }
 
         /// <summary>
         /// Loops through each layer and yield its intervals
         /// </summary>
         /// <returns>Enumerator of all intervals in the data structure</returns>
-        private IEnumerator<I> getEnumerator()
+        private IEnumerable<I> getEnumerable()
         {
             for (var i = 0; i < _layerCount; i++)
             {
@@ -308,7 +308,15 @@ namespace C5.intervals.@static
         }
 
         /// <inheritdoc/>
-        public IEnumerable<I> Sorted { get { return sorted(0, _firstLayerCount); } }
+        public IEnumerable<I> Sorted
+        {
+            get
+            {
+                // HACK
+                // TODO: Fix!
+                return sorted(0, _firstLayerCount).OrderBy(x => x, IntervalExtensions.CreateComparer<I, T>());
+            }
+        }
 
         /// <summary>
         /// Enumerate intervals in sorted order using the pointers
@@ -318,8 +326,6 @@ namespace C5.intervals.@static
         /// <returns>Enumerator of all intervals in the data structure in sorted order</returns>
         private IEnumerable<I> sorted(int start, int end)
         {
-            // TODO: Fix!
-
             if (IsEmpty)
                 yield break;
 
