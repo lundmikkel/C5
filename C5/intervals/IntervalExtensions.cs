@@ -702,6 +702,9 @@ namespace C5.intervals
 
                 Contract.Assert(Contract.ForAll(queue, x => Contract.ForAll(queue, y => x.Overlaps(y))));
             }
+
+            // Call the action on the remaining overlapping intervals in the queue
+            action(queue);
         }
     }
 
