@@ -186,6 +186,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="C5.snk" />
+    <None Include="intervals\README.md" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
