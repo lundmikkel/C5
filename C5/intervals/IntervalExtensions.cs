@@ -74,6 +74,7 @@ namespace C5.intervals
                 && (highCompare < 0 || highCompare == 0 && (!y.HighIncluded || x.HighIncluded));
         }
 
+        // TODO: Replace with IsContaining
         /// <summary>
         /// Check if one interval strictly contains another interval. The container interval
         /// contains all of the contained interval without sharing endpoints.
@@ -87,6 +88,7 @@ namespace C5.intervals
             Contract.Requires(x != null);
             Contract.Requires(y != null);
             Contract.Ensures(Contract.Result<bool>() == (x.CompareLow(y) < 0 && y.CompareHigh(x) < 0));
+            Contract.Ensures(Contract.Result<bool>() == x.IsContaining(y));
 
             // Save compare values to avoid comparing twice in case CompareTo() should be expensive
             int lowCompare = x.Low.CompareTo(y.Low), highCompare = y.High.CompareTo(x.High);

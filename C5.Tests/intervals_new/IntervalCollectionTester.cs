@@ -677,6 +677,14 @@ namespace C5.Tests.intervals_new
 
         [Test]
         [Category("Span")]
+        public void Span_ContainedInterval_ContainerEqualsSpan_FixedSeed()
+        {
+            updateRandom(-1672943992);
+            Span_ContainedInterval_ContainerEqualsSpan();
+        }
+
+        [Test]
+        [Category("Span")]
         public void Span_ContainedInterval_ContainerEqualsSpan()
         {
             // TODO: Refactor?

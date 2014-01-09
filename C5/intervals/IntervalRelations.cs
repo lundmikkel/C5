@@ -92,6 +92,7 @@ namespace C5.intervals
     /// </summary>
     public static class IntervalRelations
     {
+
         /// <summary>
         /// Get the relationship between two intervals as described by James F. Allen in "Maintaining Knowledge about Temporal Intervals".
         /// The logic for points is described by Marc B. Vilain in "A System for Reasoning About Time", though terms are still Allen.
@@ -104,57 +105,160 @@ namespace C5.intervals
             Contract.Requires(x != null);
             Contract.Requires(y != null);
 
-            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.After ||
-                y.CompareLow(x) < 0 && y.CompareHighLow(x) < 0);
-            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.MetBy ||
-                y.CompareLow(x) < 0 && y.CompareHighLow(x) == 0);
-            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.OverlappedBy ||
-                y.CompareLow(x) < 0 && y.CompareHighLow(x) > 0 && y.CompareHigh(x) < 0);
-            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Finishes ||
-                y.CompareLow(x) < 0 && y.CompareHighLow(x) >= 0 && y.CompareHigh(x) == 0);
-            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.During ||
-                y.CompareLow(x) < 0 && y.CompareHighLow(x) > 0 && y.CompareHigh(x) > 0);
-            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.StartedBy ||
-                y.CompareLow(x) == 0 && y.CompareHighLow(x) >= 0 && y.CompareHigh(x) < 0);
-            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Equals ||
-                y.CompareLow(x) == 0 && y.CompareHigh(x) == 0);
-            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Starts ||
-                y.CompareLow(x) == 0 && y.CompareHigh(x) > 0);
-            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Contains ||
-                y.CompareLow(x) > 0 && y.CompareHigh(x) < 0);
-            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.FinishedBy ||
-                y.CompareLow(x) > 0 && y.CompareLowHigh(x) <= 0 && y.CompareHigh(x) == 0);
-            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Overlaps ||
-                y.CompareLow(x) > 0 && y.CompareHigh(x) > 0);
-            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Meets ||
-                y.CompareLow(x) > 0 && y.CompareHigh(x) > 0);
-            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Before ||
-                y.CompareLow(x) > 0 && y.CompareHigh(x) > 0);
+            Contract.Ensures((Contract.Result<IntervalRelation>() == IntervalRelation.After) == x.IsAfter(y));
+            Contract.Ensures((Contract.Result<IntervalRelation>() == IntervalRelation.MetBy) == x.IsMetBy(y));
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.OverlappedBy || y.CompareLow(x) < 0 && y.CompareHighLow(x) >= 0 && y.CompareHigh(x) < 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Finishes || y.CompareLow(x) < 0 && y.CompareHighLow(x) >= 0 && y.CompareHigh(x) == 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.During || y.CompareLow(x) < 0 && y.CompareHighLow(x) > 0 && y.CompareHigh(x) > 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.StartedBy || y.CompareLow(x) == 0 && y.CompareHighLow(x) >= 0 && y.CompareHigh(x) < 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Equals || y.CompareLow(x) == 0 && y.CompareHigh(x) == 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Starts || y.CompareLow(x) == 0 && y.CompareHigh(x) > 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Contains || y.CompareLow(x) > 0 && y.CompareHigh(x) < 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.FinishedBy || y.CompareLow(x) > 0 && y.CompareLowHigh(x) <= 0 && y.CompareHigh(x) == 0);
+            Contract.Ensures(Contract.Result<IntervalRelation>() != IntervalRelation.Overlaps || y.CompareLow(x) > 0 && x.CompareHighLow(y) >= 0 && y.CompareHigh(x) > 0);
+            Contract.Ensures((Contract.Result<IntervalRelation>() == IntervalRelation.Meets) == x.IsMeeting(y));
+            Contract.Ensures((Contract.Result<IntervalRelation>() == IntervalRelation.Before) == x.IsBefore(y));
 
 
+            var compareBefore = x.High.CompareTo(y.Low);
             // Check if x is before y
-            var compareBefore = x.CompareHighLow(y);
-            if (compareBefore < 0)
+            if (compareBefore < 0 || compareBefore == 0 && !x.HighIncluded && !y.LowIncluded)
                 return IntervalRelation.Before;
+            // Check if x meets y
+            // Neither do they overlap nor is there a gap between them
+            if (compareBefore == 0 && x.HighIncluded != y.LowIncluded)
+                return IntervalRelation.Meets;
 
             // Check if x is after y
-            var compareAfter = y.CompareHighLow(x);
-            if (compareAfter < 0)
+            var compareAfter = y.High.CompareTo(x.Low);
+            if (compareAfter < 0 || compareAfter == 0 && !y.HighIncluded && !x.LowIncluded)
                 return IntervalRelation.After;
+            // Check if x is met by y
+            if (compareAfter == 0 && y.HighIncluded != x.LowIncluded)
+                return IntervalRelation.MetBy;
 
             var compareLow = x.CompareLow(y);
             var compareHigh = x.CompareHigh(y);
 
-            // TODO: Update to say [a:b) and [b:c) meet, but [a:b] and [b:c) overlap
-            // Compare Low and High when dealing with points
-            if (compareAfter == 0 && compareLow > 0 && compareHigh > 0)
-                return IntervalRelation.MetBy;
-
-            if (compareBefore == 0 && compareLow < 0 && compareHigh < 0)
-                return IntervalRelation.Meets;
-
             // Convert the compared values to the integer values of the interval relations
-            return (IntervalRelation) ((compareLow > 0 ? 2 : (compareLow == 0 ? 5 : 8)) + (compareHigh > 0 ? 0 : (compareHigh == 0 ? 1 : 2)));
+            return (IntervalRelation)
+                ((compareLow > 0 ? 2 : (compareLow == 0 ? 5 : 8)) +
+                (compareHigh > 0 ? 0 : (compareHigh == 0 ? 1 : 2)));
+        }
+
+        // TODO: Optimize to check for just the specified relation
+        public static bool IsAfter<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            Contract.Ensures(Contract.Result<bool>() == y.IsBefore(x));
+
+            var compare = y.High.CompareTo(x.Low);
+            return compare < 0 || compare == 0 && !y.HighIncluded && !x.LowIncluded;
+        }
+        public static bool IsMetBy<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            Contract.Ensures(Contract.Result<bool>() == y.IsMeeting(x));
+
+            return y.High.CompareTo(x.Low) == 0 && y.HighIncluded != x.LowIncluded;
+        }
+        public static bool IsOverlappedBy<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            Contract.Ensures(Contract.Result<bool>() == y.IsOverlapping(x));
+
+            return x.RelateTo(y) == IntervalRelation.OverlappedBy;
+        }
+        public static bool IsFinishing<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            Contract.Ensures(Contract.Result<bool>() == y.IsFinishedBy(x));
+
+            return x.RelateTo(y) == IntervalRelation.Finishes;
+        }
+
+        public static bool IsDuring<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            Contract.Ensures(Contract.Result<bool>() == y.IsContaining(x));
+
+            return x.RelateTo(y) == IntervalRelation.During;
+        }
+        public static bool IsStartedBy<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            Contract.Ensures(Contract.Result<bool>() == y.IsStarting(x));
+
+            return x.RelateTo(y) == IntervalRelation.StartedBy;
+        }
+
+        public static bool IsEqualTo<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            Contract.Ensures(Contract.Result<bool>() == y.IsEqualTo(x));
+
+            return x.IntervalEquals(y);
+        }
+
+        public static bool IsStarting<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            Contract.Ensures(Contract.Result<bool>() == y.IsStartedBy(x));
+
+            return x.RelateTo(y) == IntervalRelation.Starts;
+        }
+        public static bool IsContaining<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            Contract.Ensures(Contract.Result<bool>() == y.IsDuring(x));
+
+            return x.RelateTo(y) == IntervalRelation.Contains;
+        }
+
+        public static bool IsFinishedBy<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            Contract.Ensures(Contract.Result<bool>() == y.IsFinishing(x));
+
+            return x.RelateTo(y) == IntervalRelation.FinishedBy;
+        }
+
+        public static bool IsOverlapping<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            Contract.Ensures(Contract.Result<bool>() == y.IsOverlappedBy(x));
+
+            return x.RelateTo(y) == IntervalRelation.Overlaps;
+        }
+
+        public static bool IsMeeting<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            Contract.Ensures(Contract.Result<bool>() == y.IsMetBy(x));
+
+            return x.High.CompareTo(y.Low) == 0 && x.HighIncluded != y.LowIncluded;
+        }
+
+        public static bool IsBefore<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            Contract.Ensures(Contract.Result<bool>() == y.IsAfter(x));
+
+            var compare = x.High.CompareTo(y.Low);
+            return compare < 0 || compare == 0 && !x.HighIncluded && !y.LowIncluded;
         }
     }
 

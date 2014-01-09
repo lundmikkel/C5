@@ -18,47 +18,54 @@ namespace C5.Tests.intervals
         [Test]
         public void DraftTest()
         {
-            var x = new IntervalOfInt(3, 6, true, true);
+            var x = new IntervalOfInt(3, 6, IntervalType.Closed);
 
-            var intervalAfter = new IntervalOfInt(1, 2);
+            var intervalAfter = new IntervalOfInt(1, 2, IntervalType.LowIncluded);
             Assert.AreEqual(IntervalRelation.After, x.RelateTo(intervalAfter));
 
-            var intervalMetBy = new IntervalOfInt(1, 3, true, true);
+            var intervalMetBy = new IntervalOfInt(1, 3, IntervalType.LowIncluded);
             Assert.AreEqual(IntervalRelation.MetBy, x.RelateTo(intervalMetBy));
 
-            var intervalOverlappedBy = new IntervalOfInt(1, 4, true, true);
+            var intervalOverlappedBy = new IntervalOfInt(1, 3, IntervalType.Closed);
+            Assert.AreEqual(IntervalRelation.MetBy, x.RelateTo(intervalMetBy));
+
+            intervalOverlappedBy = new IntervalOfInt(1, 4, IntervalType.Closed);
             Assert.AreEqual(IntervalRelation.OverlappedBy, x.RelateTo(intervalOverlappedBy));
 
-            var intervalFinishes = new IntervalOfInt(1, 6, true, true);
+            var intervalFinishes = new IntervalOfInt(1, 6, IntervalType.Closed);
             Assert.AreEqual(IntervalRelation.Finishes, x.RelateTo(intervalFinishes));
 
-            var intervalDuring = new IntervalOfInt(1, 8, true, true);
+            var intervalDuring = new IntervalOfInt(1, 8, IntervalType.Closed);
             Assert.AreEqual(IntervalRelation.During, x.RelateTo(intervalDuring));
 
-            var intervalStartedBy = new IntervalOfInt(3, 5, true, true);
+            var intervalStartedBy = new IntervalOfInt(3, 5, IntervalType.Closed);
             Assert.AreEqual(IntervalRelation.StartedBy, x.RelateTo(intervalStartedBy));
 
-            var intervalEquals = new IntervalOfInt(3, 6, true, true);
+            var intervalEquals = new IntervalOfInt(3, 6, IntervalType.Closed);
             Assert.AreEqual(IntervalRelation.Equals, x.RelateTo(intervalEquals));
 
-            var intervalStarts = new IntervalOfInt(3, 7, true, true);
+            var intervalStarts = new IntervalOfInt(3, 7, IntervalType.Closed);
             Assert.AreEqual(IntervalRelation.Starts, x.RelateTo(intervalStarts));
 
-            var intervalContains = new IntervalOfInt(4, 5, true, true);
+            var intervalContains = new IntervalOfInt(4, 5, IntervalType.Closed);
             Assert.AreEqual(IntervalRelation.Contains, x.RelateTo(intervalContains));
 
-            var intervalFinishedBy = new IntervalOfInt(4, 6, true, true);
+            var intervalFinishedBy = new IntervalOfInt(4, 6, IntervalType.Closed);
             Assert.AreEqual(IntervalRelation.FinishedBy, x.RelateTo(intervalFinishedBy));
 
-            var intervalOverlaps = new IntervalOfInt(4, 7, true, true);
+            var intervalOverlaps = new IntervalOfInt(4, 7, IntervalType.Closed);
             Assert.AreEqual(IntervalRelation.Overlaps, x.RelateTo(intervalOverlaps));
 
-            var intervalMeets = new IntervalOfInt(6, 7, true, true);
+            intervalOverlaps = new IntervalOfInt(6, 7, IntervalType.Closed);
+            Assert.AreEqual(IntervalRelation.Overlaps, x.RelateTo(intervalOverlaps));
+
+            var intervalMeets = new IntervalOfInt(6, 7, IntervalType.HighIncluded);
             Assert.AreEqual(IntervalRelation.Meets, x.RelateTo(intervalMeets));
 
-            var intervalBefore = new IntervalOfInt(7, 9, true, true);
+            var intervalBefore = new IntervalOfInt(7, 9, IntervalType.Closed);
             Assert.AreEqual(IntervalRelation.Before, x.RelateTo(intervalBefore));
 
+            // TODO: Add tests for Meet and MetBy with points
 
             var pointAfter = new IntervalOfInt(1);
             Assert.AreEqual(IntervalRelation.After, x.RelateTo(pointAfter));
@@ -88,19 +95,19 @@ namespace C5.Tests.intervals
             Assert.AreEqual(IntervalRelation.Before, x.RelateTo(pointBefore));
 
 
-            intervalAfter = new IntervalOfInt(1, 2, true, true);
+            intervalAfter = new IntervalOfInt(1, 2, IntervalType.Closed);
             Assert.AreEqual(IntervalRelation.After, x.RelateTo(intervalAfter));
 
-            intervalFinishes = new IntervalOfInt(1, 3, true, true);
+            intervalFinishes = new IntervalOfInt(1, 3, IntervalType.Closed);
             Assert.AreEqual(IntervalRelation.Finishes, x.RelateTo(intervalFinishes));
 
-            intervalDuring = new IntervalOfInt(1, 4, true, true);
+            intervalDuring = new IntervalOfInt(1, 4, IntervalType.Closed);
             Assert.AreEqual(IntervalRelation.During, x.RelateTo(intervalDuring));
 
-            intervalStarts = new IntervalOfInt(3, 4, true, true);
+            intervalStarts = new IntervalOfInt(3, 4, IntervalType.Closed);
             Assert.AreEqual(IntervalRelation.Starts, x.RelateTo(intervalStarts));
 
-            intervalBefore = new IntervalOfInt(4, 6, true, true);
+            intervalBefore = new IntervalOfInt(4, 6, IntervalType.Closed);
             Assert.AreEqual(IntervalRelation.Before, x.RelateTo(intervalBefore));
         }
 
@@ -108,7 +115,7 @@ namespace C5.Tests.intervals
         public void After()
         {
 
-            var x = new IntervalOfInt(3, 5, true, true);
+            var x = new IntervalOfInt(3, 5, IntervalType.Closed);
             var y = new IntervalOfInt(3);
 
             Console.WriteLine(x.RelateTo(y));
