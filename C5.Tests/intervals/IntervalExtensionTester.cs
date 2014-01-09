@@ -56,7 +56,7 @@ namespace C5.Tests.intervals
         [Test]
         public void Gaps_NoGaps([Values(true, false)] bool isSorted)
         {
-            CollectionAssert.IsEmpty(intervals().Gaps(isSorted));
+            CollectionAssert.IsEmpty(intervals().Gaps(isSorted: isSorted));
         }
 
         [Test, Combinatorial]
@@ -89,7 +89,7 @@ namespace C5.Tests.intervals
             foreach (var interval in intervals)
                 ((add = !add) ? expected : input).Add(interval);
 
-            CollectionAssert.AreEquivalent(expected, input.Gaps(isSorted));
+            CollectionAssert.AreEquivalent(expected, input.Gaps(isSorted: isSorted));
         }
 
         private IInterval<int>[] intervals(int count = 101, int length = 10)

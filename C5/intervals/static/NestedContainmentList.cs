@@ -142,13 +142,10 @@ namespace C5.intervals.@static
         /// Create an enumerator, enumerating the intervals in sorted order - sorted on low endpoint with shortest intervals first
         /// </summary>
         /// <returns>Enumerator</returns>
-        // TODO: Test the order is still the same as when sorted with IntervalComparer. This should be that case!
         public override IEnumerator<I> GetEnumerator()
         {
-            return getEnumerator(_mainList).GetEnumerator();
+            return Sorted.GetEnumerator();
         }
-
-        // TODO: Test the order is still the same as when sorted with IntervalComparer. This should be that case!
 
         private IEnumerable<I> getEnumerator(Sublist sublist)
         {
@@ -368,13 +365,16 @@ namespace C5.intervals.@static
         /// <inheritdoc/>
         public IEnumerable<IInterval<T>> Gaps
         {
-            get { return IntervalExtensions.Gaps(this.Cast<IInterval<T>>(), false); }
+            get
+            {
+                return Sorted.Cast<IInterval<T>>().Gaps();
+            }
         }
 
         /// <inheritdoc/>
         public IEnumerable<IInterval<T>> FindGaps(IInterval<T> query)
         {
-            return FindOverlaps(query).Cast<IInterval<T>>().Gaps(query, false);
+            return FindOverlaps(query).Cast<IInterval<T>>().Gaps(query);
         }
 
         #endregion

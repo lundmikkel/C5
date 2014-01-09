@@ -287,6 +287,15 @@ namespace C5.intervals
             return new IntervalBase<T>(low, high);
         }
 
+        public static IInterval<T> Gap<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            Contract.Requires(x.IsBefore(y));
+
+            return new IntervalBase<T>(x.High, y.Low, !x.HighIncluded, !y.LowIncluded);
+        }
+
         /// <summary>
         /// Creates an interval from the lowest low and the highest high of the two intervals. The joined span contains both intervals.
         /// </summary>
@@ -514,6 +523,7 @@ namespace C5.intervals
             // Sort the intervals if necessary
             if (!isSorted)
             {
+                // TODO: It should be enough to sort them on low endpoint!
                 var sortedIntervals = intervals as I[] ?? intervals.ToArray();
                 Sorting.InsertionSort(sortedIntervals, 0, sortedIntervals.Length, CreateComparer<I, T>());
                 intervals = sortedIntervals;
@@ -547,117 +557,69 @@ namespace C5.intervals
             return max;
         }
 
-        /// <summary>
-        /// Find the gaps between the intervals in the collection. The gaps will have no overlaps with the collection, and all gaps will be contained in the span of the collection.
-        /// </summary>
         [Pure]
-        public static IEnumerable<IInterval<T>> Gaps<T>(this IEnumerable<IInterval<T>> intervals, bool isSorted = true)
-            where T : IComparable<T>
-        {
-            // Intervals must be sorted
-            Contract.Requires(!isSorted || intervals.IsSorted(IntervalExtensions.CreateComparer<IInterval<T>, T>()));
-            Contract.Requires(intervals != null);
-            // The gaps don't overlap the collection and they are within the span
-            Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => !intervals.Any(y => x.Overlaps(y))));
-            // Each gap will be met by an interval in the collection
-            Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => intervals.Any(y => x.Low.CompareTo(y.High) == 0 && x.LowIncluded != y.HighIncluded)));
-            // Each gap will be meet an interval in the collection
-            Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => intervals.Any(y => x.High.CompareTo(y.Low) == 0 && x.HighIncluded != y.LowIncluded)));
-
-            // Sort the intervals if necessary
-            if (!isSorted)
-            {
-                var sortedIntervals = intervals as IInterval<T>[] ?? intervals.ToArray();
-                Sorting.InsertionSort(sortedIntervals, 0, sortedIntervals.Length, CreateComparer<IInterval<T>, T>());
-                intervals = sortedIntervals;
-            }
-
-            // Get the node enumerator
-            var enumerator = intervals.GetEnumerator();
-
-            // Check if it is empty
-            if (!enumerator.MoveNext())
-                yield break;
-
-            // Get the first local span (which cannot be null!)
-            IInterval<T> highestHigh = enumerator.Current;
-
-
-            // Iterate through the local spans in the tree in sorted order
-            while (enumerator.MoveNext())
-            {
-                var next = enumerator.Current;
-
-                // Compare endpoints to see if there is a gap
-                var compare = highestHigh.High.CompareTo(next.Low);
-                if (compare < 0 || compare == 0 && !highestHigh.HighIncluded && !next.LowIncluded)
-                    // Create an return the gap interval by using the endpoint values and inverting the endpoint inclusions
-                    yield return new IntervalBase<T>(highestHigh.High, next.Low, !highestHigh.HighIncluded, !next.LowIncluded);
-
-                // Store the highest high of the two intervals
-                highestHigh = highestHigh.HighestHigh(next);
-            }
-        }
-
-
-        [Pure]
-        public static IEnumerable<IInterval<T>> Gaps<T>(this IEnumerable<IInterval<T>> intervals, IInterval<T> span, bool isSorted = true)
+        public static IEnumerable<IInterval<T>> Gaps<T>(this IEnumerable<IInterval<T>> intervals, IInterval<T> span = null, bool isSorted = true)
             where T : IComparable<T>
         {
             Contract.Requires(intervals != null);
             // Intervals must be sorted
             Contract.Requires(!isSorted || intervals.IsSorted(IntervalExtensions.CreateComparer<IInterval<T>, T>()));
             // The gaps don't overlap the collection and they are within the span
-            Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => span.Overlaps(x)));
-            Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => !intervals.Any(y => x.Overlaps(y))));
+            Contract.Ensures(span == null || Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => span.Overlaps(x)));
+            Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => !x.OverlapsAny(intervals)));
             // Each gap will be met by an interval in the collection
-            Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => x.CompareLow(span) == 0 || intervals.Any(y => x.Low.CompareTo(y.High) == 0 && x.LowIncluded != y.HighIncluded)));
+            Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => span != null && x.CompareLow(span) == 0 || intervals.Any(y => x.Low.CompareTo(y.High) == 0 && x.LowIncluded != y.HighIncluded)));
             // Each gap will be meet an interval in the collection
-            Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => x.CompareHigh(span) == 0 || intervals.Any(y => x.High.CompareTo(y.Low) == 0 && x.HighIncluded != y.LowIncluded)));
+            Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => span != null && x.CompareHigh(span) == 0 || intervals.Any(y => x.High.CompareTo(y.Low) == 0 && x.HighIncluded != y.LowIncluded)));
 
             // Sort the intervals if necessary
             if (!isSorted)
             {
-                var sortedIntervals = intervals as IInterval<T>[] ?? intervals.ToArray();
-                Sorting.InsertionSort(sortedIntervals, 0, sortedIntervals.Length, CreateComparer<IInterval<T>, T>());
-                intervals = sortedIntervals;
+                // TODO: It should be enough to sort them on low endpoint!
+                var list = new List<IInterval<T>>(intervals);
+                list.Sort(CreateComparer<IInterval<T>, T>());
+                intervals = list;
             }
 
-            // Get the node enumerator
+            Contract.Assert(intervals.IsSorted<IInterval<T>, T>());
+
+            var useSpan = span != null;
             var enumerator = intervals.GetEnumerator();
 
             // Check if empty
             if (!enumerator.MoveNext())
             {
-                // Return span as whole span will be a gap
-                yield return new IntervalBase<T>(span);
+                if (useSpan)
+                    // Return span as whole span will be a gap
+                    yield return new IntervalBase<T>(span);
+
                 // Break as no more gaps can exist
                 yield break;
             }
 
-            // Get the first local span (which cannot be null!)
-            IInterval<T> highestHigh = enumerator.Current;
+            // Get the first interval
+            var highestHigh = enumerator.Current;
 
-            if (span.CompareLow(highestHigh) < 0)
+            // Check for a gap within the span before the lowest endpoint
+            if (useSpan && span.CompareLow(highestHigh) < 0)
                 yield return new IntervalBase<T>(span.Low, highestHigh.Low, span.LowIncluded, !highestHigh.LowIncluded);
 
-            // Iterate through the local spans in the tree in sorted order
+            // Iterate through the sorted intervals
             while (enumerator.MoveNext())
             {
                 var next = enumerator.Current;
 
-                // Compare endpoints to see if there is a gap
-                var compare = highestHigh.High.CompareTo(next.Low);
-                if (compare < 0 || compare == 0 && !highestHigh.HighIncluded && !next.LowIncluded)
-                    // Create an return the gap interval by using the endpoint values and inverting the endpoint inclusions
-                    yield return new IntervalBase<T>(highestHigh.High, next.Low, !highestHigh.HighIncluded, !next.LowIncluded);
+                // Check for gap and create interval if there is one
+                if (highestHigh.IsBefore(next))
+                    yield return Gap(highestHigh, next);
 
-                // Store the highest high of the two intervals
-                highestHigh = highestHigh.HighestHigh(next);
+                // Update highest high if next is higher
+                if (next.CompareHigh(highestHigh) > 0)
+                    highestHigh = next;
             }
 
-            // Output interval at the end
-            if (span != null && highestHigh.CompareHigh(span) < 0)
+            // Check for a gap within the span after the highest endpoint
+            if (useSpan && highestHigh.CompareHigh(span) < 0)
                 yield return new IntervalBase<T>(highestHigh.High, span.High, !highestHigh.HighIncluded, span.HighIncluded);
         }
 
@@ -721,6 +683,13 @@ namespace C5.intervals
         public static IEnumerable<T> ToEnumerable<T>(this IEnumerator<T> enumerator)
         {
             while (enumerator.MoveNext()) yield return enumerator.Current;
+        }
+
+        public static bool IsSorted<I, T>(this IEnumerable<I> collection)
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            return collection.IsSorted(IntervalExtensions.CreateComparer<I, T>());
         }
 
         /// <summary>

@@ -308,28 +308,41 @@ namespace C5.intervals.@static
         {
             get
             {
+                if (IsEmpty)
+                    yield break;
+
                 // Create queue sorted on high intervals
                 var queue = new IntervalHeap<I>(IntervalExtensions.CreateComparer<I, T>());
 
-                return sorted(_root, queue);
+                // Create a stack
+                var stack = new Node[_height];
+                var i = 0;
+
+                // Enumerate nodes in order
+                var current = _root;
+                while (i > 0 || current != null)
+                {
+                    if (current != null)
+                    {
+                        stack[i++] = current;
+
+                        // All all intervals in the node
+                        queue.AddAll(current.LeftList);
+
+                        current = current.Left;
+                    }
+                    else
+                    {
+                        current = stack[--i];
+
+                        // Returns interval before the current node's key
+                        while (!queue.IsEmpty && queue.FindMin().Low.CompareTo(current.Key) <= 0)
+                            yield return queue.DeleteMin();
+
+                        current = current.Right;
+                    }
+                }
             }
-        }
-
-        private IEnumerable<I> sorted(Node root, IPriorityQueue<I> queue)
-        {
-            // All all intervals in the node
-            queue.AddAll(root.LeftList);
-
-            if (root.Left != null)
-                foreach (var interval in sorted(root.Left, queue))
-                    yield return interval;
-
-            while (!queue.IsEmpty && queue.FindMin().Low.CompareTo(root.Key) <= 0)
-                yield return queue.DeleteMin();
-
-            if (root.Right != null)
-                foreach (var interval in sorted(root.Right, queue))
-                    yield return interval;
         }
 
         #endregion
@@ -594,7 +607,10 @@ namespace C5.intervals.@static
         /// <inheritdoc/>
         public IEnumerable<IInterval<T>> Gaps
         {
-            get { return IntervalExtensions.Gaps(this.Cast<IInterval<T>>(), false); }
+            get
+            {
+                return Sorted.Cast<IInterval<T>>().Gaps();
+            }
         }
 
         /// <inheritdoc/>

@@ -1367,6 +1367,14 @@ namespace C5.Tests.intervals_new
 
         [Test]
         [Category("Gaps")]
+        public void Gaps_MeetingIntervals_Gaps_FixedSeed()
+        {
+            updateRandom(-1138109753);
+            Gaps_MeetingIntervals_Gaps();
+        }
+
+        [Test]
+        [Category("Gaps")]
         public void Gaps_MeetingIntervals_Gaps()
         {
             var count = Count;
@@ -2122,6 +2130,7 @@ namespace C5.Tests.intervals_new
 
         #region Large Scale Random
 
+        /*
         [Test]
         [Category("Large Scale")]
         public void Random_CallWholeInterface_FixedSeed()
@@ -2131,6 +2140,7 @@ namespace C5.Tests.intervals_new
             updateRandom(1065643459);
             Random_CallWholeInterface();
         }
+        */
 
         [Test]
         [Category("Large Scale")]

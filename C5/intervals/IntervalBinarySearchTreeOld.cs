@@ -1350,7 +1350,10 @@ namespace C5.intervals
         /// <inheritdoc/>
         public IEnumerable<IInterval<T>> Gaps
         {
-            get { return IntervalExtensions.Gaps(this.Cast<IInterval<T>>(), false); }
+            get
+            {
+                return Sorted.Cast<IInterval<T>>().Gaps();
+            }
         }
 
         /// <inheritdoc/>

@@ -124,15 +124,13 @@ namespace C5.intervals.@static
             return GetEnumerator();
         }
 
-        // TODO: Test the order is still the same as when sorted with IntervalComparer. This should be that case!
         /// <summary>
         /// Create an enumerator, enumerating the intervals in sorted order - sorted on low endpoint with shortest intervals first
         /// </summary>
         /// <returns>Enumerator</returns>
-        // TODO: Test the order is still the same as when sorted with IntervalComparer. This should be that case!
         public override IEnumerator<I> GetEnumerator()
         {
-            return getEnumerator(_list).GetEnumerator();
+            return Sorted.GetEnumerator();
         }
 
         private IEnumerable<I> getEnumerator(IEnumerable<Node> list)
@@ -202,11 +200,11 @@ namespace C5.intervals.@static
             if (ReferenceEquals(query, null))
                 throw new NullReferenceException("Query can't be null");
 
-            return overlap(_list, new IntervalBase<T>(query));
+            return findOverlaps(_list, new IntervalBase<T>(query));
         }
 
         // TODO: Test speed difference between version that takes overlap-loop and upper and low bound loop
-        private static IEnumerable<I> overlap(Node[] list, IInterval<T> query)
+        private static IEnumerable<I> findOverlaps(Node[] list, IInterval<T> query)
         {
             if (list == null)
                 yield break;
@@ -229,10 +227,8 @@ namespace C5.intervals.@static
                 yield return node.Interval;
 
                 if (node.Sublist != null)
-                {
-                    foreach (var interval in overlap(node.Sublist, query))
+                    foreach (var interval in findOverlaps(node.Sublist, query))
                         yield return interval;
-                }
             }
         }
 
@@ -297,7 +293,7 @@ namespace C5.intervals.@static
             if (query == null)
                 return Enumerable.Empty<I>();
 
-            return overlap(_list, query);
+            return findOverlaps(_list, query);
         }
 
         /// <inheritdoc/>
@@ -345,13 +341,13 @@ namespace C5.intervals.@static
         /// <inheritdoc/>
         public IEnumerable<IInterval<T>> Gaps
         {
-            get { return IntervalExtensions.Gaps(this.Cast<IInterval<T>>(), false); }
+            get { return Sorted.Cast<IInterval<T>>().Gaps(); }
         }
 
         /// <inheritdoc/>
         public IEnumerable<IInterval<T>> FindGaps(IInterval<T> query)
         {
-            return FindOverlaps(query).Cast<IInterval<T>>().Gaps(query, false);
+            return FindOverlaps(query).Cast<IInterval<T>>().Gaps(query);
         }
 
         #endregion
