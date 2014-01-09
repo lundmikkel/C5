@@ -624,7 +624,7 @@ namespace C5.intervals
         }
 
 
-        public static void OverlapsToAction<I, T>(this IEnumerable<I> intervals, Action<IEnumerable<I>> action, bool isSorted = true)
+        public static void ActionOnOverlaps<I, T>(this IEnumerable<I> intervals, Action<IEnumerable<I>> action, bool isSorted = true)
             where I : IInterval<T>
             where T : IComparable<T>
         {
