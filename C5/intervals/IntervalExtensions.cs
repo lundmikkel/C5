@@ -424,6 +424,13 @@ namespace C5.intervals
             return ComparerFactory<I>.CreateComparer((x, y) => x.CompareTo(y));
         }
 
+        public static IComparer<I> CreateLowComparer<I, T>()
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            return ComparerFactory<I>.CreateComparer((x, y) => x.CompareLow(y));
+        }
+
         public static IComparer<I> CreateReversedComparer<I, T>()
             where I : IInterval<T>
             where T : IComparable<T>
@@ -525,9 +532,8 @@ namespace C5.intervals
             // Sort the intervals if necessary
             if (!isSorted)
             {
-                // TODO: It should be enough to sort them on low endpoint!
                 var sortedIntervals = intervals as I[] ?? intervals.ToArray();
-                Sorting.InsertionSort(sortedIntervals, 0, sortedIntervals.Length, CreateComparer<I, T>());
+                Sorting.IntroSort(sortedIntervals, 0, sortedIntervals.Length, CreateLowComparer<I, T>());
                 intervals = sortedIntervals;
             }
 
@@ -565,9 +571,11 @@ namespace C5.intervals
         {
             Contract.Requires(intervals != null);
             // Intervals must be sorted
-            Contract.Requires(!isSorted || intervals.IsSorted(IntervalExtensions.CreateComparer<IInterval<T>, T>()));
+            // TODO: Figure out why this doesn't work without extra method
+            Contract.Requires(intervals.IsSortedIfClaimed<IInterval<T>, T>(isSorted));
+
             // The gaps don't overlap the collection and they are within the span
-            Contract.Ensures(span == null || Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => span.Overlaps(x)));
+            Contract.Ensures(span == null || Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), span.Contains));
             Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => !x.OverlapsAny(intervals)));
             // Each gap will be met by an interval in the collection
             Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => span != null && x.CompareLow(span) == 0 || intervals.Any(y => x.Low.CompareTo(y.High) == 0 && x.LowIncluded != y.HighIncluded)));
@@ -577,10 +585,9 @@ namespace C5.intervals
             // Sort the intervals if necessary
             if (!isSorted)
             {
-                // TODO: It should be enough to sort them on low endpoint!
-                var list = new List<IInterval<T>>(intervals);
-                list.Sort(CreateComparer<IInterval<T>, T>());
-                intervals = list;
+                var sortedIntervals = intervals as IInterval<T>[] ?? intervals.ToArray();
+                Sorting.IntroSort(sortedIntervals, 0, sortedIntervals.Length, CreateLowComparer<IInterval<T>, T>());
+                intervals = sortedIntervals;
             }
 
             Contract.Assert(intervals.IsSorted<IInterval<T>, T>());
@@ -638,7 +645,7 @@ namespace C5.intervals
             if (!isSorted)
             {
                 var sortedIntervals = intervals as I[] ?? intervals.ToArray();
-                Sorting.InsertionSort(sortedIntervals, 0, sortedIntervals.Length, CreateComparer<I, T>());
+                Sorting.IntroSort(sortedIntervals, 0, sortedIntervals.Length, CreateLowComparer<I, T>());
                 intervals = sortedIntervals;
             }
 
@@ -692,6 +699,13 @@ namespace C5.intervals
             where T : IComparable<T>
         {
             return collection.IsSorted(IntervalExtensions.CreateComparer<I, T>());
+        }
+
+        public static bool IsSortedIfClaimed<I, T>(this IEnumerable<I> collection, bool isSorted)
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            return !isSorted || collection.IsSorted(IntervalExtensions.CreateComparer<I, T>());
         }
 
         /// <summary>
