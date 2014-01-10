@@ -289,6 +289,14 @@ namespace C5.intervals
             return new IntervalBase<T>(low, high);
         }
 
+        /*public static IInterval<T> Subtract<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            // TODO
+            return null;
+        }*/
+
         public static IInterval<T> Gap<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             Contract.Requires(x != null);
