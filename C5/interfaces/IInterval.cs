@@ -48,7 +48,7 @@ namespace C5
         }
 
         [ContractClassFor(typeof(IInterval<>))]
-        abstract class IntervalContract<T> : IInterval<T> where T : IComparable<T>
+        internal abstract class IntervalContract<T> : IInterval<T> where T : IComparable<T>
         {
             public T Low
             {
