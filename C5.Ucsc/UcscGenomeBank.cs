@@ -5,7 +5,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Text;
 using System.Linq;
-using C5.intervals;
+using C5.Intervals;
 using Microsoft.VisualBasic.FileIO;
 
 namespace C5.Ucsc

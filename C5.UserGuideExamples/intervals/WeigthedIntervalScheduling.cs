@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using C5.intervals;
+using C5.Intervals;
 
-namespace C5.UserGuideExamples.intervals
+namespace C5.UserGuideExamples.Intervals
 {
     /// <summary>
-    /// The example shows how to use the extension methods from <see cref="C5.intervals"/> to solve
+    /// The example shows how to use the extension methods from <see cref="C5.Intervals"/> to solve
     /// the dynamic programming problem of finding the biggest set of non-overlapping intervals with the
     /// highest weight sum.
     /// </summary>

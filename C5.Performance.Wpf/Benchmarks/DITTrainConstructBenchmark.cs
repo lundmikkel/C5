@@ -1,5 +1,5 @@
-﻿using C5.intervals;
-using C5.UserGuideExamples.intervals;
+﻿using C5.Intervals;
+using C5.UserGuideExamples.Intervals;
 
 namespace C5.Performance.Wpf.Benchmarks
 {
@@ -19,7 +19,7 @@ namespace C5.Performance.Wpf.Benchmarks
         {
             // Get the number of trains from the csv file matching the collectionsize
             _trains = TrainUtilities.GetTrains(CollectionSize);
-            
+
             Sorting.IntroSort(_trains, 0, CollectionSize, IntervalExtensions.CreateComparer<Trains.TrainRide, double>());
 
             /*
@@ -30,7 +30,7 @@ namespace C5.Performance.Wpf.Benchmarks
 
         public override void Setup()
         {
-//            _trains.Shuffle();
+            //            _trains.Shuffle();
         }
 
         public override double Call(int i)

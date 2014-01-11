@@ -4,7 +4,7 @@
     {
         public static void Main(string[] args)
         {
-            var test = new Tests.intervals.IntervalBinarySearchTree.RandomRemove();
+            var test = new Intervals.Tests.IntervalBinarySearchTree.RandomRemove();
             test.SetUp();
             test.AddAndRemove();
         }

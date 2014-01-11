@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using C5.Performance.Wpf.Benchmarks;
-using C5.Tests.intervals;
-using C5.intervals;
+using C5.Intervals.Tests;
+using C5.Intervals;
 
 namespace C5.Performance.Wpf.Report_Benchmarks
 {

@@ -54,6 +54,14 @@
     <Folder Include="Data\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\C5.Intervals.Tests\C5.Intervals.Tests.csproj">
+      <Project>{fce2de54-8506-43bf-aa94-07706b08a527}</Project>
+      <Name>C5.Intervals.Tests</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\C5.Intervals\C5.Intervals.csproj">
+      <Project>{6c61dd88-12ec-4a7d-907c-56a8fd72edb2}</Project>
+      <Name>C5.Intervals</Name>
+    </ProjectReference>
     <ProjectReference Include="..\C5\C5.csproj">
       <Project>{D02E0664-C56C-4C3F-98E5-C8EC881A8439}</Project>
       <Name>C5</Name>

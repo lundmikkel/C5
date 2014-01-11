@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using C5.intervals;
+using C5.Intervals;
 
-namespace C5.UserGuideExamples.intervals
+namespace C5.UserGuideExamples.Intervals
 {
     public class FeedReader
     {

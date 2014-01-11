@@ -2,10 +2,10 @@
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
+using C5.Intervals;
+using C5.Intervals.Tests;
 using C5.Performance.Wpf.Benchmarks;
 using C5.Performance.Wpf.Report_Benchmarks;
-using C5.Tests.intervals;
-using C5.intervals;
 using Microsoft.Win32;
 
 namespace C5.Performance.Wpf

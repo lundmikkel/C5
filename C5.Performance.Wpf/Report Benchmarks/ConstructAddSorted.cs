@@ -1,5 +1,5 @@
 ﻿using System;
-using C5.intervals;
+using C5.Intervals;
 using C5.Performance.Wpf.Benchmarks;
 
 namespace C5.Performance.Wpf.Report_Benchmarks

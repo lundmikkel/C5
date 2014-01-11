@@ -1,6 +1,6 @@
 ﻿using System.Linq;
-using C5.intervals;
-using C5.UserGuideExamples.intervals;
+using C5.Intervals;
+using C5.UserGuideExamples.Intervals;
 
 namespace C5.Performance.Wpf.Benchmarks
 {
@@ -21,7 +21,7 @@ namespace C5.Performance.Wpf.Benchmarks
             return _intervalTrains.Remove(_trainsNotInCollection[(trainId - CollectionSize)]) ? 1 : 0;
         }
 
-        
+
 
         public override void CollectionSetup()
         {

@@ -132,6 +132,10 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\C5.Intervals\C5.Intervals.csproj">
+      <Project>{6c61dd88-12ec-4a7d-907c-56a8fd72edb2}</Project>
+      <Name>C5.Intervals</Name>
+    </ProjectReference>
     <ProjectReference Include="..\C5\C5.csproj">
       <Project>{D02E0664-C56C-4C3F-98E5-C8EC881A8439}</Project>
       <Name>C5</Name>

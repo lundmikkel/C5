@@ -1,4 +1,4 @@
-﻿using C5.intervals;
+﻿using C5.Intervals;
 
 namespace C5.Performance.Wpf.Benchmarks
 {
@@ -9,7 +9,7 @@ namespace C5.Performance.Wpf.Benchmarks
 
         public override void CollectionSetup()
         {
-            _intervals = Tests.intervals.BenchmarkTestCases.DataSetC(CollectionSize);
+            _intervals = Intervals.Tests.BenchmarkTestCases.DataSetC(CollectionSize);
             _collection = new IntervalBinarySearchTree<IInterval<int>, int>();
             ItemsArray = SearchAndSort.FillIntArray(CollectionSize);
             SearchAndSort.Shuffle(ItemsArray);

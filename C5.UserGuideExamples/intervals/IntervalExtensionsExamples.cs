@@ -1,7 +1,7 @@
 ﻿using System;
-using C5.intervals;
+using C5.Intervals;
 
-namespace C5.UserGuideExamples.intervals
+namespace C5.UserGuideExamples.Intervals
 {
     public class IntervalExtensionsExamples
     {

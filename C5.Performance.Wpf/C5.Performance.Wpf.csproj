@@ -232,6 +232,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\C5.Intervals.Tests\C5.Intervals.Tests.csproj">
+      <Project>{FCE2DE54-8506-43BF-AA94-07706B08A527}</Project>
+      <Name>C5.Intervals.Tests</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\C5.Intervals\C5.Intervals.csproj">
+      <Project>{6C61DD88-12EC-4A7D-907C-56A8FD72EDB2}</Project>
+      <Name>C5.Intervals</Name>
+    </ProjectReference>
     <ProjectReference Include="..\C5.Tests\C5.Tests.csproj">
       <Project>{08cbfdeb-a2e2-4f0e-a4e1-b996b05569de}</Project>
       <Name>C5.Tests</Name>

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
-using C5.intervals;
+using C5.Intervals;
 using Microsoft.VisualBasic.FileIO;
 
-namespace C5.UserGuideExamples.intervals
+namespace C5.UserGuideExamples.Intervals
 {
     public class Trains
     {
