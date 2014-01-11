@@ -115,6 +115,13 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>C5.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'CodeAnalysis'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\CodeAnalysis\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="arrays\CircularQueueTest.cs" />
     <Compile Include="BasesTest.cs">

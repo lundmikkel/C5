@@ -490,7 +490,7 @@ namespace C5.Intervals
             }
         }
 
-        private class Node : IComparable<Node>
+        private sealed class Node : IComparable<Node>
         {
             private bool _delete;
 
@@ -1045,7 +1045,7 @@ namespace C5.Intervals
         /// <param name="allowReferenceDuplicates">Set how reference duplicates should be handled.</param>
         public DynamicIntervalTree(bool allowReferenceDuplicates = false)
         {
-            // Set reference duplicate behaviour
+            // Set reference duplicate behavior
             AllowsReferenceDuplicates = allowReferenceDuplicates;
         }
 
@@ -1057,10 +1057,10 @@ namespace C5.Intervals
         {
             Contract.Requires(intervals != null);
 
-            // Set reference duplicate behaviour
+            // Set reference duplicate behavior
             AllowsReferenceDuplicates = false;
 
-            // TODO: Prebuild the tree structure
+            // TODO: Pre-build the tree structure
 
             // Insert all intervals
             foreach (var interval in intervals)

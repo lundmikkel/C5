@@ -611,12 +611,20 @@ namespace C5.Intervals
         [Pure]
         public static bool MetByAny<T>(IInterval<T> interval, IEnumerable<IInterval<T>> intervals) where T : IComparable<T>
         {
+            Contract.Requires(interval != null);
+            Contract.Requires(intervals != null);
+            Contract.Requires(Contract.ForAll(intervals, x => x != null));
+
             return intervals.Any(y => y.High.CompareTo(interval.Low) == 0 && y.HighIncluded != interval.LowIncluded);
         }
 
         [Pure]
         public static bool MeetsAny<T>(IInterval<T> interval, IEnumerable<IInterval<T>> intervals) where T : IComparable<T>
         {
+            Contract.Requires(interval != null);
+            Contract.Requires(intervals != null);
+            Contract.Requires(Contract.ForAll(intervals, x => x != null));
+
             return intervals.Any(y => interval.High.CompareTo(y.Low) == 0 && interval.HighIncluded != y.LowIncluded);
         }
 

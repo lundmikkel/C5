@@ -107,7 +107,7 @@ namespace C5.Intervals
 
         #region Inner Classes
 
-        class Node : IComparable<Node>
+        private sealed class Node : IComparable<Node>
         {
             #region Fields
 
@@ -127,12 +127,25 @@ namespace C5.Intervals
 
             #endregion
 
+            #region
+
+            [ContractInvariantMethod]
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+            private void invariant()
+            {
+                Contract.Invariant(Previous != null);
+                Contract.Invariant(Next != null);
+            }
+
+            #endregion
+
             #region Constructor
 
             public Node(I key, Node previous)
             {
                 Contract.Requires(key != null);
                 Contract.Requires(previous != null);
+                Contract.Requires(previous.Next != null);
                 Contract.Ensures(key != null);
                 Contract.Ensures(Next != null && Previous != null);
 
@@ -151,6 +164,8 @@ namespace C5.Intervals
 
             private void insertAfter(Node previous)
             {
+                Contract.Requires(previous != null);
+                Contract.Requires(previous.Next != null);
                 Contract.Ensures(ReferenceEquals(Contract.OldValue(previous.Next), previous.Next.Next));
                 Contract.Ensures(ReferenceEquals(previous.Next, this));
                 Contract.Ensures(ReferenceEquals(this.Previous, previous));
@@ -168,6 +183,7 @@ namespace C5.Intervals
 
             public void Remove()
             {
+
                 Previous.Next = Next;
                 Next.Previous = Previous;
             }
@@ -387,6 +403,11 @@ namespace C5.Intervals
         /// </summary>
         public DoublyLinkedFiniteIntervalTree()
         {
+            Contract.Ensures(_first != null);
+            Contract.Ensures(_last != null);
+            Contract.Ensures(ReferenceEquals(_first.Next, _last));
+            Contract.Ensures(ReferenceEquals(_last.Previous, _first));
+
             _first = new Node();
             _last = new Node();
 

@@ -395,7 +395,7 @@ namespace C5.Intervals
 
         #region Inner Classes
 
-        class Node : IComparable<Node>
+        private sealed class Node : IComparable<Node>
         {
             #region Code Contracts
 

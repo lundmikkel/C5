@@ -30,7 +30,7 @@ namespace C5.Intervals
 
         #region Inner classes
 
-        class Node
+        private sealed class Node
         {
             #region Fields
 
