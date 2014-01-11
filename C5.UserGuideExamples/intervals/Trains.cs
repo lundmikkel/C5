@@ -37,7 +37,6 @@ namespace C5.UserGuideExamples.Intervals
             {
                 // Skip first line with header
                 var parts = parser.ReadFields();
-                var i = 0;
                 while ((parts = parser.ReadFields()) != null)
                 {
                     var resource = Int32.Parse(parts[0]) - 1;

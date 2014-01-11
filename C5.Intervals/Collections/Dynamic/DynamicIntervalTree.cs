@@ -321,7 +321,7 @@ namespace C5.Intervals
                 Contract.Requires(interval != null);
 
                 // The dictionary contains a key equal to the interval
-                Contract.Ensures(_dictionary.Contains(interval));
+                Contract.Ensures(Enumerable.Contains(_dictionary.Keys, interval));
                 // The dictionary contains the interval
                 Contract.Ensures(Contract.Exists(_dictionary, keyValuePair => ReferenceEquals(keyValuePair.Key, interval) || keyValuePair.Value != null && Contract.Exists(keyValuePair.Value, x => ReferenceEquals(x, interval))));
                 // If the interval is added the count goes up by one
@@ -329,7 +329,7 @@ namespace C5.Intervals
                 // If the interval is not added the count stays the same
                 Contract.Ensures(Contract.Result<bool>() || count == Contract.OldValue(count));
                 // If the list didn't contain an interval with the same high, then the sublist is null
-                Contract.Ensures(Contract.OldValue(_dictionary.Contains(interval)) || _dictionary[interval] == null);
+                Contract.Ensures(Contract.OldValue(Enumerable.Contains(_dictionary.Keys, interval)) || _dictionary[interval] == null);
 
                 var key = interval;
                 HashBag<I> list;
@@ -1171,7 +1171,7 @@ namespace C5.Intervals
         {
             get
             {
-                Contract.Ensures(Contract.Result<IEnumerable<I>>().IsSorted(IntervalExtensions.CreateComparer<I, T>()));
+                Contract.Ensures(Contract.Result<IEnumerable<I>>().IsSorted<I, T>());
 
                 foreach (var node in sortedNodes(_root))
                 {

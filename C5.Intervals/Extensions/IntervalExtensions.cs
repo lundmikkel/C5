@@ -46,6 +46,7 @@ namespace C5.Intervals
         }
 
         // TODO: Document
+        [Pure]
         public static bool OverlapsAny<I, T>(this IInterval<T> interval, IEnumerable<I> intervals)
             where I : IInterval<T>
             where T : IComparable<T>
@@ -533,7 +534,7 @@ namespace C5.Intervals
             where T : IComparable<T>
         {
             Contract.Requires(intervals != null);
-            Contract.Requires(!isSorted || intervals.IsSorted(IntervalExtensions.CreateComparer<I, T>()));
+            Contract.Requires(!isSorted || intervals.IsSorted<I, T>());
             Contract.Ensures(Contract.Result<int>() >= 0);
             Contract.Ensures(Contract.Result<int>() == 0 || IntervalCollectionContractHelper.CountOverlaps(((IEnumerable<IInterval<T>>) intervals), Contract.ValueAtReturn(out intervalOfMaximumDepth)) == Contract.Result<int>());
 
@@ -647,7 +648,7 @@ namespace C5.Intervals
         {
             Contract.Requires(intervals != null);
             // Intervals must be sorted
-            Contract.Requires(!isSorted || intervals.IsSorted(IntervalExtensions.CreateComparer<I, T>()));
+            Contract.Requires(!isSorted || intervals.IsSorted<I, T>());
 
             // Sort the intervals if necessary
             if (!isSorted)
@@ -702,6 +703,7 @@ namespace C5.Intervals
             while (enumerator.MoveNext()) yield return enumerator.Current;
         }
 
+        [Pure]
         public static bool IsSorted<I, T>(this IEnumerable<I> collection)
             where I : IInterval<T>
             where T : IComparable<T>
@@ -709,6 +711,7 @@ namespace C5.Intervals
             return collection.IsSorted(IntervalExtensions.CreateComparer<I, T>());
         }
 
+        [Pure]
         public static bool IsSortedIfClaimed<I, T>(this IEnumerable<I> collection, bool isSorted)
             where I : IInterval<T>
             where T : IComparable<T>

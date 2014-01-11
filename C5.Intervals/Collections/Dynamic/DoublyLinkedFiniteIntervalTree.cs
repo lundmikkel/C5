@@ -45,11 +45,11 @@ namespace C5.Intervals
             Contract.Invariant(_last.Key == null && _last.Next == null && _last.Right == null && _last.Left == null && _last.Balance == 0);
 
             // Check enumerator is sorted
-            Contract.Invariant(this.IsSorted(ComparerFactory<I>.CreateComparer((x, y) => x.CompareTo(y))));
+            Contract.Invariant(this.IsSorted<I, T>());
 
             // Check that doubly linked lists are sorted in both direction
             Contract.Invariant(nextNodes(_first.Next).IsSorted());
-            Contract.Invariant(previousNodes(_last.Previous).IsSorted(ComparerFactory<Node>.CreateComparer((x, y) => y.CompareTo(x))));
+            Contract.Invariant(previousNodes(_last.Previous).IsSorted());
 
             // Check in-order traversal is sorted
             Contract.Invariant(contractHelperInOrderNodes(_root).IsSorted());
@@ -457,11 +457,13 @@ namespace C5.Intervals
         /// <summary>
         /// Get the intervals in reverse order sorted in descending endpoint order.
         /// </summary>
+        [Pure]
         public IEnumerable<I> Reverse
         {
             get { return previousNodes(_last.Previous).Select(node => node.Key); }
         }
 
+        [Pure]
         private IEnumerable<Node> nextNodes(Node node)
         {
             Contract.Requires(!ReferenceEquals(node, _first));
@@ -474,6 +476,7 @@ namespace C5.Intervals
             }
         }
 
+        [Pure]
         private IEnumerable<Node> previousNodes(Node node)
         {
             Contract.Requires(!ReferenceEquals(node, _last));

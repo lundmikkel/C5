@@ -59,14 +59,6 @@ namespace C5.UserGuideExamples.Intervals
             {
             }
 
-            public double Low { get; private set; }
-            public double High { get; private set; }
-            public bool LowIncluded { get { return false; } }
-            public bool HighIncluded { get { return false; } }
-
-            public int Track { get; private set; }
-            public int Train { get; private set; }
-
             public override string ToString()
             {
                 return this.ToIntervalString();

@@ -147,6 +147,7 @@ namespace C5.Intervals
         }
 
         // TODO: Optimize to check for just the specified relation
+        [Pure]
         public static bool IsAfter<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             Contract.Requires(x != null);
@@ -156,6 +157,8 @@ namespace C5.Intervals
             var compare = y.High.CompareTo(x.Low);
             return compare < 0 || compare == 0 && !y.HighIncluded && !x.LowIncluded;
         }
+
+        [Pure]
         public static bool IsMetBy<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             Contract.Requires(x != null);
@@ -164,6 +167,8 @@ namespace C5.Intervals
 
             return y.High.CompareTo(x.Low) == 0 && y.HighIncluded != x.LowIncluded;
         }
+
+        [Pure]
         public static bool IsOverlappedBy<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             Contract.Requires(x != null);
@@ -172,6 +177,8 @@ namespace C5.Intervals
 
             return x.RelateTo(y) == IntervalRelation.OverlappedBy;
         }
+
+        [Pure]
         public static bool IsFinishing<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             Contract.Requires(x != null);
@@ -181,6 +188,7 @@ namespace C5.Intervals
             return x.RelateTo(y) == IntervalRelation.Finishes;
         }
 
+        [Pure]
         public static bool IsDuring<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             Contract.Requires(x != null);
@@ -189,6 +197,8 @@ namespace C5.Intervals
 
             return x.RelateTo(y) == IntervalRelation.During;
         }
+
+        [Pure]
         public static bool IsStartedBy<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             Contract.Requires(x != null);
@@ -198,6 +208,7 @@ namespace C5.Intervals
             return x.RelateTo(y) == IntervalRelation.StartedBy;
         }
 
+        [Pure]
         public static bool IsEqualTo<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             Contract.Requires(x != null);
@@ -207,6 +218,7 @@ namespace C5.Intervals
             return x.IntervalEquals(y);
         }
 
+        [Pure]
         public static bool IsStarting<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             Contract.Requires(x != null);
@@ -215,6 +227,8 @@ namespace C5.Intervals
 
             return x.RelateTo(y) == IntervalRelation.Starts;
         }
+
+        [Pure]
         public static bool IsContaining<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             Contract.Requires(x != null);
@@ -224,6 +238,7 @@ namespace C5.Intervals
             return x.RelateTo(y) == IntervalRelation.Contains;
         }
 
+        [Pure]
         public static bool IsFinishedBy<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             Contract.Requires(x != null);
@@ -233,6 +248,7 @@ namespace C5.Intervals
             return x.RelateTo(y) == IntervalRelation.FinishedBy;
         }
 
+        [Pure]
         public static bool IsOverlapping<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             Contract.Requires(x != null);
@@ -242,6 +258,7 @@ namespace C5.Intervals
             return x.RelateTo(y) == IntervalRelation.Overlaps;
         }
 
+        [Pure]
         public static bool IsMeeting<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             Contract.Requires(x != null);
@@ -251,6 +268,7 @@ namespace C5.Intervals
             return x.High.CompareTo(y.Low) == 0 && x.HighIncluded != y.LowIncluded;
         }
 
+        [Pure]
         public static bool IsBefore<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
         {
             Contract.Requires(x != null);

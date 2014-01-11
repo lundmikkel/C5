@@ -267,7 +267,7 @@ namespace C5.Intervals
                 Contract.Ensures(IsEmpty != Contract.Result<IEnumerable<I>>().Any());
 
                 // The intervals are sorted
-                Contract.Ensures(Contract.Result<IEnumerable<I>>().IsSorted(IntervalExtensions.CreateComparer<I, T>()));
+                Contract.Ensures(Contract.Result<IEnumerable<I>>().IsSorted<I, T>());
                 // The enumerator is equal to the normal enumerator
                 Contract.Ensures(IntervalCollectionContractHelper.CollectionEquals(this, Contract.Result<IEnumerable<I>>()));
 
@@ -392,7 +392,7 @@ namespace C5.Intervals
                 // Each gap meets an interval in the collection
                 Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => IntervalCollectionContractHelper.MeetsAny(x, this.Cast<IInterval<T>>())));
                 // Gaps are sorted
-                Contract.Ensures(Contract.Result<IEnumerable<IInterval<T>>>().IsSorted(IntervalExtensions.CreateComparer<IInterval<T>, T>()));
+                Contract.Ensures(Contract.Result<IEnumerable<IInterval<T>>>().IsSorted<IInterval<T>, T>());
                 // Gaps do not overlap
                 Contract.Ensures(Contract.Result<IEnumerable<IInterval<T>>>().ForAllConsecutiveElements((x, y) => !x.Overlaps(y)));
 
@@ -415,7 +415,7 @@ namespace C5.Intervals
             // Each gap meets an interval in the collection
             Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), x => x.CompareHigh(query) == 0 || IntervalCollectionContractHelper.MeetsAny(x, this.Cast<IInterval<T>>())));
             // Gaps are sorted
-            Contract.Ensures(Contract.Result<IEnumerable<IInterval<T>>>().IsSorted(IntervalExtensions.CreateComparer<IInterval<T>, T>()));
+            Contract.Ensures(Contract.Result<IEnumerable<IInterval<T>>>().IsSorted<IInterval<T>, T>());
             // Gaps do not overlap
             Contract.Ensures(Contract.Result<IEnumerable<IInterval<T>>>().ForAllConsecutiveElements((x, y) => !x.Overlaps(y)));
 
@@ -486,7 +486,7 @@ namespace C5.Intervals
             // Throws exception if it is read only
             Contract.EnsuresOnThrow<ReadOnlyCollectionException>(IsReadOnly);
 
-            Contract.Ensures(IntervalCollectionContractHelper.ConfirmAddAll<I, T>(Contract.OldValue(this.ToArray()), this.ToArray(), intervals, AllowsReferenceDuplicates));
+            Contract.Ensures(IntervalCollectionContractHelper.ConfirmAddAll<I, T>(Contract.OldValue(Enumerable.ToArray(this)), Enumerable.ToArray(this), intervals, AllowsReferenceDuplicates));
 
             // The collection contains all intervals
             Contract.Ensures(Contract.ForAll(intervals, x => Contract.Exists(this, y => ReferenceEquals(x, y))));
@@ -575,6 +575,7 @@ namespace C5.Intervals
 
     internal static class IntervalCollectionContractHelper
     {
+        [Pure]
         public static bool CollectionEquals<I>(IEnumerable<I> expected, IEnumerable<I> actual)
         {
             // Copy to list
@@ -607,16 +608,19 @@ namespace C5.Intervals
             return intervals.Count(x => x.Overlaps(query));
         }
 
+        [Pure]
         public static bool MetByAny<T>(IInterval<T> interval, IEnumerable<IInterval<T>> intervals) where T : IComparable<T>
         {
             return intervals.Any(y => y.High.CompareTo(interval.Low) == 0 && y.HighIncluded != interval.LowIncluded);
         }
 
+        [Pure]
         public static bool MeetsAny<T>(IInterval<T> interval, IEnumerable<IInterval<T>> intervals) where T : IComparable<T>
         {
             return intervals.Any(y => interval.High.CompareTo(y.Low) == 0 && interval.HighIncluded != y.LowIncluded);
         }
 
+        [Pure]
         public static bool ConfirmAddAll<I, T>(I[] oldCollection, I[] newCollection, IEnumerable<I> intervalsAdded, bool allowsReferenceDuplicates)
             where I : IInterval<T>
             where T : IComparable<T>

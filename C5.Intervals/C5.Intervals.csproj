@@ -131,6 +131,9 @@
   <ItemGroup>
     <None Include="README.md" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Code contracts\" />
+  </ItemGroup>
   <Choose>
     <When Condition=" '$(Configuration)'=='DEBUG' ">
       <ItemGroup>
@@ -138,7 +141,7 @@
           <HintPath>..\packages\QuickGraph.3.6.61114.0\QuickGraph.dll</HintPath>
         </Reference>
         <Reference Include="QuickGraph.Graphviz">
-          <HintPath>..\packages\QuickGraph.3.6.61114.0\QuickGraph.Graphviz.dll</HintPath>  
+          <HintPath>..\packages\QuickGraph.3.6.61114.0\QuickGraph.Graphviz.dll</HintPath>
         </Reference>
       </ItemGroup>
     </When>

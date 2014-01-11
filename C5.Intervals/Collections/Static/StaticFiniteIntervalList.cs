@@ -23,7 +23,7 @@ namespace C5.Intervals
         private void invariant()
         {
             // Each layer is sorted
-            Contract.Invariant(IsEmpty || this.IsSorted(IntervalExtensions.CreateComparer<I, T>()));
+            Contract.Invariant(IsEmpty || this.IsSorted<I, T>());
         }
 
         #endregion
