@@ -904,6 +904,8 @@ namespace C5.intervals
 
 #if DEBUG
 
+        // TODO: Only add QuickGraph assembly in debug mode: http://stackoverflow.com/questions/7659460/how-to-add-assembly-references-on-a-per-configuration-basis
+
         /// <summary>
         /// Get a string representation of the tree in GraphViz dot format using QuickGraph.
         /// </summary>
