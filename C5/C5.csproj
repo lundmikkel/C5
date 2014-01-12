@@ -20,7 +20,6 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>4.0</OldToolsVersion>
-    <CodeContractsAssemblyMode>0</CodeContractsAssemblyMode>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -145,7 +144,6 @@
     <Compile Include="arrays\CircularQueue.cs" />
     <Compile Include="arrays\HashedArrayList.cs" />
     <Compile Include="arrays\SortedArray.cs" />
-    <Compile Include="CodeDiggerTest.cs" />
     <Compile Include="Collections.cs" />
     <Compile Include="comparers\InternalComparer.cs" />
     <Compile Include="comparers\ComparerFactory.cs" />
@@ -181,7 +179,6 @@
   <ItemGroup>
     <None Include="C5.snk" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
