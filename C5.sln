@@ -26,19 +26,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.Performance.Wpf", "C5.Performance.Wpf\C5.Performance.Wpf.csproj", "{2FDF20F0-55AF-4A44-90ED-E658ADD5D500}"
-	ProjectSection(ProjectDependencies) = postProject
-		{651F7788-6152-4DCB-9588-44552DCD48E2} = {651F7788-6152-4DCB-9588-44552DCD48E2}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.Ucsc", "C5.Ucsc\C5.Ucsc.csproj", "{2B89EBFA-7CBC-46B3-943F-10209C906294}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.Profiling", "C5.Profiling\C5.Profiling.csproj", "{F679133B-2AD9-44F0-9462-7825A4121F1C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.UserGuideExampleRunner", "C5.UserGuideExampleRunner\C5.UserGuideExampleRunner.csproj", "{651F7788-6152-4DCB-9588-44552DCD48E2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.IntervalHotSpots", "C5.IntervalHotSpots\C5.IntervalHotSpots.csproj", "{FF3DEB1E-D19F-49B4-A73D-CA8544F9B113}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.Intervals", "C5.Intervals\C5.Intervals.csproj", "{6C61DD88-12EC-4A7D-907C-56A8FD72EDB2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.Intervals.Tests", "C5.Intervals.Tests\C5.Intervals.Tests.csproj", "{FCE2DE54-8506-43BF-AA94-07706B08A527}"
@@ -67,31 +54,6 @@ Global
 		{B2A29FF2-A5C5-4F07-8CE7-FF5D744D7562}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2A29FF2-A5C5-4F07-8CE7-FF5D744D7562}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2A29FF2-A5C5-4F07-8CE7-FF5D744D7562}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2FDF20F0-55AF-4A44-90ED-E658ADD5D500}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
-		{2FDF20F0-55AF-4A44-90ED-E658ADD5D500}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2FDF20F0-55AF-4A44-90ED-E658ADD5D500}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2FDF20F0-55AF-4A44-90ED-E658ADD5D500}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2FDF20F0-55AF-4A44-90ED-E658ADD5D500}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2B89EBFA-7CBC-46B3-943F-10209C906294}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
-		{2B89EBFA-7CBC-46B3-943F-10209C906294}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2B89EBFA-7CBC-46B3-943F-10209C906294}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2B89EBFA-7CBC-46B3-943F-10209C906294}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2B89EBFA-7CBC-46B3-943F-10209C906294}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F679133B-2AD9-44F0-9462-7825A4121F1C}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
-		{F679133B-2AD9-44F0-9462-7825A4121F1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F679133B-2AD9-44F0-9462-7825A4121F1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F679133B-2AD9-44F0-9462-7825A4121F1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F679133B-2AD9-44F0-9462-7825A4121F1C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{651F7788-6152-4DCB-9588-44552DCD48E2}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
-		{651F7788-6152-4DCB-9588-44552DCD48E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{651F7788-6152-4DCB-9588-44552DCD48E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{651F7788-6152-4DCB-9588-44552DCD48E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{651F7788-6152-4DCB-9588-44552DCD48E2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FF3DEB1E-D19F-49B4-A73D-CA8544F9B113}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
-		{FF3DEB1E-D19F-49B4-A73D-CA8544F9B113}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FF3DEB1E-D19F-49B4-A73D-CA8544F9B113}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FF3DEB1E-D19F-49B4-A73D-CA8544F9B113}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FF3DEB1E-D19F-49B4-A73D-CA8544F9B113}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6C61DD88-12EC-4A7D-907C-56A8FD72EDB2}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
 		{6C61DD88-12EC-4A7D-907C-56A8FD72EDB2}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
 		{6C61DD88-12EC-4A7D-907C-56A8FD72EDB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
