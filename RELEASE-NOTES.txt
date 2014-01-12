@@ -1,6 +1,10 @@
 RELEASE NOTES FOR C5 GENERIC COLLECTION LIBRARY FOR C#/CLI
 ------------------------------
 
+Release 2.2.5073.27396 of 2013-11-21
+
+ * Update to PCL profile in NuGet package
+
 Release 2.2.4822.42600 of 2013-03-15
 
  * Mono support is now built-in as Mono 3.0.6 and Xamarin Studio supports portable libraries.

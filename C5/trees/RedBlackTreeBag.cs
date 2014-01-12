@@ -671,6 +671,9 @@ namespace C5
                         path[level] = null;
                     }
 
+                    // bug20120422: the root was never updated because this was missing:
+                    root = cursor; 
+
                     return !update;
 
                 }
@@ -4034,4 +4037,3 @@ namespace C5
         #endregion
     }
 }
-

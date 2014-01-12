@@ -4,9 +4,9 @@ The C5 library is a set of generic collection classes (or container classes)
 for the C# programming language and other generics-enabled languages on
 version 4.0 of the CLI platform, as implemented by Microsoft .NET and Mono.
 
-The C5 library provides a wide range of classic data
-structures, rich funcionality, the best possible asumptotic time complexity,
-documented performance, and a thoroughly tested implementation.
+The C5 library provides a wide range of classic data structures, rich
+funcionality, the best possible asymptotic time complexity, documented
+performance, and a thoroughly tested implementation.
 
 == Why this fork? C5 Intervals, that's why!
 
@@ -83,9 +83,7 @@ The C5 implementation was originally built on .NET 2.0 and has only recently bee
 upgraded to .NET 4.0. It does not (yet) use a great number of the new features 
 introduced with C# 3 and 4, notably LINQ and covariant and contravariant type parameters.
 
-C5 builds and runs on the latest versions of Mono.
-
-C5 is a portable library supporting .NET 4.0, Silverlight, Windows Phone 7, and Xbox 360.
+C5 is a portable library supporting .NET 4.0, Silverlight, Windows Phone 8, and Mono.
 
 == Getting Started
 
@@ -102,7 +100,10 @@ C5 is a portable library supporting .NET 4.0, Silverlight, Windows Phone 7, and 
 4. Building the unit test project requires NUnit. If you have NuGet installed it 
    should automatically add the reference.
    
-   There are more than 1400 NUnit test cases which should execute in less
+   To run the tests, start NUnit, open project C5/C5.Tests/bin/Debug/C5.Tests.dll, 
+   press Run.
+
+   There are more than 1430 NUnit test cases which should execute in less
    than 30 seconds. All should pass.
    
 == C5 on Mono
