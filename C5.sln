@@ -14,18 +14,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.Tests", "C5.Tests\C5.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.UserGuideExamples", "C5.UserGuideExamples\C5.UserGuideExamples.csproj", "{B2A29FF2-A5C5-4F07-8CE7-FF5D744D7562}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{97B9443C-0872-416D-A45A-D9540AC9D9BD}"
-	ProjectSection(SolutionItems) = preProject
-		C5.vsmdi = C5.vsmdi
-		Local.testsettings = Local.testsettings
-		Performance1.psess = Performance1.psess
-		Performance2.psess = Performance2.psess
-		Performance3.psess = Performance3.psess
-		Performance4.psess = Performance4.psess
-		Performance5.psess = Performance5.psess
-		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.Intervals", "C5.Intervals\C5.Intervals.csproj", "{6C61DD88-12EC-4A7D-907C-56A8FD72EDB2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C5.Intervals.Tests", "C5.Intervals.Tests\C5.Intervals.Tests.csproj", "{FCE2DE54-8506-43BF-AA94-07706B08A527}"
