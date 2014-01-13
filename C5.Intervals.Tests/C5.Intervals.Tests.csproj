@@ -63,29 +63,20 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
-    <Compile Include="old\Benchmarker.cs" />
-    <Compile Include="old\DynamicIntervalTreeTester.cs" />
-    <Compile Include="old\GenericIIntervaledTester.cs" />
-    <Compile Include="old\IntervalBinarySearchTreeTester.cs" />
-    <Compile Include="old\IntervalExtensionTester.cs" />
-    <Compile Include="old\IntervalRelationsTester.cs" />
-    <Compile Include="old\LayeredContainmentListTester.cs" />
-    <Compile Include="old\NestedContainmentList2Tester.cs" />
-    <Compile Include="old\NestedContainmentListTester.cs" />
-    <Compile Include="new\BinaryIntervalSearchTester.cs" />
-    <Compile Include="new\DoublyLinkedFiniteIntervalTreeTester.cs" />
-    <Compile Include="new\DynamicIntervalTreeTester.cs" />
-    <Compile Include="new\IntervalBinarySearchTreeOldTester.cs" />
-    <Compile Include="new\IntervalBinarySearchTreeTester.cs" />
-    <Compile Include="new\IntervalCollectionTester.cs" />
-    <Compile Include="new\LayeredContainmentListTester.cs" />
-    <Compile Include="new\StaticFiniteIntervalListTester.cs" />
-    <Compile Include="new\StaticIntervalTreeTester.cs" />
+    <Compile Include="Extensions\IntervalExtensionTester.cs" />
+    <Compile Include="Extensions\IntervalRelationsTester.cs" />
+    <Compile Include="Collections\Static\BinaryIntervalSearchTester.cs" />
+    <Compile Include="Collections\Dynamic\DoublyLinkedFiniteIntervalTreeTester.cs" />
+    <Compile Include="Collections\Dynamic\DynamicIntervalTreeTester.cs" />
+    <Compile Include="Collections\Dynamic\IntervalBinarySearchTreeOldTester.cs" />
+    <Compile Include="Collections\Dynamic\IntervalBinarySearchTreeTester.cs" />
+    <Compile Include="Collections\IntervalCollectionTester.cs" />
+    <Compile Include="Collections\Static\LayeredContainmentListTester.cs" />
+    <Compile Include="Collections\Static\StaticFiniteIntervalListTester.cs" />
+    <Compile Include="Collections\Static\StaticIntervalTreeTester.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="old\data\performance_23333.csv" />
-    <None Include="old\data\sample100.csv" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -98,6 +89,7 @@
       <Name>C5</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

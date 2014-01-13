@@ -49,7 +49,7 @@ namespace C5.Intervals
 
             // Check that doubly linked lists are sorted in both direction
             Contract.Invariant(nextNodes(_first.Next).IsSorted());
-            Contract.Invariant(previousNodes(_last.Previous).IsSorted());
+            Contract.Invariant(previousNodes(_last.Previous).Select(n => n.Key).IsSorted(IntervalExtensions.CreateReversedComparer<I, T>()));
 
             // Check in-order traversal is sorted
             Contract.Invariant(contractHelperInOrderNodes(_root).IsSorted());

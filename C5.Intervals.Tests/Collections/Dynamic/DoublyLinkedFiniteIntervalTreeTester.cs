@@ -14,7 +14,7 @@ namespace C5.Intervals.Tests
         using Interval = IntervalBase<int>;
 
         // TODO: Re-enable all black-box tests
-        /*
+
         #region Black-box
 
         class DoublyLinkedFiniteIntervalTreeTester_BlackBox : IntervalCollectionTester
@@ -36,7 +36,7 @@ namespace C5.Intervals.Tests
         }
 
         #endregion
-        */
+
 
         #region White-box
 

@@ -937,28 +937,6 @@ namespace C5.Intervals.Tests
 
             return intervals.ToArray();
         }
-
-        [Test, Ignore]
-        public void Benchmark()
-        {
-            var intervals = BenchmarkIntervals();
-            var repetitions = 100000;
-
-            var sw = new Stopwatch();
-            sw.Start();
-
-            for (int i = 0; i < repetitions; i++)
-                foreach (var x in intervals)
-                    foreach (var y in intervals)
-                        x.Equals(y);
-
-            sw.Stop();
-
-            Console.WriteLine("Time for {0}: {1} ms",
-                "IntervalEquals",
-                sw.ElapsedMilliseconds
-            );
-        }
     }
     // ReSharper restore CoVariantArrayConversion
 

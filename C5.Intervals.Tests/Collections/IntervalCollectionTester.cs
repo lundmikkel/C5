@@ -2,90 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using C5.Intervals;
 using NUnit.Framework;
 
 namespace C5.Intervals.Tests
 {
-    internal class Interval : TestInterval<int>
-    {
-        public Interval(int query)
-            : base(query)
-        {
-        }
-
-        public Interval(int low, int high, bool lowIncluded = true, bool highIncluded = false)
-            : base(low, high, lowIncluded, highIncluded)
-        {
-        }
-
-        public Interval(int low, int high, IntervalType type)
-            : base(low, high, type)
-        {
-        }
-
-        public Interval(IInterval<int> i)
-            : base(i)
-        {
-        }
-
-        public Interval(IInterval<int> low, IInterval<int> high)
-            : base(low, high)
-        {
-        }
-
-        public override string ToString()
-        {
-            return String.Format("{0}{1:#,0} : {2:#,0}{3}",
-                LowIncluded ? "[" : "(",
-                Low,
-                High,
-                HighIncluded ? "]" : ")");
-        }
-    }
-
-    internal class TestInterval<T> : IntervalBase<T> where T : IComparable<T>
-    {
-        public int Id { get; private set; }
-
-        private int randomInt()
-        {
-            var bytes = new byte[4];
-            System.Security.Cryptography.RandomNumberGenerator.Create().GetBytes(bytes);
-            return BitConverter.ToInt32(bytes, 0);
-        }
-
-        public TestInterval(T query)
-            : base(query)
-        {
-            Id = randomInt();
-        }
-
-        public TestInterval(T low, T high, bool lowIncluded = true, bool highIncluded = false)
-            : base(low, high, lowIncluded, highIncluded)
-        {
-            Id = randomInt();
-        }
-
-        public TestInterval(T low, T high, IntervalType type)
-            : base(low, high, type)
-        {
-            Id = randomInt();
-        }
-
-        public TestInterval(IInterval<T> i)
-            : base(i)
-        {
-            Id = randomInt();
-        }
-
-        public TestInterval(IInterval<T> low, IInterval<T> high)
-            : base(low, high)
-        {
-            Id = randomInt();
-        }
-    }
-
     [TestFixture]
     abstract class IntervalCollectionTester
     {
@@ -97,6 +17,89 @@ namespace C5.Intervals.Tests
          * [ ] Many intervals collection - all same interval    (DuplicateIntervals)
          * [ ] Many intervals collection                        (ManyIntervals)
          */
+
+        #region Inner Classes
+
+        internal class Interval : TestInterval<int>
+        {
+            public Interval(int query)
+                : base(query)
+            {
+            }
+
+            public Interval(int low, int high, bool lowIncluded = true, bool highIncluded = false)
+                : base(low, high, lowIncluded, highIncluded)
+            {
+            }
+
+            public Interval(int low, int high, IntervalType type)
+                : base(low, high, type)
+            {
+            }
+
+            public Interval(IInterval<int> i)
+                : base(i)
+            {
+            }
+
+            public Interval(IInterval<int> low, IInterval<int> high)
+                : base(low, high)
+            {
+            }
+
+            public override string ToString()
+            {
+                return String.Format("{0}{1:#,0} : {2:#,0}{3}",
+                    LowIncluded ? "[" : "(",
+                    Low,
+                    High,
+                    HighIncluded ? "]" : ")");
+            }
+        }
+
+        internal class TestInterval<T> : IntervalBase<T> where T : IComparable<T>
+        {
+            public int Id { get; private set; }
+
+            private int randomInt()
+            {
+                var bytes = new byte[4];
+                System.Security.Cryptography.RandomNumberGenerator.Create().GetBytes(bytes);
+                return BitConverter.ToInt32(bytes, 0);
+            }
+
+            public TestInterval(T query)
+                : base(query)
+            {
+                Id = randomInt();
+            }
+
+            public TestInterval(T low, T high, bool lowIncluded = true, bool highIncluded = false)
+                : base(low, high, lowIncluded, highIncluded)
+            {
+                Id = randomInt();
+            }
+
+            public TestInterval(T low, T high, IntervalType type)
+                : base(low, high, type)
+            {
+                Id = randomInt();
+            }
+
+            public TestInterval(IInterval<T> i)
+                : base(i)
+            {
+                Id = randomInt();
+            }
+
+            public TestInterval(IInterval<T> low, IInterval<T> high)
+                : base(low, high)
+            {
+                Id = randomInt();
+            }
+        }
+
+        #endregion
 
         #region Meta
 
@@ -1103,11 +1106,11 @@ namespace C5.Intervals.Tests
             // | [   ]                                |
             // ****************************************
             var intervals = new[] {
-                new Interval(5, 9, true, true),
-                new Interval(11, 15, true, true),
-                new Interval(15, 20, true, true),
-                new Interval(20, 24, true, true),
-                new Interval(26, 30, true, true)
+                new Interval(5, 9, IntervalType.Closed),
+                new Interval(11, 15, IntervalType.Closed),
+                new Interval(15, 20, IntervalType.Closed),
+                new Interval(20, 24, IntervalType.Closed),
+                new Interval(26, 30, IntervalType.Closed)
             };
 
             var collection = CreateCollection<Interval, int>(intervals);
@@ -1263,6 +1266,8 @@ namespace C5.Intervals.Tests
 
         #region Stabbing
 
+        // TODO: Finish testing CountOverlaps(T query)
+
         [Test]
         [Category("Count Overlaps Stabbing")]
         public void CountOverlapsStabbing_EmptyCollection_Zero()
@@ -1273,9 +1278,36 @@ namespace C5.Intervals.Tests
             Assert.AreEqual(0, collection.CountOverlaps(query));
         }
 
+        [Test]
+        [Category("Count Overlaps Stabbing")]
+        public void CountOverlapsStabbing_FixedIntervals_NoOverlaps()
+        {
+            var intervals = new[] {
+                new Interval( 0,  5, IntervalType.HighIncluded),
+                new Interval( 2,  6, IntervalType.Closed),
+                new Interval( 6,  8, IntervalType.Closed),
+                new Interval(11, 17, IntervalType.Closed),
+                new Interval(11, 17, IntervalType.Closed),
+                new Interval(11, 18, IntervalType.Closed),
+                new Interval(17, 18, IntervalType.Closed),
+                new Interval(17, 20, IntervalType.LowIncluded),
+                new Interval(18),
+                new Interval(23, 28, IntervalType.Closed),
+            };
+
+            var collection = CreateCollection<Interval, int>(intervals);
+
+            Assert.AreEqual(0, collection.CountOverlaps(0));
+            Assert.AreEqual(0, collection.CountOverlaps(9));
+            Assert.AreEqual(0, collection.CountOverlaps(20));
+            Assert.AreEqual(0, collection.CountOverlaps(29));
+        }
+
         #endregion
 
         #region Range
+
+        // TODO: Finish testing CountOverlaps(IInterval<T> query)
 
         [Test]
         [Category("Count Overlaps Range")]
@@ -1309,6 +1341,97 @@ namespace C5.Intervals.Tests
                 interval = SingleInterval();
 
             Assert.AreEqual(0, collection.CountOverlaps(interval));
+        }
+
+        [Test]
+        [Category("Count Overlaps Range")]
+        public void CountOverlapsRange_LayerExample()
+        {
+            var intervals = new[]
+            {
+                new Interval(0, 5),
+                new Interval(1, 4),
+                new Interval(2),
+                new Interval(6, 12),
+                new Interval(8, 9),
+                new Interval(10, 11),
+                new Interval(13, 14), 
+            };
+
+            var collection = CreateCollection<Interval, int>(intervals);
+
+            Assert.AreEqual(collection.AllowsOverlaps ? 2 : 1, collection.CountOverlaps(new Interval(8, 9)));
+            Assert.AreEqual(collection.AllowsOverlaps ? 3 : 2, collection.CountOverlaps(new Interval(3, 7)));
+        }
+
+        #endregion
+
+        #region Legacy Examples
+
+        [Test]
+        public void CountOverlaps_NoContainments()
+        {
+            var intervals = new[]
+            {
+                new Interval( 0,  5, IntervalType.Closed),
+                new Interval( 2,  6, IntervalType.Closed),
+                new Interval( 6,  8, IntervalType.Closed),
+                new Interval(11, 17, IntervalType.Closed),
+                new Interval(11, 17, IntervalType.Closed),
+                new Interval(11, 18, IntervalType.Closed),
+                new Interval(17, 18, IntervalType.Closed),
+                new Interval(17, 20, IntervalType.Closed),
+                new Interval(23, 28, IntervalType.Closed),
+            };
+
+            var collection = CreateCollection<Interval, int>(intervals);
+
+            // Non overlaps
+            Assert.AreEqual(0, collection.CountOverlaps(new Interval(9)));
+            Assert.AreEqual(0, collection.CountOverlaps(new Interval(29, 30, IntervalType.Closed)));
+            Assert.AreEqual(0, collection.CountOverlaps(new Interval(int.MinValue, -2, IntervalType.Closed)));
+
+            // Few overlaps
+            Assert.AreEqual(1, collection.CountOverlaps(new Interval(0)));
+            Assert.AreEqual(collection.AllowsOverlaps ? 2 : 1, collection.CountOverlaps(new Interval(6, 9, IntervalType.Closed)));
+            Assert.AreEqual(1, collection.CountOverlaps(new Interval(21, 30, IntervalType.Closed)));
+
+            // Many overlaps   
+            Assert.AreEqual(collection.AllowsOverlaps ? 3 : 2, collection.CountOverlaps(new Interval(0, 6, IntervalType.Closed)));
+            Assert.AreEqual(collection.AllowsOverlaps ? 5 : 1, collection.CountOverlaps(new Interval(12, 19, IntervalType.Closed)));
+            Assert.AreEqual(collection.AllowsOverlaps ? 3 : 0, collection.CountOverlaps(new Interval(18, 19, IntervalType.Closed)));
+        }
+
+        [Test]
+        public void CountOverlaps_OnlyContainments()
+        {
+            var intervals = new[]
+            {
+                new Interval( 0, 30, IntervalType.Closed),
+                new Interval( 1, 29, IntervalType.Closed),
+                new Interval( 2, 20, IntervalType.Closed),
+                new Interval( 3, 19, IntervalType.Closed),
+                new Interval( 9, 18, IntervalType.Closed),
+                new Interval(10, 17, IntervalType.Closed),
+                new Interval(11, 16, IntervalType.Closed),
+                new Interval(12, 15, IntervalType.Closed),
+                new Interval(13, 14, IntervalType.Closed),
+            };
+
+            var collection = CreateCollection<Interval, int>(intervals);
+
+            // No overlaps
+            Assert.AreEqual(0, collection.CountOverlaps(new Interval(31, int.MaxValue, IntervalType.Closed)));
+            Assert.AreEqual(0, collection.CountOverlaps(new Interval(int.MinValue, -2, IntervalType.Closed)));
+
+            // Single overlap
+            Assert.AreEqual(1, collection.CountOverlaps(new Interval(0)));
+            Assert.AreEqual(1, collection.CountOverlaps(new Interval(30, 35, IntervalType.Closed)));
+
+            // Many overlaps
+            Assert.AreEqual(collection.AllowsOverlaps ? 2 : 1, collection.CountOverlaps(new Interval(23, 25, IntervalType.Closed)));
+            Assert.AreEqual(collection.AllowsOverlaps ? 4 : 1, collection.CountOverlaps(new Interval(5, 8, IntervalType.Closed)));
+            Assert.AreEqual(collection.AllowsOverlaps ? 9 : 1, collection.CountOverlaps(new Interval(13, 13, IntervalType.Closed)));
         }
 
         #endregion
@@ -1452,6 +1575,53 @@ namespace C5.Intervals.Tests
             var gaps = collection.Gaps;
             Assert.AreEqual(1, gaps.Count());
             Assert.True((new Interval(1)).IntervalEquals(gaps.First()));
+        }
+
+
+        [Test]
+        [Category("Gaps")]
+        public void Gaps_WeldingExample()
+        {
+            var weld1 = new[]
+            {
+                new IntervalBase<int>(  0,  30),
+                new IntervalBase<int>( 50,  60),
+                new IntervalBase<int>(100, 150),
+                new IntervalBase<int>(200, 210)
+            };
+            var weld2 = new[]
+            {
+                new IntervalBase<int>( 10,  20),
+                new IntervalBase<int>( 40,  70)
+            };
+            var paint = new[]
+            {
+                new IntervalBase<int>( 20,  40),
+                new IntervalBase<int>( 60, 100),
+                new IntervalBase<int>(120, 130),
+                new IntervalBase<int>(160, 190)
+            };
+
+            var weld1Paint = new DynamicIntervalTree<IInterval<int>, int>(weld1);
+            weld1Paint.AddAll(paint);
+            var weld1Result = new[]
+                    {
+                        new IntervalBase<int>(40, 50),
+                        new IntervalBase<int>(150, 160),
+                        new IntervalBase<int>(190, 200),
+                    };
+            CollectionAssert.AreEquivalent(weld1Result, weld1Paint.Gaps);
+            // TODO: Fix contract exception!!
+            //weld1Paint.AddAll(paint);
+
+            var weld2Paint = new DynamicIntervalTree<IInterval<int>, int>(weld2);
+            weld2Paint.AddAll(paint);
+            var weld2Result = new[]
+            {
+                new IntervalBase<int>(100, 120),
+                new IntervalBase<int>(130, 160)
+            };
+            CollectionAssert.AreEquivalent(weld2Result, weld2Paint.Gaps);
         }
 
         #endregion
@@ -1895,6 +2065,8 @@ namespace C5.Intervals.Tests
                 foreach (var interval in ManyIntervals())
                     Assert.False(collection.Remove(interval));
             }
+
+            Assert.AreEqual(collection.AllowsOverlaps ? Count : NonOverlapping(intervals).Count(), collection.Count);
         }
 
         #region Events
@@ -2137,18 +2309,6 @@ namespace C5.Intervals.Tests
         #endregion
 
         #region Large Scale Random
-
-        /*
-        [Test]
-        [Category("Large Scale")]
-        public void Random_CallWholeInterface_FixedSeed()
-        {
-            updateRandom(267138595);
-            Random_CallWholeInterface();
-            updateRandom(1065643459);
-            Random_CallWholeInterface();
-        }
-        */
 
         [Test]
         [Category("Large Scale")]
