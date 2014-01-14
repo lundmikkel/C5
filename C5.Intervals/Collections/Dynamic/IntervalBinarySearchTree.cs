@@ -1729,21 +1729,45 @@ namespace C5.Intervals
                 yield break;
 
             var set = new IntervalSet();
-            var splitNode = _root;
+            Node splitNode = null;
 
             // Use a lambda instead of out, as out or ref isn't allowed for iterators
             foreach (var interval in findSplitNode(_root, query, n => { splitNode = n; }).Where(set.Add))
                 yield return interval;
 
-            // Find all intersecting intervals in left subtree
-            if (query.Low.CompareTo(splitNode.Key) < 0)
+            // We stop if we didn't find a split node
+            if (splitNode == null)
+                yield break;
+
+            var compareHigh = query.High.CompareTo(splitNode.Key);
+            var compareLow = query.Low.CompareTo(splitNode.Key);
+
+            if (compareLow < 0)
+            {
+                if (splitNode.Less != null && !splitNode.Less.IsEmpty)
+                    foreach (var interval in splitNode.Less.Where(set.Add))
+                        yield return interval;
+
+                // Find all intersecting intervals in left subtree
                 foreach (var interval in findLeft(splitNode.Left, query).Where(set.Add))
                     yield return interval;
+            }
 
-            // Find all intersecting intervals in right subtree
-            if (splitNode.Key.CompareTo(query.High) < 0)
+            if (splitNode.Equal != null && !splitNode.Equal.IsEmpty &&
+                ((compareLow < 0 || query.LowIncluded) && (compareHigh > 0 || query.HighIncluded)))
+                foreach (var interval in splitNode.Equal.Where(set.Add))
+                    yield return interval;
+
+            if (compareHigh > 0)
+            {
+                if (splitNode.Greater != null && !splitNode.Greater.IsEmpty)
+                    foreach (var interval in splitNode.Greater.Where(set.Add))
+                        yield return interval;
+
+                // Find all intersecting intervals in right subtree
                 foreach (var interval in findRight(splitNode.Right, query).Where(set.Add))
                     yield return interval;
+            }
         }
 
         /// <summary>
@@ -1753,14 +1777,7 @@ namespace C5.Intervals
         {
             while (root != null)
             {
-                // Update split node
-                setSplitNode(root);
-
-                // Interval is lower than root, go left
-                var compareHigh = query.High.CompareTo(root.Key);
-                int compareLow;
-
-                if (compareHigh < 0)
+                if (query.High.CompareTo(root.Key) < 0)
                 {
                     if (root.Less != null && !root.Less.IsEmpty)
                         foreach (var interval in root.Less)
@@ -1770,7 +1787,7 @@ namespace C5.Intervals
                     root = root.Left;
                 }
                 // Interval is higher than root, go right
-                else if ((compareLow = query.Low.CompareTo(root.Key)) > 0)
+                else if (query.Low.CompareTo(root.Key) > 0)
                 {
                     if (root.Greater != null && !root.Greater.IsEmpty)
                         foreach (var interval in root.Greater)
@@ -1782,16 +1799,8 @@ namespace C5.Intervals
                 // Otherwise add overlapping nodes in split node
                 else
                 {
-                    if (root.Less != null && !root.Less.IsEmpty && compareLow < 0)
-                        foreach (var interval in root.Less)
-                            yield return interval;
-                    if (root.Equal != null && !root.Equal.IsEmpty &&
-                        ((compareLow < 0 || query.LowIncluded) && (compareHigh > 0 || query.HighIncluded)))
-                        foreach (var interval in root.Equal)
-                            yield return interval;
-                    if (root.Greater != null && !root.Greater.IsEmpty && compareHigh > 0)
-                        foreach (var interval in root.Greater)
-                            yield return interval;
+                    // Update split node
+                    setSplitNode(root);
 
                     yield break;
                 }
@@ -1811,7 +1820,7 @@ namespace C5.Intervals
                         foreach (var interval in root.Greater)
                             yield return interval;
 
-                    // Iteratively travese right subtree
+                    // Iteratively traverse right subtree
                     root = root.Right;
                 }
                 // Search in left subtree
@@ -1825,7 +1834,7 @@ namespace C5.Intervals
                     foreach (var interval in intervals(root.Right))
                         yield return interval;
 
-                    // Iteratively travese left subtree
+                    // Iteratively traverse left subtree
                     root = root.Left;
                 }
                 else
@@ -1864,7 +1873,7 @@ namespace C5.Intervals
                         foreach (var interval in root.Less)
                             yield return interval;
 
-                    // Otherwise Recursively travese left subtree
+                    // Otherwise Recursively traverse left subtree
                     root = root.Left;
                 }
                 //
@@ -1880,7 +1889,7 @@ namespace C5.Intervals
                     foreach (var interval in intervals(root.Left))
                         yield return interval;
 
-                    // Recursively travese left subtree
+                    // Recursively traverse left subtree
                     root = root.Right;
                 }
                 else
