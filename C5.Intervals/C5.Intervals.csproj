@@ -169,6 +169,7 @@
     <Compile Include="Entities\IntervalType.cs" />
     <Compile Include="Extensions\IntervalExtensions.cs" />
     <Compile Include="Extensions\IntervalRelations.cs" />
+    <Compile Include="Extensions\IntervalTypeExtensions.cs" />
     <Compile Include="Interfaces\IInterval.cs" />
     <Compile Include="Interfaces\IIntervalCollection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -203,6 +204,6 @@
     <CompileDependsOn>$(CompileDependsOn);CheckForCodeContracts</CompileDependsOn>
   </PropertyGroup>
   <Target Name="CheckForCodeContracts" Condition="'$(CodeContractsImported)' != 'true'">
-    <Error Text="Project requires Code Contracts http://msdn.microsoft.com/en-us/devlabs/dd491992.aspx"/>
+    <Error Text="Project requires Code Contracts http://msdn.microsoft.com/en-us/devlabs/dd491992.aspx" />
   </Target>
 </Project>
