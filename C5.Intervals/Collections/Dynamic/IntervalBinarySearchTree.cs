@@ -1497,23 +1497,22 @@ namespace C5.Intervals
             if (IsEmpty)
                 yield break;
 
-            var height = calcHeight(_count);
-
-            var stack = new Node[height];
             var i = 0;
+            var stack = new Node[calcHeight(_count)];
 
             var current = root;
             while (i > 0 || current != null)
             {
                 if (current != null)
                 {
+                    // Push node onto stack and search left
                     stack[i++] = current;
                     current = current.Left;
                 }
                 else
                 {
-                    current = stack[--i];
-                    yield return current;
+                    // Pop node and yield, then search right
+                    yield return current = stack[--i];
                     current = current.Right;
                 }
             }
