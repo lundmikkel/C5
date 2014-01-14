@@ -363,7 +363,7 @@ namespace C5.Intervals.Tests
         public void IsEmpty_EmptyCollection_Empty()
         {
             var collection = CreateEmptyCollection<IInterval<int>, int>();
-            Assert.True(collection.IsEmpty);
+            Assert.That(collection.IsEmpty, Is.True);
         }
 
         [Test]
@@ -372,7 +372,7 @@ namespace C5.Intervals.Tests
         {
             var interval = SingleInterval();
             var collection = CreateCollection<Interval, int>(interval);
-            Assert.False(collection.IsEmpty);
+            Assert.That(collection.IsEmpty, Is.Not.True);
         }
 
         [Test]
@@ -381,7 +381,7 @@ namespace C5.Intervals.Tests
         {
             var intervals = SingleObject();
             var collection = CreateCollection<Interval, int>(intervals);
-            Assert.False(collection.IsEmpty);
+            Assert.That(collection.IsEmpty, Is.Not.True);
         }
 
         [Test]
@@ -390,7 +390,7 @@ namespace C5.Intervals.Tests
         {
             var intervals = DuplicateIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            Assert.False(collection.IsEmpty);
+            Assert.That(collection.IsEmpty, Is.Not.True);
         }
 
         [Test]
@@ -399,7 +399,7 @@ namespace C5.Intervals.Tests
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            Assert.False(collection.IsEmpty);
+            Assert.That(collection.IsEmpty, Is.Not.True);
         }
 
         #endregion
@@ -412,7 +412,7 @@ namespace C5.Intervals.Tests
         {
             var collection = CreateEmptyCollection<Interval, int>();
 
-            Assert.AreEqual(0, collection.Count);
+            Assert.That(collection.Count, Is.EqualTo(0));
         }
 
         [Test]
@@ -422,7 +422,7 @@ namespace C5.Intervals.Tests
             var interval = SingleInterval();
             var collection = CreateCollection<Interval, int>(interval);
 
-            Assert.AreEqual(1, collection.Count);
+            Assert.That(collection.Count, Is.EqualTo(1));
         }
 
         [Test]
@@ -432,7 +432,11 @@ namespace C5.Intervals.Tests
             var intervals = SingleObject();
             var collection = CreateCollection<Interval, int>(intervals);
 
-            Assert.AreEqual(collection.AllowsReferenceDuplicates ? Count : 1, collection.Count);
+            if (collection.AllowsReferenceDuplicates)
+                Assert.That(collection.Count, Is.EqualTo(Count));
+            else
+                Assert.That(collection.Count, Is.EqualTo(1));
+
         }
 
         [Test]
@@ -442,7 +446,10 @@ namespace C5.Intervals.Tests
             var intervals = DuplicateIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
 
-            Assert.AreEqual(collection.AllowsOverlaps ? Count : 1, collection.Count);
+            if (collection.AllowsOverlaps)
+                Assert.That(collection.Count, Is.EqualTo(Count));
+            else
+                Assert.That(collection.Count, Is.EqualTo(1));
         }
 
         [Test]
