@@ -39,16 +39,17 @@ namespace C5.Intervals
             Contract.Invariant(contractHelperConfirmBalance(_root));
 
             // First and last point to each other if the collection is empty
-            Contract.Invariant(!IsEmpty || ReferenceEquals(_first.Next, _last) && ReferenceEquals(_last.Previous, _first));
+            Contract.Invariant(!IsEmpty || _first.Next == _last && _last.Previous == _first);
             // First and last are empty but the next and previous pointers respectively
             Contract.Invariant(_first.Key == null && _first.Previous == null && _first.Right == null && _first.Left == null && _first.Balance == 0);
             Contract.Invariant(_last.Key == null && _last.Next == null && _last.Right == null && _last.Left == null && _last.Balance == 0);
+            Contract.Invariant(_first != _last);
 
             // Check enumerator is sorted
             Contract.Invariant(this.IsSorted<I, T>());
 
             // Check that doubly linked lists are sorted in both direction
-            Contract.Invariant(nextNodes(_first.Next).IsSorted());
+            Contract.Invariant(nextNodes(_first).IsSorted());
             Contract.Invariant(previousNodes(_last.Previous).Select(n => n.Key).IsSorted(IntervalExtensions.CreateReversedComparer<I, T>()));
 
             // Check in-order traversal is sorted
@@ -164,11 +165,11 @@ namespace C5.Intervals
             {
                 Contract.Requires(previous != null);
                 Contract.Requires(previous.Next != null);
-                Contract.Ensures(ReferenceEquals(Contract.OldValue(previous.Next), previous.Next.Next));
-                Contract.Ensures(ReferenceEquals(previous.Next, this));
-                Contract.Ensures(ReferenceEquals(this.Previous, previous));
-                Contract.Ensures(ReferenceEquals(Contract.OldValue(previous.Next).Previous, this));
-                Contract.Ensures(ReferenceEquals(this.Next, Contract.OldValue(previous.Next)));
+                Contract.Ensures(Contract.OldValue(previous.Next) == previous.Next.Next);
+                Contract.Ensures(previous.Next == this);
+                Contract.Ensures(this.Previous == previous);
+                Contract.Ensures(Contract.OldValue(previous.Next).Previous == this);
+                Contract.Ensures(this.Next == Contract.OldValue(previous.Next));
 
                 var next = previous.Next;
 
@@ -403,8 +404,8 @@ namespace C5.Intervals
         {
             Contract.Ensures(_first != null);
             Contract.Ensures(_last != null);
-            Contract.Ensures(ReferenceEquals(_first.Next, _last));
-            Contract.Ensures(ReferenceEquals(_last.Previous, _first));
+            Contract.Ensures(_first.Next == _last);
+            Contract.Ensures(_last.Previous == _first);
 
             _first = new Node();
             _last = new Node();
@@ -485,25 +486,39 @@ namespace C5.Intervals
         [Pure]
         private IEnumerable<Node> nextNodes(Node node)
         {
-            Contract.Requires(!ReferenceEquals(node, _first));
+            Contract.Requires(node != null);
 
-            while (node != null && node.Next != null)
+            // Skip the _first node
+            if (node == _first)
+                node = _first.Next;
+
+            // Iterate until the _last node
+            while (node != _last)
             {
                 yield return node;
-
                 node = node.Next;
             }
         }
 
         [Pure]
+        private IEnumerable<I> nextIntervals(Node node)
+        {
+            return nextNodes(node).Select(n => n.Key);
+        }
+
+        [Pure]
         private IEnumerable<Node> previousNodes(Node node)
         {
-            Contract.Requires(!ReferenceEquals(node, _last));
+            Contract.Requires(node != null);
 
-            while (node != null && node.Previous != null)
+            // Skip the _last node
+            if (node == _last)
+                node = _last.Previous;
+
+            // Iterate until the _first node
+            while (node != _first)
             {
                 yield return node;
-
                 node = node.Previous;
             }
         }
@@ -541,7 +556,7 @@ namespace C5.Intervals
         public bool AllowsReferenceDuplicates { get { return false; } }
 
         /// <inheritdoc/>
-        public IEnumerable<I> Sorted { get { return nextNodes(_first.Next).Select(node => node.Key); } }
+        public IEnumerable<I> Sorted { get { return nextIntervals(_first.Next); } }
 
         #endregion
 
@@ -563,7 +578,7 @@ namespace C5.Intervals
             var node = _root;
 
             // Search for the node containing the first overlap
-            do
+            while (true)
             {
                 var compare = query.CompareLowHigh(node.Key);
 
@@ -583,7 +598,7 @@ namespace C5.Intervals
                         node = node.Next;
 
                         // Make sure the low is still lower or equal to the query's high
-                        if (ReferenceEquals(node, _last) || query.CompareLowHigh(node.Key) > 0)
+                        if (node == _last || query.CompareLowHigh(node.Key) > 0)
                             yield break;
 
                         break;
@@ -594,15 +609,11 @@ namespace C5.Intervals
                 }
                 else
                     break;
-            } while (true);
+            }
 
             // Iterate overlaps
-            while (!ReferenceEquals(node, _last) && node.Key.CompareLowHigh(query) <= 0)
-            {
-                yield return node.Key;
-
-                node = node.Next;
-            }
+            foreach (var interval in nextIntervals(node).TakeWhile(x => x.CompareLowHigh(query) <= 0))
+                yield return interval;
         }
 
         #endregion
@@ -631,7 +642,7 @@ namespace C5.Intervals
                         node = node.Previous;
 
                         // Check if previous interval overlaps
-                        if (!ReferenceEquals(node, _first) && node.Key.Overlaps(query))
+                        if (node != _first && node.Key.Overlaps(query))
                         {
                             overlap = node.Key;
                             return true;
@@ -672,7 +683,7 @@ namespace C5.Intervals
                     node = node.Previous;
 
                     // Check if the previous interval overlaps
-                    if (!ReferenceEquals(node, _first) && node.Key.High.CompareTo(query) == 0 && node.Key.HighIncluded)
+                    if (node != _first && node.Key.High.CompareTo(query) == 0 && node.Key.HighIncluded)
                     {
                         overlap = node.Key;
                         return true;
@@ -705,7 +716,7 @@ namespace C5.Intervals
 
         public int CountOverlaps(T query)
         {
-            I overlap = default(I);
+            var overlap = default(I);
             return FindOverlap(query, ref overlap) ? 1 : 0;
         }
 
@@ -723,7 +734,7 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public IEnumerable<IInterval<T>> Gaps
         {
-            get { return this.Cast<IInterval<T>>().Gaps(); }
+            get { return Sorted.Cast<IInterval<T>>().Gaps(); }
         }
 
         /// <inheritdoc/>
@@ -771,8 +782,8 @@ namespace C5.Intervals
             if (root == null)
             {
                 // Return if previous or next overlaps interval
-                if (!ReferenceEquals(previous, _first) && previous.Key.CompareHighLow(interval) >= 0 ||
-                    !ReferenceEquals(previous.Next, _last) && interval.CompareHighLow(previous.Next.Key) >= 0)
+                if (previous != _first && previous.Key.CompareHighLow(interval) >= 0 ||
+                    previous.Next != _last && interval.CompareHighLow(previous.Next.Key) >= 0)
                     return null;
 
                 rotationNeeded = true;
