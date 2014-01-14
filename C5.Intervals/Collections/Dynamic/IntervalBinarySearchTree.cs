@@ -1671,14 +1671,11 @@ namespace C5.Intervals
         public IEnumerable<I> FindOverlaps(T query)
         {
             // Break if the query is outside the collections span
-            if (_span != null && !_span.Overlaps(query))
-                return Enumerable.Empty<I>();
+            if (IsEmpty || _span != null && !_span.Overlaps(query))
+                yield break;
 
-            return findOverlaps(_root, query);
-        }
+            var root = _root;
 
-        private static IEnumerable<I> findOverlaps(Node root, T query)
-        {
             // Search the tree until we reach the bottom of the tree    
             while (root != null)
             {
