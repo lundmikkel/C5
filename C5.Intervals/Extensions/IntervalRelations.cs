@@ -9,19 +9,19 @@ namespace C5.Intervals
     public enum IntervalRelation
     {
         /// <summary>
-        /// The interval is after another interval
+        /// The interval is after another interval.
         /// </summary>
         [Symbol(">")]
         After = 0,
 
         /// <summary>
-        /// The interval is met by another interval thereby sharing an endpoint
+        /// The interval is met by another interval. They do not overlap and there is no gap between them.
         /// </summary>
         [Symbol("mi")]
         MetBy = 1,
 
         /// <summary>
-        /// The interval is overlaped by another interval but share no endpoint
+        /// The interval is overlapped by another interval.
         /// </summary>
         [Symbol("oi")]
         OverlappedBy = 2,
@@ -33,55 +33,55 @@ namespace C5.Intervals
         Finishes = 3,
 
         /// <summary>
-        /// The interval is during another interval
+        /// The interval is during another interval.
         /// </summary>
         [Symbol("d")]
         During = 4,
 
         /// <summary>
-        /// The interval is started by another interval thereby sharing the low endpoint
+        /// The interval is started by another interval thereby sharing the low endpoint.
         /// </summary>
         [Symbol("si")]
         StartedBy = 5,
 
         /// <summary>
-        /// The interval is equal to another interval thereby sharing both endpoints
+        /// The interval is equal to another interval thereby sharing both endpoints.
         /// </summary>
         [Symbol("e")]
         Equals = 6,
 
         /// <summary>
-        /// The interval is starts another interval thereby sharing the low endpoint
+        /// The interval is starts another interval thereby sharing the low endpoint.
         /// </summary>
         [Symbol("s")]
         Starts = 7,
 
         /// <summary>
-        /// The interval is contained in another interval
+        /// The interval is contained in another interval.
         /// </summary>
         [Symbol("di")]
         Contains = 8,
 
         /// <summary>
-        /// The interval finished by another interval thereby sharing the high endpoint
+        /// The interval finished by another interval thereby sharing the high endpoint.
         /// </summary>
         [Symbol("fi")]
         FinishedBy = 9,
 
         /// <summary>
-        /// The interval overlaps another interval but share no endpoint
+        /// The interval overlaps another interval.
         /// </summary>
         [Symbol("o")]
         Overlaps = 10,
 
         /// <summary>
-        /// The interval meets another interval thereby sharing an endpoint
+        /// The interval meets another interval. They do not overlap and there is no gap between them.
         /// </summary>
         [Symbol("m")]
         Meets = 11,
 
         /// <summary>
-        /// The interval is before another interval
+        /// The interval is before another interval.
         /// </summary>
         [Symbol("<")]
         Before = 12,
@@ -92,6 +92,14 @@ namespace C5.Intervals
     /// </summary>
     public static class IntervalRelations
     {
+
+        /*public static IEnumerable<IntervalRelation> TrasitivityRelations<T>(IntervalRelation xToY, IntervalRelation yToZ)
+            where T : IComparable<T>
+        {
+            // Return possible relations between x and z
+
+            throw new NotImplementedException();
+        }*/
 
         /// <summary>
         /// Get the relationship between two intervals as described by James F. Allen in "Maintaining Knowledge about Temporal Intervals".
