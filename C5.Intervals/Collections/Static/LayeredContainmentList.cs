@@ -26,6 +26,7 @@ namespace C5.Intervals
 
         private readonly I[][] _intervalLayers;
         private readonly int[][] _pointerLayers;
+        private readonly I[] _sorted;
 
         private readonly IInterval<T> _span;
 
@@ -124,16 +125,26 @@ namespace C5.Intervals
         {
             Contract.Ensures(intervals.Count() == Count);
 
+            // TODO: Add to signature
+            var isSorted = false;
+
             // Make intervals to array to allow fast sorting and counting
-            var intervalArray = intervals as I[] ?? intervals.ToArray();
+            _sorted = intervals as I[] ?? intervals.ToArray();
 
             // Stop if we have no intervals
-            if (!intervalArray.Any())
+            if (!_sorted.Any())
                 return;
 
-            _count = intervalArray.Length;
+            _count = _sorted.Length;
 
-            var nodeLayers = generateLayers(ref intervalArray);
+            // Sort intervals
+            if (!isSorted)
+            {
+                var comparer = IntervalExtensions.CreateComparer<I, T>();
+                Sorting.IntroSort(_sorted, 0, _count, comparer);
+            }
+
+            var nodeLayers = generateLayers();
 
             _layerCount = nodeLayers.Count();
             _firstLayerCount = nodeLayers.First.Count;
@@ -167,29 +178,21 @@ namespace C5.Intervals
             _span = new IntervalBase<T>(_intervalLayers.First().First(), _intervalLayers.First()[_firstLayerCount - 1]);
         }
 
-        private static ArrayList<ArrayList<Node>> generateLayers(ref I[] intervals)
+        private ArrayList<ArrayList<Node>> generateLayers()
         {
-            Contract.Requires(intervals != null);
-
-            var count = intervals.Length;
-
-            // Sort intervals
-            var comparer = IntervalExtensions.CreateComparer<I, T>();
-            Sorting.IntroSort(intervals, 0, count, comparer);
-
             // Initialize layers with two empty layers
             var layers = new ArrayList<ArrayList<Node>> { new ArrayList<Node>(), new ArrayList<Node>() };
 
             // Add the first interval to the first layer to avoid empty layers in the binary search
-            if (count > 0)
-                layers[0].Add(new Node(intervals[0], 0));
+            if (_count > 0)
+                layers[0].Add(new Node(_sorted[0], 0));
 
             var layer = 0;
 
             // Insert the rest of the intervals
-            for (var i = 1; i < count; i++)
+            for (var i = 1; i < _count; i++)
             {
-                var interval = intervals[i];
+                var interval = _sorted[i];
 
                 // Search for the layer to insert the interval based on the last layer insert into
                 layer = binaryLayerSearch(layers, interval, layer);
@@ -289,84 +292,11 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override IEnumerator<I> GetEnumerator()
         {
-            return getEnumerable().GetEnumerator();
-        }
-
-        /// <summary>
-        /// Loops through each layer and yield its intervals
-        /// </summary>
-        /// <returns>Enumerator of all intervals in the data structure</returns>
-        private IEnumerable<I> getEnumerable()
-        {
-            for (var i = 0; i < _layerCount; i++)
-            {
-                var intervalCount = _intervalLayers[i].Count();
-
-                for (var j = 0; j < intervalCount; j++)
-                    yield return _intervalLayers[i][j];
-            }
+            return Sorted.GetEnumerator();
         }
 
         /// <inheritdoc/>
-        public IEnumerable<I> Sorted
-        {
-            get
-            {
-                // HACK
-                // TODO: Fix!
-                return sorted(0, _firstLayerCount).OrderBy(x => x, IntervalExtensions.CreateComparer<I, T>());
-            }
-        }
-
-        /// <summary>
-        /// Enumerate intervals in sorted order using the pointers
-        /// </summary>
-        /// <param name="start">The index of the first interval in the first layer</param>
-        /// <param name="end">The index after the last interval in the first layer</param>
-        /// <returns>Enumerator of all intervals in the data structure in sorted order</returns>
-        private IEnumerable<I> sorted(int start, int end)
-        {
-            if (IsEmpty)
-                yield break;
-
-            // Create our own stack to avoid stack overflow and to speed up the enumerator
-            var stack = new int[_layerCount << 1];
-            var i = 0;
-            // We stack both values consecutively instead of stacking pairs
-            stack[i++] = start;
-            stack[i++] = end;
-
-            // Continue as long as we still have values on the stack
-            while (i > 0)
-            {
-                // Get start and end from stack
-                end = stack[--i];
-                start = stack[--i];
-
-                // Cache layers for speed
-                var intervalLayer = _intervalLayers[i >> 1];
-                var pointerLayer = _pointerLayers[i >> 1];
-
-                while (start < end)
-                {
-                    yield return intervalLayer[start];
-
-                    // If this and the next interval point to different intervals in the next layer, we need to swap layer
-                    if (pointerLayer[start] < pointerLayer[start + 1])
-                    {
-                        // Push the current values
-                        stack[i++] = start + 1;
-                        stack[i++] = end;
-                        // Push the values for the next layer
-                        stack[i++] = pointerLayer[start];
-                        stack[i++] = pointerLayer[start + 1];
-                        break;
-                    }
-
-                    start++;
-                }
-            }
-        }
+        public IEnumerable<I> Sorted { get { return _sorted; } }
 
         #endregion
 
@@ -412,6 +342,7 @@ namespace C5.Intervals
             }
         }
 
+        /*
         /// <summary>
         /// Find the maximum number of overlaps for all intervals overlapping the query interval.
         /// </summary>
@@ -445,6 +376,7 @@ namespace C5.Intervals
             IInterval<T> intervalOfMaximumDepth = null;
             return FindOverlapsSorted(query).Where(filter).MaximumDepth(ref intervalOfMaximumDepth);
         }
+        */
 
         /// <summary>
         /// Find the maximum depth for all intervals that match the filter.
@@ -591,6 +523,8 @@ namespace C5.Intervals
 
         #region Sorted
 
+        /*
+        // TODO: Solve the sorted enumeration problem!
         /// <summary>
         /// Create an enumerable, enumerating all intervals in the collection that overlap the query point in sorted order.
         /// </summary>
@@ -683,33 +617,7 @@ namespace C5.Intervals
                 }
             }
         }
-
-        private IEnumerable<I> findOverlapsSortedRecursive(IInterval<T> query, int layer, int start, int end, int highestVisitedLayer)
-        {
-            if (layer > highestVisitedLayer)
-            {
-                start = findFirst(query, layer, start, end);
-                highestVisitedLayer++;
-            }
-
-            var intervalLayer = _intervalLayers[layer];
-            var pointerLayer = _pointerLayers[layer];
-
-            // Iterate through all overlaps
-            while (start < end && intervalLayer[start].CompareLowHigh(query) <= 0)
-            {
-                yield return intervalLayer[start];
-
-                // If this and the next interval point to different intervals in the next layer, we need to swap layer
-                if (pointerLayer[start] < pointerLayer[start + 1])
-                {
-                    foreach (var interval in findOverlapsSortedRecursive(query, layer + 1, pointerLayer[start], pointerLayer[start + 1], highestVisitedLayer))
-                        yield return interval;
-                }
-
-                start++;
-            }
-        }
+        */
 
         #endregion
 
@@ -755,12 +663,15 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public int CountOverlaps(IInterval<T> query)
         {
-            return !IsEmpty ? countOverlaps(query) : 0;
+            return countOverlaps(query);
         }
 
         private int countOverlaps(IInterval<T> query)
         {
             Contract.Requires(query != null);
+
+            if (IsEmpty)
+                return 0;
 
             int layer = 0, lower = 0, upper = _firstLayerCount, count = 0;
 

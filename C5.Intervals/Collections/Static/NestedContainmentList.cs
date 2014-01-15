@@ -217,24 +217,18 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
-            if (ReferenceEquals(query, null))
-                return Enumerable.Empty<I>();
-
             return findOverlaps(_mainList, new IntervalBase<T>(query));
         }
 
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
-            if (query == null)
-                return Enumerable.Empty<I>();
-
             return findOverlaps(_mainList, query);
         }
 
         private IEnumerable<I> findOverlaps(Sublist sublist, IInterval<T> query)
         {
-            if (_list == null || sublist.Length == 0)
+            if (IsEmpty || sublist.Length == 0)
                 yield break;
 
             // Find first overlapping interval

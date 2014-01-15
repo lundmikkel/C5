@@ -289,7 +289,7 @@ namespace C5.Intervals
             get
             {
                 if (_maximumDepth < 0)
-                    _maximumDepth = ToArray().MaximumDepth(ref _intervalOfMaximumDepth, false);
+                    _maximumDepth = Sorted.MaximumDepth(ref _intervalOfMaximumDepth);
 
                 return _maximumDepth;
             }
@@ -368,7 +368,10 @@ namespace C5.Intervals
             foreach (var interval in findSplitNode(_root, query, n => { splitNode = n; }))
                 yield return interval;
 
-            foreach (var interval in findLeft(splitNode.Left, query).Concat(findRight(splitNode.Right, query)))
+            foreach (var interval in findLeft(splitNode.Left, query))
+                yield return interval;
+
+            foreach (var interval in findRight(splitNode.Right, query))
                 yield return interval;
         }
 

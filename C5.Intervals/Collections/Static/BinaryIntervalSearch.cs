@@ -88,7 +88,7 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override IEnumerator<I> GetEnumerator()
         {
-            return IsEmpty ? Enumerable.Empty<I>().GetEnumerator() : _lowSorted.Cast<I>().GetEnumerator();
+            return Sorted.GetEnumerator();
         }
 
         #endregion
@@ -106,40 +106,13 @@ namespace C5.Intervals
             get
             {
                 if (_maximumDepth < 0)
-                    _maximumDepth = findMaximumDepth();
+                {
+                    IInterval<T> intervalOfMaximumDepth = null;
+                    _maximumDepth = Sorted.MaximumDepth(ref intervalOfMaximumDepth);
+                }
 
                 return _maximumDepth;
             }
-        }
-
-        private int findMaximumDepth()
-        {
-            var max = 0;
-
-            // Get intervals and sort them by low, then high, endpoint
-            var sortedIntervals = _lowSorted;
-
-            if (sortedIntervals == null)
-                return 0;
-
-            // Create queue sorted on high intervals
-            var highComparer = ComparerFactory<IInterval<T>>.CreateComparer(IntervalExtensions.CompareHigh);
-            var queue = new IntervalHeap<IInterval<T>>(highComparer);
-
-            // Loop through intervals in sorted order
-            foreach (var interval in sortedIntervals)
-            {
-                // Remove all intervals from the queue not overlapping the current interval
-                while (!queue.IsEmpty && interval.CompareLowHigh(queue.FindMin()) > 0)
-                    queue.DeleteMin();
-
-                queue.Add(interval);
-
-                if (queue.Count > max)
-                    max = queue.Count;
-            }
-
-            return max;
         }
 
         /// <inheritdoc/>
@@ -158,21 +131,7 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
-            if (IsEmpty || !_span.Overlaps(query))
-                yield break;
-
-            // Search for the last overlap
-            var last = findLast(new IntervalBase<T>(query));
-
-            // Enumerate collection until it is reached
-            for (var i = 0; i < last; i++)
-            {
-                var interval = _lowSorted[i];
-
-                // Only return if it actually overlaps
-                if (interval.Overlaps(query))
-                    yield return interval;
-            }
+            return FindOverlaps(new IntervalBase<T>(query));
         }
 
         /// <inheritdoc/>
@@ -183,14 +142,13 @@ namespace C5.Intervals
 
             // Search for the last overlap
             var last = findLast(query);
+            I interval;
 
             // Enumerate collection until it is reached
             for (var i = 0; i < last; i++)
             {
-                var interval = _lowSorted[i];
-
                 // Only return if it actually overlaps
-                if (interval.Overlaps(query))
+                if ((interval = _lowSorted[i]).Overlaps(query))
                     yield return interval;
             }
         }

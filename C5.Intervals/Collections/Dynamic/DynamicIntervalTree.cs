@@ -615,6 +615,8 @@ namespace C5.Intervals
 
             public void UpdateSpan()
             {
+                // TODO: This could potentially be very expensive. A lot of intervals being created again and again
+
                 // No children
                 if (Left == null && Right == null)
                     Span = LocalSpan;
@@ -1139,16 +1141,7 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override IEnumerator<I> GetEnumerator()
         {
-            foreach (var node in nodes(_root))
-            {
-                if (node.IncludedList != null)
-                    foreach (var interval in node.IncludedList)
-                        yield return interval;
-
-                if (node.ExcludedList != null)
-                    foreach (var interval in node.ExcludedList)
-                        yield return interval;
-            }
+            return Sorted.GetEnumerator();
         }
 
         [Pure]
@@ -1171,8 +1164,6 @@ namespace C5.Intervals
         {
             get
             {
-                Contract.Ensures(Contract.Result<IEnumerable<I>>().IsSorted<I, T>());
-
                 foreach (var node in sortedNodes(_root))
                 {
                     if (node.IncludedList != null)
@@ -1186,19 +1177,39 @@ namespace C5.Intervals
             }
         }
 
-        private static IEnumerable<Node> sortedNodes(Node root)
+        private IEnumerable<Node> sortedNodes(Node root)
         {
             Contract.Ensures(Contract.Result<IEnumerable<Node>>().IsSorted());
 
-            while (root != null)
+            if (IsEmpty)
+                yield break;
+
+            var i = 0;
+            var stack = new Node[calcHeight(_count)];
+
+            var current = root;
+            while (i > 0 || current != null)
             {
-                foreach (var node in nodes(root.Left))
-                    yield return node;
-
-                yield return root;
-
-                root = root.Right;
+                if (current != null)
+                {
+                    // Push node onto stack and search left
+                    stack[i++] = current;
+                    current = current.Left;
+                }
+                else
+                {
+                    // Pop node and yield, then search right
+                    yield return current = stack[--i];
+                    current = current.Right;
+                }
             }
+        }
+
+        [Pure]
+        private static int calcHeight(int count)
+        {
+            // TODO: Should this be one more as the count is intervals, and not endpoints? Can't seem to make it fail.
+            return (int) Math.Ceiling(1.44 * Math.Log(count + 2, 2) - 0.328);
         }
 
         #endregion
@@ -1227,13 +1238,7 @@ namespace C5.Intervals
         public IInterval<T> Span { get { return new IntervalBase<T>(_root.Span); } }
 
         /// <inheritdoc/>
-        public int MaximumDepth
-        {
-            get
-            {
-                return IsEmpty ? 0 : _root.Max;
-            }
-        }
+        public int MaximumDepth { get { return IsEmpty ? 0 : _root.Max; } }
 
         /// <inheritdoc/>
         public bool AllowsOverlaps { get { return true; } }
@@ -1254,6 +1259,7 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
+            // TODO: Make sorted
             if (IsEmpty)
                 yield break;
 
@@ -1261,11 +1267,8 @@ namespace C5.Intervals
             _visit++;
 #endif
 
-            // TODO: Should this be one more as the count is intervals, and not endpoints? Can't seem to make it fail.
-            var height = (int) Math.Ceiling(1.44 * Math.Log(Count + 2, 2) - 0.328);
-            var stack = new Node[height];
             var i = 0;
-
+            var stack = new Node[calcHeight(Count)];
             stack[i++] = _root;
 
             while (i > 0)
