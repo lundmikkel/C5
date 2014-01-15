@@ -7,7 +7,7 @@ namespace C5.Intervals
 {
     // TODO: Finish data structure
     public class BinaryIntervalSearch<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
-        where I : IInterval<T>
+        where I : class, IInterval<T>
         where T : IComparable<T>
     {
         private readonly I[] _lowSorted, _highSorted;

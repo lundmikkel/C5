@@ -12,7 +12,7 @@ namespace C5.Intervals
     /// <typeparam name="I">The interval type.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
     public class NestedContainmentList<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
-        where I : IInterval<T>
+        where I : class, IInterval<T>
         where T : IComparable<T>
     {
         #region Fields
@@ -367,15 +367,16 @@ namespace C5.Intervals
         {
             get
             {
-                return Sorted.Cast<IInterval<T>>().Gaps();
+                return Sorted.Gaps();
             }
         }
 
         /// <inheritdoc/>
         public IEnumerable<IInterval<T>> FindGaps(IInterval<T> query)
         {
-            return FindOverlaps(query).Cast<IInterval<T>>().Gaps(query);
+            return FindOverlaps(query).Gaps(query);
         }
+
 
         #endregion
 

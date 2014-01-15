@@ -14,7 +14,7 @@ namespace C5.Intervals
     /// <typeparam name="I">The interval type.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
     public class DynamicIntervalTree<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
-        where I : IInterval<T>
+        where I : class, IInterval<T>
         where T : IComparable<T>
     {
         #region Fields
@@ -1306,7 +1306,6 @@ namespace C5.Intervals
             }
         }
 
-        /// <inheritdoc/>
         public IEnumerable<I> FindOverlapsSelective(IInterval<T> query)
         {
             if (IsEmpty)
@@ -1424,11 +1423,10 @@ namespace C5.Intervals
             get { return sortedNodes(_root).Select(n => n.LocalSpan).Where(x => x != null).Gaps(); }
         }
 
-
         /// <inheritdoc/>
         public IEnumerable<IInterval<T>> FindGaps(IInterval<T> query)
         {
-            return FindOverlaps(query).Cast<IInterval<T>>().Gaps(query, false);
+            return FindOverlaps(query).Gaps(query, false);
         }
 
         #endregion

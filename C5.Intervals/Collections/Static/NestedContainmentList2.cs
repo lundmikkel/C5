@@ -13,7 +13,7 @@ namespace C5.Intervals
     /// <typeparam name="I">The interval type.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
     public class NestedContainmentList2<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
-        where I : IInterval<T>
+        where I : class, IInterval<T>
         where T : IComparable<T>
     {
         private readonly Node[] _list;

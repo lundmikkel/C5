@@ -15,7 +15,7 @@ namespace C5.Intervals
     /// <typeparam name="T">The interval's endpoint values.</typeparam>
     [ContractClass(typeof(IntervalCollectionContract<,>))]
     public interface IIntervalCollection<I, T> : ICollectionValue<I>
-        where I : IInterval<T>
+        where I : class, IInterval<T>
         where T : IComparable<T>
     {
         #region Properties
@@ -204,7 +204,7 @@ namespace C5.Intervals
     // TODO: Add helpful strings to code contracts instead of displaying the actual contract
     [ContractClassFor(typeof(IIntervalCollection<,>))]
     internal abstract class IntervalCollectionContract<I, T> : IIntervalCollection<I, T>
-        where I : IInterval<T>
+        where I : class, IInterval<T>
         where T : IComparable<T>
     {
         #region Properties

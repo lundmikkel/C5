@@ -17,7 +17,7 @@ namespace C5.Intervals
     /// <typeparam name="I">The interval type.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
     public class DoublyLinkedFiniteIntervalTree<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
-        where I : IInterval<T>
+        where I : class, IInterval<T>
         where T : IComparable<T>
     {
         #region Fields
@@ -562,14 +562,15 @@ namespace C5.Intervals
 
         #region Find Overlaps
 
+        /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
-            var overlap = default(I);
-
+            I overlap = null;
             if (FindOverlap(query, ref overlap))
                 yield return overlap;
         }
 
+        /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
             if (IsEmpty)
@@ -620,6 +621,7 @@ namespace C5.Intervals
 
         #region Find Overlap
 
+        /// <inheritdoc/>
         public bool FindOverlap(T query, ref I overlap)
         {
             // Stop immediately if empty
@@ -695,6 +697,7 @@ namespace C5.Intervals
             }
         }
 
+        /// <inheritdoc/>
         public bool FindOverlap(IInterval<T> query, ref I overlap)
         {
             bool result;
@@ -716,7 +719,7 @@ namespace C5.Intervals
 
         public int CountOverlaps(T query)
         {
-            var overlap = default(I);
+            I overlap = null;
             return FindOverlap(query, ref overlap) ? 1 : 0;
         }
 
@@ -734,13 +737,13 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public IEnumerable<IInterval<T>> Gaps
         {
-            get { return Sorted.Cast<IInterval<T>>().Gaps(); }
+            get { return Sorted.Gaps(); }
         }
 
         /// <inheritdoc/>
         public IEnumerable<IInterval<T>> FindGaps(IInterval<T> query)
         {
-            return FindOverlaps(query).Cast<IInterval<T>>().Gaps(query);
+            return FindOverlaps(query).Gaps(query);
         }
 
         #endregion

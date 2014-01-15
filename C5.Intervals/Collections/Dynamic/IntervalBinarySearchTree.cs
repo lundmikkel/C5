@@ -19,7 +19,7 @@ namespace C5.Intervals
     /// <typeparam name="I">The interval type.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
     public class IntervalBinarySearchTree<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
-        where I : IInterval<T>
+        where I : class, IInterval<T>
         where T : IComparable<T>
     {
         #region Fields
@@ -723,7 +723,7 @@ namespace C5.Intervals
                     if (ReferenceEquals(_list[i], interval))
                     {
                         _list[i] = _list[--_count];
-                        _list[_count] = default(I);
+                        _list[_count] = null;
                         return true;
                     }
 
@@ -1170,8 +1170,7 @@ namespace C5.Intervals
         /// Create empty Interval Binary Search Tree.
         /// </summary>
         public IntervalBinarySearchTree()
-        {
-        }
+        { }
 
         /// <summary>
         /// Create an Interval Binary Search Tree with a collection of intervals.
@@ -1518,6 +1517,7 @@ namespace C5.Intervals
             }
         }
 
+        [Pure]
         private static int calcHeight(int count)
         {
             return (int) Math.Ceiling(1.44 * Math.Log(count * 2 + 2, 2) - 0.328 + 2);

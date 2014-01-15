@@ -6,7 +6,7 @@ using System.Linq;
 namespace C5.Intervals
 {
     public class IntervalCollectionFactory<I, T>
-        where I : IInterval<T>
+        where I : class, IInterval<T>
         where T : IComparable<T>
     {
         public static IIntervalCollection<I, T> CreateCollection(IEnumerable<I> intervals = null, bool allowsOverlaps = true, bool isReadOnly = false, bool allowsReferenceDuplicates = true)

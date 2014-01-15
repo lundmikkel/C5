@@ -5,8 +5,9 @@ using System.Linq;
 
 namespace C5.Intervals
 {
+
     public class StaticFiniteIntervalList<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
-        where I : IInterval<T>
+        where I : class, IInterval<T>
         where T : IComparable<T>
     {
         #region Fields
@@ -293,7 +294,7 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public int CountOverlaps(T query)
         {
-            var overlap = default(I);
+            I overlap = null;
             return FindOverlap(query, ref overlap) ? 1 : 0;
         }
 

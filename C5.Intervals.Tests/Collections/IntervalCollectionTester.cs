@@ -262,7 +262,7 @@ namespace C5.Intervals.Tests
         }
 
         protected IIntervalCollection<I, T> CreateCollection<I, T>(params I[] intervals)
-            where I : IInterval<T>
+            where I : class, IInterval<T>
             where T : IComparable<T>
         {
             var additionalParameters = AdditionalParameters();
@@ -283,7 +283,7 @@ namespace C5.Intervals.Tests
         }
 
         protected IIntervalCollection<I, T> CreateEmptyCollection<I, T>()
-            where I : IInterval<T>
+            where I : class, IInterval<T>
             where T : IComparable<T>
         {
             return CreateCollection<I, T>(new I[0]);
