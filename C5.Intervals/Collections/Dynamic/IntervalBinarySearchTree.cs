@@ -809,6 +809,16 @@ namespace C5.Intervals
                 return s.IsEmpty ? String.Empty : String.Join(", ", s.ToArray());
             }
 
+            public IEnumerable<I> SortedWithLow(T low)
+            {
+                var array = _set.Where(x => x.Low.CompareTo(low) == 0).ToArray();
+
+                if (array.Length > 1)
+                    Sorting.IntroSort(array, 0, array.Length, Comparer);
+
+                return array;
+            }
+
             public static IntervalSet operator -(IntervalSet s1, IntervalSet s2)
             {
                 IntervalSet res = null;
@@ -1606,8 +1616,7 @@ namespace C5.Intervals
                 return nodes(_root)
                     .SelectMany(node => node
                         .IntervalsEndingInNode
-                        .Where(interval => interval.Low.CompareTo(node.Key) == 0)
-                        .OrderBy(x => x, Comparer)
+                        .SortedWithLow(node.Key)
                     );
             }
         }
@@ -1633,13 +1642,13 @@ namespace C5.Intervals
             var stack = new Node[calcHeight(_count)];
 
             var current = root;
-            while (i > 0 || current != null)
+            var currentIsNotNull = true;
+            do
             {
-                if (current != null)
+                if (currentIsNotNull)
                 {
                     // Push node onto stack and search left
-                    stack[i++] = current;
-                    current = current.Left;
+                    current = (stack[i++] = current).Left;
                 }
                 else
                 {
@@ -1647,7 +1656,7 @@ namespace C5.Intervals
                     yield return current = stack[--i];
                     current = current.Right;
                 }
-            }
+            } while ((currentIsNotNull = current != null) || i > 0);
         }
 
         [Pure]
