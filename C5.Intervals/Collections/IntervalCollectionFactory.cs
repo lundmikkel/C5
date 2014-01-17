@@ -9,7 +9,7 @@ namespace C5.Intervals
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
-        public static IIntervalCollection<I, T> CreateCollection(IEnumerable<I> intervals = null, bool allowsOverlaps = true, bool isReadOnly = false, bool allowsReferenceDuplicates = true)
+        public static IIntervalCollection<I, T> CreateCollection(IEnumerable<I> intervals = null, bool allowsOverlaps = true, bool isReadOnly = false, bool allowsReferenceDuplicates = false)
         {
             // The returned collection will have the same 
             Contract.Ensures(Contract.Result<IIntervalCollection<I, T>>().IsReadOnly == isReadOnly);
@@ -31,7 +31,10 @@ namespace C5.Intervals
             {
                 // Allows overlaps
                 if (allowsOverlaps)
-                    return new IntervalBinarySearchTree<I, T>(intervals);
+                    if (allowsReferenceDuplicates)
+                        return new DynamicIntervalTree<I, T>(intervals);
+                    else
+                        return new IntervalBinarySearchTree<I, T>(intervals);
                 else
                     return new DoublyLinkedFiniteIntervalTree<I, T>(intervals);
             }
