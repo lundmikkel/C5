@@ -363,13 +363,13 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public IEnumerable<IInterval<T>> Gaps
         {
-            get { return this.Cast<IInterval<T>>().Gaps(); }
+            get { return Sorted.Gaps(); }
         }
 
         /// <inheritdoc/>
         public IEnumerable<IInterval<T>> FindGaps(IInterval<T> query)
         {
-            return FindOverlaps(query).Cast<IInterval<T>>().Gaps(query);
+            return FindOverlaps(query).Gaps(query);
         }
 
         #endregion

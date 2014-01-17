@@ -1361,14 +1361,14 @@ namespace C5.Intervals
         {
             get
             {
-                return Sorted.Cast<IInterval<T>>().Gaps();
+                return Sorted.Gaps();
             }
         }
 
         /// <inheritdoc/>
         public IEnumerable<IInterval<T>> FindGaps(IInterval<T> query)
         {
-            return FindOverlaps(query).Cast<IInterval<T>>().Gaps(query, false);
+            return FindOverlaps(query).Gaps(query, false);
         }
 
         #endregion
