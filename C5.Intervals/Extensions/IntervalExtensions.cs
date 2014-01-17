@@ -631,7 +631,7 @@ namespace C5.Intervals
             where T : IComparable<T>
         {
             Contract.Requires(intervals != null);
-            Contract.Requires(!isSorted || IntervalContractHelper.IsSorted<I, T>(intervals));
+            Contract.Requires(IntervalContractHelper.IsSorted<I, T>(intervals, isSorted));
             Contract.Ensures(Contract.Result<int>() >= 0);
             Contract.Ensures(Contract.Result<int>() == 0 || IntervalCollectionContractHelper.CountOverlaps(((IEnumerable<IInterval<T>>) intervals), Contract.ValueAtReturn(out intervalOfMaximumDepth)) == Contract.Result<int>());
 
@@ -677,7 +677,7 @@ namespace C5.Intervals
         {
             Contract.Requires(intervals != null);
             // Intervals must be sorted
-            Contract.Requires(!isSorted || IntervalContractHelper.IsSorted<IInterval<T>, T>(intervals));
+            Contract.Requires(IntervalContractHelper.IsSorted<IInterval<T>, T>(intervals, isSorted));
 
             // The gaps don't overlap the collection and they are within the span
             Contract.Ensures(span == null || Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), span.Contains));
@@ -744,7 +744,7 @@ namespace C5.Intervals
         {
             Contract.Requires(intervals != null);
             // Intervals must be sorted
-            Contract.Requires(!isSorted || IntervalContractHelper.IsSorted<I, T>(intervals));
+            Contract.Requires(IntervalContractHelper.IsSorted<I, T>(intervals, isSorted));
 
             // Sort the intervals if necessary
             if (!isSorted)
