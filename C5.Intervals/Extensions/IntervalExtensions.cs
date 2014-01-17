@@ -631,7 +631,7 @@ namespace C5.Intervals
             where T : IComparable<T>
         {
             Contract.Requires(intervals != null);
-            Contract.Requires(!isSorted || intervals.IsSorted<I, T>());
+            Contract.Requires(!isSorted || IntervalContractHelper.IsSorted<I, T>(intervals));
             Contract.Ensures(Contract.Result<int>() >= 0);
             Contract.Ensures(Contract.Result<int>() == 0 || IntervalCollectionContractHelper.CountOverlaps(((IEnumerable<IInterval<T>>) intervals), Contract.ValueAtReturn(out intervalOfMaximumDepth)) == Contract.Result<int>());
 
@@ -677,8 +677,7 @@ namespace C5.Intervals
         {
             Contract.Requires(intervals != null);
             // Intervals must be sorted
-            // TODO: Figure out why this doesn't work without extra method
-            Contract.Requires(intervals.IsSortedIfClaimed<IInterval<T>, T>(isSorted));
+            Contract.Requires(!isSorted || IntervalContractHelper.IsSorted<IInterval<T>, T>(intervals));
 
             // The gaps don't overlap the collection and they are within the span
             Contract.Ensures(span == null || Contract.ForAll(Contract.Result<IEnumerable<IInterval<T>>>(), span.Contains));
@@ -745,7 +744,7 @@ namespace C5.Intervals
         {
             Contract.Requires(intervals != null);
             // Intervals must be sorted
-            Contract.Requires(!isSorted || intervals.IsSorted<I, T>());
+            Contract.Requires(!isSorted || IntervalContractHelper.IsSorted<I, T>(intervals));
 
             // Sort the intervals if necessary
             if (!isSorted)
@@ -806,14 +805,6 @@ namespace C5.Intervals
             where T : IComparable<T>
         {
             return collection.IsSorted(IntervalExtensions.CreateComparer<I, T>());
-        }
-
-        [Pure]
-        public static bool IsSortedIfClaimed<I, T>(this IEnumerable<I> collection, bool isSorted)
-            where I : IInterval<T>
-            where T : IComparable<T>
-        {
-            return !isSorted || collection.IsSorted(IntervalExtensions.CreateComparer<I, T>());
         }
 
         /// <summary>
