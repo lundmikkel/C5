@@ -973,38 +973,51 @@ namespace C5.Intervals
 
         #region Properties
 
-        #region Span
+        #region Data Structure Properties
 
         /// <inheritdoc/>
-        public IInterval<T> Span
-        {
-            get
-            {
-                return new IntervalBase<T>(getLowest(_root), getHighest(_root));
-            }
-        }
+        public bool AllowsOverlaps { get { return true; } }
 
-        private static IInterval<T> getLowest(Node root)
-        {
-            Contract.Requires(root != null);
+        /// <inheritdoc/>
+        public bool AllowsReferenceDuplicates { get { return false; } }
 
-            if (root.Left != null)
-                return getLowest(root.Left);
+        #endregion
 
-            return root.Equal != null && !root.Equal.IsEmpty ? root.Equal.Choose() : root.IntervalsEndingInNode.Choose();
-        }
+        #region Collection Properties
 
-        private static IInterval<T> getHighest(Node root)
+        /// <inheritdoc/>
+        public IInterval<T> Span { get { return new IntervalBase<T>(LowestInterval, HighestInterval); } }
+
+        /// <inheritdoc/>
+        public I LowestInterval { get { return lowestList(_root).Choose(); } }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> LowestIntervals { get { return IsEmpty ? Enumerable.Empty<I>() : lowestList(_root); } }
+
+        /// <inheritdoc/>
+        public I HighestInterval { get { return highestList(_root).Choose(); } }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> HighestIntervals { get { return IsEmpty ? Enumerable.Empty<I>() : highestList(_root); } }
+
+        private static IntervalSet highestList(Node root)
         {
             Contract.Requires(root != null);
 
             if (root.Right != null)
-                return getHighest(root.Right);
+                return highestList(root.Right);
 
-            return root.Equal != null && !root.Equal.IsEmpty ? root.Equal.Choose() : root.IntervalsEndingInNode.Choose();
+            return root.Equal != null && !root.Equal.IsEmpty ? root.Equal : root.IntervalsEndingInNode;
         }
+        private static IntervalSet lowestList(Node root)
+        {
+            Contract.Requires(root != null);
 
-        #endregion
+            if (root.Left != null)
+                return lowestList(root.Left);
+
+            return root.Equal != null && !root.Equal.IsEmpty ? root.Equal : root.IntervalsEndingInNode;
+        }
 
         #region maximum depth
 
@@ -1059,11 +1072,7 @@ namespace C5.Intervals
 
         #endregion
 
-        /// <inheritdoc/>
-        public bool AllowsOverlaps { get { return true; } }
-
-        /// <inheritdoc/>
-        public bool AllowsReferenceDuplicates { get { return false; } }
+        #endregion
 
         /// <inheritdoc/>
         public IEnumerable<I> Sorted { get { return this.OrderBy(x => x, Comparer); } }

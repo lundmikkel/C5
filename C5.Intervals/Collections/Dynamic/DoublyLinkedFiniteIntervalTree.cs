@@ -466,13 +466,83 @@ namespace C5.Intervals
 
         #endregion
 
+        #region Events
+
+        /// <inheritdoc/>
+        public override EventTypeEnum ListenableEvents { get { return EventTypeEnum.Basic; } }
+        //public EventTypeEnum ActiveEvents { get; private set; }
+        //public event CollectionChangedHandler<T> CollectionChanged;
+        //public event CollectionClearedHandler<T> CollectionCleared;
+        //public event ItemsAddedHandler<T> ItemsAdded;
+        //public event ItemInsertedHandler<T> ItemInserted;
+        //public event ItemsRemovedHandler<T> ItemsRemoved;
+        //public event ItemRemovedAtHandler<T> ItemRemovedAt;
+
+        #endregion
+
+        #region Interval Collection
+
+        #region Properties
+
+        #region Data Structure Properties
+
+        /// <inheritdoc/>
+        public bool AllowsOverlaps { get { return false; } }
+
+        /// <inheritdoc/>
+        public bool AllowsReferenceDuplicates { get { return false; } }
+
+        #endregion
+
+        #region Collection Properties
+
+        /// <inheritdoc/>
+        public IInterval<T> Span { get { return new IntervalBase<T>(_first.Next.Key, _last.Previous.Key); } }
+
+        /// <inheritdoc/>
+        public I LowestInterval { get { return _first.Next.Key; } }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> LowestIntervals
+        {
+            get
+            {
+                if (IsEmpty)
+                    yield break;
+
+                yield return LowestInterval;
+            }
+        }
+
+        /// <inheritdoc/>
+        public I HighestInterval { get { return _last.Previous.Key; } }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> HighestIntervals
+        {
+            get
+            {
+                if (IsEmpty)
+                    yield break;
+
+                yield return HighestInterval;
+            }
+        }
+
+        /// <inheritdoc/>
+        public int MaximumDepth { get { return IsEmpty ? 0 : 1; } }
+
+        #endregion
+
+        #endregion
+
         #region Enumerable
 
         /// <inheritdoc/>
-        public override IEnumerator<I> GetEnumerator()
-        {
-            return Sorted.GetEnumerator();
-        }
+        public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> Sorted { get { return nextIntervals(_first.Next); } }
 
         /// <summary>
         /// Get the intervals in reverse order sorted in descending endpoint order.
@@ -522,41 +592,6 @@ namespace C5.Intervals
                 node = node.Previous;
             }
         }
-
-        #endregion
-
-        #region Events
-
-        /// <inheritdoc/>
-        public override EventTypeEnum ListenableEvents { get { return EventTypeEnum.Basic; } }
-        //public EventTypeEnum ActiveEvents { get; private set; }
-        //public event CollectionChangedHandler<T> CollectionChanged;
-        //public event CollectionClearedHandler<T> CollectionCleared;
-        //public event ItemsAddedHandler<T> ItemsAdded;
-        //public event ItemInsertedHandler<T> ItemInserted;
-        //public event ItemsRemovedHandler<T> ItemsRemoved;
-        //public event ItemRemovedAtHandler<T> ItemRemovedAt;
-
-        #endregion
-
-        #region Interval Collection
-
-        #region Properties
-
-        /// <inheritdoc/>
-        public IInterval<T> Span { get { return new IntervalBase<T>(_first.Next.Key, _last.Previous.Key); } }
-
-        /// <inheritdoc/>
-        public int MaximumDepth { get { return IsEmpty ? 0 : 1; } }
-
-        /// <inheritdoc/>
-        public bool AllowsOverlaps { get { return false; } }
-
-        /// <inheritdoc/>
-        public bool AllowsReferenceDuplicates { get { return false; } }
-
-        /// <inheritdoc/>
-        public IEnumerable<I> Sorted { get { return nextIntervals(_first.Next); } }
 
         #endregion
 

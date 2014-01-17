@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace C5.Intervals
@@ -19,8 +20,11 @@ namespace C5.Intervals
 
         private readonly Node[] _list;
         private readonly IInterval<T> _span;
-        private readonly Sublist _mainList;
+        private readonly Sublist _mainSublist;
         private readonly int _count;
+
+        private int _maximumDepth = -1;
+        private IInterval<T> _intervalOfMaximumDepth;
 
         #endregion
 
@@ -80,10 +84,10 @@ namespace C5.Intervals
                 _list = new Node[totalSection.Length];
 
                 // Build nested containment list recursively and save the upper-most list in the class
-                _mainList = new Sublist(0, createList(intervalsArray, totalSection, totalSection));
+                _mainSublist = new Sublist(0, createList(intervalsArray, totalSection, totalSection));
 
                 // Save span to allow for constant speeds on later requests
-                _span = new IntervalBase<T>(_list[_mainList.Start].Interval, _list[_mainList.Length + _mainList.Start - 1].Interval);
+                _span = new IntervalBase<T>(_list[_mainSublist.Start].Interval, _list[_mainSublist.Length + _mainSublist.Start - 1].Interval);
             }
         }
 
@@ -133,19 +137,14 @@ namespace C5.Intervals
 
         #region Enumerable
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
         /// <summary>
         /// Create an enumerator, enumerating the intervals in sorted order - sorted on low endpoint with shortest intervals first
         /// </summary>
         /// <returns>Enumerator</returns>
-        public override IEnumerator<I> GetEnumerator()
-        {
-            return Sorted.GetEnumerator();
-        }
+        public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> Sorted { get { return getEnumerator(_mainSublist); } }
 
         private IEnumerable<I> getEnumerator(Sublist sublist)
         {
@@ -192,14 +191,7 @@ namespace C5.Intervals
 
         #region Properties
 
-        /// <inheritdoc/>
-        public IInterval<T> Span { get { return _span; } }
-
-        /// <inheritdoc/>
-        public int MaximumDepth
-        {
-            get { throw new NotSupportedException(); }
-        }
+        #region Data Structure Properties
 
         /// <inheritdoc/>
         public bool AllowsOverlaps { get { return true; } }
@@ -207,8 +199,96 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get { return true; } }
 
+        #endregion
+
+        #region Collection Properties
+
         /// <inheritdoc/>
-        public IEnumerable<I> Sorted { get { return getEnumerator(_mainList); } }
+        public IInterval<T> Span { get { return _span; } }
+
+        /// <inheritdoc/>
+        public I LowestInterval { get { return _list[0].Interval; } }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> LowestIntervals
+        {
+            get
+            {
+                if (IsEmpty)
+                    yield break;
+
+                var lowestInterval = _list[0].Interval;
+
+                yield return lowestInterval;
+
+                // Iterate through bottom layer as long as the intervals share a low
+                for (var i = 1; i < _mainSublist.Length; i++)
+                {
+                    if (_list[i].Interval.CompareLow(lowestInterval) == 0)
+                        yield return _list[i].Interval;
+                    else
+                        yield break;
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public I HighestInterval { get { return _list[_mainSublist.Length - 1].Interval; } }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> HighestIntervals
+        {
+            get
+            {
+                if (IsEmpty)
+                    yield break;
+
+                var highestInterval = _list[_mainSublist.Length - 1].Interval;
+
+                yield return highestInterval;
+
+                // Iterate through bottom layer as long as the intervals share a low
+                for (var i = _mainSublist.Length - 2; i >= 0; i--)
+                {
+                    var interval = _list[i].Interval;
+                    if (interval.CompareHigh(highestInterval) == 0)
+                        yield return interval;
+                    else
+                        yield break;
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public int MaximumDepth
+        {
+            get
+            {
+                if (_maximumDepth < 0)
+                    _maximumDepth = Sorted.MaximumDepth(ref _intervalOfMaximumDepth);
+
+                return _maximumDepth;
+            }
+        }
+
+        /// <summary>
+        /// Get the interval in which the maximum depth is.
+        /// </summary>
+        public IInterval<T> IntervalOfMaximumDepth
+        {
+            get
+            {
+                // If the Maximum Depth is below 0, then the interval of maximum depth has not been set yet
+                Contract.Assert(_maximumDepth >= 0 || _intervalOfMaximumDepth == null);
+
+                if (_maximumDepth < 0)
+                    _maximumDepth = Sorted.MaximumDepth(ref _intervalOfMaximumDepth);
+
+                return _intervalOfMaximumDepth;
+            }
+        }
+
+        #endregion
 
         #endregion
 
@@ -217,13 +297,13 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
-            return findOverlaps(_mainList, new IntervalBase<T>(query));
+            return findOverlaps(_mainSublist, new IntervalBase<T>(query));
         }
 
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
-            return findOverlaps(_mainList, query);
+            return findOverlaps(_mainSublist, query);
         }
 
         private IEnumerable<I> findOverlaps(Sublist sublist, IInterval<T> query)
@@ -326,10 +406,10 @@ namespace C5.Intervals
                 return false;
 
             // Find first overlap
-            var i = findFirst(_mainList, query);
+            var i = findFirst(_mainSublist, query);
 
             // Check if index is in bound and if the interval overlaps the query
-            var result = _mainList.Start <= i && i < _mainList.End && _list[i].Interval.Overlaps(query);
+            var result = _mainSublist.Start <= i && i < _mainSublist.End && _list[i].Interval.Overlaps(query);
 
             if (result)
                 overlap = _list[i].Interval;

@@ -19,9 +19,13 @@ namespace C5.Intervals
         private readonly int _height;
         private readonly int _count;
         private readonly IInterval<T> _span;
+        private I _lowestInterval;
+        private I _highestInterval;
+
         private int _maximumDepth = -1;
         // TODO: Expose in a property
         private IInterval<T> _intervalOfMaximumDepth;
+
 
         private static readonly IComparer<I> LeftComparer = IntervalExtensions.CreateComparer<I, T>();
         private static readonly IComparer<I> RightComparer = IntervalExtensions.CreateReversedComparer<I, T>();
@@ -30,7 +34,7 @@ namespace C5.Intervals
 
         #region Inner classes
 
-        private sealed class Node
+        private class Node
         {
             #region Fields
 
@@ -46,7 +50,7 @@ namespace C5.Intervals
 
             #region Constructor
 
-            internal Node(I[] intervals, ref IInterval<T> span, ref int height)
+            internal Node(I[] intervals, ref I lowestInterval, ref I highestInterval, ref int height)
             {
                 Key = getKey(intervals);
 
@@ -89,28 +93,23 @@ namespace C5.Intervals
                 Sorting.IntroSort(LeftList, 0, count, LeftComparer);
                 Sorting.IntroSort(RightList, 0, count, RightComparer);
 
+                // Cache the lowest interval
+                if (LeftList[0].CompareLow(lowestInterval) < 0)
+                    lowestInterval = LeftList[0];
 
-                // Update span
-                var lowestInterval = LeftList[0];
-                // If the left most interval in the node has a lower Low than the current _span, update _span
-                if (lowestInterval.CompareLow(span) < 0)
-                    span = new IntervalBase<T>(lowestInterval, span);
-
-                // Update span
-                var highestInterval = RightList[0];
-                // If the right most interval in the node has a higher High than the current Span, update Span
-                if (span.CompareHigh(highestInterval) < 0)
-                    span = new IntervalBase<T>(span, highestInterval);
+                // Cache the highest interval
+                if (highestInterval.CompareHigh(RightList[0]) < 0)
+                    highestInterval = RightList[0];
 
                 var leftHeight = 0;
                 var rightHeight = 0;
 
                 // Construct interval tree recursively for Left and Right subtrees
                 if (lefts != null)
-                    Left = new Node(lefts.ToArray(), ref span, ref leftHeight);
+                    Left = new Node(lefts.ToArray(), ref lowestInterval, ref highestInterval, ref leftHeight);
 
                 if (rights != null)
-                    Right = new Node(rights.ToArray(), ref span, ref rightHeight);
+                    Right = new Node(rights.ToArray(), ref lowestInterval, ref highestInterval, ref rightHeight);
 
                 height = Math.Max(leftHeight, rightHeight) + 1;
             }
@@ -135,8 +134,11 @@ namespace C5.Intervals
 
             _count = intervalArray.Count();
 
-            _span = new IntervalBase<T>(intervalArray.First());
-            _root = new Node(intervalArray, ref _span, ref _height);
+            // Initialise variables to random interval
+            _lowestInterval = _highestInterval = intervalArray[0];
+
+            _root = new Node(intervalArray, ref _lowestInterval, ref _highestInterval, ref _height);
+            _span = new IntervalBase<T>(_lowestInterval, _highestInterval);
         }
 
         #endregion
@@ -205,51 +207,6 @@ namespace C5.Intervals
 
         #endregion
 
-        #region Enumerable
-
-        /// <inheritdoc/>
-        public override IEnumerator<I> GetEnumerator()
-        {
-            return getEnumerator(_root);
-        }
-
-        private IEnumerable<Node> nodes(Node root)
-        {
-            if (IsEmpty)
-                yield break;
-
-            var stack = new Node[_height];
-            var i = 0;
-
-            var current = root;
-            while (i > 0 || current != null)
-            {
-                if (current != null)
-                {
-                    stack[i++] = current;
-                    current = current.Left;
-                }
-                else
-                {
-                    current = stack[--i];
-                    yield return current;
-                    current = current.Right;
-                }
-            }
-        }
-
-        private IEnumerator<I> getEnumerator(Node root)
-        {
-            foreach (var node in nodes(root))
-            {
-                // Go through all intervals in the node
-                foreach (var interval in node.LeftList)
-                    yield return interval;
-            }
-        }
-
-        #endregion
-
         #region Collection Value
 
         /// <inheritdoc/>
@@ -274,10 +231,66 @@ namespace C5.Intervals
 
         #region Properties
 
+        #region Data Structure Properties
+
+        /// <inheritdoc/>
+        public bool AllowsOverlaps { get { return true; } }
+
+        /// <inheritdoc/>
+        public bool AllowsReferenceDuplicates { get { return true; } }
+
+        #endregion
+
+        #region Collection Properties
+
         #region Span
 
         /// <inheritdoc/>
         public IInterval<T> Span { get { return _span; } }
+
+        /// <inheritdoc/>
+        public I LowestInterval { get { return _lowestInterval; } }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> LowestIntervals
+        {
+            get
+            {
+                if (IsEmpty)
+                    yield break;
+
+                var node = _root;
+                while (node != null)
+                {
+                    foreach (var interval in node.LeftList.TakeWhile(x => x.CompareLow(_lowestInterval) == 0))
+                        yield return interval;
+
+                    node = node.Left;
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public I HighestInterval { get { return _highestInterval; } }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> HighestIntervals
+        {
+            get
+            {
+                if (IsEmpty)
+                    yield break;
+
+                var node = _root;
+                while (node != null)
+                {
+                    foreach (var interval in node.RightList.TakeWhile(x => x.CompareHigh(_highestInterval) == 0))
+                        yield return interval;
+
+                    node = node.Right;
+                }
+            }
+        }
 
         #endregion
 
@@ -297,11 +310,17 @@ namespace C5.Intervals
 
         #endregion
 
-        /// <inheritdoc/>
-        public bool AllowsOverlaps { get { return true; } }
+        #endregion
+
+        #endregion
+
+        #region Enumerable
 
         /// <inheritdoc/>
-        public bool AllowsReferenceDuplicates { get { return true; } }
+        public override IEnumerator<I> GetEnumerator()
+        {
+            return getEnumerator(_root);
+        }
 
         /// <inheritdoc/>
         public IEnumerable<I> Sorted
@@ -342,6 +361,41 @@ namespace C5.Intervals
                         current = current.Right;
                     }
                 }
+            }
+        }
+
+        private IEnumerable<Node> nodes(Node root)
+        {
+            if (IsEmpty)
+                yield break;
+
+            var stack = new Node[_height];
+            var i = 0;
+
+            var current = root;
+            while (i > 0 || current != null)
+            {
+                if (current != null)
+                {
+                    stack[i++] = current;
+                    current = current.Left;
+                }
+                else
+                {
+                    current = stack[--i];
+                    yield return current;
+                    current = current.Right;
+                }
+            }
+        }
+
+        private IEnumerator<I> getEnumerator(Node root)
+        {
+            foreach (var node in nodes(root))
+            {
+                // Go through all intervals in the node
+                foreach (var interval in node.LeftList)
+                    yield return interval;
             }
         }
 

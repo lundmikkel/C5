@@ -124,35 +124,54 @@ namespace C5.Intervals
 
         #endregion
 
-        #region Enumerable
+        #region Interval Collection
+
+        #region Properties
+
+        #region Data Structure Properties
 
         /// <inheritdoc/>
-        public override IEnumerator<I> GetEnumerator()
-        {
-            return Sorted.GetEnumerator();
-        }
+        public bool AllowsOverlaps { get { return false; } }
 
         /// <inheritdoc/>
-        public IEnumerable<I> Sorted
+        public bool AllowsReferenceDuplicates { get { return false; } }
+
+        #endregion
+
+        #region Collection Properties
+
+        /// <inheritdoc/>
+        public IInterval<T> Span { get { return _span; } }
+
+        /// <inheritdoc/>
+        public I LowestInterval { get { return _intervals[0]; } }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> LowestIntervals
         {
             get
             {
                 if (IsEmpty)
                     yield break;
 
-                for (var i = 0; i < _count; i++)
-                    yield return _intervals[i];
+                yield return LowestInterval;
             }
         }
 
-        #endregion
-
-        #region Interval Collection
-
-        #region Properties
+        /// <inheritdoc/>
+        public I HighestInterval { get { return _intervals[_count - 1]; } }
 
         /// <inheritdoc/>
-        public IInterval<T> Span { get { return _span; } }
+        public IEnumerable<I> HighestIntervals
+        {
+            get
+            {
+                if (IsEmpty)
+                    yield break;
+
+                yield return HighestInterval;
+            }
+        }
 
         #region Maximum Depth
 
@@ -164,11 +183,24 @@ namespace C5.Intervals
 
         #endregion
 
-        /// <inheritdoc/>
-        public bool AllowsOverlaps { get { return false; } }
+        #endregion
+
+        #endregion
+
+        #region Enumerable
 
         /// <inheritdoc/>
-        public bool AllowsReferenceDuplicates { get { return false; } }
+        public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> Sorted
+        {
+            get
+            {
+                for (var i = 0; i < _count; i++)
+                    yield return _intervals[i];
+            }
+        }
 
         #endregion
 

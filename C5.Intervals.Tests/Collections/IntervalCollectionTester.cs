@@ -544,79 +544,59 @@ namespace C5.Intervals.Tests
 
         #endregion
 
-        #region Enumerable
-
-        [Test]
-        [Category("Enumerable")]
-        public void Enumerable_EmptyCollection_Empty()
-        {
-            var collection = CreateEmptyCollection<Interval, int>();
-
-            CollectionAssert.IsEmpty(collection);
-        }
-
-        [Test]
-        [Category("Enumerable")]
-        public void Enumerable_SingleInterval_AreEqual()
-        {
-            var interval = SingleInterval();
-            var collection = CreateCollection<Interval, int>(interval);
-
-            CollectionAssert.AreEqual(new[] { interval }, collection);
-        }
-
-        [Test]
-        [Category("Enumerable")]
-        public void Enumerable_SingleObject_AreEquivalent()
-        {
-            var intervals = SingleObject();
-            var collection = CreateCollection<Interval, int>(intervals);
-
-            if (collection.AllowsReferenceDuplicates)
-                CollectionAssert.AreEquivalent(intervals, collection);
-            else
-                CollectionAssert.AreEquivalent(new[] { intervals.First() }, collection);
-        }
-
-        [Test]
-        [Category("Enumerable")]
-        public void Enumerable_DuplicateIntervals_AreEquivalent()
-        {
-            var intervals = DuplicateIntervals();
-            var collection = CreateCollection<Interval, int>(intervals);
-
-            CollectionAssert.AreEquivalent(collection.AllowsOverlaps ? intervals : new[] { intervals.First() }, collection);
-        }
-
-        [Test]
-        [Category("Enumerable")]
-        public void Enumerable_ManyIntervals_AreEquivalent()
-        {
-            var intervals = ManyIntervals();
-            var collection = CreateCollection<Interval, int>(intervals);
-
-            CollectionAssert.AreEquivalent(collection.AllowsOverlaps ? intervals : NonOverlapping(intervals), collection);
-            CollectionAssert.AllItemsAreUnique(collection);
-        }
-
-        #endregion
-
         #region Interval Collection
 
         #region Properties
 
-        #region Span
+        #region Data Structure Properties
+
+        #region Allows Overlaps
+        // TODO
+        #endregion
+
+        #region Allows Reference Duplicates
+
+        protected abstract bool AllowsReferenceDuplicates();
 
         [Test]
-        public void Span_EmptyCollection_Exception_FixedSeed()
+        [Category("Allows Reference Duplicates")]
+        public void AllowsReferenceDuplicates_EmptyCollection_DefinedResult()
         {
-            updateRandom(-1498148951);
-            Span_EmptyCollection_Exception();
+            var collection = CreateEmptyCollection<Interval, int>();
+
+            Assert.AreEqual(AllowsReferenceDuplicates(), collection.AllowsReferenceDuplicates);
         }
 
         [Test]
+        [Category("Allows Reference Duplicates")]
+        public void AllowsReferenceDuplicates_SingleInterval_DefinedResult()
+        {
+            var interval = SingleInterval();
+            var collection = CreateCollection<Interval, int>(interval);
+
+            Assert.AreEqual(AllowsReferenceDuplicates(), collection.AllowsReferenceDuplicates);
+        }
+
+        [Test]
+        [Category("Allows Reference Duplicates")]
+        public void AllowsReferenceDuplicates_ManyIntervals_DefinedResult()
+        {
+            var interval = ManyIntervals();
+            var collection = CreateCollection<Interval, int>(interval);
+
+            Assert.AreEqual(AllowsReferenceDuplicates(), collection.AllowsReferenceDuplicates);
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Collection Properties
+
+        #region Span
+
+        [Test]
         [Category("Span")]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void Span_EmptyCollection_Exception()
         {
             const string contractExceptionName = "System.Diagnostics.Contracts.__ContractsRuntime+ContractException";
@@ -640,7 +620,7 @@ namespace C5.Intervals.Tests
 
         [Test]
         [Category("Span")]
-        public void Span_SingleInterval_IntervalEqualsSpan()
+        public void Span_SingleInterval_SpanEqualsInterval()
         {
             var interval = SingleInterval();
             var collection = CreateCollection<Interval, int>(interval);
@@ -712,6 +692,313 @@ namespace C5.Intervals.Tests
             var span = collection.Span;
 
             Assert.True(interval1.IntervalEquals(span));
+        }
+
+        #endregion
+
+        #region Lowest Interval
+
+        [Test]
+        [Category("Lowest Interval")]
+        public void LowestInterval_EmptyCollection_Exception()
+        {
+            const string contractExceptionName = "System.Diagnostics.Contracts.__ContractsRuntime+ContractException";
+            var collection = CreateEmptyCollection<IInterval<int>, int>();
+
+            try
+            {
+                var lowestInterval = CreateEmptyCollection<Interval, int>().LowestInterval;
+            }
+            catch (Exception e)
+            {
+                if (e.GetType().FullName != contractExceptionName)
+                    throw;
+
+                Assert.Pass();
+                return;
+            }
+
+            Assert.Fail();
+        }
+
+        [Test]
+        [Category("Lowest Interval")]
+        public void LowestInterval_SingleInterval_LowestIntervalEqualsInterval()
+        {
+            var interval = SingleInterval();
+            var collection = CreateCollection<Interval, int>(interval);
+            var lowestInterval = collection.LowestInterval;
+
+            Assert.True(ReferenceEquals(lowestInterval, interval));
+        }
+
+        [Test]
+        [Category("Lowest Interval")]
+        public void LowestInterval_SingleObject_LowestIntervalEqualsAnInterval()
+        {
+            var intervals = SingleObject();
+            var collection = CreateCollection<Interval, int>(intervals);
+            var lowestInterval = collection.LowestInterval;
+
+            Assert.That(ReferenceEquals(lowestInterval, intervals[0]));
+        }
+
+        [Test]
+        [Category("Lowest Interval")]
+        public void LowestInterval_DuplicateIntervals_LowestIntervalEqualsAnInterval()
+        {
+            var intervals = DuplicateIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+            var lowestInterval = collection.LowestInterval;
+
+            Assert.That(lowestInterval.IntervalEquals(intervals[0]));
+        }
+
+        [Test]
+        [Category("Lowest Interval")]
+        public void LowestInterval_ManyIntervals_Lowest()
+        {
+            var intervals = ManyIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+            var lowestInterval = (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).LowestInterval<Interval, int>();
+
+            Assert.True(collection.LowestInterval.CompareLow(lowestInterval) == 0);
+        }
+
+        #endregion
+
+        #region Lowest Intervals
+
+        [Test]
+        [Category("Lowest Intervals")]
+        public void LowestIntervals_EmptyCollection_EmptyResult()
+        {
+            var collection = CreateEmptyCollection<IInterval<int>, int>();
+            Assert.That(collection.LowestIntervals, Is.Empty);
+        }
+
+        [Test]
+        [Category("Lowest Intervals")]
+        public void LowestIntervals_SingleInterval_LowestIntervalsEqualInterval()
+        {
+            var interval = SingleInterval();
+            var collection = CreateCollection<Interval, int>(interval);
+
+            Assert.That(collection.LowestIntervals.Count(), Is.EqualTo(1));
+            Assert.That(ReferenceEquals(collection.LowestIntervals.First(), interval));
+        }
+
+        [Test]
+        [Category("Lowest Intervals")]
+        public void LowestIntervals_SingleObject_LowestIntervalsEqualsIntervals()
+        {
+            var intervals = SingleObject();
+            var collection = CreateCollection<Interval, int>(intervals);
+            var lowestIntervals = collection.LowestIntervals;
+
+            if (collection.AllowsReferenceDuplicates)
+                Assert.That(lowestIntervals, Is.EqualTo(intervals));
+            else
+                Assert.That(lowestIntervals, Is.EqualTo(intervals.Take(1)));
+        }
+
+        [Test]
+        [Category("Lowest Intervals")]
+        public void LowestIntervals_DuplicateIntervals_LowestIntervalEqualsAnInterval()
+        {
+            var intervals = DuplicateIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+            var lowestIntervals = collection.AllowsOverlaps ? intervals : NonOverlapping(intervals);
+
+            Assert.That(collection.LowestIntervals, Is.EqualTo(lowestIntervals));
+        }
+
+        [Test]
+        [Category("Lowest Intervals")]
+        public void LowestIntervals_ManyIntervals_Lowests()
+        {
+            var intervals = ManyIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+            var lowestIntervals = (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).LowestIntervals<Interval, int>();
+
+            Assert.That(collection.LowestIntervals, Is.EqualTo(lowestIntervals));
+        }
+
+        [Test]
+        [Category("Lowest Intervals")]
+        public void LowestIntervals_ManyIntervalsWithManyLowIntervals_LowestIntervals()
+        {
+            IEnumerable<Interval> intervals = ManyIntervals();
+            var span = intervals.Span();
+            var length = span.High / Count - span.Low / Count;
+
+            var lowIntervals = new Interval[Count];
+
+            for (var i = 0; i < Count; i++)
+                lowIntervals[i] = new Interval(span.Low, span.Low + 1 + length * i, span.LowIncluded, span.HighIncluded);
+            intervals = intervals.Concat(lowIntervals);
+
+            var collection = CreateCollection<Interval, int>(intervals.ToArray());
+            var lowestIntervals = (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).LowestIntervals<Interval, int>();
+
+            Assert.That(collection.LowestIntervals, Is.EquivalentTo(lowestIntervals));
+        }
+
+        #endregion
+
+        #region Highest Interval
+
+        [Test]
+        [Category("Highest Interval")]
+        public void HighestInterval_EmptyCollection_Exception()
+        {
+            const string contractExceptionName = "System.Diagnostics.Contracts.__ContractsRuntime+ContractException";
+            var collection = CreateEmptyCollection<IInterval<int>, int>();
+
+            try
+            {
+                var highestInterval = CreateEmptyCollection<Interval, int>().HighestInterval;
+            }
+            catch (Exception e)
+            {
+                if (e.GetType().FullName != contractExceptionName)
+                    throw;
+
+                Assert.Pass();
+                return;
+            }
+
+            Assert.Fail();
+        }
+
+        [Test]
+        [Category("Highest Interval")]
+        public void HighestInterval_SingleInterval_HighestIntervalEqualsInterval()
+        {
+            var interval = SingleInterval();
+            var collection = CreateCollection<Interval, int>(interval);
+            var highestInterval = collection.HighestInterval;
+
+            Assert.True(ReferenceEquals(highestInterval, interval));
+        }
+
+        [Test]
+        [Category("Highest Interval")]
+        public void HighestInterval_SingleObject_HighestIntervalEqualsAnInterval()
+        {
+            var intervals = SingleObject();
+            var collection = CreateCollection<Interval, int>(intervals);
+            var highestInterval = collection.HighestInterval;
+
+            Assert.That(ReferenceEquals(highestInterval, intervals[0]));
+        }
+
+        [Test]
+        [Category("Highest Interval")]
+        public void HighestInterval_DuplicateIntervals_HighestIntervalEqualsAnInterval()
+        {
+            var intervals = DuplicateIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+            var highestInterval = collection.HighestInterval;
+
+            Assert.That(highestInterval.IntervalEquals(intervals[0]));
+        }
+
+        [Test]
+        [Category("Highest Interval")]
+        public void HighestInterval_ManyIntervals_Highest_FixedSeed()
+        {
+            updateRandom(497738314);
+            HighestInterval_ManyIntervals_Highest();
+        }
+
+        [Test]
+        [Category("Highest Interval")]
+        public void HighestInterval_ManyIntervals_Highest()
+        {
+            var intervals = ManyIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+            var highestInterval = (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).HighestInterval();
+
+            Assert.True(collection.HighestInterval.CompareHigh(highestInterval) == 0);
+        }
+
+        #endregion
+
+        #region Highest Intervals
+
+        [Test]
+        [Category("Highest Intervals")]
+        public void HighestIntervals_EmptyCollection_EmptyResult()
+        {
+            var collection = CreateEmptyCollection<IInterval<int>, int>();
+            Assert.That(collection.HighestIntervals, Is.Empty);
+        }
+
+        [Test]
+        [Category("Highest Intervals")]
+        public void HighestIntervals_SingleInterval_HighestIntervalsEqualInterval()
+        {
+            var interval = SingleInterval();
+            var collection = CreateCollection<Interval, int>(interval);
+
+            Assert.That(collection.HighestIntervals.Count(), Is.EqualTo(1));
+            Assert.That(ReferenceEquals(collection.HighestIntervals.First(), interval));
+        }
+
+        [Test]
+        [Category("Highest Intervals")]
+        public void HighestIntervals_SingleObject_HighestIntervalsEqualIntervals()
+        {
+            var intervals = SingleObject();
+            var collection = CreateCollection<Interval, int>(intervals);
+
+            if (collection.AllowsReferenceDuplicates)
+                Assert.That(collection.HighestIntervals, Is.EqualTo(intervals));
+            else
+                Assert.That(collection.HighestIntervals, Is.EqualTo(intervals.Take(1)));
+        }
+
+        [Test]
+        [Category("Highest Intervals")]
+        public void HighestIntervals_DuplicateIntervals_HighestIntervalsEqualIntervals()
+        {
+            var intervals = DuplicateIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+            var highestIntervals = collection.AllowsOverlaps ? intervals : NonOverlapping(intervals);
+
+            Assert.That(collection.HighestIntervals, Is.EqualTo(highestIntervals));
+        }
+
+        [Test]
+        [Category("Highest Intervals")]
+        public void HighestIntervals_ManyIntervals_Highest()
+        {
+            var intervals = ManyIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+            var highestIntervals = (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).HighestIntervals<Interval, int>();
+
+            Assert.That(collection.HighestIntervals, Is.EqualTo(highestIntervals));
+        }
+
+        [Test]
+        [Category("Highest Intervals")]
+        public void HighestIntervals_ManyIntervalsWithManyHighIntervals_HighestIntervals()
+        {
+            IEnumerable<Interval> intervals = ManyIntervals();
+            var span = intervals.Span();
+            var length = span.High / Count - span.Low / Count;
+
+            var highIntervals = new Interval[Count];
+
+            for (var i = 0; i < Count; i++)
+                highIntervals[i] = new Interval(span.High - 1 - length * 1, span.High, span.LowIncluded, span.HighIncluded);
+            intervals = intervals.Concat(highIntervals);
+
+            var collection = CreateCollection<Interval, int>(intervals.ToArray());
+            var highestIntervals = (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).HighestIntervals<Interval, int>();
+
+            Assert.That(collection.HighestIntervals, Is.EquivalentTo(highestIntervals));
         }
 
         #endregion
@@ -844,41 +1131,65 @@ namespace C5.Intervals.Tests
 
         #endregion
 
-        #region Allows Overlaps
-        // TODO
         #endregion
 
-        #region Allows Reference Duplicates
+        #endregion
 
-        protected abstract bool AllowsReferenceDuplicates();
+        #region Enumerable
+
+        #region Get Enumerator
 
         [Test]
-        [Category("Allows Reference Duplicates")]
-        public void AllowsReferenceDuplicates_EmptyCollection_DefinedResult()
+        [Category("Enumerable")]
+        public void Enumerable_EmptyCollection_Empty()
         {
             var collection = CreateEmptyCollection<Interval, int>();
 
-            Assert.AreEqual(AllowsReferenceDuplicates(), collection.AllowsReferenceDuplicates);
+            CollectionAssert.IsEmpty(collection);
         }
 
         [Test]
-        [Category("Allows Reference Duplicates")]
-        public void AllowsReferenceDuplicates_SingleInterval_DefinedResult()
+        [Category("Enumerable")]
+        public void Enumerable_SingleInterval_AreEqual()
         {
             var interval = SingleInterval();
             var collection = CreateCollection<Interval, int>(interval);
 
-            Assert.AreEqual(AllowsReferenceDuplicates(), collection.AllowsReferenceDuplicates);
+            CollectionAssert.AreEqual(new[] { interval }, collection);
         }
 
         [Test]
-        [Category("Allows Reference Duplicates")]
-        public void AllowsReferenceDuplicates_ManyIntervals_DefinedResult()
+        [Category("Enumerable")]
+        public void Enumerable_SingleObject_AreEquivalent()
         {
-            var interval = ManyIntervals();
-            var collection = CreateCollection<Interval, int>(interval);
+            var intervals = SingleObject();
+            var collection = CreateCollection<Interval, int>(intervals);
 
-            Assert.AreEqual(AllowsReferenceDuplicates(), collection.AllowsReferenceDuplicates);
+            if (collection.AllowsReferenceDuplicates)
+                CollectionAssert.AreEquivalent(intervals, collection);
+            else
+                CollectionAssert.AreEquivalent(new[] { intervals.First() }, collection);
+        }
+
+        [Test]
+        [Category("Enumerable")]
+        public void Enumerable_DuplicateIntervals_AreEquivalent()
+        {
+            var intervals = DuplicateIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+
+            CollectionAssert.AreEquivalent(collection.AllowsOverlaps ? intervals : new[] { intervals.First() }, collection);
+        }
+
+        [Test]
+        [Category("Enumerable")]
+        public void Enumerable_ManyIntervals_AreEquivalent()
+        {
+            var intervals = ManyIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+
+            CollectionAssert.AreEquivalent(collection.AllowsOverlaps ? intervals : NonOverlapping(intervals), collection);
+            CollectionAssert.AllItemsAreUnique(collection);
         }
 
         #endregion
@@ -2316,6 +2627,14 @@ namespace C5.Intervals.Tests
         #endregion
 
         #region Large Scale Random
+
+        [Test]
+        [Category("Large Scale")]
+        public void Random_CallWholeInterface_FixedSeed()
+        {
+            updateRandom(550523346);
+            Random_CallWholeInterface();
+        }
 
         [Test]
         [Category("Large Scale")]

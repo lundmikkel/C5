@@ -19,6 +19,8 @@ namespace C5.Intervals
         private readonly Node[] _list;
         private readonly IInterval<T> _span;
         private readonly int _count;
+        private int _maximumDepth;
+        private IInterval<T> _intervalOfMaximumDepth;
 
         #region Node nested classes
 
@@ -117,44 +119,7 @@ namespace C5.Intervals
 
         #endregion
 
-        #region IEnumerable
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        /// <summary>
-        /// Create an enumerator, enumerating the intervals in sorted order - sorted on low endpoint with shortest intervals first
-        /// </summary>
-        /// <returns>Enumerator</returns>
-        public override IEnumerator<I> GetEnumerator()
-        {
-            return Sorted.GetEnumerator();
-        }
-
-        private IEnumerable<I> getEnumerator(IEnumerable<Node> list)
-        {
-            // Just for good measures
-            if (list == null)
-                yield break;
-
-            foreach (var node in list)
-            {
-                // Yield the interval itself before the sublist to maintain sorting order
-                yield return node.Interval;
-
-                if (node.Sublist != null)
-                    foreach (var interval in getEnumerator(node.Sublist))
-                        yield return interval;
-            }
-        }
-
-        #endregion
-
-
-        #region ICollectionValue
-
+        #region Collection Value
 
         /// <inheritdoc/>
         public override bool IsEmpty { get { return Count == 0; } }
@@ -174,16 +139,11 @@ namespace C5.Intervals
 
         #endregion
 
-        #region IIntervaled
+        #region Interval Collection
 
-        /// <inheritdoc/>
-        public IInterval<T> Span { get { return _span; } }
+        #region Properties
 
-        /// <inheritdoc/>
-        public int MaximumDepth
-        {
-            get { throw new NotSupportedException(); }
-        }
+        #region Data Structure Properties
 
         /// <inheritdoc/>
         public bool AllowsOverlaps { get { return true; } }
@@ -191,8 +151,119 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get { return true; } }
 
+        #endregion
+
+        #region Collection Properties
+
+        /// <inheritdoc/>
+        public IInterval<T> Span { get { return _span; } }
+
+        public I LowestInterval { get { return _list[0].Interval; } }
+
+        public IEnumerable<I> LowestIntervals
+        {
+            get
+            {
+                if (IsEmpty)
+                    yield break;
+
+                var lowestInterval = _list[0].Interval;
+
+                yield return lowestInterval;
+
+                // Iterate through bottom layer as long as the intervals share a low
+                for (var i = 1; i < _list.Length; i++)
+                {
+                    if (_list[i].Interval.CompareLow(lowestInterval) == 0)
+                        yield return _list[i].Interval;
+                    else
+                        yield break;
+                }
+            }
+        }
+
+        public I HighestInterval { get { return _list[_list.Length - 1].Interval; } }
+        public IEnumerable<I> HighestIntervals
+        {
+            get
+            {
+                if (IsEmpty)
+                    yield break;
+
+                var highestInterval = _list[_list.Length - 1].Interval;
+
+                yield return highestInterval;
+
+                // Iterate through bottom layer as long as the intervals share a low
+                for (var i = _list.Length - 2; i >= 0; i--)
+                {
+                    if (_list[i].Interval.CompareHigh(highestInterval) == 0)
+                        yield return _list[i].Interval;
+                    else
+                        yield break;
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public int MaximumDepth
+        {
+            get
+            {
+                if (_maximumDepth < 0)
+                    _maximumDepth = Sorted.MaximumDepth(ref _intervalOfMaximumDepth);
+
+                return _maximumDepth;
+            }
+        }
+
+        /// <summary>
+        /// Get the interval in which the maximum depth is.
+        /// </summary>
+        public IInterval<T> IntervalOfMaximumDepth
+        {
+            get
+            {
+                if (_maximumDepth < 0)
+                    _maximumDepth = Sorted.MaximumDepth(ref _intervalOfMaximumDepth);
+
+                return _intervalOfMaximumDepth;
+            }
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Enumerable
+
+        /// <summary>
+        /// Create an enumerator, enumerating the intervals in sorted order - sorted on low endpoint with shortest intervals first
+        /// </summary>
+        /// <returns>Enumerator</returns>
+        public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
+
         /// <inheritdoc/>
         public IEnumerable<I> Sorted { get { return getEnumerator(_list); } }
+
+        private IEnumerable<I> getEnumerator(IEnumerable<Node> list)
+        {
+            // Just for good measures
+            if (list == null)
+                yield break;
+
+            foreach (var node in list)
+            {
+                // Yield the interval itself before the sublist to maintain sorting order
+                yield return node.Interval;
+
+                if (node.Sublist != null)
+                    foreach (var interval in getEnumerator(node.Sublist))
+                        yield return interval;
+            }
+        }
+
+        #endregion
 
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)

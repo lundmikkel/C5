@@ -128,6 +128,8 @@ namespace C5.Intervals
             // TODO: Add to signature
             var isSorted = false;
 
+            // TODO: Calculate the maximum depth during construction based on argument
+
             // Make intervals to array to allow fast sorting and counting
             _sorted = intervals as I[] ?? intervals.ToArray();
 
@@ -287,25 +289,80 @@ namespace C5.Intervals
 
         #endregion
 
-        #region Enumerable
-
-        /// <inheritdoc/>
-        public override IEnumerator<I> GetEnumerator()
-        {
-            return Sorted.GetEnumerator();
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<I> Sorted { get { return _sorted; } }
-
-        #endregion
-
         #region Interval Collection
 
         #region Properties
 
+        #region Data Structure Properties
+
+        // TODO: Support user setting the value
+        /// <inheritdoc/>
+        public bool AllowsOverlaps { get { return true; } }
+
+        // TODO: Support user setting the value
+        /// <inheritdoc/>
+        public bool AllowsReferenceDuplicates { get { return true; } }
+
+        #endregion
+
+        #region Collection Properties
+
         /// <inheritdoc/>
         public IInterval<T> Span { get { return _span; } }
+
+        /// <inheritdoc/>
+        public I LowestInterval { get { return _intervalLayers[0][0]; } }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> LowestIntervals
+        {
+            get
+            {
+                if (IsEmpty)
+                    yield break;
+
+                var bottomLayer = _intervalLayers[0];
+                var lowestInterval = bottomLayer[0];
+
+                yield return lowestInterval;
+
+                // Iterate through bottom layer as long as the intervals share a low
+                for (var i = 1; i < _firstLayerCount; i++)
+                {
+                    if (bottomLayer[i].CompareLow(lowestInterval) == 0)
+                        yield return bottomLayer[i];
+                    else
+                        yield break;
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public I HighestInterval { get { return _intervalLayers[0][_firstLayerCount - 1]; } }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> HighestIntervals
+        {
+            get
+            {
+                if (IsEmpty)
+                    yield break;
+
+                var bottomLayer = _intervalLayers[0];
+                var highestInterval = bottomLayer[_firstLayerCount - 1];
+
+                yield return highestInterval;
+
+                // Iterate through bottom layer as long as the intervals share a low
+                for (var i = _firstLayerCount - 2; i >= 0; i--)
+                {
+                    if (bottomLayer[i].CompareHigh(highestInterval) == 0)
+                        yield return bottomLayer[i];
+                    else
+                        yield break;
+                }
+            }
+        }
 
         #region Maximum Depth
 
@@ -396,13 +453,17 @@ namespace C5.Intervals
 
         #endregion
 
-        // TODO: Support user setting the value
-        /// <inheritdoc/>
-        public bool AllowsOverlaps { get { return true; } }
+        #endregion
 
-        // TODO: Support user setting the value
+        #endregion
+
+        #region Enumerable
+
         /// <inheritdoc/>
-        public bool AllowsReferenceDuplicates { get { return true; } }
+        public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> Sorted { get { return _sorted; } }
 
         #endregion
 

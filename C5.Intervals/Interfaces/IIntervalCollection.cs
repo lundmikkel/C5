@@ -20,22 +20,7 @@ namespace C5.Intervals
     {
         #region Properties
 
-        /// <summary>
-        /// The smallest interval that spans all intervals in the collection. The interval's low is the lowest low endpoint in the collection and the high is the highest high endpoint.
-        /// <c>coll.FindOverlaps(coll.Span())</c> will by definition return all intervals in the collection.
-        /// </summary>
-        /// <remarks>Not defined for an empty collection.</remarks>
-        /// <returns>The smallest spanning interval.</returns>
-        /// <exception cref="InvalidOperationException">Thrown if called on an empty collection.</exception>
-        [Pure]
-        IInterval<T> Span { get; }
-
-        /// <summary>
-        /// The maximum number of intervals overlapping at a single point in the collection.
-        /// </summary>
-        /// <remarks>The point of maximum depth may not be representable with an endpoint value, as it could be between two descrete values.</remarks>
-        [Pure]
-        int MaximumDepth { get; }
+        #region Data Structure Properties
 
         /// <summary>
         /// Indicates if the collection supports overlapping intervals. If a collection supports
@@ -52,6 +37,72 @@ namespace C5.Intervals
         /// <value>True if this collection allows reference duplicates.</value>
         bool AllowsReferenceDuplicates { get; }
 
+        #endregion
+
+        #region Collection Properties
+
+        /// <summary>
+        /// The smallest interval that spans all intervals in the collection. The interval's low is
+        /// the lowest low endpoint in the collection and the high is the highest high endpoint.
+        /// <c>coll.FindOverlaps(coll.Span())</c> will by definition return all intervals in the collection.
+        /// </summary>
+        /// <remarks>
+        /// Not defined for an empty collection.
+        /// </remarks>
+        /// <returns>The smallest spanning interval.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if called on an empty collection.
+        /// </exception>
+        [Pure]
+        IInterval<T> Span { get; }
+
+        /// <summary>
+        /// Returns the interval with the lowest (low) endpoint in the collection. If there are
+        /// multiple intervals that share the lowest endpoint, the interval that is fastest to
+        /// retrieve will be returned.
+        /// </summary>
+        /// <remarks>Not defined for an empty collection.</remarks>
+        /// <value>An interval with the lowest endpoint in the collection.</value>
+        I LowestInterval { get; }
+
+        /// <summary>
+        /// Returns all intervals with the highest (high) endpoint in the collection. If the
+        /// collection is empty, the enumerable will be empty. If the collection does not allow
+        /// overlaps, the result will only contain one interval.
+        /// </summary>
+        /// <value>All intervals with the highest endpoint in the collection.</value>
+        IEnumerable<I> LowestIntervals { get; }
+
+        /// <summary>
+        /// Returns the interval with the highest (high) endpoint in the collection. If there are
+        /// multiple intervals that share the highest endpoint, the interval that is fastest to
+        /// retrieve will be returned.
+        /// </summary>
+        /// <remarks>Not defined for an empty collection.</remarks>
+        /// <value>An interval with the highest endpoint in the collection.</value>
+        I HighestInterval { get; }
+
+        /// <summary>
+        /// Returns all intervals with the highest (high) endpoint in the collection. If the
+        /// collection is empty, the enumerable will be empty. If the collection does not allow
+        /// overlaps, the result will only contain one interval.
+        /// </summary>
+        /// <value>All intervals with the highest endpoint in the collection.</value>
+        IEnumerable<I> HighestIntervals { get; }
+
+        /// <summary>
+        /// The maximum number of intervals overlapping at a single point in the collection.
+        /// </summary>
+        /// <remarks>The point of maximum depth may not be representable with an endpoint value, as it could be between two discrete values.</remarks>
+        [Pure]
+        int MaximumDepth { get; }
+
+        #endregion
+
+        #endregion
+
+        #region Enumerable
+
         /// <summary>
         /// Create an enumerable, enumerating all intervals in the collection in sorted order.
         /// This might be slower than using the normal enumerator, but it ensures that the
@@ -61,8 +112,6 @@ namespace C5.Intervals
         IEnumerable<I> Sorted { get; }
 
         #endregion
-
-        //TODO: Add a Enumerable group documenting the behavior!
 
         #region Find Overlaps
 
@@ -209,6 +258,25 @@ namespace C5.Intervals
     {
         #region Properties
 
+        #region Data Structure Properties
+
+        public abstract bool AllowsOverlaps { get; }
+
+        public bool AllowsReferenceDuplicates
+        {
+            get
+            {
+                // If the collection doesn't support overlaps it can't support reference duplicates either
+                Contract.Ensures(!Contract.Result<bool>() || AllowsOverlaps);
+
+                throw new NotImplementedException();
+            }
+        }
+
+        #endregion
+
+        #region Collection Properties
+
         public IInterval<T> Span
         {
             get
@@ -223,6 +291,62 @@ namespace C5.Intervals
                 Contract.Ensures(Contract.Exists(this, x => Contract.Result<IInterval<T>>().CompareLow(x) == 0));
                 // There is an interval that has the same high as span
                 Contract.Ensures(Contract.Exists(this, x => Contract.Result<IInterval<T>>().CompareHigh(x) == 0));
+
+                throw new NotImplementedException();
+            }
+        }
+
+        public I LowestInterval
+        {
+            get
+            {
+                Contract.Requires(!IsEmpty);
+
+                Contract.Ensures(Contract.Result<I>() != null);
+                Contract.Ensures(Contract.ForAll(this, x => Contract.Result<I>().CompareLow(x) <= 0));
+                Contract.Ensures(Contract.Exists(this, x => ReferenceEquals(x, Contract.Result<I>())));
+
+                throw new NotImplementedException();
+            }
+        }
+
+        public IEnumerable<I> LowestIntervals
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<IEnumerable<I>>() != null);
+                Contract.Ensures(IsEmpty != Contract.Result<IEnumerable<I>>().Any());
+                Contract.Ensures(AllowsOverlaps || Contract.Result<IEnumerable<I>>().Count() == (IsEmpty ? 0 : 1));
+                Contract.Ensures(Contract.ForAll(this, x => Contract.ForAll(Contract.Result<IEnumerable<I>>(), y => y.CompareLow(x) <= 0)));
+                Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<I>>(), x => Contract.Exists(this, y => ReferenceEquals(x, y))));
+
+                throw new NotImplementedException();
+            }
+        }
+
+        public I HighestInterval
+        {
+            get
+            {
+                Contract.Requires(!IsEmpty);
+
+                Contract.Ensures(Contract.Result<I>() != null);
+                Contract.Ensures(Contract.ForAll(this, x => x.CompareHigh(Contract.Result<I>()) <= 0));
+                Contract.Ensures(Contract.Exists(this, x => ReferenceEquals(x, Contract.Result<I>())));
+
+                throw new NotImplementedException();
+            }
+        }
+
+        public IEnumerable<I> HighestIntervals
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<IEnumerable<I>>() != null);
+                Contract.Ensures(IsEmpty == !Contract.Result<IEnumerable<I>>().Any());
+                Contract.Ensures(AllowsOverlaps || Contract.Result<IEnumerable<I>>().Count() == (IsEmpty ? 0 : 1));
+                Contract.Ensures(Contract.ForAll(this, x => Contract.ForAll(Contract.Result<IEnumerable<I>>(), y => x.CompareHigh(y) <= 0)));
+                Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<I>>(), x => Contract.Exists(this, y => ReferenceEquals(x, y))));
 
                 throw new NotImplementedException();
             }
@@ -247,18 +371,11 @@ namespace C5.Intervals
             }
         }
 
-        public abstract bool AllowsOverlaps { get; }
+        #endregion
 
-        public bool AllowsReferenceDuplicates
-        {
-            get
-            {
-                // If the collection doesn't support overlaps it can't support reference duplicates either
-                Contract.Ensures(!Contract.Result<bool>() || AllowsOverlaps);
+        #endregion
 
-                throw new NotImplementedException();
-            }
-        }
+        #region Enumerable
 
         public IEnumerable<I> Sorted
         {

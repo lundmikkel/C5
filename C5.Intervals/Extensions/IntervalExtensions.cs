@@ -497,11 +497,11 @@ namespace C5.Intervals
         public static IInterval<T> Span<T>(this IEnumerable<IInterval<T>> intervals)
             where T : IComparable<T>
         {
+            Contract.Requires(intervals.Any());
+
             var enumerator = intervals.GetEnumerator();
 
-            if (!enumerator.MoveNext())
-                throw new InvalidOperationException("An empty collection has no span");
-
+            enumerator.MoveNext();
             var low = enumerator.Current;
             var high = enumerator.Current;
 
@@ -516,6 +516,103 @@ namespace C5.Intervals
             }
 
             return new IntervalBase<T>(low, high);
+        }
+
+        [Pure]
+        public static I LowestInterval<I, T>(this IEnumerable<I> intervals)
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            Contract.Requires(intervals.Any());
+
+            var enumerator = intervals.GetEnumerator();
+            enumerator.MoveNext();
+            var low = enumerator.Current;
+
+            while (enumerator.MoveNext())
+                if (enumerator.Current.CompareLow(low) < 0)
+                    low = enumerator.Current;
+
+            return low;
+        }
+
+        [Pure]
+        public static IEnumerable<I> LowestIntervals<I, T>(this IEnumerable<I> intervals)
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            Contract.Requires(intervals.Any());
+
+            var enumerator = intervals.GetEnumerator();
+            if (!enumerator.MoveNext())
+                return Enumerable.Empty<I>();
+
+            var list = new LinkedList<I>();
+            var low = enumerator.Current;
+            list.Add(low);
+
+            while (enumerator.MoveNext())
+            {
+                var compare = enumerator.Current.CompareLow(low);
+
+                if (compare > 0)
+                    continue;
+
+                if (compare < 0)
+                    list.Clear();
+
+                list.Add(low = enumerator.Current);
+            }
+
+            return list;
+        }
+
+        [Pure]
+        public static IInterval<T> HighestInterval<T>(this IEnumerable<IInterval<T>> intervals)
+            where T : IComparable<T>
+        {
+            Contract.Requires(intervals.Any());
+
+            var enumerator = intervals.GetEnumerator();
+            enumerator.MoveNext();
+            var highestInterval = enumerator.Current;
+
+            while (enumerator.MoveNext())
+                if (highestInterval.CompareHigh(enumerator.Current) < 0)
+                    highestInterval = enumerator.Current;
+
+            return highestInterval;
+        }
+
+        [Pure]
+        public static IEnumerable<I> HighestIntervals<I, T>(this IEnumerable<I> intervals)
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            Contract.Requires(intervals.Any());
+
+            var enumerator = intervals.GetEnumerator();
+            if (!enumerator.MoveNext())
+                return Enumerable.Empty<I>();
+
+            var list = new LinkedList<I>();
+            var high = enumerator.Current;
+            list.Add(high);
+
+            while (enumerator.MoveNext())
+            {
+                var compare = high.CompareHigh(enumerator.Current);
+
+                if (compare > 0)
+                    continue;
+
+                if (compare < 0)
+                    list.Clear();
+
+                list.Add(high = enumerator.Current);
+            }
+
+            return list;
         }
 
         /// <summary>

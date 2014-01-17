@@ -1465,18 +1465,157 @@ namespace C5.Intervals
 
         #endregion
 
+        #region Events
+
+        /// <inheritdoc/>
+        public override EventTypeEnum ListenableEvents { get { return EventTypeEnum.Basic; } }
+        //public EventTypeEnum ActiveEvents { get; private set; }
+        //public event CollectionChangedHandler<T> CollectionChanged;
+        //public event CollectionClearedHandler<T> CollectionCleared;
+        //public event ItemsAddedHandler<T> ItemsAdded;
+        //public event ItemInsertedHandler<T> ItemInserted;
+        //public event ItemsRemovedHandler<T> ItemsRemoved;
+        //public event ItemRemovedAtHandler<T> ItemRemovedAt;
+
+        #endregion
+
+        #region Interval Collection
+
+        #region Properties
+
+        #region Data Structure Properties
+
+        /// <inheritdoc/>
+        public bool AllowsOverlaps { get { return true; } }
+
+        /// <inheritdoc/>
+        public bool AllowsReferenceDuplicates { get { return false; } }
+
+        #endregion
+
+        #region Collection Properties
+
+        /// <inheritdoc/>
+        public IInterval<T> Span
+        {
+            get
+            {
+                return _span ?? (_span = new IntervalBase<T>(LowestInterval, HighestInterval));
+            }
+        }
+
+        /// <inheritdoc/>
+        public I LowestInterval { get { return lowestHighestList(_root, true).Choose(); } }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> LowestIntervals { get { return IsEmpty ? Enumerable.Empty<I>() : lowestHighestList(_root, true); } }
+
+        /// <inheritdoc/>
+        public I HighestInterval { get { return lowestHighestList(_root, false).Choose(); } }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> HighestIntervals { get { return IsEmpty ? Enumerable.Empty<I>() : lowestHighestList(_root, false); } }
+
+        private static IntervalSet lowestHighestList(Node root, bool findLow)
+        {
+            Contract.Requires(root != null);
+
+            // Search for the lowest/highest node
+            if (findLow)
+                while (root.Left != null)
+                    root = root.Left;
+            else
+                while (root.Right != null)
+                    root = root.Right;
+
+            // Check if the lowest/highest endpoint is included
+            if (root.Equal != null && !root.Equal.IsEmpty)
+                return root.Equal;
+
+            // Otherwise pick an excluded one from intervals ending in node
+            return root.IntervalsEndingInNode;
+        }
+
+        #region Maximum Depth
+
+        /// <inheritdoc/>
+        public int MaximumDepth
+        {
+            get { return _root != null ? _root.Max : 0; }
+        }
+
+        /// <summary>
+        /// Recursively search for the split node, while updating the maximum depth on the way
+        /// back if necessary.
+        /// </summary>
+        /// <param name="root">The root for the tree to search.</param>
+        /// <param name="interval">The interval whose endpoints we search for.</param>
+        /// <returns>True if we need to update the maximum depth for the parent node.</returns>
+        private static bool updateMaximumDepth(Node root, IInterval<T> interval)
+        {
+            Contract.Requires(root != null);
+            Contract.Requires(interval != null);
+
+            // Search left for split node and update maximum depth if necessary
+            if (interval.High.CompareTo(root.Key) < 0)
+                return updateMaximumDepth(root.Left, interval) && root.UpdateMaximumDepth();
+
+            // Search right for split node and update maximum depth if necessary
+            if (interval.Low.CompareTo(root.Key) > 0)
+                return updateMaximumDepth(root.Right, interval) && root.UpdateMaximumDepth();
+
+            // Return true if maximum depth has changed for either endpoint
+            return updateMaximumDepth(root, interval.High) | updateMaximumDepth(root, interval.Low);
+        }
+
+        private static bool updateMaximumDepth(Node root, T key)
+        {
+            Contract.Requires(root != null);
+
+            var compare = key.CompareTo(root.Key);
+
+            // Search left for key and update maximum depth if necessary
+            if (compare < 0)
+                return updateMaximumDepth(root.Left, key) && root.UpdateMaximumDepth();
+
+            // Search right for key and update maximum depth if necessary
+            if (compare > 0)
+                return updateMaximumDepth(root.Right, key) && root.UpdateMaximumDepth();
+
+            // Update maximum depth when low is found
+            return root.UpdateMaximumDepth();
+        }
+
+        #endregion
+
+        #endregion
+
+        #endregion
+
         #region Enumerable
 
         /// <inheritdoc/>
         public override IEnumerator<I> GetEnumerator()
         {
-            // TODO: Sort IntervalsEndingInNode to make whole iteration sorted
-
             return nodes(_root)
                 .SelectMany(node => node
                     .IntervalsEndingInNode
                     .Where(interval => interval.Low.CompareTo(node.Key) == 0)
                 ).GetEnumerator();
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> Sorted
+        {
+            get
+            {
+                return nodes(_root)
+                    .SelectMany(node => node
+                        .IntervalsEndingInNode
+                        .Where(interval => interval.Low.CompareTo(node.Key) == 0)
+                        .OrderBy(x => x, Comparer)
+                    );
+            }
         }
 
         /// <summary>
@@ -1535,131 +1674,6 @@ namespace C5.Intervals
                 yield return root;
 
                 root = root.Right;
-            }
-        }
-
-        #endregion
-
-        #region Events
-
-        /// <inheritdoc/>
-        public override EventTypeEnum ListenableEvents { get { return EventTypeEnum.Basic; } }
-        //public EventTypeEnum ActiveEvents { get; private set; }
-        //public event CollectionChangedHandler<T> CollectionChanged;
-        //public event CollectionClearedHandler<T> CollectionCleared;
-        //public event ItemsAddedHandler<T> ItemsAdded;
-        //public event ItemInsertedHandler<T> ItemInserted;
-        //public event ItemsRemovedHandler<T> ItemsRemoved;
-        //public event ItemRemovedAtHandler<T> ItemRemovedAt;
-
-        #endregion
-
-        #region Interval Collection
-
-        #region Properties
-
-        #region Span
-
-        /// <inheritdoc/>
-        public IInterval<T> Span
-        {
-            get
-            {
-                return _span ?? (_span = new IntervalBase<T>(span(_root, true), span(_root, false)));
-            }
-        }
-
-        private static IInterval<T> span(Node root, bool findLow)
-        {
-            Contract.Requires(root != null);
-
-            // Search for the lowest/highest node
-            if (findLow)
-                while (root.Left != null)
-                    root = root.Left;
-            else
-                while (root.Right != null)
-                    root = root.Right;
-
-            // Check if the lowest/highest endpoint is included
-            if (root.Equal != null && !root.Equal.IsEmpty)
-                return root.Equal.Choose();
-
-            // Otherwise pick an excluded one from intervals ending in node
-            return root.IntervalsEndingInNode.Choose();
-        }
-
-        #endregion
-
-        #region Maximum Depth
-
-        /// <inheritdoc/>
-        public int MaximumDepth
-        {
-            get { return _root != null ? _root.Max : 0; }
-        }
-
-        /// <summary>
-        /// Recursively search for the split node, while updating the maximum depth on the way
-        /// back if necessary.
-        /// </summary>
-        /// <param name="root">The root for the tree to search.</param>
-        /// <param name="interval">The interval whose endpoints we search for.</param>
-        /// <returns>True if we need to update the maximum depth for the parent node.</returns>
-        private static bool updateMaximumDepth(Node root, IInterval<T> interval)
-        {
-            Contract.Requires(root != null);
-            Contract.Requires(interval != null);
-
-            // Search left for split node and update maximum depth if necessary
-            if (interval.High.CompareTo(root.Key) < 0)
-                return updateMaximumDepth(root.Left, interval) && root.UpdateMaximumDepth();
-
-            // Search right for split node and update maximum depth if necessary
-            if (interval.Low.CompareTo(root.Key) > 0)
-                return updateMaximumDepth(root.Right, interval) && root.UpdateMaximumDepth();
-
-            // Return true if maximum depth has changed for either endpoint
-            return updateMaximumDepth(root, interval.High) | updateMaximumDepth(root, interval.Low);
-        }
-
-        private static bool updateMaximumDepth(Node root, T key)
-        {
-            Contract.Requires(root != null);
-
-            var compare = key.CompareTo(root.Key);
-
-            // Search left for key and update maximum depth if necessary
-            if (compare < 0)
-                return updateMaximumDepth(root.Left, key) && root.UpdateMaximumDepth();
-
-            // Search right for key and update maximum depth if necessary
-            if (compare > 0)
-                return updateMaximumDepth(root.Right, key) && root.UpdateMaximumDepth();
-
-            // Update maximum depth when low is found
-            return root.UpdateMaximumDepth();
-        }
-
-        #endregion
-
-        /// <inheritdoc/>
-        public bool AllowsOverlaps { get { return true; } }
-
-        /// <inheritdoc/>
-        public bool AllowsReferenceDuplicates { get { return false; } }
-
-        /// <inheritdoc/>
-        public IEnumerable<I> Sorted
-        {
-            get
-            {
-                return nodes(_root)
-                    .SelectMany(node => node
-                        .IntervalsEndingInNode
-                        .Where(interval => interval.Low.CompareTo(node.Key) == 0)
-                        .OrderBy(x => x, Comparer)
-                    );
             }
         }
 
@@ -2471,7 +2485,7 @@ namespace C5.Intervals
             // Replace node with successor
             else if (root.Left != null && root.Right != null)
             {
-                var successor = findSuccessor(root.Right);
+                var successor = findLowestNode(root.Right);
 
                 // Get intervals in successor
                 var intervalsNeedingReinsertion = successor.IntervalsEndingInNode;
@@ -2525,11 +2539,7 @@ namespace C5.Intervals
             return root;
         }
 
-        /// <summary>
-        /// Find the successor node.
-        /// </summary>
-        /// <returns>The successor node.</returns>
-        private static Node findSuccessor(Node node)
+        private static Node findLowestNode(Node node)
         {
             Contract.Requires(node != null);
             Contract.Ensures(Contract.Result<Node>() != null);
@@ -2537,6 +2547,18 @@ namespace C5.Intervals
 
             while (node.Left != null)
                 node = node.Left;
+
+            return node;
+        }
+
+        private static Node findHighestNode(Node node)
+        {
+            Contract.Requires(node != null);
+            Contract.Ensures(Contract.Result<Node>() != null);
+            Contract.Ensures(Contract.Result<Node>() == nodesStatic(Contract.OldValue(node)).First());
+
+            while (node.Right != null)
+                node = node.Right;
 
             return node;
         }

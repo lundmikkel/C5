@@ -83,22 +83,70 @@ namespace C5.Intervals
 
         #endregion
 
-        #region Enumerable
-
-        /// <inheritdoc/>
-        public override IEnumerator<I> GetEnumerator()
-        {
-            return Sorted.GetEnumerator();
-        }
-
-        #endregion
-
         #region Interval Collection
 
         #region Properties
 
+        #region Data Structure Properties
+
+        /// <inheritdoc/>
+        public bool AllowsOverlaps { get { return true; } }
+
+        /// <inheritdoc/>
+        public bool AllowsReferenceDuplicates { get { return true; } }
+
+        #endregion
+
+        #region Collection Properties
+
         /// <inheritdoc/>
         public IInterval<T> Span { get { return _span; } }
+
+        public I LowestInterval { get { return _lowSorted[0]; } }
+        public IEnumerable<I> LowestIntervals
+        {
+            get
+            {
+                if (IsEmpty)
+                    yield break;
+
+                var lowestInterval = _lowSorted[0];
+
+                yield return lowestInterval;
+
+                // Iterate through bottom layer as long as the intervals share a low
+                for (var i = 1; i < _count; i++)
+                {
+                    if (_lowSorted[i].CompareLow(lowestInterval) == 0)
+                        yield return _lowSorted[i];
+                    else
+                        yield break;
+                }
+            }
+        }
+        public I HighestInterval { get { return _highSorted[_count - 1]; } }
+
+        public IEnumerable<I> HighestIntervals
+        {
+            get
+            {
+                if (IsEmpty)
+                    yield break;
+
+                var highestInterval = _highSorted[_count - 1];
+
+                yield return highestInterval;
+
+                // Iterate through bottom layer as long as the intervals share a low
+                for (var i = _count - 2; i >= 0; i--)
+                {
+                    if (_highSorted[i].CompareHigh(highestInterval) == 0)
+                        yield return _highSorted[i];
+                    else
+                        yield break;
+                }
+            }
+        }
 
         /// <inheritdoc/>
         public int MaximumDepth
@@ -115,11 +163,14 @@ namespace C5.Intervals
             }
         }
 
-        /// <inheritdoc/>
-        public bool AllowsOverlaps { get { return true; } }
+        #endregion
+
+        #endregion
+
+        #region Enumerable
 
         /// <inheritdoc/>
-        public bool AllowsReferenceDuplicates { get { return true; } }
+        public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
 
         /// <inheritdoc/>
         public IEnumerable<I> Sorted { get { return IsEmpty ? Enumerable.Empty<I>() : _lowSorted; } }

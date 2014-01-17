@@ -1136,6 +1136,127 @@ namespace C5.Intervals
 
         #endregion
 
+        #region Events
+
+        /// <inheritdoc/>
+        public override EventTypeEnum ListenableEvents { get { return EventTypeEnum.Basic; } }
+        //public EventTypeEnum ActiveEvents { get; private set; }
+        //public event CollectionChangedHandler<T> CollectionChanged;
+        //public event CollectionClearedHandler<T> CollectionCleared;
+        //public event ItemsAddedHandler<T> ItemsAdded;
+        //public event ItemInsertedHandler<T> ItemInserted;
+        //public event ItemsRemovedHandler<T> ItemsRemoved;
+        //public event ItemRemovedAtHandler<T> ItemRemovedAt;
+
+        #endregion
+
+        #region Interval Collection
+
+        #region Properties
+
+        #region Data Structure Properties
+
+        /// <inheritdoc/>
+        public bool AllowsOverlaps { get { return true; } }
+
+        /// <inheritdoc/>
+        public bool AllowsReferenceDuplicates { get; private set; }
+
+        #endregion
+
+        #region Collection Properties
+
+        /// <inheritdoc/>
+        public IInterval<T> Span { get { return new IntervalBase<T>(_root.Span); } }
+
+        /// <inheritdoc/>
+        public I LowestInterval { get { return lowestList().Choose(); } }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> LowestIntervals { get { return IsEmpty ? Enumerable.Empty<I>() : lowestList(); } }
+
+        private IntervalList lowestList()
+        {
+            var node = _root;
+            
+            // Find the first node
+            while (node.Left != null)
+                node = node.Left;
+
+            return node.IncludedList ?? node.ExcludedList;
+        }
+
+        /// <inheritdoc/>
+        public I HighestInterval
+        {
+            get
+            {
+                var node = _root;
+
+                while (true)
+                {
+                    // Check if children contain any intervals
+                    var rightDeadEnd = node.Right == null || node.Right.Span == null;
+                    var leftDeadEnd = node.Left == null || node.Left.Span == null;
+
+                    // Check if the node span's high matches the local span's high
+                    if (rightDeadEnd && leftDeadEnd || node.LocalSpan != null && node.Span.CompareHigh(node.LocalSpan) == 0)
+                        return highestIntervalInNode(node);
+
+                    // Check if right child is a dead end
+                    if (rightDeadEnd)
+                        node = node.Left;
+                    // Check if left child is a dead end
+                    else if (leftDeadEnd)
+                        node = node.Right;
+                    // Both children might contain highest interval
+                    else
+                        // We prefer right, as this will give us a small interval
+                        node = node.Left.Span.CompareHigh(node.Right.Span) <= 0 ? node.Right : node.Left;
+                }
+            }
+        }
+
+        private static I highestIntervalInNode(Node node)
+        {
+            // If the included list is non-empty, it might hold the highest interval
+            if (node.IncludedList != null)
+            {
+                var highestFromIncludedList = node.IncludedList.Highest;
+
+                // Check if we have the highest interval
+                if (highestFromIncludedList.CompareHigh(node.LocalSpan) == 0)
+                    return highestFromIncludedList;
+            }
+
+            // Otherwise it must be the highest in the excluded list
+            return node.ExcludedList.Highest;
+        }
+
+        public IEnumerable<I> HighestIntervals
+        {
+            get
+            {
+                // TODO: Implement properly!
+
+                if (IsEmpty)
+                    return Enumerable.Empty<I>();
+
+                var highestInterval = HighestInterval;
+
+                if (highestInterval.HighIncluded)
+                    return FindOverlaps(highestInterval.High);
+
+                return FindOverlaps(highestInterval).Where(x => x.High.CompareTo(highestInterval.High) == 0);
+            }
+        }
+
+        public int MaximumDepth { get { return IsEmpty ? 0 : _root.Max; } }
+
+        #endregion
+
+        #endregion
+
         #region Enumerable
 
         /// <inheritdoc/>
@@ -1143,22 +1264,6 @@ namespace C5.Intervals
         {
             return Sorted.GetEnumerator();
         }
-
-        [Pure]
-        private static IEnumerable<Node> nodes(Node root)
-        {
-            while (root != null)
-            {
-                foreach (var node in nodes(root.Left))
-                    yield return node;
-
-                yield return root;
-
-                root = root.Right;
-            }
-        }
-
-        #region Ordered
 
         public IEnumerable<I> Sorted
         {
@@ -1174,6 +1279,20 @@ namespace C5.Intervals
                         foreach (var interval in node.ExcludedList)
                             yield return interval;
                 }
+            }
+        }
+
+        [Pure]
+        private static IEnumerable<Node> nodes(Node root)
+        {
+            while (root != null)
+            {
+                foreach (var node in nodes(root.Left))
+                    yield return node;
+
+                yield return root;
+
+                root = root.Right;
             }
         }
 
@@ -1209,42 +1328,8 @@ namespace C5.Intervals
         private static int calcHeight(int count)
         {
             // TODO: Should this be one more as the count is intervals, and not endpoints? Can't seem to make it fail.
-            return (int) Math.Ceiling(1.44 * Math.Log(count + 2, 2) - 0.328);
+            return (int) Math.Ceiling(1.44 * Math.Log(count + 2, 2) - 0.328) + 1;
         }
-
-        #endregion
-
-        #endregion
-
-        #region Events
-
-        /// <inheritdoc/>
-        public override EventTypeEnum ListenableEvents { get { return EventTypeEnum.Basic; } }
-        //public EventTypeEnum ActiveEvents { get; private set; }
-        //public event CollectionChangedHandler<T> CollectionChanged;
-        //public event CollectionClearedHandler<T> CollectionCleared;
-        //public event ItemsAddedHandler<T> ItemsAdded;
-        //public event ItemInsertedHandler<T> ItemInserted;
-        //public event ItemsRemovedHandler<T> ItemsRemoved;
-        //public event ItemRemovedAtHandler<T> ItemRemovedAt;
-
-        #endregion
-
-        #region Interval Collection
-
-        #region Properties
-
-        /// <inheritdoc/>
-        public IInterval<T> Span { get { return new IntervalBase<T>(_root.Span); } }
-
-        /// <inheritdoc/>
-        public int MaximumDepth { get { return IsEmpty ? 0 : _root.Max; } }
-
-        /// <inheritdoc/>
-        public bool AllowsOverlaps { get { return true; } }
-
-        /// <inheritdoc/>
-        public bool AllowsReferenceDuplicates { get; private set; }
 
         #endregion
 
