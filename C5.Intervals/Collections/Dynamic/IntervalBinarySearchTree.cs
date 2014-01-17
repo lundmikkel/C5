@@ -781,15 +781,9 @@ namespace C5.Intervals
 
             #region Enumerator
 
-            public IEnumerator<I> GetEnumerator()
-            {
-                return _set.GetEnumerator();
-            }
+            IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
+            public IEnumerator<I> GetEnumerator() { return _set.GetEnumerator(); }
 
             #endregion
 

@@ -193,14 +193,7 @@ namespace C5.Intervals
         public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
 
         /// <inheritdoc/>
-        public IEnumerable<I> Sorted
-        {
-            get
-            {
-                for (var i = 0; i < _count; i++)
-                    yield return _intervals[i];
-            }
-        }
+        public IEnumerable<I> Sorted { get { return _intervals; } }
 
         #endregion
 

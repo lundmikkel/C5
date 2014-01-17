@@ -770,16 +770,10 @@ namespace C5.Intervals
         #region Gaps
 
         /// <inheritdoc/>
-        public IEnumerable<IInterval<T>> Gaps
-        {
-            get { return Sorted.Gaps(); }
-        }
+        public IEnumerable<IInterval<T>> Gaps { get { return Sorted.Gaps(); } }
 
         /// <inheritdoc/>
-        public IEnumerable<IInterval<T>> FindGaps(IInterval<T> query)
-        {
-            return FindOverlaps(query).Gaps(query);
-        }
+        public IEnumerable<IInterval<T>> FindGaps(IInterval<T> query) { return FindOverlaps(query).Gaps(query); }
 
         #endregion
 
