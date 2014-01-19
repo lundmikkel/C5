@@ -671,6 +671,11 @@ namespace C5.Intervals
             return max;
         }
 
+        public static bool IsContiguous<T>(this IEnumerable<IInterval<T>> intervals) where T : IComparable<T>
+        {
+            return intervals.ForAllConsecutiveElements((x, y) => x.IsMeeting(y));
+        }
+
         [Pure]
         public static IEnumerable<IInterval<T>> Gaps<T>(this IEnumerable<IInterval<T>> intervals, IInterval<T> span = null, bool isSorted = true)
             where T : IComparable<T>
