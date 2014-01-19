@@ -13,22 +13,172 @@ namespace C5.Intervals
 
         // Use read-only fields to avoid breaking data structures, if values were changed
         /// <inheritdoc/>
-        private readonly T _low;
+        [ContractPublicPropertyName("Low")]
+        private T _low;
         /// <inheritdoc/>
-        private readonly T _high;
+        [ContractPublicPropertyName("High")]
+        private T _high;
         /// <inheritdoc/>
-        private readonly bool _lowIncluded;
+        [ContractPublicPropertyName("LowIncluded")]
+        private bool _lowIncluded;
         /// <inheritdoc/>
-        private readonly bool _highIncluded;
+        [ContractPublicPropertyName("HighIncluded")]
+        private bool _highIncluded;
 
         /// <inheritdoc/>
-        public T Low { get { return _low; } }
+        public T Low
+        {
+            get
+            {
+                Contract.Ensures(this.IsValidInterval());
+                return _low;
+            }
+            set
+            {
+                Contract.Requires(value.CompareTo(High) < 0 || value.CompareTo(High) == 0 && LowIncluded && HighIncluded);
+                _low = value;
+            }
+        }
+
         /// <inheritdoc/>
-        public T High { get { return _high; } }
+        public T High
+        {
+            get
+            {
+                Contract.Ensures(this.IsValidInterval());
+                return _high;
+            }
+            set
+            {
+                Contract.Requires(Low.CompareTo(value) < 0 || Low.CompareTo(value) == 0 && LowIncluded && HighIncluded);
+                _high = value;
+            }
+        }
+
         /// <inheritdoc/>
-        public bool LowIncluded { get { return _lowIncluded; } }
+        public bool LowIncluded
+        {
+            get
+            {
+                Contract.Ensures(this.IsValidInterval());
+                return _lowIncluded;
+            }
+            set
+            {
+                Contract.Requires(Low.CompareTo(High) != 0 || value);
+                _lowIncluded = value;
+            }
+        }
+
         /// <inheritdoc/>
-        public bool HighIncluded { get { return _highIncluded; } }
+        public bool HighIncluded
+        {
+            get
+            {
+                Contract.Ensures(this.IsValidInterval());
+                return _highIncluded;
+            }
+            set
+            {
+                Contract.Requires(Low.CompareTo(High) != 0 || value);
+                _highIncluded = value;
+            }
+        }
+
+        public void SetLowEndpoint(T low, bool lowIncluded)
+        {
+            Contract.Requires(low != null);
+            // TODO: Consider if contracts should be here
+            Contract.Requires(low.CompareTo(High) < 0 || low.CompareTo(High) == 0 && lowIncluded && HighIncluded);
+
+            _low = low;
+            _lowIncluded = lowIncluded;
+        }
+
+        public void SetLowEndpoint(IInterval<T> interval)
+        {
+            Contract.Requires(interval != null);
+            // TODO: Consider if contracts should be here
+            Contract.Requires(interval.Low.CompareTo(High) < 0 || interval.Low.CompareTo(High) == 0 && interval.LowIncluded && HighIncluded);
+
+            _low = interval.Low;
+            _lowIncluded = interval.LowIncluded;
+        }
+
+        public void SetHighEndpoint(T high, bool highIncluded)
+        {
+            Contract.Requires(high != null);
+            // TODO: Consider if contracts should be here
+            Contract.Requires(Low.CompareTo(high) < 0 || Low.CompareTo(high) == 0 && LowIncluded && highIncluded);
+
+            _high = high;
+            _highIncluded = highIncluded;
+        }
+
+        public void SetHighEndpoint(IInterval<T> interval)
+        {
+            Contract.Requires(interval != null);
+            // TODO: Consider if contracts should be here
+            Contract.Requires(Low.CompareTo(interval.High) < 0 || Low.CompareTo(interval.High) == 0 && LowIncluded && interval.HighIncluded);
+
+            _high = interval.High;
+            _highIncluded = interval.HighIncluded;
+        }
+
+        public void SetEndpoints(T low, T high, bool? lowIncluded = null, bool? highIncluded = null)
+        {
+            Contract.Requires(low != null);
+            Contract.Requires(high != null);
+            Contract.Requires(low.CompareTo(high) < 0 || low.CompareTo(high) == 0 && lowIncluded.GetValueOrDefault(_lowIncluded) && highIncluded.GetValueOrDefault(_highIncluded));
+
+            _low = low;
+            _high = high;
+
+            if (lowIncluded != null)
+                _lowIncluded = (bool) lowIncluded;
+            if (highIncluded != null)
+                _highIncluded = (bool) highIncluded;
+        }
+
+        public void SetEndpoints(IInterval<T> low, IInterval<T> high)
+        {
+            Contract.Requires(low != null);
+            Contract.Requires(high != null);
+            Contract.Requires(low.Low.CompareTo(high.High) < 0 || low.Low.CompareTo(high.High) == 0 && low.LowIncluded && high.HighIncluded);
+
+            _low = low.Low;
+            _lowIncluded = low.LowIncluded;
+
+            _high = high.High;
+            _highIncluded = high.HighIncluded;
+        }
+
+        public void SetPoint(T point)
+        {
+            _low = _high = point;
+            _lowIncluded = _highIncluded = true;
+        }
+
+        public void SetEndpoints(IInterval<T> interval)
+        {
+            Contract.Requires(interval != null);
+            Contract.Requires(interval.IsValidInterval());
+
+            _low = interval.Low;
+            _high = interval.High;
+            _lowIncluded = interval.LowIncluded;
+            _highIncluded = interval.HighIncluded;
+        }
+
+        #endregion
+
+        #region Code Contracts
+
+        [ContractInvariantMethod]
+        private void invariant()
+        {
+            Contract.Invariant(this.IsValidInterval());
+        }
 
         #endregion
 
@@ -74,6 +224,8 @@ namespace C5.Intervals
         /// <exception cref="ArgumentException">Thrown if interval is an empty point set.</exception>
         public IntervalBase(T low, T high, IntervalType type)
         {
+            Contract.Requires(low.CompareTo(high) < 0 || low.CompareTo(high) == 0 && type == IntervalType.Closed);
+
             _low = low;
             _high = high;
             _lowIncluded = (type & IntervalType.LowIncluded) == IntervalType.LowIncluded;
