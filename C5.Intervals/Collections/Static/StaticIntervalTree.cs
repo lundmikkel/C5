@@ -19,8 +19,8 @@ namespace C5.Intervals
         private readonly int _height;
         private readonly int _count;
         private readonly IInterval<T> _span;
-        private I _lowestInterval;
-        private I _highestInterval;
+        private readonly I _lowestInterval;
+        private readonly I _highestInterval;
 
         private int _maximumDepth = -1;
         // TODO: Expose in a property

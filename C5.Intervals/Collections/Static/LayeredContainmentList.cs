@@ -94,8 +94,8 @@ namespace C5.Intervals
 
         struct Node
         {
-            internal I Interval { get; private set; }
-            internal int Pointer { get; private set; }
+            internal readonly I Interval;
+            internal readonly int Pointer;
 
             internal Node(I interval, int pointer)
                 : this()

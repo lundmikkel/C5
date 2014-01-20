@@ -128,7 +128,7 @@ namespace C5.Intervals
 
             #endregion
 
-            #region
+            #region Code Contracts
 
             [ContractInvariantMethod]
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
