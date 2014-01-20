@@ -190,8 +190,10 @@ namespace C5.Intervals
         {
             Contract.Requires(interval.IsValidInterval());
 
-            SetLowEndpoint(this.LowestLow(interval));
-            SetHighEndpoint(this.HighestHigh(interval));
+            if (interval.CompareLow(this) < 0)
+                SetLowEndpoint(interval);
+            if (this.CompareHigh(interval) < 0)
+                SetHighEndpoint(interval);
 
             return this;
         }
