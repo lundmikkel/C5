@@ -28,10 +28,6 @@ namespace C5.Intervals
         private static readonly IEqualityComparer<IInterval<T>> EqualityComparer =
             ComparerFactory<IInterval<T>>.CreateEqualityComparer(ReferenceEquals, x => x.GetHashCode());
 
-#if DEBUG
-        private int _visit;
-#endif
-
         #endregion
 
         #region Code Contracts
@@ -409,7 +405,7 @@ namespace C5.Intervals
                 Contract.Ensures(_dictionary.IsEmpty);
 
                 // TODO: Benchmark against SortedArrayDictionary
-                _dictionary = new TreeDictionary<I, HashBag<I>>((IComparer<I>) Comparer);
+                _dictionary = new TreeDictionary<I, HashBag<I>>(Comparer);
             }
 
             public bool Add(I interval)
@@ -433,7 +429,7 @@ namespace C5.Intervals
                 {
                     if (list == null)
                     {
-                        _dictionary[key] = new HashBag<I>((IEqualityComparer<I>) EqualityComparer) { interval };
+                        _dictionary[key] = new HashBag<I>(EqualityComparer) { interval };
                         return true;
                     }
 
@@ -665,7 +661,9 @@ namespace C5.Intervals
                 Span = new SpanInterval();
 
                 AddHighToDelta(highIncluded);
-                UpdateMaximumDepth();
+
+                // Set sum
+                Sum = -1;
             }
 
             public Node(I interval)
@@ -688,7 +686,8 @@ namespace C5.Intervals
                 // Insert the interval into a list
                 AddIntervalToList(interval);
 
-                UpdateMaximumDepth();
+                // Max and sum
+                Max = Sum = 1;
             }
 
             #endregion
@@ -1662,8 +1661,7 @@ namespace C5.Intervals
 
             if (root == null)
             {
-                nodeWasAdded = true;
-                intervalWasAdded = true;
+                nodeWasAdded = intervalWasAdded = true;
 
                 return new Node(interval);
             }
@@ -1696,11 +1694,11 @@ namespace C5.Intervals
             {
                 root.UpdateSpan();
                 root.UpdateMaximumDepth();
-            }
 
             // Tree might be unbalanced after root was added, so we rotate
             if (nodeWasAdded)
                 root = rotateForAdd(root, ref nodeWasAdded);
+            }
 
             return root;
         }
@@ -1711,8 +1709,7 @@ namespace C5.Intervals
 
             if (root == null)
             {
-                nodeWasAdded = true;
-                updateSpan = true;
+                nodeWasAdded = updateSpan = true;
                 return new Node(interval.High, interval.HighIncluded);
             }
 
