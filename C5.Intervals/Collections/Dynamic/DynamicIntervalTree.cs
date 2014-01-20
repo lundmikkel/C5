@@ -588,14 +588,43 @@ namespace C5.Intervals
 
         private sealed class Node : IComparable<Node>
         {
+            #region Fields
+
             private bool _delete;
+
+            // The interval which Low is used as key in the binary search tree
+            public T Key;
+
+            // Children
+            public Node Left;
+            public Node Right;
+
+            // The span of the intervals in the successor
+            public readonly SpanInterval LocalSpan;
+            // The span of the subtree rooted in this successor
+            public readonly SpanInterval Span;
+
+            // List of intervals starting at the same low as Key
+            public IntervalList IncludedList;
+            public IntervalList ExcludedList;
+
+            // Fields for Maximum Depth
+            internal int DeltaAt;
+            internal int DeltaAfter;
+            public int Sum;
+            public int Max;
+
+            // AVL Balance
+            public int Balance;
+
+            #endregion
 
             #region Code Contracts
 
             [ContractInvariantMethod]
             private void invariant()
             {
-                Contract.Invariant(Dummy || Key != null);
+                Contract.Invariant(Key != null);
 
                 // The interval lists are either null or non-empty
                 Contract.Invariant(IncludedList == null || !IncludedList.IsEmpty);
@@ -622,41 +651,6 @@ namespace C5.Intervals
                 Contract.Invariant(IncludedList == null || Contract.ForAll(IncludedList, x => x.Low.Equals(Key) && x.LowIncluded));
                 Contract.Invariant(ExcludedList == null || Contract.ForAll(ExcludedList, x => x.Low.Equals(Key) && !x.LowIncluded));
             }
-
-            #endregion
-
-            #region Properties
-
-            // The interval which Low is used as key in the binary search tree
-            public T Key { get; private set; }
-
-            // Children
-            public Node Left { get; set; }
-            public Node Right { get; set; }
-
-            // The span of the intervals in the successor
-            public readonly SpanInterval LocalSpan;
-            // The span of the subtree rooted in this successor
-            public readonly SpanInterval Span;
-
-            // List of intervals starting at the same low as Key
-            public IntervalList IncludedList { get; private set; }
-            public IntervalList ExcludedList { get; private set; }
-
-            // Fields for Maximum Depth
-            internal int DeltaAt { get; private set; }
-            internal int DeltaAfter { get; private set; }
-            public int Sum { get; private set; }
-            public int Max { get; private set; }
-
-            // AVL Balance
-            public int Balance { get; set; }
-
-            // Used for printing
-            public bool Dummy { get; private set; }
-#if DEBUG
-            public int Visit { get; set; }
-#endif
 
             #endregion
 
@@ -1472,10 +1466,6 @@ namespace C5.Intervals
             if (IsEmpty)
                 yield break;
 
-#if DEBUG
-            _visit++;
-#endif
-
             var i = 0;
             var stack = new Node[calcHeight(Count)];
             stack[i++] = _root;
@@ -1485,10 +1475,6 @@ namespace C5.Intervals
                 var root = stack[--i];
                 // Set to null to avoid memory leak
                 stack[i] = null;
-
-#if DEBUG
-                root.Visit = _visit;
-#endif
 
                 // Query is to the left of root's Low
                 var compare = query.High.CompareTo(root.Key);
@@ -1523,10 +1509,6 @@ namespace C5.Intervals
             if (IsEmpty)
                 yield break;
 
-#if DEBUG
-            _visit++;
-#endif
-
             // TODO: Should this be one more as the count is intervals, and not endpoints? Can't seem to make it fail.
             var height = (int) Math.Ceiling(1.44 * Math.Log(Count + 2, 2) - 0.328);
             var stack = new Node[height];
@@ -1539,10 +1521,6 @@ namespace C5.Intervals
                 var root = stack[--i];
                 // Set to null to avoid memory leak
                 stack[i] = null;
-
-#if DEBUG
-                root.Visit = _visit;
-#endif
 
                 // Query is to the left of root's Low
                 var compare = query.High.CompareTo(root.Key);
