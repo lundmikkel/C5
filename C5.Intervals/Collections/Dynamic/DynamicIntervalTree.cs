@@ -768,6 +768,28 @@ namespace C5.Intervals
                 return true;
             }
 
+            public void UpdateMaximum()
+            {
+                // Set Max to Left's Max
+                Max = Left != null ? Left.Max : 0;
+
+                // Start building up the other possible Max sums
+                var value = (Left != null ? Left.Sum : 0) + DeltaAt;
+                // And check if they are higher the previously found max
+                if (value > Max)
+                    Max = value;
+
+                // Add DeltaAfter and check for new max
+                value += DeltaAfter;
+                if (value > Max)
+                    Max = value;
+
+                // Add Right's max and check for new max
+                value += Right != null ? Right.Max : 0;
+                if (value > Max)
+                    Max = value;
+            }
+
             public void UpdateMaximumDepth()
             {
                 // Set Max to Left's Max
@@ -1693,11 +1715,14 @@ namespace C5.Intervals
             if (intervalWasAdded)
             {
                 root.UpdateSpan();
-                root.UpdateMaximumDepth();
 
-            // Tree might be unbalanced after root was added, so we rotate
-            if (nodeWasAdded)
-                root = rotateForAdd(root, ref nodeWasAdded);
+                // Increment sum and update max
+                root.Sum++;
+                root.UpdateMaximum();
+
+                // Tree might be unbalanced after root was added, so we rotate
+                if (nodeWasAdded)
+                    root = rotateForAdd(root, ref nodeWasAdded);
             }
 
             return root;
@@ -1739,8 +1764,9 @@ namespace C5.Intervals
             if (updateSpan)
                 updateSpan = root.UpdateSpan();
 
-            // Update maximum depth
-            root.UpdateMaximumDepth();
+            // Decrement sum and update max
+            root.Sum--;
+            root.UpdateMaximum();
 
             // Tree might be unbalanced after root was added, so we rotate
             if (nodeWasAdded)
