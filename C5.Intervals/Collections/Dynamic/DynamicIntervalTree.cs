@@ -44,7 +44,7 @@ namespace C5.Intervals
             // Check node spans
             Contract.Invariant(contractHelperCheckNodeSpans(_root));
 
-            Contract.Invariant(IsEmpty && _root == null || _root.Span != null);
+            Contract.Invariant(IsEmpty && _root == null || !_root.Span.IsEmpty);
 
             // The left most node will always contain at least one interval
             Contract.Invariant(IsEmpty || contractHelperLowestNodeIsNonEmpty(_root));
@@ -73,27 +73,27 @@ namespace C5.Intervals
             foreach (var node in nodes(root))
             {
                 // There is a span
-                if (node.Span != null)
+                if (!node.Span.IsEmpty)
                 {
                     // Check that span contains local span
-                    if (node.LocalSpan != null && !node.Span.Contains(node.LocalSpan))
+                    if (!node.LocalSpan.IsEmpty && !node.Span.Contains(node.LocalSpan))
                         return false;
 
                     // If span is set then left, right and local span cannot be null at the same time
-                    if (node.LocalSpan == null && (node.Left == null || node.Left.Span == null) && (node.Right == null || node.Right.Span == null))
+                    if (node.LocalSpan.IsEmpty && (node.Left == null || node.Left.Span.IsEmpty) && (node.Right == null || node.Right.Span.IsEmpty))
                         return false;
 
                     // Span must contain left's span
-                    if (node.Left != null && node.Left.Span != null && !node.Span.Contains(node.Left.Span))
+                    if (node.Left != null && !node.Left.Span.IsEmpty && !node.Span.Contains(node.Left.Span))
                         return false;
                     // Span must contain right's span
-                    if (node.Right != null && node.Right.Span != null && !node.Span.Contains(node.Right.Span))
+                    if (node.Right != null && !node.Right.Span.IsEmpty && !node.Span.Contains(node.Right.Span))
                         return false;
                 }
                 // If span is null, then local span and subtree spans must be null too
                 else
                 {
-                    if (node.LocalSpan != null || (node.Left != null && node.Left.Span != null) || (node.Right != null && node.Right.Span != null))
+                    if (!node.LocalSpan.IsEmpty || (node.Left != null && !node.Left.Span.IsEmpty) || (node.Right != null && !node.Right.Span.IsEmpty))
                         return false;
                 }
 
@@ -272,6 +272,102 @@ namespace C5.Intervals
         #endregion
 
         #region Inner Classes
+
+        private class SpanInterval : IInterval<T>
+        {
+            #region Fields
+
+            public bool IsEmpty { get; set; }
+
+            public T Low { get; private set; }
+            public T High { get; private set; }
+            public bool LowIncluded { get; private set; }
+            public bool HighIncluded { get; private set; }
+
+            #endregion
+
+            #region Constructor
+
+            public SpanInterval(IInterval<T> interval = null)
+            {
+                // Use a null interval to create an empty interval
+                if (interval == null)
+                    IsEmpty = true;
+                else
+                {
+                    IsEmpty = false;
+
+                    Low = interval.Low;
+                    High = interval.High;
+                    LowIncluded = interval.LowIncluded;
+                    HighIncluded = interval.HighIncluded;
+                }
+            }
+
+            #endregion
+
+            #region Set Endpoints
+
+            public void SetInterval(SpanInterval interval)
+            {
+                if (interval.IsEmpty)
+                    IsEmpty = true;
+                else
+                {
+                    IsEmpty = false;
+
+                    Low = interval.Low;
+                    LowIncluded = interval.LowIncluded;
+                    High = interval.High;
+                    HighIncluded = interval.HighIncluded;
+                }
+            }
+
+            public void SetInterval(IInterval<T> interval)
+            {
+                //Contract.Requires(interval.IsValidInterval());
+
+                IsEmpty = false;
+
+                Low = interval.Low;
+                LowIncluded = interval.LowIncluded;
+                High = interval.High;
+                HighIncluded = interval.HighIncluded;
+            }
+
+            public void SetInterval(IInterval<T> low, IInterval<T> high)
+            {
+                //Contract.Requires(low != null);
+                //Contract.Requires(high != null);
+                //Contract.Requires(low.Low.CompareTo(high.High) < 0 || low.Low.CompareTo(high.High) == 0 && low.LowIncluded && high.HighIncluded);
+
+                IsEmpty = false;
+
+                Low = low.Low;
+                LowIncluded = low.LowIncluded;
+                High = high.High;
+                HighIncluded = high.HighIncluded;
+            }
+
+            public void ExpandInterval(IInterval<T> interval)
+            {
+                //Contract.Requires(!IsEmpty);
+                //Contract.Requires(interval.IsValidInterval());
+
+                if (interval.CompareLow(this) < 0)
+                {
+                    Low = interval.Low;
+                    LowIncluded = interval.LowIncluded;
+                }
+                if (this.CompareHigh(interval) < 0)
+                {
+                    High = interval.High;
+                    HighIncluded = interval.HighIncluded;
+                }
+            }
+
+            #endregion
+        }
 
         private class IntervalList : IEnumerable<I>
         {
@@ -506,18 +602,18 @@ namespace C5.Intervals
                 Contract.Invariant(ExcludedList == null || !ExcludedList.IsEmpty);
 
                 // If there is a local span then both lists can't be empty
-                Contract.Invariant(LocalSpan == null || !(IncludedList == null && ExcludedList == null));
+                Contract.Invariant(LocalSpan.IsEmpty || !(IncludedList == null && ExcludedList == null));
 
                 // Local span contains all intervals
-                Contract.Invariant(LocalSpan == null || IncludedList == null || Contract.ForAll(IncludedList, i => LocalSpan.Contains(i)));
-                Contract.Invariant(LocalSpan == null || ExcludedList == null || Contract.ForAll(ExcludedList, i => LocalSpan.Contains(i)));
+                Contract.Invariant(LocalSpan.IsEmpty || IncludedList == null || Contract.ForAll(IncludedList, i => LocalSpan.Contains(i)));
+                Contract.Invariant(LocalSpan.IsEmpty || ExcludedList == null || Contract.ForAll(ExcludedList, i => LocalSpan.Contains(i)));
 
                 // Local span has the lowest low in the lists
-                Contract.Invariant(LocalSpan == null || !LocalSpan.LowIncluded || IncludedList != null);
-                Contract.Invariant(LocalSpan == null || LocalSpan.LowIncluded || ExcludedList != null);
+                Contract.Invariant(LocalSpan.IsEmpty || !LocalSpan.LowIncluded || IncludedList != null);
+                Contract.Invariant(LocalSpan.IsEmpty || LocalSpan.LowIncluded || ExcludedList != null);
 
                 // Local span has the highest high in the lists
-                Contract.Invariant(LocalSpan == null ||
+                Contract.Invariant(LocalSpan.IsEmpty ||
                     IncludedList != null && ExcludedList != null && IncludedList.Highest.HighestHigh(ExcludedList.Highest).CompareHigh(LocalSpan) == 0 ||
                     IncludedList == null && ExcludedList.Highest.CompareHigh(LocalSpan) == 0 ||
                     ExcludedList == null && IncludedList.Highest.CompareHigh(LocalSpan) == 0);
@@ -539,9 +635,9 @@ namespace C5.Intervals
             public Node Right { get; set; }
 
             // The span of the intervals in the successor
-            public IInterval<T> LocalSpan { get; private set; }
+            public readonly SpanInterval LocalSpan;
             // The span of the subtree rooted in this successor
-            public IInterval<T> Span { get; private set; }
+            public readonly SpanInterval Span;
 
             // List of intervals starting at the same low as Key
             public IntervalList IncludedList { get; private set; }
@@ -570,6 +666,10 @@ namespace C5.Intervals
             {
                 Key = key;
 
+                // Set spans
+                LocalSpan = new SpanInterval();
+                Span = new SpanInterval();
+
                 AddHighToDelta(highIncluded);
                 UpdateMaximumDepth();
             }
@@ -578,8 +678,8 @@ namespace C5.Intervals
             {
                 Contract.Requires(interval != null);
                 Contract.Ensures(Key != null);
-                Contract.Ensures(LocalSpan != null);
-                Contract.Ensures(Span != null);
+                Contract.Ensures(!LocalSpan.IsEmpty);
+                Contract.Ensures(!Span.IsEmpty);
                 Contract.Ensures(Key.Equals(interval.Low));
                 Contract.Ensures(LocalSpan.IntervalEquals(interval));
                 Contract.Ensures(Span.IntervalEquals(interval));
@@ -587,16 +687,14 @@ namespace C5.Intervals
 
                 Key = interval.Low;
 
+                // Set spans
+                LocalSpan = new SpanInterval(interval);
+                Span = new SpanInterval(interval);
+
                 // Insert the interval into a list
                 AddIntervalToList(interval);
 
-                UpdateSpan();
                 UpdateMaximumDepth();
-            }
-
-            public Node()
-            {
-                Dummy = true;
             }
 
             #endregion
@@ -613,53 +711,68 @@ namespace C5.Intervals
                 private set { _delete = value; }
             }
 
-            public void UpdateSpan()
+            public bool UpdateSpan()
             {
-                // TODO: This could potentially be very expensive. A lot of intervals being created again and again
-
                 // No children
                 if (Left == null && Right == null)
-                    Span = LocalSpan;
+                    Span.SetInterval(LocalSpan);
                 // No right child with a span
-                else if (Right == null || Right.Span == null)
+                else if (Right == null || Right.Span.IsEmpty)
                 {
                     // Left node is an endpoint node
-                    if (Left == null || Left.Span == null)
-                        Span = LocalSpan;
+                    if (Left == null || Left.Span.IsEmpty)
+                        Span.SetInterval(LocalSpan);
                     // This node is an endpoint node
-                    else if (LocalSpan == null)
-                        Span = Left.Span;
+                    else if (LocalSpan.IsEmpty)
+                        Span.SetInterval(Left.Span);
                     // Neither is an endpoint node
                     else
-                        Span = (Left.Span.CompareHigh(LocalSpan) >= 0)
-                             ? Left.Span
-                             : new IntervalBase<T>(Left.Span, LocalSpan);
+                    {
+                        if (Left.Span.CompareHigh(LocalSpan) >= 0)
+                            Span.SetInterval(Left.Span);
+                        else
+                            Span.SetInterval(Left.Span, LocalSpan);
+                    }
                 }
                 // No left child with a span
-                else if (Left == null || Left.Span == null)
+                else if (Left == null || Left.Span.IsEmpty)
                 {
                     // This node is an endpoint node
-                    if (LocalSpan == null)
-                        Span = Right.Span;
+                    if (LocalSpan.IsEmpty)
+                        Span.SetInterval(Right.Span);
                     // Neither is an endpoint node
                     else
-                        Span = (Right.Span.CompareHigh(LocalSpan) > 0)
-                             ? new IntervalBase<T>(LocalSpan, Right.Span)
-                             : LocalSpan;
+                    {
+                        if (Right.Span.CompareHigh(LocalSpan) > 0)
+                            Span.SetInterval(LocalSpan, Right.Span);
+                        else
+                            Span.SetInterval(LocalSpan);
+                    }
                 }
                 // Both children have a span
                 else
                 {
                     // Right span has higher high than left span
                     if (Right.Span.CompareHigh(Left.Span) > 0)
-                        Span = (LocalSpan == null)
-                             ? new IntervalBase<T>(Left.Span, Right.Span)
-                             : new IntervalBase<T>(Left.Span, Right.Span.HighestHigh(LocalSpan));
+                        if (LocalSpan.IsEmpty)
+                            Span.SetInterval(Left.Span, Right.Span);
+                        else
+                            Span.SetInterval(Left.Span, Right.Span.HighestHigh(LocalSpan));
                     else
-                        Span = (LocalSpan == null)
-                             ? Left.Span
-                             : (Left.Span.CompareHigh(LocalSpan) >= 0 ? Left.Span : new IntervalBase<T>(Left.Span, LocalSpan));
+                    {
+                        if (LocalSpan.IsEmpty)
+                            Span.SetInterval(Left.Span);
+                        else
+                        {
+                            if (Left.Span.CompareHigh(LocalSpan) >= 0)
+                                Span.SetInterval(Left.Span);
+                            else
+                                Span.SetInterval(Left.Span, LocalSpan);
+                        }
+                    }
                 }
+
+                return true;
             }
 
             public void UpdateMaximumDepth()
@@ -696,7 +809,10 @@ namespace C5.Intervals
                 bool intervalWasAdded;
 
                 // Make copy if no span exists, otherwise join with current span
-                LocalSpan = LocalSpan == null ? new IntervalBase<T>(interval) : LocalSpan.JoinedSpan(interval);
+                if (LocalSpan.IsEmpty)
+                    LocalSpan.SetInterval(interval);
+                else
+                    LocalSpan.ExpandInterval(interval);
 
                 if (interval.LowIncluded)
                 {
@@ -757,13 +873,21 @@ namespace C5.Intervals
                 }
 
                 // Update span as we removed the interval
-                LocalSpan = IncludedList != null
-                    ? (ExcludedList != null
-                        ? IncludedList.Highest.JoinedSpan(ExcludedList.Highest)
-                        : new IntervalBase<T>(IncludedList.Highest))
-                    : (ExcludedList != null
-                        ? new IntervalBase<T>(ExcludedList.Highest)
-                        : null);
+                if (IncludedList != null)
+                    if (ExcludedList != null)
+                    {
+                        LocalSpan.SetInterval(IncludedList.Highest);
+                        LocalSpan.ExpandInterval(ExcludedList.Highest);
+                    }
+                    else
+                        LocalSpan.SetInterval(IncludedList.Highest);
+                else
+                {
+                    if (ExcludedList != null)
+                        LocalSpan.SetInterval(ExcludedList.Highest);
+                    else
+                        LocalSpan.IsEmpty = true;
+                }
 
                 return true;
             }
@@ -787,7 +911,7 @@ namespace C5.Intervals
             public void Swap(Node successor)
             {
                 Contract.Requires(successor != null);
-                Contract.Requires(LocalSpan == null && IncludedList == null && ExcludedList == null);
+                Contract.Requires(LocalSpan.IsEmpty && IncludedList == null && ExcludedList == null);
 
                 Contract.Ensures(Key != null);
                 // Ensures the successor is deletable
@@ -799,8 +923,8 @@ namespace C5.Intervals
                 successor.Key = tmpKey;
 
                 // Swap local span
-                LocalSpan = successor.LocalSpan;
-                successor.LocalSpan = null;
+                LocalSpan.SetInterval(successor.LocalSpan);
+                successor.LocalSpan.IsEmpty = true;
 
                 // Copy successor data to node
                 IncludedList = successor.IncludedList;
@@ -1125,7 +1249,7 @@ namespace C5.Intervals
 
             while (true)
             {
-                if (node.LocalSpan != null)
+                if (!node.LocalSpan.IsEmpty)
                     // Choose an interval from one of the lists
                     return node.IncludedList != null ? node.IncludedList.Choose() : node.ExcludedList.Choose();
 
@@ -1178,7 +1302,7 @@ namespace C5.Intervals
         private IntervalList lowestList()
         {
             var node = _root;
-            
+
             // Find the first node
             while (node.Left != null)
                 node = node.Left;
@@ -1196,11 +1320,11 @@ namespace C5.Intervals
                 while (true)
                 {
                     // Check if children contain any intervals
-                    var rightDeadEnd = node.Right == null || node.Right.Span == null;
-                    var leftDeadEnd = node.Left == null || node.Left.Span == null;
+                    var rightDeadEnd = node.Right == null || node.Right.Span.IsEmpty;
+                    var leftDeadEnd = node.Left == null || node.Left.Span.IsEmpty;
 
                     // Check if the node span's high matches the local span's high
-                    if (rightDeadEnd && leftDeadEnd || node.LocalSpan != null && node.Span.CompareHigh(node.LocalSpan) == 0)
+                    if (rightDeadEnd && leftDeadEnd || !node.LocalSpan.IsEmpty && node.Span.CompareHigh(node.LocalSpan) == 0)
                         return highestIntervalInNode(node);
 
                     // Check if right child is a dead end
@@ -1372,14 +1496,14 @@ namespace C5.Intervals
                 {
                     stack[i++] = root.Left;
                 }
-                else if (root.Span != null && query.CompareLowHigh(root.Span) <= 0)
+                else if (!root.Span.IsEmpty && query.CompareLowHigh(root.Span) <= 0)
                 {
                     if (root.Left != null)
                         stack[i++] = root.Left;
                     if (root.Right != null)
                         stack[i++] = root.Right;
 
-                    if (root.LocalSpan != null)
+                    if (!root.LocalSpan.IsEmpty)
                     {
                         // Find overlaps in lists
                         if (root.IncludedList != null)
@@ -1424,17 +1548,17 @@ namespace C5.Intervals
                 var compare = query.High.CompareTo(root.Key);
                 if (root.Left != null && (compare < 0 || compare == 0 && (!query.HighIncluded || root.IncludedList == null)))
                 {
-                    if (root.Left.Span != null && query.Overlaps(root.Left.Span))
+                    if (!root.Left.Span.IsEmpty && query.Overlaps(root.Left.Span))
                         stack[i++] = root.Left;
                 }
-                else if (root.Span != null && query.CompareLowHigh(root.Span) <= 0)
+                else if (!root.Span.IsEmpty && query.CompareLowHigh(root.Span) <= 0)
                 {
-                    if (root.Left != null && root.Left.Span != null && query.CompareLowHigh(root.Left.Span) <= 0)
+                    if (root.Left != null && !root.Left.Span.IsEmpty && query.CompareLowHigh(root.Left.Span) <= 0)
                         stack[i++] = root.Left;
                     if (root.Right != null)
                         stack[i++] = root.Right;
 
-                    if (root.LocalSpan != null)
+                    if (!root.LocalSpan.IsEmpty)
                     {
                         // Find overlaps in lists
                         if (root.IncludedList != null)
@@ -1508,7 +1632,7 @@ namespace C5.Intervals
         /// <inheritdoc/>}
         public IEnumerable<IInterval<T>> Gaps
         {
-            get { return sortedNodes(_root).Select(n => n.LocalSpan).Where(x => x != null).Gaps(); }
+            get { return sortedNodes(_root).Select(n => n.LocalSpan).Where(x => !x.IsEmpty).Cast<IInterval<T>>().Gaps(); }
         }
 
         /// <inheritdoc/>
@@ -1638,7 +1762,7 @@ namespace C5.Intervals
                 root.AddHighToDelta(interval.HighIncluded);
 
             if (updateSpan)
-                root.UpdateSpan();
+                updateSpan = root.UpdateSpan();
 
             // Update maximum depth
             root.UpdateMaximumDepth();
@@ -1824,7 +1948,7 @@ namespace C5.Intervals
             }
 
             if (updateSpan)
-                root.UpdateSpan();
+                updateSpan = root.UpdateSpan();
 
             root.UpdateMaximumDepth();
 
@@ -1888,11 +2012,6 @@ namespace C5.Intervals
         #endregion
 
         #endregion
-
-        #endregion
-
-        #region Interval Methods
-
 
         #endregion
     }
