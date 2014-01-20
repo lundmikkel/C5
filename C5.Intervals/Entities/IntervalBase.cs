@@ -85,7 +85,7 @@ namespace C5.Intervals
             }
         }
 
-        public void SetLowEndpoint(T low, bool lowIncluded)
+        public IntervalBase<T> SetLowEndpoint(T low, bool lowIncluded)
         {
             Contract.Requires(low != null);
             // TODO: Consider if contracts should be here
@@ -93,9 +93,11 @@ namespace C5.Intervals
 
             _low = low;
             _lowIncluded = lowIncluded;
+
+            return this;
         }
 
-        public void SetLowEndpoint(IInterval<T> interval)
+        public IntervalBase<T> SetLowEndpoint(IInterval<T> interval)
         {
             Contract.Requires(interval != null);
             // TODO: Consider if contracts should be here
@@ -103,9 +105,11 @@ namespace C5.Intervals
 
             _low = interval.Low;
             _lowIncluded = interval.LowIncluded;
+
+            return this;
         }
 
-        public void SetHighEndpoint(T high, bool highIncluded)
+        public IntervalBase<T> SetHighEndpoint(T high, bool highIncluded)
         {
             Contract.Requires(high != null);
             // TODO: Consider if contracts should be here
@@ -113,9 +117,11 @@ namespace C5.Intervals
 
             _high = high;
             _highIncluded = highIncluded;
+
+            return this;
         }
 
-        public void SetHighEndpoint(IInterval<T> interval)
+        public IntervalBase<T> SetHighEndpoint(IInterval<T> interval)
         {
             Contract.Requires(interval != null);
             // TODO: Consider if contracts should be here
@@ -123,9 +129,11 @@ namespace C5.Intervals
 
             _high = interval.High;
             _highIncluded = interval.HighIncluded;
+
+            return this;
         }
 
-        public void SetEndpoints(T low, T high, bool? lowIncluded = null, bool? highIncluded = null)
+        public IntervalBase<T> SetEndpoints(T low, T high, bool? lowIncluded = null, bool? highIncluded = null)
         {
             Contract.Requires(low != null);
             Contract.Requires(high != null);
@@ -138,9 +146,11 @@ namespace C5.Intervals
                 _lowIncluded = (bool) lowIncluded;
             if (highIncluded != null)
                 _highIncluded = (bool) highIncluded;
+
+            return this;
         }
 
-        public void SetEndpoints(IInterval<T> low, IInterval<T> high)
+        public IntervalBase<T> SetEndpoints(IInterval<T> low, IInterval<T> high)
         {
             Contract.Requires(low != null);
             Contract.Requires(high != null);
@@ -151,15 +161,19 @@ namespace C5.Intervals
 
             _high = high.High;
             _highIncluded = high.HighIncluded;
+
+            return this;
         }
 
-        public void SetPoint(T point)
+        public IntervalBase<T> SetPoint(T point)
         {
             _low = _high = point;
             _lowIncluded = _highIncluded = true;
+
+            return this;
         }
 
-        public void SetEndpoints(IInterval<T> interval)
+        public IntervalBase<T> SetInterval(IInterval<T> interval)
         {
             Contract.Requires(interval != null);
             Contract.Requires(interval.IsValidInterval());
@@ -168,6 +182,18 @@ namespace C5.Intervals
             _high = interval.High;
             _lowIncluded = interval.LowIncluded;
             _highIncluded = interval.HighIncluded;
+
+            return this;
+        }
+
+        public IntervalBase<T> ExpandInterval(IInterval<T> interval)
+        {
+            Contract.Requires(interval.IsValidInterval());
+
+            SetLowEndpoint(this.LowestLow(interval));
+            SetHighEndpoint(this.HighestHigh(interval));
+
+            return this;
         }
 
         #endregion
