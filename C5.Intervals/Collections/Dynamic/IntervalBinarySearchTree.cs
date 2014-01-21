@@ -1228,29 +1228,6 @@ namespace C5.Intervals
             _root = createNodes(uniqueEndpoints, 0, endpointCount - 1, ref height);
         }
 
-        private void preconstructPresortedNodeStructure(IEnumerable<I> intervalsEnumerable)
-        {
-            // TODO: Sort endpoints using same approach as maximum depth
-
-            var intervals = intervalsEnumerable as I[] ?? intervalsEnumerable.ToArray();
-
-            var intervalCount = intervals.Length;
-
-            // Save all endpoints to array
-            var endpoints = new T[intervalCount * 2];
-
-            for (var i = 0; i < intervalCount; i++)
-            {
-                var interval = intervals[i];
-
-                endpoints[i * 2] = interval.Low;
-                endpoints[i * 2 + 1] = interval.High;
-            }
-
-            var height = 0;
-            _root = createNodes(endpoints, 0, intervalCount * 2 - 1, ref height);
-        }
-
         private Node createNodes(T[] endpoints, int lower, int upper, ref int height)
         {
             if (lower > upper)

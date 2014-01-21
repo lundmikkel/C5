@@ -31,6 +31,7 @@ namespace C5.Intervals
         #endregion
 
         #region Code Contracts
+
         [ContractInvariantMethod]
         private void invariant()
         {
@@ -1194,33 +1195,14 @@ namespace C5.Intervals
         /// Construct an empty Dynamic Interval Tree that does not allow reference duplicates.
         /// </summary>
         /// <param name="intervals">A collection of intervals.</param>
-        public DynamicIntervalTree(IEnumerable<I> intervals)
+        public DynamicIntervalTree(IEnumerable<I> intervals, bool allowReferenceDuplicates = false)
         {
             Contract.Requires(intervals != null);
 
             // Set reference duplicate behavior
-            AllowsReferenceDuplicates = false;
-
-            // TODO: Pre-build the tree structure
-
-            // Insert all intervals
-            foreach (var interval in intervals)
-                Add(interval);
-        }
-
-        /// <summary>
-        /// Construct a Dynamic Interval Tree from a collection of intervals.
-        /// </summary>
-        /// <param name="intervals">A collection of intervals.</param>
-        /// <param name="allowReferenceDuplicates">Set how reference duplicates should be handled.</param>
-        public DynamicIntervalTree(IEnumerable<I> intervals, bool allowReferenceDuplicates)
-        {
-            Contract.Requires(intervals != null);
-
-            // Set reference duplicate behaviour
             AllowsReferenceDuplicates = allowReferenceDuplicates;
 
-            // TODO: Prebuild the tree structure
+            // TODO: Pre-build the tree structure
 
             // Insert all intervals
             foreach (var interval in intervals)
@@ -1684,7 +1666,6 @@ namespace C5.Intervals
             if (root == null)
             {
                 nodeWasAdded = intervalWasAdded = true;
-
                 return new Node(interval);
             }
 
@@ -1694,16 +1675,12 @@ namespace C5.Intervals
             {
                 root.Right = addLow(interval, root.Right, ref nodeWasAdded, ref intervalWasAdded);
 
-                Contract.Assert(root.Right != null);
-
                 if (nodeWasAdded)
                     root.Balance++;
             }
             else if (compare < 0)
             {
                 root.Left = addLow(interval, root.Left, ref nodeWasAdded, ref intervalWasAdded);
-
-                Contract.Assert(root.Left != null);
 
                 if (nodeWasAdded)
                     root.Balance--;
