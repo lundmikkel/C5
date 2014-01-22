@@ -478,10 +478,6 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
-            // Break if we won't find any overlaps
-            if (query == null || IsEmpty)
-                yield break;
-
             int layer = 0, lower = 0, upper = _firstLayerCount;
 
             // Make sure first and last don't point at the same interval (theorem 2)
@@ -773,14 +769,35 @@ namespace C5.Intervals
         {
             get
             {
-                return Sorted.Gaps();
+                if (IsEmpty)
+                    return Enumerable.Empty<IInterval<T>>();
+
+                return _intervalLayers[0].Gaps();
             }
         }
 
         /// <inheritdoc/>
         public IEnumerable<IInterval<T>> FindGaps(IInterval<T> query)
         {
-            return FindOverlaps(query).Gaps(query, false);
+            return findOverlapsInFirstLayer(query).Gaps(query);
+        }
+
+        private IEnumerable<I> findOverlapsInFirstLayer(IInterval<T> query)
+        {
+            if (IsEmpty)
+                yield break;
+
+            var last = _firstLayerCount;
+
+            // We know first doesn't overlap so we can increment it before searching
+            var first = findFirst(query, 0, 0, last);
+
+            // Cache variables to speed up iteration
+            var currentLayer = _intervalLayers[0];
+            I interval;
+
+            while (first < last && (interval = currentLayer[first++]).CompareLowHigh(query) <= 0)
+                yield return interval;
         }
 
         #endregion

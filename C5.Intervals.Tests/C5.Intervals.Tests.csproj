@@ -63,6 +63,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="Collections\Static\NestedContainmentListTester.cs" />
     <Compile Include="Extensions\IntervalExtensionTester.cs" />
     <Compile Include="Extensions\IntervalRelationsTester.cs" />
     <Compile Include="Collections\Static\BinaryIntervalSearchTester.cs" />

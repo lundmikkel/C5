@@ -441,16 +441,34 @@ namespace C5.Intervals
         {
             get
             {
-                return Sorted.Gaps();
+                if (IsEmpty)
+                    return Enumerable.Empty<IInterval<T>>();
+
+                return _list.Take(_mainSublist.End).Select(x => x.Interval).Gaps();
             }
         }
 
         /// <inheritdoc/>
         public IEnumerable<IInterval<T>> FindGaps(IInterval<T> query)
         {
-            return FindOverlaps(query).Gaps(query);
+            return findOverlapsInMainList(query).Gaps(query);
         }
 
+        private IEnumerable<I> findOverlapsInMainList(IInterval<T> query)
+        {
+            if (IsEmpty)
+                yield break;
+
+            // We know first doesn't overlap so we can increment it before searching
+            var first = findFirst(_mainSublist, query);
+
+            // Cache variables to speed up iteration
+            var last = _mainSublist.End;
+            I interval;
+
+            while (first < last && (interval = _list[first++].Interval).CompareLowHigh(query) <= 0)
+                yield return interval;
+        }
 
         #endregion
 
