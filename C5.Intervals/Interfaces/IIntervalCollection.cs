@@ -539,28 +539,6 @@ namespace C5.Intervals
             throw new NotImplementedException();
         }
 
-        /*
-        /// <inheritdoc/>
-        public bool FindGap(IInterval<T> query, ref IInterval<T> gap)
-        {
-            Contract.Requires(query != null);
-
-            // A found gap is not null
-            Contract.Ensures(!Contract.Result<bool>() || Contract.ValueAtReturn(out gap) != null);
-            // A found gap is contained in query
-            Contract.Ensures(!Contract.Result<bool>() || query.Contains(Contract.ValueAtReturn(out gap)));
-            // A found gap doesn't overlap any interval in the collection
-            Contract.Ensures(!Contract.Result<bool>() || Contract.ValueAtReturn(out gap).OverlapsAny(this));
-
-            // A found gap will be met by an interval in the collection
-            Contract.Ensures(!Contract.Result<bool>() || IntervalCollectionContractHelper.MetByAny(Contract.ValueAtReturn(out gap), this.Cast<IInterval<T>>()));
-            // A found gap will meet an interval in the collection
-            Contract.Ensures(!Contract.Result<bool>() || IntervalCollectionContractHelper.MeetsAny(Contract.ValueAtReturn(out gap), this.Cast<IInterval<T>>()));
-
-            throw new NotImplementedException();
-        }
-        */
-
         #endregion
 
         #region Extensible
