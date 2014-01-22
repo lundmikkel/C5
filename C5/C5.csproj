@@ -162,6 +162,7 @@
     <Compile Include="Random.cs" />
     <Compile Include="Records.cs" />
     <Compile Include="Sorting.cs" />
+    <Compile Include="Sorting\Timsort.cs" />
     <Compile Include="trees\RedBlackTreeBag.cs" />
     <Compile Include="trees\RedBlackTreeDictionary.cs" />
     <Compile Include="trees\RedBlackTreeSet.cs" />
@@ -185,6 +186,6 @@
     <CompileDependsOn>$(CompileDependsOn);CheckForCodeContracts</CompileDependsOn>
   </PropertyGroup>
   <Target Name="CheckForCodeContracts" Condition="'$(CodeContractsImported)' != 'true'">
-    <Error Text="Project requires Code Contracts http://msdn.microsoft.com/en-us/devlabs/dd491992.aspx"/>
+    <Error Text="Project requires Code Contracts http://msdn.microsoft.com/en-us/devlabs/dd491992.aspx" />
   </Target>
 </Project>

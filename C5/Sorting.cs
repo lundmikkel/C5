@@ -19,13 +19,14 @@
  SOFTWARE.
 */
 using System;
+using System.Diagnostics.Contracts;
 using SCG = System.Collections.Generic;
 namespace C5
 {
     /// <summary>
     /// A utility class with functions for sorting arrays with respect to an IComparer&lt;T&gt;
     /// </summary>
-    public class Sorting
+    public partial class Sorting
     {
         Sorting() { }
 
@@ -73,6 +74,24 @@ namespace C5
         }
 
 
+        public static void BinaryInsertionSort<T>(T[] array, SCG.IComparer<T> comparer = null)
+        {
+            Contract.Requires(array != null, "array cannot be null.");
+
+            new Sorter<T>(array, comparer).BinaryInsertionSort(0, array.Length);
+        }
+
+        public static void BinaryInsertionSort<T>(T[] array, int start, int count, SCG.IComparer<T> comparer)
+        {
+            Contract.Requires(array != null, "array cannot be null.");
+            Contract.Requires(0 <= start, "start must be non-negative.");
+            Contract.Requires(0 <= count, "count must be non-negative.");
+            Contract.Requires(start + count <= array.Length);
+
+            new Sorter<T>(array, comparer).BinaryInsertionSort(start, start + count);
+        }
+
+
         /// <summary>
         /// Sort part of array in place using Heap Sort
         /// </summary>
@@ -92,19 +111,20 @@ namespace C5
 
         class Sorter<T>
         {
-            T[] a;
+            readonly T[] _a;
+            readonly SCG.IComparer<T> _c;
 
-            SCG.IComparer<T> c;
-
-
-            internal Sorter(T[] a, SCG.IComparer<T> c) { this.a = a; this.c = c; }
-
+            internal Sorter(T[] a, SCG.IComparer<T> c)
+            {
+                _a = a;
+                _c = c ?? SCG.Comparer<T>.Default;
+            }
 
             internal void IntroSort(int f, int b)
             {
                 if (b - f > 31)
                 {
-                    int depth_limit = (int)Math.Floor(2.5 * Math.Log(b - f, 2));
+                    int depth_limit = (int) Math.Floor(2.5 * Math.Log(b - f, 2));
 
                     introSort(f, b, depth_limit);
                 }
@@ -131,43 +151,43 @@ namespace C5
             }
 
 
-            private int compare(T i1, T i2) { return c.Compare(i1, i2); }
+            private int compare(T i1, T i2) { return _c.Compare(i1, i2); }
 
 
             private int partition(int f, int b)
             {
                 int bot = f, mid = (b + f) / 2, top = b - 1;
-                T abot = a[bot], amid = a[mid], atop = a[top];
+                T abot = _a[bot], amid = _a[mid], atop = _a[top];
 
                 if (compare(abot, amid) < 0)
                 {
                     if (compare(atop, abot) < 0)//atop<abot<amid
-                    { a[top] = amid; amid = a[mid] = abot; a[bot] = atop; }
+                    { _a[top] = amid; amid = _a[mid] = abot; _a[bot] = atop; }
                     else if (compare(atop, amid) < 0) //abot<=atop<amid
-                    { a[top] = amid; amid = a[mid] = atop; }
+                    { _a[top] = amid; amid = _a[mid] = atop; }
                     //else abot<amid<=atop
                 }
                 else
                 {
                     if (compare(amid, atop) > 0) //atop<amid<=abot
-                    { a[bot] = atop; a[top] = abot; }
+                    { _a[bot] = atop; _a[top] = abot; }
                     else if (compare(abot, atop) > 0) //amid<=atop<abot
-                    { a[bot] = amid; amid = a[mid] = atop; a[top] = abot; }
+                    { _a[bot] = amid; amid = _a[mid] = atop; _a[top] = abot; }
                     else //amid<=abot<=atop
-                    { a[bot] = amid; amid = a[mid] = abot; }
+                    { _a[bot] = amid; amid = _a[mid] = abot; }
                 }
 
                 int i = bot, j = top;
 
                 while (true)
                 {
-                    while (compare(a[++i], amid) < 0) ;
+                    while (compare(_a[++i], amid) < 0) ;
 
-                    while (compare(amid, a[--j]) < 0) ;
+                    while (compare(amid, _a[--j]) < 0) ;
 
                     if (i < j)
                     {
-                        T tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+                        T tmp = _a[i]; _a[i] = _a[j]; _a[j] = tmp;
                     }
                     else
                         return i;
@@ -179,16 +199,49 @@ namespace C5
             {
                 for (int j = f + 1; j < b; j++)
                 {
-                    T key = a[j], other;
+                    T key = _a[j], other;
                     int i = j - 1;
 
-                    if (c.Compare(other = a[i], key) > 0)
+                    if (_c.Compare(other = _a[i], key) > 0)
                     {
-                        a[j] = other;
-                        while (i > f && c.Compare(other = a[i - 1], key) > 0) { a[i--] = other; }
+                        _a[j] = other;
+                        while (i > f && _c.Compare(other = _a[i - 1], key) > 0) { _a[i--] = other; }
 
-                        a[i] = key;
+                        _a[i] = key;
                     }
+                }
+            }
+
+
+            internal void BinaryInsertionSort(int start, int end)
+            {
+                for (var j = start + 1; j < end; j++)
+                {
+                    // Get next
+                    var next = _a[j];
+
+                    var i = j - 1;
+
+                    // Continue if next doesn't need moving
+                    if (compare(_a[i], next) <= 0)
+                        continue;
+
+                    // Search for position
+                    var low = -1;
+                    while (low + 1 < i)
+                    {
+                        var middle = low + (i - low >> 1);
+
+                        if (compare(next, _a[middle]) <= 0)
+                            i = middle;
+                        else
+                            low = middle;
+                    }
+
+                    // Move items that are in the wrong place
+                    Array.Copy(_a, i, _a, i + 1, j - i);
+
+                    _a[i] = next;
                 }
             }
 
@@ -199,7 +252,7 @@ namespace C5
 
                 for (int i = b - 1; i > f; i--)
                 {
-                    T tmp = a[f]; a[f] = a[i]; a[i] = tmp;
+                    T tmp = _a[f]; _a[f] = _a[i]; _a[i] = tmp;
                     heapify(f, i, f);
                 }
             }
@@ -207,27 +260,27 @@ namespace C5
 
             private void heapify(int f, int b, int i)
             {
-                T pv = a[i], lv, rv, max = pv;
+                T pv = _a[i], lv, rv, max = pv;
                 int j = i, maxpt = j;
 
                 while (true)
                 {
                     int l = 2 * j - f + 1, r = l + 1;
 
-                    if (l < b && compare(lv = a[l], max) > 0) { maxpt = l; max = lv; }
+                    if (l < b && compare(lv = _a[l], max) > 0) { maxpt = l; max = lv; }
 
-                    if (r < b && compare(rv = a[r], max) > 0) { maxpt = r; max = rv; }
+                    if (r < b && compare(rv = _a[r], max) > 0) { maxpt = r; max = rv; }
 
                     if (maxpt == j)
                         break;
 
-                    a[j] = max;
+                    _a[j] = max;
                     max = pv;
                     j = maxpt;
                 }
 
                 if (j > i)
-                    a[j] = pv;
+                    _a[j] = pv;
             }
         }
     }

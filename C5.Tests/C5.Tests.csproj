@@ -64,6 +64,7 @@
     <Compile Include="Sorting.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Sorting\Timsort.cs" />
     <Compile Include="SupportClasses.cs">
       <SubType>Code</SubType>
     </Compile>
