@@ -361,17 +361,13 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
-            if (query == null)
-                return Enumerable.Empty<I>();
-
             return findOverlaps(_list, query);
         }
 
         /// <inheritdoc/>
-        public bool FindOverlap(IInterval<T> query, ref I overlap)
+        public bool FindOverlap(IInterval<T> query, out I overlap)
         {
-            if (query == null)
-                return false;
+            overlap = null;
 
             // Check if query overlaps the collection at all
             if (_list == null || !query.Overlaps(Span))
@@ -390,9 +386,9 @@ namespace C5.Intervals
         }
 
         /// <inheritdoc/>
-        public bool FindOverlap(T query, ref I overlap)
+        public bool FindOverlap(T query, out I overlap)
         {
-            return FindOverlap(new IntervalBase<T>(query), ref overlap);
+            return FindOverlap(new IntervalBase<T>(query), out overlap);
         }
 
         /// <inheritdoc/>

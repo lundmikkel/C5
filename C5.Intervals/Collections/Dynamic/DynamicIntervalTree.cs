@@ -1559,33 +1559,23 @@ namespace C5.Intervals
         #region Find Overlap
 
         /// <inheritdoc/>
-        public bool FindOverlap(T query, ref I overlap)
+        public bool FindOverlap(T query, out I overlap)
         {
             bool result;
 
             using (var enumerator = FindOverlaps(query).GetEnumerator())
-            {
-                result = enumerator.MoveNext();
-
-                if (result)
-                    overlap = enumerator.Current;
-            }
+                overlap = (result = enumerator.MoveNext()) ? enumerator.Current : null;
 
             return result;
         }
 
         /// <inheritdoc/>
-        public bool FindOverlap(IInterval<T> query, ref I overlap)
+        public bool FindOverlap(IInterval<T> query, out I overlap)
         {
             bool result;
 
             using (var enumerator = FindOverlaps(query).GetEnumerator())
-            {
-                result = enumerator.MoveNext();
-
-                if (result)
-                    overlap = enumerator.Current;
-            }
+                overlap = (result = enumerator.MoveNext()) ? enumerator.Current : null;
 
             return result;
         }

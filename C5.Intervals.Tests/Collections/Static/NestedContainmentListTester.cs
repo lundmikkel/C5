@@ -516,25 +516,25 @@ namespace C5.Intervals.Tests
             public void OverlapExists_Empty()
             {
                 Assert.False(new NestedContainmentList<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).
-                    FindOverlap(new IntervalBase<int>(4, 5, true, true), ref _overlap));
+                    FindOverlap(new IntervalBase<int>(4, 5, true, true), out _overlap));
             }
 
             [Test]
             public void OverlapExists_QueryOutOfSpan()
             {
-                Assert.False(new NestedContainmentList<IInterval<int>, int>(dataSetB).FindOverlap(new IntervalBase<int>(21, 23, true, true), ref _overlap));
+                Assert.False(new NestedContainmentList<IInterval<int>, int>(dataSetB).FindOverlap(new IntervalBase<int>(21, 23, true, true), out _overlap));
             }
 
             [Test]
             public void OverlapExists_Hit()
             {
-                Assert.True(new NestedContainmentList<IInterval<int>, int>(dataSetB).FindOverlap(new IntervalBase<int>(4, 5, true, true), ref _overlap));
+                Assert.True(new NestedContainmentList<IInterval<int>, int>(dataSetB).FindOverlap(new IntervalBase<int>(4, 5, true, true), out _overlap));
             }
 
             [Test]
             public void OverlapExists_NoHit()
             {
-                Assert.False(new NestedContainmentList<IInterval<int>, int>(dataSetE).FindOverlap(new IntervalBase<int>(9, 11, true, true), ref _overlap));
+                Assert.False(new NestedContainmentList<IInterval<int>, int>(dataSetE).FindOverlap(new IntervalBase<int>(9, 11, true, true), out _overlap));
             }
 
             #endregion

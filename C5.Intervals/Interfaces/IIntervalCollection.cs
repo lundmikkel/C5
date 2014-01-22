@@ -141,22 +141,22 @@ namespace C5.Intervals
         /// <summary>
         /// Check if there exists an interval that overlaps the query point.
         /// </summary>
-        /// <remarks>There is no garanty of which interval will be returned, but implementations must assure that the interval returned is the fastest to retrieve.</remarks>
+        /// <remarks>There is no guaranty of which interval will be returned, but implementations must assure that the interval returned is the fastest to retrieve.</remarks>
         /// <param name="query">The query point.</param>
         /// <param name="overlap">The overlapping interval found, if return is true.</param>
         /// <returns>True if an interval overlapped the query.</returns>
         [Pure]
-        bool FindOverlap(T query, ref I overlap);
+        bool FindOverlap(T query, out I overlap);
 
         /// <summary>
         /// Check if there exists an interval that overlaps the query interval.
         /// </summary>
-        /// <remarks>There is no garanty of which interval will be returned, but implementations must assure that the interval returned is the fastest to retrieve.</remarks>
+        /// <remarks>There is no guaranty of which interval will be returned, but implementations must assure that the interval returned is the fastest to retrieve.</remarks>
         /// <param name="query">The query interval.</param>
         /// <param name="overlap">The overlapping interval found, if return is true.</param>
         /// <returns>True if an interval overlapped the query.</returns>
         [Pure]
-        bool FindOverlap(IInterval<T> query, ref I overlap);
+        bool FindOverlap(IInterval<T> query, out I overlap);
 
         #endregion
 
@@ -428,7 +428,7 @@ namespace C5.Intervals
 
         #region Find Overlap
 
-        public bool FindOverlap(T query, ref I overlap)
+        public bool FindOverlap(T query, out I overlap)
         {
             Contract.Requires(query != null);
 
@@ -441,7 +441,7 @@ namespace C5.Intervals
             throw new NotImplementedException();
         }
 
-        public bool FindOverlap(IInterval<T> query, ref I overlap)
+        public bool FindOverlap(IInterval<T> query, out I overlap)
         {
             Contract.Requires(query != null);
 

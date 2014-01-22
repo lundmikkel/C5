@@ -600,8 +600,8 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
-            I overlap = null;
-            if (FindOverlap(query, ref overlap))
+            I overlap;
+            if (FindOverlap(query, out overlap))
                 yield return overlap;
         }
 
@@ -657,8 +657,10 @@ namespace C5.Intervals
         #region Find Overlap
 
         /// <inheritdoc/>
-        public bool FindOverlap(T query, ref I overlap)
+        public bool FindOverlap(T query, out I overlap)
         {
+            overlap = null;
+
             // Stop immediately if empty
             if (IsEmpty)
                 return false;
@@ -733,17 +735,12 @@ namespace C5.Intervals
         }
 
         /// <inheritdoc/>
-        public bool FindOverlap(IInterval<T> query, ref I overlap)
+        public bool FindOverlap(IInterval<T> query, out I overlap)
         {
             bool result;
 
             using (var enumerator = FindOverlaps(query).GetEnumerator())
-            {
-                result = enumerator.MoveNext();
-
-                if (result)
-                    overlap = enumerator.Current;
-            }
+                overlap = (result = enumerator.MoveNext()) ? enumerator.Current : null;
 
             return result;
         }
@@ -754,8 +751,8 @@ namespace C5.Intervals
 
         public int CountOverlaps(T query)
         {
-            I overlap = null;
-            return FindOverlap(query, ref overlap) ? 1 : 0;
+            I overlap;
+            return FindOverlap(query, out overlap) ? 1 : 0;
         }
 
         public int CountOverlaps(IInterval<T> query)

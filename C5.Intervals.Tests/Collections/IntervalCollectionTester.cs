@@ -1519,10 +1519,10 @@ namespace C5.Intervals.Tests
         public void FindOverlapStabbing_EmptyCollection_False()
         {
             var query = randomInt();
-            Interval interval = null;
+            Interval interval;
             var collection = CreateEmptyCollection<Interval, int>();
 
-            Assert.False(collection.FindOverlap(query, ref interval));
+            Assert.False(collection.FindOverlap(query, out interval));
             Assert.IsNull(interval);
         }
 
@@ -1535,10 +1535,10 @@ namespace C5.Intervals.Tests
         public void FindOverlapRange_EmptyCollection_False()
         {
             var query = SingleInterval();
-            Interval interval = null;
+            Interval interval;
             var collection = CreateEmptyCollection<Interval, int>();
 
-            Assert.False(collection.FindOverlap(query, ref interval));
+            Assert.False(collection.FindOverlap(query, out interval));
             Assert.IsNull(interval);
         }
 
@@ -1557,8 +1557,8 @@ namespace C5.Intervals.Tests
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
             var interval = collection.Choose();
-            Interval overlap = null;
-            Assert.True(collection.FindOverlap(interval, ref overlap));
+            Interval overlap;
+            Assert.True(collection.FindOverlap(interval, out overlap));
             Assert.True(interval.Overlaps(overlap));
         }
 
@@ -1569,10 +1569,10 @@ namespace C5.Intervals.Tests
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
             var interval = SingleInterval();
-            Interval overlap = null;
+            Interval overlap;
             while (intervals.Any(x => x.Overlaps(interval)))
                 interval = SingleInterval();
-            Assert.False(collection.FindOverlap(interval, ref overlap));
+            Assert.False(collection.FindOverlap(interval, out overlap));
             Assert.IsNull(overlap);
         }
 
@@ -2662,8 +2662,8 @@ namespace C5.Intervals.Tests
                     Assert.AreEqual(collection.FindOverlaps(interval).Count(), collection.CountOverlaps(interval));
                     Assert.AreEqual(collection.FindOverlaps(interval.Low).Count(), collection.CountOverlaps(interval.Low));
                     sum += collection.FindOverlaps(interval).Count();
-                    Assert.True(collection.FindOverlap(interval, ref interval));
-                    collection.FindOverlap(interval.Low, ref interval);
+                    Assert.True(collection.FindOverlap(interval, out interval));
+                    collection.FindOverlap(interval.Low, out interval);
 
                     var remove = Random.Next(0, 2);
                     if (remove == 1)

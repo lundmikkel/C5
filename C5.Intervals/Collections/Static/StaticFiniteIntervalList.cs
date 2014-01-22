@@ -295,14 +295,16 @@ namespace C5.Intervals
         #region Find Overlap
 
         /// <inheritdoc/>
-        public bool FindOverlap(T query, ref I overlap)
+        public bool FindOverlap(T query, out I overlap)
         {
-            return FindOverlap(new IntervalBase<T>(query), ref overlap);
+            return FindOverlap(new IntervalBase<T>(query), out overlap);
         }
 
         /// <inheritdoc/>
-        public bool FindOverlap(IInterval<T> query, ref I overlap)
+        public bool FindOverlap(IInterval<T> query, out I overlap)
         {
+            overlap = null;
+
             // No overlap if collection is empty, or query doesn't overlap collection
             if (IsEmpty || !query.Overlaps(Span))
                 return false;
@@ -327,7 +329,7 @@ namespace C5.Intervals
         public int CountOverlaps(T query)
         {
             I overlap = null;
-            return FindOverlap(query, ref overlap) ? 1 : 0;
+            return FindOverlap(query, out overlap) ? 1 : 0;
         }
 
         /// <inheritdoc/>

@@ -393,16 +393,18 @@ namespace C5.Intervals
         #region Find Overlap
 
         /// <inheritdoc/>
-        public bool FindOverlap(T query, ref I overlap)
+        public bool FindOverlap(T query, out I overlap)
         {
-            return FindOverlap(new IntervalBase<T>(query), ref overlap);
+            return FindOverlap(new IntervalBase<T>(query), out overlap);
         }
 
         /// <inheritdoc/>
-        public bool FindOverlap(IInterval<T> query, ref I overlap)
+        public bool FindOverlap(IInterval<T> query, out I overlap)
         {
+            overlap = null;
+
             // Check if query overlaps the collection at all
-            if (query == null || _list == null || !query.Overlaps(Span))
+            if (_list == null || !query.Overlaps(Span))
                 return false;
 
             // Find first overlap
