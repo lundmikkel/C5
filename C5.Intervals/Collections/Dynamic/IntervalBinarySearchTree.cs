@@ -1910,12 +1910,46 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public bool FindOverlap(T query, out I overlap)
         {
-            bool result;
+            var node = _root;
 
-            using (var enumerator = FindOverlaps(query).GetEnumerator())
-                overlap = (result = enumerator.MoveNext()) ? enumerator.Current : null;
+            while (node != null)
+            {
+                var compare = query.CompareTo(node.Key);
 
-            return result;
+                if (compare < 0)
+                {
+                    if (node.Less != null && !node.Less.IsEmpty)
+                    {
+                        overlap = node.Less.Choose();
+                        return true;
+                    }
+
+                    node = node.Left;
+                }
+                else if (compare > 0)
+                {
+                    if (node.Greater != null && !node.Greater.IsEmpty)
+                    {
+                        overlap = node.Greater.Choose();
+                        return true;
+                    }
+
+                    node = node.Right;
+                }
+                else
+                {
+                    if (node.Equal != null && !node.Equal.IsEmpty)
+                    {
+                        overlap = node.Equal.Choose();
+                        return true;
+                    }
+
+                    break;
+                }
+            }
+
+            overlap = null;
+            return false;
         }
 
         /// <inheritdoc/>

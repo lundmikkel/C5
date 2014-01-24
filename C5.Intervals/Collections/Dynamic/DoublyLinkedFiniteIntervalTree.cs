@@ -737,12 +737,24 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public bool FindOverlap(IInterval<T> query, out I overlap)
         {
-            bool result;
+            overlap = null;
 
-            using (var enumerator = FindOverlaps(query).GetEnumerator())
-                overlap = (result = enumerator.MoveNext()) ? enumerator.Current : null;
+            var node = _root;
 
-            return result;
+            while (node != null)
+            {
+                if (query.CompareHighLow(node.Key) < 0)
+                    node = node.Left;
+                else if (query.CompareLowHigh(node.Key) > 0)
+                    node = node.Right;
+                else
+                {
+                    overlap = node.Key;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         #endregion

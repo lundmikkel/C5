@@ -209,7 +209,9 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public IEnumerable<I> FindOverlaps(T query)
         {
-            return FindOverlaps(new IntervalBase<T>(query));
+            I overlap;
+            if (findOverlap(query, out overlap))
+                yield return overlap;
         }
 
         /// <inheritdoc/>
@@ -233,7 +235,59 @@ namespace C5.Intervals
                 yield return _intervals[first++];
         }
 
-        // TODO: Decide on using either start/end or lower/upper.
+        private bool findOverlap(T query, out I overlap)
+        {
+            // Do a binary search among the low endpoints
+            var min = 0;
+            var max = _count;
+            while (min < max)
+            {
+                var mid = min + (max - min >> 1);
+
+                var compare = query.CompareTo(_intervals[mid].Low);
+
+                if (compare < 0)
+                    max = mid - 1;
+                else if (compare > 0)
+                    min = mid + 1;
+                else
+                {
+                    min = mid;
+                    break;
+                }
+            }
+
+            // Make sure index is in bound
+            if (min < _count)
+            {
+                var compare = query.CompareTo((overlap = _intervals[min]).Low);
+
+                if (compare == 0)
+                {
+                    // Stabbing directly on low
+                    if (overlap.LowIncluded)
+                        return true;
+                }
+                else if (compare > 0)
+                {
+                    // Check high to check if we have an overlap
+                    compare = query.CompareTo(overlap.High);
+                    if (compare < 0 || compare == 0 && overlap.HighIncluded)
+                        return true;
+
+                    overlap = null;
+                    return false;
+                }
+            }
+
+            // Check if the interval before overlaps
+            if (min > 0 && (overlap = _intervals[min - 1]).Overlaps(query))
+                return true;
+
+            overlap = null;
+            return false;
+        }
+
         private int findFirst(IInterval<T> query)
         {
             Contract.Requires(query != null);
@@ -297,7 +351,7 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public bool FindOverlap(T query, out I overlap)
         {
-            return FindOverlap(new IntervalBase<T>(query), out overlap);
+            return findOverlap(query, out overlap);
         }
 
         /// <inheritdoc/>

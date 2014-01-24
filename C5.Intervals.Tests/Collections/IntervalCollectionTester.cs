@@ -1251,7 +1251,7 @@ namespace C5.Intervals.Tests
         }
 
         [Test]
-        [Category("Find Overlap Stabbing")]
+        [Category("Find Overlaps Stabbing")]
         public void FindOverlapsStabbing_SingleInterval_SingleOverlap()
         {
             var interval = SingleInterval();
@@ -1275,7 +1275,7 @@ namespace C5.Intervals.Tests
         }
 
         [Test]
-        [Category("Find Overlap Stabbing")]
+        [Category("Find Overlaps Stabbing")]
         public void FindOverlapsStabbing_SingleObject_CountOrSingleOverlap()
         {
             var intervals = SingleObject();
@@ -1301,7 +1301,7 @@ namespace C5.Intervals.Tests
         }
 
         [Test]
-        [Category("Find Overlap Stabbing")]
+        [Category("Find Overlaps Stabbing")]
         public void FindOverlapsStabbing_DuplicateIntervals_CountOverlaps()
         {
             var intervals = DuplicateIntervals();
@@ -1326,7 +1326,7 @@ namespace C5.Intervals.Tests
         }
 
         [Test]
-        [Category("Find Overlap Stabbing")]
+        [Category("Find Overlaps Stabbing")]
         public void FindOverlapsStabbing_ManyIntervals_AtLeastOneOverlap_FixedSeed()
         {
             updateRandom(1641746101);
@@ -1334,7 +1334,7 @@ namespace C5.Intervals.Tests
         }
 
         [Test]
-        [Category("Find Overlap Stabbing")]
+        [Category("Find Overlaps Stabbing")]
         public void FindOverlapsStabbing_ManyIntervals_AtLeastOneOverlap()
         {
             var intervals = ManyIntervals();
@@ -1514,16 +1514,188 @@ namespace C5.Intervals.Tests
 
         #region Stabbing
 
+        // TODO!!
+
         [Test]
         [Category("Find Overlap Stabbing")]
         public void FindOverlapStabbing_EmptyCollection_False()
         {
             var query = randomInt();
-            Interval interval;
+            Interval overlap;
             var collection = CreateEmptyCollection<Interval, int>();
 
-            Assert.False(collection.FindOverlap(query, out interval));
-            Assert.IsNull(interval);
+            Assert.False(collection.FindOverlap(query, out overlap));
+            Assert.IsNull(overlap);
+        }
+
+        [Test]
+        [Category("Find Overlap Stabbing")]
+        public void FindOverlapStabbing_SingleInterval_OverlapEqualsInterval()
+        {
+            var interval = SingleInterval();
+            var query = randomInt();
+            while (interval.Overlaps(query)) query = randomInt();
+            var collection = CreateCollection<Interval, int>(interval);
+            Interval overlap;
+
+            Assert.That(collection.FindOverlap(query, out overlap), Is.False);
+            Assert.That(overlap, Is.Null);
+
+            if (interval.LowIncluded)
+            {
+                Assert.That(collection.FindOverlap(interval.Low, out overlap), Is.True);
+                Assert.That(overlap, Is.EqualTo(interval));
+            }
+            else
+            {
+                Assert.That(collection.FindOverlap(interval.Low, out overlap), Is.False);
+                Assert.That(overlap, Is.Null);
+            }
+
+            if (interval.HighIncluded)
+            {
+                Assert.That(collection.FindOverlap(interval.High, out overlap), Is.True);
+                Assert.That(overlap, Is.EqualTo(interval));
+            }
+            else
+            {
+                Assert.That(collection.FindOverlap(interval.High, out overlap), Is.False);
+                Assert.That(overlap, Is.Null);
+            }
+
+            Assert.That(collection.FindOverlap(interval.Low / 2 + interval.High / 2, out overlap), Is.True);
+            Assert.That(overlap, Is.EqualTo(interval));
+        }
+
+        [Test]
+        [Category("Find Overlap Stabbing")]
+        public void FindOverlapStabbing_SingleObject_OverlapIntervalEqualsInterval()
+        {
+            var intervals = SingleObject();
+            var interval = intervals[0];
+            var query = randomInt();
+            while (interval.Overlaps(query)) query = randomInt();
+            var collection = CreateCollection<Interval, int>(intervals);
+            Interval overlap;
+
+            Assert.That(collection.FindOverlap(query, out overlap), Is.False);
+            Assert.That(overlap, Is.Null);
+
+            if (interval.LowIncluded)
+            {
+                Assert.That(collection.FindOverlap(interval.Low, out overlap), Is.True);
+                Assert.That(overlap, Is.EqualTo(interval));
+            }
+            else
+            {
+                Assert.That(collection.FindOverlap(interval.Low, out overlap), Is.False);
+                Assert.That(overlap, Is.Null);
+            }
+
+            if (interval.HighIncluded)
+            {
+                Assert.That(collection.FindOverlap(interval.High, out overlap), Is.True);
+                Assert.That(overlap, Is.EqualTo(interval));
+            }
+            else
+            {
+                Assert.That(collection.FindOverlap(interval.High, out overlap), Is.False);
+                Assert.That(overlap, Is.Null);
+            }
+
+            Assert.That(collection.FindOverlap(interval.Low / 2 + interval.High / 2, out overlap), Is.True);
+            Assert.That(overlap, Is.EqualTo(interval));
+        }
+
+        [Test]
+        [Category("Find Overlap Stabbing")]
+        public void FindOverlapStabbing_DuplicateIntervals_CountOverlaps()
+        {
+            var intervals = DuplicateIntervals();
+            var interval = intervals[0];
+            var query = randomInt();
+            while (interval.Overlaps(query)) query = randomInt();
+            var collection = CreateCollection<Interval, int>(intervals);
+            Interval overlap;
+
+            Assert.That(collection.FindOverlap(query, out overlap), Is.False);
+            Assert.That(overlap, Is.Null);
+
+            if (interval.LowIncluded)
+            {
+                Assert.That(collection.FindOverlap(interval.Low, out overlap), Is.True);
+                Assert.That(overlap.IntervalEquals(interval));
+            }
+            else
+            {
+                Assert.That(collection.FindOverlap(interval.Low, out overlap), Is.False);
+                Assert.That(overlap, Is.Null);
+            }
+
+            if (interval.HighIncluded)
+            {
+                Assert.That(collection.FindOverlap(interval.High, out overlap), Is.True);
+                Assert.That(overlap.IntervalEquals(interval));
+            }
+            else
+            {
+                Assert.That(collection.FindOverlap(interval.High, out overlap), Is.False);
+                Assert.That(overlap, Is.Null);
+            }
+
+            Assert.That(collection.FindOverlap(interval.Low / 2 + interval.High / 2, out overlap), Is.True);
+            Assert.That(overlap.IntervalEquals(interval));
+        }
+
+        [Test]
+        [Category("Find Overlap Stabbing")]
+        public void FindOverlapStabbing_ManyIntervals_AtLeastOneOverlap()
+        {
+            var intervals = ManyIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+
+            // TODO!!
+        }
+
+        [Test]
+        [Category("Find Overlaps Stabbing")]
+        public void FindOverlapStabbing_SingleIntervalAllEndpointCombinations_Overlaps()
+        {
+            var interval = SingleInterval();
+            var intervals = Enumerable.Range(0, 4).Select(i => new Interval(interval.Low, interval.High, (IntervalType) i)).ToArray();
+            var collection = CreateCollection<Interval, int>(intervals);
+            Interval overlap;
+
+            if (!collection.AllowsOverlaps)
+                intervals = NonOverlapping(intervals);
+
+            var hasOverlap = intervals.Any(x => x.Overlaps(interval.Low));
+            Assert.That(collection.FindOverlap(interval.Low, out overlap), Is.EqualTo(hasOverlap));
+            Assert.That(hasOverlap ? overlap.Overlaps(interval.Low) : overlap == null);
+
+            hasOverlap = intervals.Any(x => x.Overlaps(interval.High));
+            Assert.That(collection.FindOverlap(interval.High, out overlap), Is.EqualTo(hasOverlap));
+            Assert.That(hasOverlap ? overlap.Overlaps(interval.High) : overlap == null);
+
+            var query = interval.Low / 2 + interval.High / 2;
+            Assert.That(collection.FindOverlap(query, out overlap), Is.True);
+            Assert.That(overlap.Overlaps(query));
+        }
+
+        [Test]
+        [Category("Find Overlaps Stabbing")]
+        public void FindOverlapStabbing_TwoIntervalsSharingEndpointValue_NoOverlaps()
+        {
+            var intervals = new[]
+            {
+                new Interval(0, 1, IntervalType.LowIncluded),
+                new Interval(1, 2, IntervalType.HighIncluded),
+            };
+            var collection = CreateCollection<Interval, int>(intervals);
+            Interval overlap;
+
+            Assert.That(collection.FindOverlap(1, out overlap), Is.False);
+            Assert.That(overlap, Is.Null);
         }
 
         #endregion

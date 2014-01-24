@@ -612,12 +612,43 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public bool FindOverlap(T query, out I overlap)
         {
-            bool result;
+            var node = _root;
 
-            using (var enumerator = FindOverlaps(query).GetEnumerator())
-                overlap = (result = enumerator.MoveNext()) ? enumerator.Current : null;
+            while (node != null)
+            {
+                var compare = query.CompareTo(node.Key);
 
-            return result;
+                if (compare < 0)
+                {
+                    // Check if first interval in low sorted list overlaps endpoint
+                    compare = (overlap = node.LeftList[0]).Low.CompareTo(query);
+                    if (compare < 0 || compare == 0 && overlap.LowIncluded)
+                        return true;
+
+                    node = node.Left;
+                }
+                else if (compare > 0)
+                {
+                    // Check if first interval in high sorted list overlaps endpoint
+                    compare = (overlap = node.RightList[0]).High.CompareTo(query);
+                    if (compare > 0 || compare == 0 && overlap.HighIncluded)
+                        return true;
+
+                    node = node.Right;
+                }
+                else
+                {
+                    foreach (var interval in node.LeftList.Where(interval => interval.Overlaps(query)))
+                    {
+                        overlap = interval;
+                        return true;
+                    }
+                    break;
+                }
+            }
+
+            overlap = null;
+            return false;
         }
 
         /// <inheritdoc/>
