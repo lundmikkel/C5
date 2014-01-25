@@ -812,6 +812,7 @@ namespace C5.Intervals
             return intervalWasAdded;
         }
 
+        /// <inheritdoc/>
         public void AddAll(IEnumerable<I> intervals)
         {
             foreach (var interval in intervals)
@@ -832,7 +833,7 @@ namespace C5.Intervals
                 return new Node(interval, previous);
             }
 
-            var compare = interval.CompareTo(root.Key);
+            var compare = interval.CompareLow(root.Key);
 
             if (compare < 0)
             {
