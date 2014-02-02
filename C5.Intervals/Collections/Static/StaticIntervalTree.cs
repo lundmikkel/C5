@@ -115,6 +115,15 @@ namespace C5.Intervals
             }
 
             #endregion
+
+            #region Public Methods
+
+            public override string ToString()
+            {
+                return Key.ToString();
+            }
+
+            #endregion
         }
 
         #endregion
@@ -417,7 +426,7 @@ namespace C5.Intervals
                 yield break;
 
             var splitNode = _root;
-            // Use a lambda instead of out, as out or ref isn't allowed for itorators
+            // Use a lambda instead of out, as out or ref isn't allowed for iterators
             // Find all intersecting intervals in left subtree and right subtree
             foreach (var interval in findSplitNode(_root, query, n => { splitNode = n; }))
                 yield return interval;
@@ -669,7 +678,49 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public int CountOverlaps(T query)
         {
-            return FindOverlaps(query).Count();
+            var node = _root;
+            var count = 0;
+
+            while (node != null)
+            {
+                var compare = query.CompareTo(node.Key);
+
+                if (compare < 0)
+                {
+                    count += node.LeftList.TakeWhile(x => x.CompareLow(query) <= 0).Count();
+
+                    node = node.Left;
+                }
+                else if (compare > 0)
+                {
+                    count += node.RightList.TakeWhile(x => x.CompareHigh(query) >= 0).Count();
+
+                    node = node.Right;
+                }
+                else
+                {
+                    I interval;
+                    var i = 0;
+                    while (true)
+                    {
+                        compare = (interval = node.LeftList[i++]).CompareLow(query);
+
+                        if (compare < 0)
+                        {
+                            if (interval.CompareHigh(query) >= 0)
+                                count++;
+                        }
+                        else if (compare == 0)
+                            count++;
+                        else
+                            break;
+                    }
+
+                    break;
+                }
+            }
+
+            return count;
         }
 
         /// <inheritdoc/>
