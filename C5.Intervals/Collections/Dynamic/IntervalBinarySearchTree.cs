@@ -1974,45 +1974,41 @@ namespace C5.Intervals
             if (_span != null && !_span.Overlaps(query))
                 return 0;
 
-            return countOverlaps(query, _root);
-        }
-
-        private static int countOverlaps(T query, Node root)
-        {
+            var node = _root;
             var count = 0;
 
             // Search the tree until we reach the bottom of the tree    
-            while (root != null)
+            while (node != null)
             {
                 // Store compare value as we need it twice
-                var compare = query.CompareTo(root.Key);
+                var compare = query.CompareTo(node.Key);
 
                 // Query is to the left of the current node
                 if (compare < 0)
                 {
                     // Add set count to total
-                    if (root.Less != null)
-                        count += root.Less.Count;
+                    if (node.Less != null)
+                        count += node.Less.Count;
 
                     // Move left
-                    root = root.Left;
+                    node = node.Left;
                 }
                 // Query is to the right of the current node
                 else if (compare > 0)
                 {
                     // Add set count to total
-                    if (root.Greater != null)
-                        count += root.Greater.Count;
+                    if (node.Greater != null)
+                        count += node.Greater.Count;
 
                     // Move right
-                    root = root.Right;
+                    node = node.Right;
                 }
                 // Node with query value found
                 else
                 {
                     // Add set count to total
-                    if (root.Equal != null)
-                        count += root.Equal.Count;
+                    if (node.Equal != null)
+                        count += node.Equal.Count;
 
                     // Stop as the search is done
                     break;
