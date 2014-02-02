@@ -171,6 +171,28 @@ namespace C5.Intervals
         }
 
         /// <summary>
+        /// Compare the low endpoint of an interval to a point.
+        /// </summary>
+        /// <param name="x">The interval.</param>
+        /// <param name="p">The point.</param>
+        /// <returns>Negative if the interval's low is less than the point, 0 if they are equal, otherwise positive.</returns>
+        [Pure]
+        public static int CompareLow<T>(this IInterval<T> x, T p) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(p != null);
+            Contract.Ensures(Contract.Result<int>() == x.CompareLow(new IntervalBase<T>(p)));
+
+            var compare = x.Low.CompareTo(p);
+
+            // Check endpoint inclusion, if values are equal
+            if (compare == 0)
+                return x.LowIncluded ? 0 : 1;
+
+            return compare;
+        }
+
+        /// <summary>
         /// Compare the high endpoints of two intervals. If the high endpoint values are equal,
         /// an excluded endpoint precedes an included endpoint
         /// </summary>
@@ -189,6 +211,28 @@ namespace C5.Intervals
             if (compare == 0 && x.HighIncluded != y.HighIncluded)
                 // Excluded high endpoints come before included
                 return !x.HighIncluded ? -1 : 1;
+
+            return compare;
+        }
+
+        /// <summary>
+        /// Compare the high endpoint of an interval to a point.
+        /// </summary>
+        /// <param name="x">The interval.</param>
+        /// <param name="p">The point.</param>
+        /// <returns>Negative if the interval's high is less than the point, 0 if they are equal, otherwise positive.</returns>
+        [Pure]
+        public static int CompareHigh<T>(this IInterval<T> x, T p) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(p != null);
+            Contract.Ensures(Contract.Result<int>() == x.CompareHigh(new IntervalBase<T>(p)));
+
+            var compare = x.High.CompareTo(p);
+
+            // Check endpoint inclusion, if values are equal, but inclusion is different
+            if (compare == 0)
+                return !x.HighIncluded ? -1 : 0;
 
             return compare;
         }
