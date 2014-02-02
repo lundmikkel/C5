@@ -76,6 +76,7 @@
     <Compile Include="Collections\Static\StaticFiniteIntervalListTester.cs" />
     <Compile Include="Collections\Static\StaticIntervalTreeTester.cs" />
     <Compile Include="Extensions\IntervalTypeExtensionTester.cs" />
+    <Compile Include="Helper\TestHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
