@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using NUnit.Framework;
-using C5.Intervals;
-using C5.Intervals.Tests;
 using NUnit.Framework.Constraints;
 
 namespace C5.Intervals.Tests
@@ -570,6 +569,203 @@ namespace C5.Intervals.Tests
             }
         }
         */
+
+        #region Force Add
+
+        [TestFixture]
+        class ForceAdd
+        {
+            private int callCount = 0;
+            private Func<IntervalBase<int>, IntervalBase<int>, bool> action;
+
+            [SetUp]
+            public void SetUp()
+            {
+                callCount = 0;
+                action = (x, y) =>
+                {
+                    callCount++;
+
+                    y.SetEndpoints(x.High, x.High + y.High - y.Low);
+
+                    return false;
+                };
+            }
+
+            [Test]
+            [ExpectedException(typeof(InvalidOperationException))]
+            public void ForceAdd_FaultyAction_Exception()
+            {
+                Func<Interval, Interval, bool> faultyAction = (x, y) => { return false; };
+
+                var intervals = new[]
+                {
+                    new Interval(0, 2),
+                    new Interval(2, 4),
+                };
+                var collection = new DoublyLinkedFiniteIntervalTree<Interval, int>(intervals);
+                var interval = new Interval(1, 3);
+
+                collection.ForceAdd(interval, faultyAction);
+            }
+
+            [Test]
+            public void ForceAdd_InsertInGap_Nothing()
+            {
+                var intervals = new[]
+                {
+                    new Interval(0, 1),
+                    new Interval(2, 3),
+                };
+                var collection = new DoublyLinkedFiniteIntervalTree<Interval, int>(intervals);
+                var interval = new Interval(1, 2);
+
+                Assert.That(collection.ForceAdd(interval, action), Is.False);
+                Assert.That(callCount, Is.EqualTo(0));
+            }
+
+            [Test]
+            public void ForceAdd_InsertOverlapWithGap_ShiftOnce()
+            {
+                var intervals = new[]
+                {
+                    new Interval(0, 2),
+                    new Interval(3, 4),
+                };
+                var collection = new DoublyLinkedFiniteIntervalTree<Interval, int>(intervals);
+                var interval = new Interval(1, 2);
+
+                Assert.That(collection.ForceAdd(interval, action), Is.True);
+                Assert.That(interval.IntervalEquals(new Interval(2, 3)));
+                Assert.That(callCount, Is.EqualTo(1));
+            }
+
+            [Test]
+            public void ForceAdd_InsertAsOverlapping_ShiftOverlapOnce()
+            {
+                var intervals = new[]
+                {
+                    new Interval(0, 2),
+                    new Interval(3, 4),
+                };
+                var collection = new DoublyLinkedFiniteIntervalTree<Interval, int>(intervals);
+                var interval = new Interval(1, 2);
+
+                Assert.That(collection.ForceAdd(interval, action), Is.True);
+                Assert.That(interval.IntervalEquals(new Interval(2, 3)));
+                Assert.That(callCount, Is.EqualTo(1));
+            }
+
+            [Test]
+            public void ForceAdd_InsertWithSameLow_ShiftOverlapOnce()
+            {
+                var intervals = new[]
+                {
+                    new Interval(0, 1),
+                    new Interval(1, 2),
+                    new Interval(3, 4),
+                };
+                var collection = new DoublyLinkedFiniteIntervalTree<Interval, int>(intervals);
+                var interval = new Interval(1, 2);
+
+                Assert.That(collection.ForceAdd(interval, action), Is.True);
+                Assert.That(interval, Is.EqualTo(collection.Skip(2).First()));
+                Assert.That(callCount, Is.EqualTo(1));
+            }
+
+            [Test]
+            public void ForceAdd_InsertAsOverlappingStart_ShiftEverything()
+            {
+                var intervals = new[]
+                {
+                    new Interval(1, 2),
+                    new Interval(2, 3),
+                    new Interval(3, 4),
+                };
+                var collection = new DoublyLinkedFiniteIntervalTree<Interval, int>(intervals);
+                var interval = new Interval(0, 2);
+
+                Assert.That(collection.ForceAdd(interval, action), Is.True);
+                Assert.That(collection.Count, Is.EqualTo(4));
+                Assert.That(collection.Span.IntervalEquals(new Interval(0, 5)));
+                Assert.That(callCount, Is.EqualTo(3));
+            }
+
+            [Test]
+            public void ForceAdd_InsertAsOverlapping_ShiftUntilGap()
+            {
+                var intervals = new[]
+                {
+                    new Interval(0, 2),
+                    new Interval(2, 3),
+                    new Interval(3, 4),
+                    new Interval(5, 6),
+                };
+                var collection = new DoublyLinkedFiniteIntervalTree<Interval, int>(intervals);
+                var interval = new Interval(1, 2);
+
+                Assert.That(collection.ForceAdd(interval, action), Is.True);
+                Assert.That(collection.Count, Is.EqualTo(5));
+                Assert.That(collection.Span.IntervalEquals(new Interval(0, 6)));
+                Assert.That(callCount, Is.EqualTo(3));
+            }
+
+            [Test]
+            public void ForceAdd_MeetingIntervals_ShiftAllOnce()
+            {
+                var count = 10;
+                var intervals = new Interval[count];
+                for (var i = 0; i < count; i++)
+                    intervals[i] = new Interval(i * 2, i * 2 + 2);
+                var collection = new DoublyLinkedFiniteIntervalTree<Interval, int>(intervals);
+
+                var interval = new Interval(1, 2);
+                Assert.That(collection.ForceAdd(interval, action), Is.True);
+                foreach (var x in collection.Skip(2))
+                    Assert.That(x.Low % 2 == 1);
+            }
+
+            //[Test]
+            public void ForceAdd_PerformanceTestInteger()
+            {
+                var count = 1000 * 1000;
+                var intervals = new Interval[count];
+                for (var i = 0; i < count; i++)
+                    intervals[i] = new Interval(i * 2, i * 2 + 2);
+                var collection = new DoublyLinkedFiniteIntervalTree<Interval, int>(intervals);
+                var interval = new Interval(count, count + 1);
+
+                var sw = Stopwatch.StartNew();
+                collection.ForceAdd(interval, action);
+                var time = sw.ElapsedMilliseconds;
+                Console.Out.WriteLine("ForceAdd with {0} intervals, doing {1} shifts, in {2} ms.", count, callCount, time);
+            }
+
+            //[Test]
+            public void ForceAdd_PerformanceTestDateTime()
+            {
+                var count = 1000 * 1000;
+                var intervals = new IntervalBase<DateTime>[count];
+                var now = DateTime.Now.Date;
+                for (var i = 0; i < count; i++)
+                    intervals[i] = new IntervalBase<DateTime>(now.AddDays(i * 2), now.AddDays(i * 2 + 2));
+                var collection = new DoublyLinkedFiniteIntervalTree<IntervalBase<DateTime>, DateTime>(intervals);
+                var interval = new IntervalBase<DateTime>(now.AddDays(count), now.AddDays(count + 1));
+                Func<IntervalBase<DateTime>, IntervalBase<DateTime>, bool> datetimeAction = (x, y) =>
+                {
+                    callCount++;
+                    y.SetEndpoints(x.High, x.High + (y.High - y.Low));
+                    return false;
+                };
+
+                var sw = Stopwatch.StartNew();
+                collection.ForceAdd(interval, datetimeAction);
+                var time = sw.ElapsedMilliseconds;
+                Console.Out.WriteLine("ForceAdd with {0} intervals, doing {1} shifts, in {2} ms.", count, callCount, time);
+            }
+        }
+
+        #endregion
 
         #endregion
     }

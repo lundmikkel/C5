@@ -864,6 +864,91 @@ namespace C5.Intervals
             return root;
         }
 
+        public bool ForceAdd(I interval, Func<I, I, bool> action, bool continueWhenNoConflict = false, bool forcePosition = false)
+        {
+            return ForceAdd(interval, action, () => continueWhenNoConflict, forcePosition);
+        }
+
+        /// <summary>
+        /// Forcingly adds an interval, even if it has overlaps in the collection. The function must resolve any overlapping conflict for a pair of overlapping intervals, by moving either interval
+        ///  will be called to resolve any overlap conflicts arose from the insertion
+        /// .
+        /// </summary>
+        /// <param name="interval">The interval.</param>
+        /// <param name="action">The action, that will resolve overlap conflict.</param>
+        /// <returns>True, if the action was called to resolve a conflict.</returns>
+        public bool ForceAdd(I interval, Func<I, I, bool> action, Func<bool> continueWhenNoConflict, bool forcePosition = false)
+        {
+            var rotationNeeded = false;
+            Node node;
+            _root = forceAdd(interval, _root, _first, ref rotationNeeded, out node);
+            _count++;
+
+            if (forcePosition && node.Previous != _first && node.Previous.Key.CompareHighLow(node.Key) <= 0)
+            {
+                node.Previous.Swap(node);
+                node = node.Previous;
+            }
+
+            var result = false;
+
+            while (node.Next != _last && node.Key.CompareHighLow(node.Next.Key) >= 0 || continueWhenNoConflict())
+            {
+                result = true;
+                if (action(node.Key, node.Next.Key))
+                {
+                    Remove(node.Next.Key);
+                    continue;
+                }
+
+                if (node.Key.CompareHighLow(node.Next.Key) >= 0)
+                    throw new InvalidOperationException("The interval has to be schedule after the previous one. The invariant is now broken.");
+
+                // Move to next node
+                node = node.Next;
+            }
+
+            return result;
+        }
+
+        private Node forceAdd(I interval, Node root, Node previous, ref bool rotationNeeded, out Node startNode)
+        {
+            if (root == null)
+            {
+                rotationNeeded = true;
+                var node = new Node(interval, previous);
+
+                startNode = previous != _first && previous.Key.CompareHighLow(interval) >= 0 ? previous : node;
+
+                return node;
+            }
+
+            var compare = interval.CompareLow(root.Key);
+
+            if (compare < 0)
+            {
+                root.Left = forceAdd(interval, root.Left, root.Previous, ref rotationNeeded, out startNode);
+
+                // Adjust node balance, if node was added
+                if (rotationNeeded)
+                    root.Balance--;
+            }
+            else
+            {
+                root.Right = forceAdd(interval, root.Right, root, ref rotationNeeded, out startNode);
+
+                // Adjust node balance, if node was added
+                if (rotationNeeded)
+                    root.Balance++;
+            }
+
+            // Tree might be unbalanced after node was added, so we rotate
+            if (rotationNeeded)
+                root = rotateForAdd(root, ref rotationNeeded);
+
+            return root;
+        }
+
         #endregion
 
         #region Remove
