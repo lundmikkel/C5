@@ -694,6 +694,24 @@ namespace C5.Intervals
         }
 
         [Pure]
+        public static bool CollectionIntervalEquals<I, T>(IEnumerable<I> expected, IEnumerable<I> actual)
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            // Copy to list
+            var actualList = new ArrayList<I>();
+            actualList.AddAll(actual);
+
+            var expectedList = new ArrayList<I>();
+            expectedList.AddAll(expected);
+
+            if (actualList.Count != expectedList.Count)
+                return false;
+
+            return !actualList.Where((t, i) => !t.IntervalEquals(expectedList[i])).Any();
+        }
+
+        [Pure]
         public static int CountOverlaps<T>(IEnumerable<IInterval<T>> intervals, IInterval<T> query)
             where T : IComparable<T>
         {

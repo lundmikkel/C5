@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using NUnit.Framework;
 using NUnit.Framework.Constraints;
 
 namespace C5.Intervals.Tests
 {
+    using Interval = IntervalBase<int>;
+
     [TestFixture]
     public class IntervalEquals
     {
@@ -100,6 +105,152 @@ namespace C5.Intervals.Tests
             }
 
             return intervals;
+        }
+    }
+
+    [TestFixture]
+    public class Collapse
+    {
+        [Test]
+        public void Collapse_Ben_AllInOne()
+        {
+            var intervals = new[]
+            {
+                new Interval(0, 1, IntervalType.Closed),
+                new Interval(1, 2, IntervalType.HighIncluded),
+
+                new Interval(3, 8, IntervalType.Closed),
+                new Interval(4, 7, IntervalType.Closed), 
+                new Interval(5, 6, IntervalType.Closed),
+
+                new Interval(9, 11),
+                new Interval(10, 12),
+            };
+
+            var collapsed = intervals.Collapse<Interval, int>(false);
+
+            var expected = new[]
+            {
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(intervals[0], new[] {intervals[0]}),
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(intervals[1], new[] {intervals[1]}),
+                
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(new Interval(3, 4, IntervalType.LowIncluded), new[] {intervals[2]}),
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(new Interval(4, 5, IntervalType.LowIncluded), new[] {intervals[2], intervals[3]}),
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(new Interval(5, 6, IntervalType.Closed), new[] {intervals[2], intervals[3], intervals[4]}),
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(new Interval(6, 7, IntervalType.HighIncluded), new[] {intervals[2], intervals[3]}),
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(new Interval(7, 8, IntervalType.HighIncluded), new[] {intervals[2]}),
+                
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(new Interval(9, 10, IntervalType.LowIncluded), new[] {intervals[5]}),
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(new Interval(10, 11, IntervalType.LowIncluded), new[] {intervals[5], intervals[6]}),
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(new Interval(11, 12, IntervalType.LowIncluded), new[] {intervals[6]}),
+            };
+
+            AssertEqual(expected, collapsed);
+        }
+
+        [Test]
+        public void Collapse_Ben_Containment()
+        {
+            var intervals = new[]
+            {
+                new Interval(0, 5, IntervalType.Closed),
+                new Interval(1, 4, IntervalType.Closed), 
+                new Interval(2, 3, IntervalType.Closed),
+            };
+
+            var collapsed = intervals.Collapse<Interval, int>(false);
+
+            var expected = new[]
+            {
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(new Interval(0, 1, IntervalType.LowIncluded), new[] {intervals[0]}),
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(new Interval(1, 2, IntervalType.LowIncluded), new[] {intervals[0], intervals[1]}),
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(new Interval(2, 3, IntervalType.Closed), intervals),
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(new Interval(3, 4, IntervalType.HighIncluded), new[] {intervals[0], intervals[1]}),
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(new Interval(4, 5, IntervalType.HighIncluded), new[] {intervals[0]}),
+            };
+
+            AssertEqual(expected, collapsed);
+        }
+
+        [Test]
+        public void Collapse_Ben_Overlaps()
+        {
+            var intervals = new[]
+            {
+                new Interval(0, 2),
+                new Interval(1, 3),
+            };
+
+            var collapsed = intervals.Collapse<Interval, int>();
+
+            var expected = new[]
+            {
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(new Interval(0, 1, IntervalType.LowIncluded), new[] {intervals[0]}),
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(new Interval(1, 2, IntervalType.LowIncluded), intervals),
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(new Interval(2, 3, IntervalType.LowIncluded), new[] {intervals[1]}),
+            };
+
+            AssertEqual(expected, collapsed);
+        }
+
+        [Test]
+        public void Collapse_Ben_NoOverlaps()
+        {
+            var intervals = new[]
+            {
+                new Interval(0, 1),
+                new Interval(2, 3),
+                new Interval(3, 4),
+            };
+
+            var collapsed = intervals.Collapse<Interval, int>();
+
+            var expected = new[]
+            {
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(intervals[0], new[]{intervals[0]}),
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(intervals[1], new[]{intervals[1]}),
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(intervals[2], new[]{intervals[2]}),
+            };
+
+            AssertEqual(expected, collapsed);
+        }
+
+        [Test]
+        public void Collapse_Equals()
+        {
+            var intervals = new[]
+            {
+                new Interval(0, 1),
+                new Interval(0, 1),
+            };
+
+            var collapsed = intervals.Collapse<Interval, int>();
+
+            var expected = new[]
+            {
+                new KeyValuePair<IInterval<int>, IEnumerable<Interval>>(intervals[0], intervals),
+            };
+
+            AssertEqual(expected, collapsed);
+        }
+
+        private static void AssertEqual(IEnumerable<KeyValuePair<IInterval<int>, IEnumerable<Interval>>> expected,
+            IEnumerable<KeyValuePair<IInterval<int>, IEnumerable<Interval>>> actual)
+        {
+            var expectedArray = expected.ToArray();
+            var actualArray = actual.ToArray();
+
+            Assert.That(actualArray.Length, Is.EqualTo(expectedArray.Length));
+
+            for (var i = 0; i < expectedArray.Length; i++)
+            {
+                var a = expectedArray[i];
+                var b = actualArray[i];
+
+                Assert.That(a.Key.IntervalEquals(b.Key));
+
+                Assert.That(b.Value, Is.EquivalentTo(a.Value));
+            }
         }
     }
 

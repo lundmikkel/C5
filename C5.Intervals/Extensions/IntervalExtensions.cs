@@ -484,6 +484,13 @@ namespace C5.Intervals
             return ComparerFactory<I>.CreateComparer((x, y) => x.CompareLow(y));
         }
 
+        public static IComparer<I> CreateHighComparer<I, T>()
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            return ComparerFactory<I>.CreateComparer((x, y) => x.CompareHigh(y));
+        }
+
         public static IComparer<I> CreateReversedComparer<I, T>()
             where I : IInterval<T>
             where T : IComparable<T>
@@ -830,6 +837,106 @@ namespace C5.Intervals
 
             // Call the action on the remaining overlapping intervals in the queue
             action(queue);
+        }
+
+
+        public static IEnumerable<KeyValuePair<IInterval<T>, IEnumerable<I>>> Collapse<I, T>(this IEnumerable<I> intervals, bool isSorted = true)
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            Contract.Requires(intervals != null);
+            // Intervals must be sorted
+            Contract.Requires(IntervalContractHelper.IsSorted<I, T>(intervals, isSorted));
+
+            Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<KeyValuePair<IInterval<T>, IEnumerable<I>>>>(), pair => Contract.ForAll(pair.Value, x => x.Contains(pair.Key))));
+            Contract.Ensures(Contract.Result<IEnumerable<KeyValuePair<IInterval<T>, IEnumerable<I>>>>().Select(x => x.Key).IsSorted<IInterval<T>, T>());
+            Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<KeyValuePair<IInterval<T>, IEnumerable<I>>>>(), pair => IntervalCollectionContractHelper.CollectionEquals(pair.Value, intervals.Where(x => x.Contains(pair.Key)))));
+            Contract.Ensures(IntervalCollectionContractHelper.CollectionIntervalEquals<IInterval<T>, T>(Contract.Result<IEnumerable<KeyValuePair<IInterval<T>, IEnumerable<I>>>>().Select(pair => pair.Key).Gaps(), intervals.Cast<IInterval<T>>().Gaps(isSorted: isSorted)));
+
+
+            // Sort the intervals if necessary
+            if (!isSorted)
+            {
+                var sortedIntervals = intervals as I[] ?? intervals.ToArray();
+                Sorting.IntroSort(sortedIntervals, 0, sortedIntervals.Length, CreateLowComparer<I, T>());
+                intervals = sortedIntervals;
+            }
+
+            // Create queue sorted on high intervals
+            var queue = new IntervalHeap<I>(CreateHighComparer<I, T>());
+
+            var enumerator = intervals.GetEnumerator();
+
+            if (!enumerator.MoveNext())
+                yield break;
+
+            var previous = enumerator.Current;
+            queue.Add(previous);
+
+            // Loop through intervals in sorted order
+            while (enumerator.MoveNext())
+            {
+                var current = enumerator.Current;
+
+                // Remove all intervals from the queue not overlapping the current interval
+                while (!queue.IsEmpty && queue.FindMin().CompareHighLow(current) < 0)
+                    foreach (var pair in collapse<I, T>(queue, previous))
+                        yield return pair;
+
+                // Get the interval from the last interval's low up to current
+                if (!queue.IsEmpty && previous.CompareLow(current) < 0)
+                {
+                    yield return new KeyValuePair<IInterval<T>, IEnumerable<I>>(
+                        new IntervalBase<T>(previous.Low, current.Low, previous.LowIncluded, !current.LowIncluded),
+                        queue.ToArray()
+                    );
+                }
+
+                queue.Add(current);
+
+                previous = current;
+            }
+
+            foreach (var pair in collapse<I, T>(queue, previous))
+                yield return pair;
+        }
+
+        private static IEnumerable<KeyValuePair<IInterval<T>, IEnumerable<I>>> collapse<I, T>(IPriorityQueue<I> queue, I previous)
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            if (queue.IsEmpty)
+                yield break;
+
+            var current = queue.FindMin();
+
+            if (previous.CompareLowHigh(current) < 0)
+            {
+                yield return new KeyValuePair<IInterval<T>, IEnumerable<I>>(
+                    new IntervalBase<T>(previous, current),
+                    queue.ToArray()
+                );
+            }
+
+            queue.DeleteMin();
+            previous = current;
+
+            // Empty queue
+            while (!queue.IsEmpty)
+            {
+                current = queue.FindMin();
+
+                if (previous.CompareHigh(current) < 0)
+                {
+                    yield return new KeyValuePair<IInterval<T>, IEnumerable<I>>(
+                        new IntervalBase<T>(previous.High, current.High, !previous.HighIncluded, current.HighIncluded),
+                        queue.ToArray()
+                        );
+                }
+
+                queue.DeleteMin();
+                previous = current;
+            }
         }
     }
 
