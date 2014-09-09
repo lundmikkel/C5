@@ -2798,6 +2798,52 @@ namespace C5.Intervals.Tests
 
         #endregion
 
+        #region Nested Containment List Example
+
+        [Test]
+        [Category("Example Cases")]
+        public void _NestedContainmentListArticleExample_()
+        {
+            var intervals = new[]
+                {
+                    new Interval( 0,  2),   // A
+                    new Interval( 1,  6),   // B
+                    new Interval( 3, 19),   // C
+                    new Interval( 4,  9),   // D
+                    new Interval( 5,  7),   // E
+                    new Interval( 7, 11),   // F
+                    new Interval( 8, 14),   // G
+                    new Interval(10, 12),   // H
+                    new Interval(15, 18),   // I
+                    new Interval(16, 17),   // J
+                    new Interval(20, 24),   // K
+                    new Interval(22, 26),   // L
+                    new Interval(23, 25),   // M
+                    new Interval(25, 27),   // N
+                    new Interval(26, 30),   // O
+                    new Interval(28, 29)    // P
+                };
+
+            var collection = CreateCollection<Interval, int>(intervals);
+
+            // Skip finite data structures
+            if (!collection.AllowsOverlaps)
+                return;
+
+            var expected = new[]
+                {
+                    intervals['C' - 'A'],
+                    intervals['G' - 'A'],
+                    intervals['I' - 'A'],
+                    intervals['J' - 'A'],
+                    intervals['K' - 'A']
+                };
+            var query = new Interval(13, 21);
+            CollectionAssert.AreEquivalent(expected, collection.FindOverlaps(query));   
+        }
+
+        #endregion
+
         #region Large Scale Random
 
         [Test]
