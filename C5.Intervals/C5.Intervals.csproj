@@ -164,6 +164,7 @@
     <Compile Include="Collections\Static\LayeredContainmentList.cs" />
     <Compile Include="Collections\Static\NestedContainmentList.cs" />
     <Compile Include="Collections\Static\NestedContainmentList2.cs" />
+    <Compile Include="Collections\Static\NestedContainmentListArticle.cs" />
     <Compile Include="Collections\Static\StaticFiniteIntervalList.cs" />
     <Compile Include="Collections\Static\StaticIntervalTree.cs" />
     <Compile Include="Entities\IntervalBase.cs" />
@@ -178,9 +179,7 @@
   <ItemGroup>
     <None Include="README.md" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Code contracts\" />
-  </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition=" '$(Configuration)'=='DEBUG' ">
       <ItemGroup>
