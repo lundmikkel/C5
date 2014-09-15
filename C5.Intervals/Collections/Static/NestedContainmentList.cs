@@ -338,10 +338,11 @@ namespace C5.Intervals
         /// </summary>
         private int findFirst(Sublist sublist, IInterval<T> query)
         {
-            if (query == null || sublist.Length == 0)
+            if (sublist.Length == 0)
                 return -1;
 
-            int min = sublist.Start - 1, max = sublist.End;
+            int min = sublist.Start - 1,
+                max = sublist.End;
 
             while (min + 1 < max)
             {
