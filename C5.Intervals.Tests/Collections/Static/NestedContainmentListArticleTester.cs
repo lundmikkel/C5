@@ -32,6 +32,131 @@ namespace C5.Intervals.Tests
 
         #region White-box
 
+        #region In-place construction
+
+        [TestFixture]
+        public class InPlace
+        {
+            [Test]
+            public void Construction()
+            {
+                /**
+                 *   345
+                 *  234
+                 * 123456
+                 */
+                var intervals = new[]
+                {
+                    new IntervalBase<int>(1, 6, true, true),
+                    new IntervalBase<int>(2, 4, true, true),
+                    new IntervalBase<int>(3, 5, true, true)
+                };
+
+                var collection = new NestedContainmentListArticle<IntervalBase<int>, int>(intervals);
+            }
+
+            [Test]
+            public void Construction2()
+            {
+                /**
+                 *   34
+                 *  2345
+                 * 123456
+                 */
+                var intervals = new[]
+                {
+                    new IntervalBase<int>(1, 6, true, true),
+                    new IntervalBase<int>(2, 5, true, true),
+                    new IntervalBase<int>(3, 4, true, true)
+                };
+
+                var collection = new NestedContainmentListArticle<IntervalBase<int>, int>(intervals);
+            }
+
+            [Test]
+            public void Construction3()
+            {
+                /**
+                 *   345
+                 *  234
+                 * 123
+                 */
+                var intervals = new[]
+                {
+                    new IntervalBase<int>(1, 3, true, true),
+                    new IntervalBase<int>(2, 4, true, true),
+                    new IntervalBase<int>(3, 5, true, true)
+                };
+
+                var collection = new NestedContainmentListArticle<IntervalBase<int>, int>(intervals);
+            }
+
+            [Test]
+            public void Construction4()
+            {
+                /**
+                 *   34
+                 *  2345
+                 * 123
+                 */
+                var intervals = new[]
+                {
+                    new IntervalBase<int>(1, 3, true, true),
+                    new IntervalBase<int>(2, 5, true, true),
+                    new IntervalBase<int>(3, 4, true, true)
+                };
+
+                var collection = new NestedContainmentListArticle<IntervalBase<int>, int>(intervals);
+            }
+
+            [Test]
+            public void Construction5()
+            {
+                /**
+                 *     56
+                 *   345678
+                 *  234
+                 * 1234567
+                 */
+                var intervals = new[]
+                {
+                    new IntervalBase<int>(1, 7, true, true),
+                    new IntervalBase<int>(2, 4, true, true),
+                    new IntervalBase<int>(3, 8, true, true),
+                    new IntervalBase<int>(5, 6, true, true)
+                };
+
+                var collection = new NestedContainmentListArticle<IntervalBase<int>, int>(intervals);
+            }
+
+            [Test]
+            public void Construction6()
+            {
+                var intervals = new[]
+                {
+                    new IntervalBase<int>(1, 15, true, true),    
+                    new IntervalBase<int>(2, 8, true, true),    
+                    new IntervalBase<int>(3, 22, true, true),    
+                    new IntervalBase<int>(4, 6, true, true),    
+                    new IntervalBase<int>(5, 19, true, true),    
+                    new IntervalBase<int>(7, 18, true, true),    
+                    new IntervalBase<int>(9, 13, true, true),    
+                    new IntervalBase<int>(10, 28, true, true),   
+                    new IntervalBase<int>(11, 24, true, true),   
+                    new IntervalBase<int>(12, 16, true, true),   
+                    new IntervalBase<int>(14, 20, true, true),   
+                    new IntervalBase<int>(17, 26, true, true),   
+                    new IntervalBase<int>(21, 25, true, true),   
+                    new IntervalBase<int>(23, 27, true, true),   
+                    new IntervalBase<int>(29, 30, true, true)
+                };
+
+                var collection = new NestedContainmentListArticle<IntervalBase<int>, int>(intervals);
+            }
+        }
+
+        #endregion
+
         #region Statement testing
 
         [TestFixture]
