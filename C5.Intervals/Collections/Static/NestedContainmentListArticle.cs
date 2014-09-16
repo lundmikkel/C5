@@ -90,9 +90,8 @@ namespace C5.intervals
 
             _count = intervalArray.Length;
 
-            // TODO: Change to better sorting method
             // Sort
-            Sorting.IntroSort(intervalArray, 0, _count, IntervalExtensions.CreateComparer<I, T>());
+            Sorting.HeapSort(intervalArray, 0, _count, IntervalExtensions.CreateComparer<I, T>());
 
             // Create list with intervals
             _list = new Node[_count];
@@ -109,9 +108,12 @@ namespace C5.intervals
             computeAbsolutePosition(sublistCount);
 
             // Sort sublists
-            // TODO: Use HeapSort
-            var sublistComparer = ComparerFactory<Node>.CreateComparer((i, j) => i.Sublist.CompareTo(j.Sublist));
-            Sorting.InsertionSort(_list, 0, _count, sublistComparer);
+            var sublistComparer = ComparerFactory<Node>.CreateComparer((i, j) =>
+            {
+                var compareTo = i.Sublist.CompareTo(j.Sublist);
+                return compareTo != 0 ? compareTo : i.Interval.CompareTo(j.Interval);
+            });
+            Sorting.HeapSort(_list, 0, _count, sublistComparer);
 
             sublistInvert(sublistCount);
 
