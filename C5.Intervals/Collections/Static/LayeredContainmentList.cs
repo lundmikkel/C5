@@ -790,8 +790,6 @@ namespace C5.Intervals
                 yield break;
 
             var last = _firstLayerCount;
-
-            // We know first doesn't overlap so we can increment it before searching
             var first = findFirst(query, 0, 0, last);
 
             // Cache variables to speed up iteration
