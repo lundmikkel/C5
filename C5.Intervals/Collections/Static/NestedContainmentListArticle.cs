@@ -71,6 +71,7 @@ namespace C5.intervals
                 Interval = interval;
             }
 
+            // TODO: Use more or delete
             public bool HasSublist { get { return Sublist >= 0; } }
 
             public override string ToString()
@@ -305,12 +306,16 @@ namespace C5.intervals
 
         #region Collection Value
 
+        /// <inheritdoc/>
         public override bool IsEmpty { get { return _count == 0; } }
 
+        /// <inheritdoc/>
         public override int Count { get { return _count; } }
 
+        /// <inheritdoc/>
         public override Speed CountSpeed { get { return Speed.Constant; } }
 
+        /// <inheritdoc/>
         public override I Choose()
         {
             if (IsEmpty)
@@ -351,15 +356,16 @@ namespace C5.intervals
                 if (IsEmpty)
                     yield break;
 
+                // Yield lowest iterval
                 var lowestInterval = _list[0].Interval;
-
                 yield return lowestInterval;
 
-                // Iterate through bottom layer as long as the intervals share a low
-                for (var i = 1; i < _header[0].Length; ++i)
+                // Iterate through main list as long as the intervals share a low
+                for (var i = 1; i < _header[0].End; ++i)
                 {
-                    if (_list[i].Interval.CompareLow(lowestInterval) == 0)
-                        yield return _list[i].Interval;
+                    var interval = _list[i].Interval;
+                    if (interval.CompareLow(lowestInterval) == 0)
+                        yield return interval;
                     else
                         yield break;
                 }
@@ -367,7 +373,7 @@ namespace C5.intervals
         }
 
         /// <inheritdoc/>
-        public I HighestInterval { get { return _list[_header[0].Length - 1].Interval; } }
+        public I HighestInterval { get { return _list[_header[0].End - 1].Interval; } }
 
         /// <inheritdoc/>
         public IEnumerable<I> HighestIntervals
@@ -377,12 +383,11 @@ namespace C5.intervals
                 if (IsEmpty)
                     yield break;
 
-                var highestInterval = _list[_header[0].Length - 1].Interval;
-
+                var highestInterval = _list[_header[0].End - 1].Interval;
                 yield return highestInterval;
 
-                // Iterate through bottom layer as long as the intervals share a low
-                for (var i = _header[0].Length - 2; i >= 0; i--)
+                // Iterate through main list as long as the intervals share a low
+                for (var i = _header[0].End - 2; i >= 0; --i)
                 {
                     var interval = _list[i].Interval;
                     if (interval.CompareHigh(highestInterval) == 0)
@@ -434,7 +439,7 @@ namespace C5.intervals
             if (IsEmpty)
                 return Enumerable.Empty<I>().GetEnumerator();
 
-            return _list.Select(item => item.Interval).GetEnumerator();
+            return _list.Select(node => node.Interval).GetEnumerator();
         }
 
         /// <inheritdoc/>
@@ -452,14 +457,15 @@ namespace C5.intervals
         private IEnumerable<I> sorted(Sublist sublist)
         {
             int min = sublist.Start,
-                max = sublist.Start + sublist.Length;
+                max = sublist.End;
 
             for (var i = min; i < max; ++i)
             {
-                yield return _list[i].Interval;
+                var node = _list[i];
+                yield return node.Interval;
 
-                if (_list[i].Sublist >= 0)
-                    foreach (var interval in sorted(_header[_list[i].Sublist]))
+                if (node.HasSublist)
+                    foreach (var interval in sorted(_header[node.Sublist]))
                         yield return interval;
             }
         }
@@ -488,8 +494,8 @@ namespace C5.intervals
 
         private IEnumerable<I> findOverlaps(IInterval<T> query, Sublist sublist)
         {
-            if (IsEmpty || sublist.Length == 0)
-                yield break;
+            Contract.Requires(!IsEmpty);
+            Contract.Requires(sublist.Start != sublist.End);
 
             // Find first overlapping interval
             var first = findFirst(sublist, query);
@@ -499,7 +505,6 @@ namespace C5.intervals
                 yield break;
 
             Node node;
-
             while (first < sublist.End && (node = _list[first++]).Interval.CompareLowHigh(query) <= 0)
             {
                 yield return node.Interval;
@@ -514,7 +519,7 @@ namespace C5.intervals
         private int findFirst(Sublist sublist, IInterval<T> query)
         {
             int min = sublist.Start - 1,
-                max = sublist.Start + sublist.Length;
+                max = sublist.End;
 
             while (min + 1 < max)
             {
@@ -545,14 +550,14 @@ namespace C5.intervals
             overlap = null;
 
             // Check if query overlaps the collection at all
-            if (_list == null || !query.Overlaps(Span))
+            if (IsEmpty || !query.Overlaps(Span))
                 return false;
 
             // Find first overlap
             var i = findFirst(_header[0], query);
 
             // Check if index is in bound and if the interval overlaps the query
-            var result = 0 <= i && i < _header[0].Length && _list[i].Interval.Overlaps(query);
+            var result = 0 <= i && i < _header[0].End && _list[i].Interval.Overlaps(query);
 
             if (result)
                 overlap = _list[i].Interval;
@@ -588,7 +593,7 @@ namespace C5.intervals
                 if (IsEmpty)
                     return Enumerable.Empty<IInterval<T>>();
 
-                return _list.Take(_header[0].Length).Select(x => x.Interval).Gaps();
+                return _list.Take(_header[0].End).Select(node => node.Interval).Gaps();
             }
         }
 
