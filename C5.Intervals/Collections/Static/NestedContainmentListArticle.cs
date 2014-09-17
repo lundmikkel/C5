@@ -121,7 +121,7 @@ namespace C5.intervals
             // Count sublists
             var sublistCount = initSublists(ref intervalArray);
 
-            // No containments
+            // No containments, everything is in the main list
             if (sublistCount == 1)
             {
                 _header = new[] { new Sublist(0, _count) };
@@ -158,13 +158,13 @@ namespace C5.intervals
         /// <returns>The number of sublists</returns>
         private int initSublists(ref I[] intervals)
         {
-            var n = 1;
+            var sublistCount = 1;
 
             for (var i = 1; i < _count; ++i)
                 if (intervals[i - 1].StrictlyContains(intervals[i]))
-                    ++n;
+                    ++sublistCount;
 
-            return n;
+            return sublistCount;
         }
 
         /// <summary>
@@ -218,7 +218,7 @@ namespace C5.intervals
                     parentList = listCount;
 
                     // Continue to the next interval
-                    i++;
+                    ++i;
                 }
                 // Otherwise move down to the containing sublist
                 else
