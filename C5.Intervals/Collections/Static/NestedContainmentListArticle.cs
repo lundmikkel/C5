@@ -34,12 +34,12 @@ namespace C5.intervals
             // Either the collection is empty or there is one list or more
             Contract.Invariant(IsEmpty || _header.Length >= 1);
             // Either all intervals are in the first list, or there are more than one list
-            Contract.Invariant(IsEmpty || _count == _header[0].Length || _header.Length > 1);
+            Contract.Invariant(IsEmpty || _count == _header[0].End || _header.Length > 1);
             // The lists are null if empty
             Contract.Invariant(!IsEmpty || _list == null && _header == null);
 
             // No layer is empty
-            Contract.Invariant(IsEmpty || Contract.ForAll(0, _header.Length, sublist => _header[sublist].Length > 0));
+            Contract.Invariant(IsEmpty || Contract.ForAll(0, _header.Length, sublist => _header[sublist].End - _header[sublist].Start > 0));
             // Each list is sorted
             Contract.Invariant(IsEmpty || Contract.ForAll(0, _header.Length, j => Contract.ForAll(_header[j].Start, _header[j].End - 1, i => _list[i].Interval.CompareTo(_list[i + 1].Interval) <= 0)));
             // Each list is sorted on both low and high endpoint
@@ -71,7 +71,6 @@ namespace C5.intervals
                 Interval = interval;
             }
 
-            // TODO: Use more or delete
             public bool HasSublist { get { return Sublist >= 0; } }
 
             public override string ToString()
@@ -83,23 +82,18 @@ namespace C5.intervals
         private struct Sublist
         {
             public int Start;
-            public int Length;
+            public int End;
 
-            public int End
-            {
-                get { return Start + Length; }
-            }
-
-            public Sublist(int start, int length)
+            public Sublist(int start, int end)
                 : this()
             {
                 Start = start;
-                Length = length;
+                End = end;
             }
 
             public override string ToString()
             {
-                return String.Format("{0} / {1}", Start, Length);
+                return String.Format("{0} / {1}", Start, End);
             }
         }
 
@@ -154,7 +148,7 @@ namespace C5.intervals
                 sublistInvert(sublistCount);
             }
 
-            _span = new IntervalBase<T>(_list[0].Interval, _list[_header[0].Length - 1].Interval);
+            _span = new IntervalBase<T>(_list[0].Interval, _list[_header[0].End - 1].Interval);
         }
 
         /// <summary>
@@ -203,7 +197,7 @@ namespace C5.intervals
                 if (parentList == 0 || _list[parent].Interval.StrictlyContains(_list[i].Interval))
                 {
                     // Check if the interval is the first in the list
-                    if (_header[parentList].Length == 0)
+                    if (_header[parentList].End == 0)
                     {
                         // Increment list count
                         listCount++;
@@ -212,7 +206,7 @@ namespace C5.intervals
                     }
 
                     // Increment the length of the parent's list
-                    _header[parentList].Length++;
+                    _header[parentList].End++;
 
                     // Update which sublist the ith interval belongs to
                     _list[i].Sublist = parentList;
@@ -244,8 +238,8 @@ namespace C5.intervals
 
             for (var i = 0; i < sublistCount; ++i)
             {
-                var tmp = _header[i].Length;
-                _header[i].Length = total;
+                var tmp = _header[i].End;
+                _header[i].End = total;
                 total += tmp;
             }
         }
@@ -259,31 +253,15 @@ namespace C5.intervals
 
                 if (currentSublist < sublistCount && i == _header[currentSublist].Start)
                 {
-                    _header[currentSublist].Start = _header[intervalSublist].Length;
+                    _header[currentSublist].Start = _header[intervalSublist].End;
                     ++currentSublist;
                 }
-                ++_header[intervalSublist].Length;
+                ++_header[intervalSublist].End;
             }
         }
 
         private void sublistInvert(int sublistCount)
         {
-            /*var isub = 0;
-            for (var i = 0; i < _count; ++i)
-            {
-                if (_list[i].Sublist > isub)
-                {
-                    isub = _list[i].Sublist;
-                    var parent = _header[isub].Start;
-                    _list[parent].Sublist = isub;
-                    _header[isub].Start = i;
-                    _header[isub].Length = 0;
-                }
-
-                _header[isub].Length++;
-                _list[i].Sublist = -1;
-            }*/
-
             // Reset all sublists
             for (var i = 0; i < _count; ++i)
                 _list[i].Sublist = -1;
@@ -295,11 +273,14 @@ namespace C5.intervals
             // Fix start in header
             _header[0].Start = 0;
             for (var j = 1; j < sublistCount; ++j)
-                _header[j].Start = _header[j - 1].Length;
+                _header[j].Start = _header[j - 1].End;
 
             // Fix length in header
             for (var j = sublistCount - 1; j > 0; --j)
-                _header[j].Length = _header[j].Length - _header[j - 1].Length;
+                _header[j].End = _header[j].End - _header[j - 1].End;
+
+            for (var j = 0; j < sublistCount; j++)
+                _header[j].End = _header[j].Start + _header[j].End;
         }
 
         #endregion
