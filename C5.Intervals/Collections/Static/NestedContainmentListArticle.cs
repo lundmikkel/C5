@@ -43,7 +43,7 @@ namespace C5.intervals
             // Each list is sorted
             Contract.Invariant(IsEmpty || Contract.ForAll(0, _header.Length, j => Contract.ForAll(_header[j].Start, _header[j].End - 1, i => _list[i].Interval.CompareTo(_list[i + 1].Interval) <= 0)));
             // Each list is sorted on both low and high endpoint
-            Contract.Invariant(IsEmpty || Contract.ForAll(0, _header.Length, j => Contract.ForAll(_header[j].Start, _header[j].End - 1, i => _list[i].Interval.CompareLow(_list[i+1].Interval) <= 0 && _list[i].Interval.CompareHigh(_list[i + 1].Interval) <= 0)));
+            Contract.Invariant(IsEmpty || Contract.ForAll(0, _header.Length, j => Contract.ForAll(_header[j].Start, _header[j].End - 1, i => _list[i].Interval.CompareLow(_list[i + 1].Interval) <= 0 && _list[i].Interval.CompareHigh(_list[i + 1].Interval) <= 0)));
             // Each interval in a layer must be contained in at least one interval in each layer below
             Contract.Invariant(IsEmpty ||
                 Contract.ForAll(0, _count, i =>
@@ -185,7 +185,7 @@ namespace C5.intervals
         {
             // Initialize the parent index to be the first interval
             var parent = 0;
-            
+
             // The first list (the main list) has no parent and initially contains one interval (the first)
             _header[0] = new Sublist(-1, 1);
 
@@ -492,26 +492,26 @@ namespace C5.intervals
             return findOverlaps(query, _header[0]);
         }
 
-        private IEnumerable<I> findOverlaps(IInterval<T> query, Sublist sublist)
+        private IEnumerable<I> findOverlaps(IInterval<T> query, Sublist sublist, bool takeAll = false)
         {
             Contract.Requires(!IsEmpty);
             Contract.Requires(sublist.Start != sublist.End);
 
             // Find first overlapping interval
-            var first = findFirst(sublist, query);
+            var first = takeAll ? sublist.Start : findFirst(sublist, query);
 
             // If index is out of bound, or interval doesn't overlap, we can just stop our search
-            if (first < sublist.Start || sublist.End - 1 < first || !_list[first].Interval.Overlaps(query))
+            if (!takeAll && (first < sublist.Start || sublist.End - 1 < first || !_list[first].Interval.Overlaps(query)))
                 yield break;
 
-            Node node;
-            while (first < sublist.End && (node = _list[first++]).Interval.CompareLowHigh(query) <= 0)
+            while (first < sublist.End && (takeAll || _list[first].Interval.CompareLowHigh(query) <= 0))
             {
+                var node = _list[first++];
                 yield return node.Interval;
 
                 if (node.HasSublist)
                     // If the interval is contained in the query, all intervals in the sublist must overlap the query
-                    foreach (var interval in findOverlaps(query, _header[node.Sublist]))
+                    foreach (var interval in findOverlaps(query, _header[node.Sublist], takeAll || query.Contains(node.Interval)))
                         yield return interval;
             }
         }
