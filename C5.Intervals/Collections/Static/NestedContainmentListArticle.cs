@@ -67,10 +67,7 @@ namespace C5.intervals
 
             public bool HasSublist { get { return Sublist >= 0; } }
 
-            public override string ToString()
-            {
-                return String.Format("{0} / {1}", Interval, Sublist);
-            }
+            public override string ToString() { return String.Format("{0} / {1}", Interval, Sublist); }
         }
 
         private struct Sublist
@@ -85,17 +82,15 @@ namespace C5.intervals
                 End = end;
             }
 
-            public override string ToString()
-            {
-                return String.Format("{0} / {1}", Start, End);
-            }
+            public override string ToString() { return String.Format("{0} / {1}", Start, End); }
         }
 
         #endregion
 
         #region Constructors
 
-        public NestedContainmentListArticle(IEnumerable<I> intervals)
+        // TODO: Make an out-of-place constructor
+        public NestedContainmentListArticle(IEnumerable<I> intervals, bool inplace = true)
         {
             var intervalArray = intervals as I[] ?? intervals.ToArray();
 

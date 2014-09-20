@@ -26,6 +26,11 @@ namespace C5.Intervals.Tests
             {
                 return true;
             }
+
+            protected override object[] AdditionalParameters()
+            {
+                return new object[] { true };
+            }
         }
 
         #endregion
