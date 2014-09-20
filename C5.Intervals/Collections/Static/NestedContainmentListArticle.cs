@@ -62,14 +62,8 @@ namespace C5.intervals
 
         private struct Node
         {
-            public readonly I Interval;
+            public I Interval;
             public int Sublist;
-
-            public Node(I interval)
-                : this()
-            {
-                Interval = interval;
-            }
 
             public bool HasSublist { get { return Sublist >= 0; } }
 
@@ -110,32 +104,31 @@ namespace C5.intervals
 
             _count = intervalArray.Length;
 
-            // Sort
             Sorting.HeapSort(intervalArray, 0, _count, IntervalExtensions.CreateComparer<I, T>());
 
             // Create list with intervals
             _list = new Node[_count];
             for (var i = 0; i < _count; ++i)
-                _list[i] = new Node(intervalArray[i]);
+                _list[i].Interval = intervalArray[i];
 
-            // Count sublists
-            var sublistCount = initSublists(ref intervalArray);
+            var listCount = initSublists(ref intervalArray);
 
-            // No containments, everything is in the main list
-            if (sublistCount == 1)
+            // If no intervals are contained, we can skip the list construction
+            if (listCount == 1)
             {
+                // Initialize header to contain only main list
                 _header = new[] { new Sublist(0, _count) };
 
-                for (var i = 0; i < _count; i++)
+                for (var i = 0; i < _count; ++i)
                     _list[i].Sublist = -1;
             }
             else
             {
-                _header = new Sublist[sublistCount];
+                _header = new Sublist[listCount];
 
                 labelSublists();
-                computeSubStart(sublistCount);
-                computeAbsolutePosition(sublistCount);
+                computeSubStart(listCount);
+                computeAbsPos();
 
                 // Sort sublists
                 var sublistComparer = ComparerFactory<Node>.CreateComparer((i, j) =>
@@ -145,7 +138,7 @@ namespace C5.intervals
                 });
                 Sorting.HeapSort(_list, 0, _count, sublistComparer);
 
-                sublistInvert(sublistCount);
+                sublistInvert();
             }
 
             _span = new IntervalBase<T>(_list[0].Interval, _list[_header[0].End - 1].Interval);
@@ -177,110 +170,82 @@ namespace C5.intervals
         /// </summary>
         private void labelSublists()
         {
-            // Initialize the parent index to be the first interval
-            var parent = 0;
-
-            // The first list (the main list) has no parent and initially contains one interval (the first)
             _header[0] = new Sublist(-1, 1);
-
-            // The list id of the list owned by the parent
+            var parent = 0;
             var parentList = 1;
-
-            // The initial number of lists is just one (the main list)
             var listCount = 1;
 
-            // Iterate through all intervals
             for (var i = 1; i < _count; /**/)
             {
-                // Check if we have found the right sublist of the current interval
-                // (Are in the main list, or does the parent interval contains the current interval?)
                 if (parentList == 0 || _list[parent].Interval.StrictlyContains(_list[i].Interval))
                 {
-                    // Check if the interval is the first in the list
                     if (_header[parentList].End == 0)
                     {
-                        // Increment list count
                         listCount++;
-                        // Set its parent in the header
                         _header[parentList].Start = parent;
                     }
 
-                    // Increment the length of the parent's list
                     _header[parentList].End++;
-
-                    // Update which sublist the ith interval belongs to
                     _list[i].Sublist = parentList;
-
-                    // Set the new parent to be the current interval
                     parent = i;
-
-                    // And update the parent's list to be the next list (which is equal to the list count)
                     parentList = listCount;
-
-                    // Continue to the next interval
                     ++i;
                 }
-                // Otherwise move down to the containing sublist
                 else
                 {
-                    // Get the next parent's list
+                    if (parentList < _header.Length)
+                        _header[parentList].Start = _header[_list[parent].Sublist].End - 1;
+
                     parentList = _list[parent].Sublist;
-
-                    // Get the parent of the current list
-                    parent = _header[parentList].Start;
+                    parent = _header[_list[parent].Sublist].Start;
                 }
+            }
+
+            // Pop remaining stack
+            while (parentList > 0)
+            {
+                if (parentList < _header.Length)
+                    _header[parentList].Start = _header[_list[parent].Sublist].End - 1;
+
+                parentList = _list[parent].Sublist;
+                parent = _header[_list[parent].Sublist].Start;
             }
         }
 
-        private void computeSubStart(int sublistCount)
+        private void computeSubStart(int listCount)
         {
-            var total = 0;
-
-            for (var i = 0; i < sublistCount; ++i)
+            for (int i = 0, total = 0, temp; i < listCount; ++i, total += temp)
             {
-                var tmp = _header[i].End;
+                temp = _header[i].End;
                 _header[i].End = total;
-                total += tmp;
             }
         }
 
-        private void computeAbsolutePosition(int sublistCount)
+        private void computeAbsPos()
         {
-            var currentSublist = 1;
+            for (var i = 1; i < _count; ++i)
+                if (_list[i - 1].Sublist < _list[i].Sublist)
+                    _header[_list[i].Sublist].Start += _header[_list[i - 1].Sublist].End;
+        }
+
+        private void sublistInvert()
+        {
+            var parentList = 0;
+            _header[0].Start = 0;
+
             for (var i = 0; i < _count; ++i)
             {
-                var intervalSublist = _list[i].Sublist;
-
-                if (currentSublist < sublistCount && i == _header[currentSublist].Start)
+                if (_list[i].Sublist > parentList)
                 {
-                    _header[currentSublist].Start = _header[intervalSublist].End;
-                    ++currentSublist;
+                    parentList = _list[i].Sublist;
+                    var parent = _header[parentList].Start;
+                    _list[parent].Sublist = parentList;
+                    _header[parentList].End = _header[parentList].Start = i;
                 }
-                ++_header[intervalSublist].End;
-            }
-        }
 
-        private void sublistInvert(int sublistCount)
-        {
-            // Reset all sublists
-            for (var i = 0; i < _count; ++i)
+                _header[parentList].End++;
                 _list[i].Sublist = -1;
-
-            // Fix sublists in list
-            for (var j = 1; j < sublistCount; ++j)
-                _list[_header[j].Start].Sublist = j;
-
-            // Fix start in header
-            _header[0].Start = 0;
-            for (var j = 1; j < sublistCount; ++j)
-                _header[j].Start = _header[j - 1].End;
-
-            // Fix length in header
-            for (var j = sublistCount - 1; j > 0; --j)
-                _header[j].End = _header[j].End - _header[j - 1].End;
-
-            for (var j = 0; j < sublistCount; j++)
-                _header[j].End = _header[j].Start + _header[j].End;
+            }
         }
 
         #endregion
