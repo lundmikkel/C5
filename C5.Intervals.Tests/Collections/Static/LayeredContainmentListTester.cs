@@ -586,6 +586,17 @@ namespace C5.Intervals.Tests
             {
                 var intervals = new[]
                 {
+                    new IntervalBase<int>(0, 7),
+                    new IntervalBase<int>(1, 6),
+                    new IntervalBase<int>(2, 3),
+                    new IntervalBase<int>(3, 8),
+                    new IntervalBase<int>(4, 5),
+                };
+
+                var collection = new LayeredContainmentList<IInterval<int>, int>(intervals);
+
+                intervals = new[]
+                {
                     new IntervalBase<int>(0, 10),
                     new IntervalBase<int>(1, 8),
                     new IntervalBase<int>(2, 6),
@@ -593,7 +604,7 @@ namespace C5.Intervals.Tests
                     new IntervalBase<int>(4, 5),
                 };
 
-                var collection = new LayeredContainmentList<IInterval<int>, int>(intervals);
+                collection = new LayeredContainmentList<IInterval<int>, int>(intervals);
 
                 //TODO: Expand beyond simple construction?
             }
