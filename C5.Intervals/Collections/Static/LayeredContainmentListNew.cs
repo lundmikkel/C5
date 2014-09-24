@@ -186,15 +186,15 @@ namespace C5.Intervals
 
             nodes = new Node[_count];
             // Add first interval to layers manually
-            nodes[0] = new Node{ Interval = intervals[0], Layer = 0, Pointer = 0 };
-            
+            nodes[0] = new Node { Interval = intervals[0], Layer = 0, Pointer = 0 };
+
             var layer = 0;
 
             // Figure out each intervals placement
             for (var i = 1; i < _count; ++i)
             {
                 var interval = intervals[i];
-                layer = binaryLayerSearch(layers, interval, layer);
+                layer = gallopLayerSearch(layers, interval);
 
                 // Add a node if we are about to populate the last layer
                 if (layer == layers.Count - 1)
@@ -205,7 +205,7 @@ namespace C5.Intervals
                 layers[layer].Length++;
 
                 // Slowly add each interval etc. to nodes array
-                nodes[i] = new Node { Interval = interval, Layer = layer, Pointer = layers[layer + 1].Length};
+                nodes[i] = new Node { Interval = interval, Layer = layer, Pointer = layers[layer + 1].Length };
             }
 
             // Minus the one extra empty layer
@@ -234,6 +234,79 @@ namespace C5.Intervals
                 for (var i = start; i < offset; ++i)
                     nodes[i].Length += offset;
             }
+        }
+
+        private static int gallopLayerSearch(ArrayList<Node> layers, I query)
+        {
+            Contract.Requires(query != null);
+            Contract.Requires(layers.Last.Interval == null);
+            // The high endpoints of the last interval in each layer is sorted
+            Contract.Requires(Contract.ForAll(1, layers.Count - 1, l => layers[l].Interval.CompareHigh(layers[l - 1].Interval) < 0));
+            // Result is non-negative and less than layer count
+            Contract.Ensures(0 <= Contract.Result<int>() && Contract.Result<int>() < layers.Count);
+            // The last interval in the layer has a high less than or equal to interval's high
+            Contract.Ensures(layers[Contract.Result<int>()].Interval == null || layers[Contract.Result<int>()].Interval.CompareHigh(query) <= 0);
+            // The last interval in the layer below has a high greater than interval's high
+            Contract.Ensures(Contract.Result<int>() == 0 || layers[Contract.Result<int>() - 1].Interval.CompareHigh(query) > 0);
+
+            var jump = 1;
+            var lower = 0;
+            var upper = layers.Count - 1;
+
+            while (true)
+            {
+                var compare = layers[lower].Interval.CompareHigh(query);
+
+                // Endpoints match; we are in the right layer
+                if (compare == 0)
+                    return lower;
+
+                var next = lower + jump;
+
+                // We are in a higher layer than needed, do binary search for the rest
+                if (compare < 0 || upper <= next)
+                {
+                    if (compare < 0)
+                        upper = lower;
+
+                    if (upper == 0)
+                        return 0;
+
+                    // Back up to previous value
+                    lower = lower - (jump >> 1) + 1;
+
+                    return gallopBinaryLayerSearch(layers, query, lower, upper);
+                }
+
+                // Jump
+                lower = next;
+
+                // Double jump
+                jump <<= 1;
+            }
+        }
+
+        private static int gallopBinaryLayerSearch(ArrayList<Node> layers, I query, int lower, int upper)
+        {
+            while (lower < upper)
+            {
+                // Binarily pick the next layer to check
+                var current = lower + (upper - lower >> 1);
+
+                var compare = layers[current].Interval.CompareHigh(query);
+
+                // interval contains the last interval
+                if (compare < 0)
+                    upper = current;
+                // The last interval contains interval
+                else if (compare > 0)
+                    lower = current + 1;
+                // We have found an interval with the same high
+                else
+                    return current;
+            }
+
+            return lower;
         }
 
         private static int binaryLayerSearch(ArrayList<Node> layers, I interval, int current)
@@ -502,7 +575,7 @@ namespace C5.Intervals
             Contract.Requires(0 <= upper && upper <= _nodes.Length);
             // Lower and upper must be in the same layer
             Contract.Requires(Contract.ForAll(lower, upper, i => _nodes[i].Interval != null));
-            
+
             // Either no interval overlaps or the interval at index result is the first overlap
             Contract.Ensures(
                 Contract.Result<int>() < lower ||
@@ -568,7 +641,7 @@ namespace C5.Intervals
 
         #region Sorted
 
-        
+
         // TODO: Solve the sorted enumeration problem!
         /// <summary>
         /// Create an enumerable, enumerating all intervals in the collection that overlap the query point in sorted order.
