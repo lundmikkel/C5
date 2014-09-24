@@ -137,7 +137,7 @@ namespace C5.Intervals
 
             public override string ToString()
             {
-                return Interval + " / " + Pointer + "(" + Layer + ")";
+                return Interval + " / " + Pointer;
             }
         }
 
@@ -174,7 +174,7 @@ namespace C5.Intervals
             Sorting.Timsort(intervalArray, IntervalExtensions.CreateComparer<I, T>());
 
             // Pointer is used to store the layers length
-            var layers = new ArrayList<Node>(8) {
+            var layers = new ArrayList<Node> {
                 // The main layer
                 new Node {
                     Interval = intervals[0],
@@ -236,11 +236,11 @@ namespace C5.Intervals
             }
         }
 
-        private static int binaryLayerSearch(ArrayList<Node> layers, I interval, int layer)
+        private static int binaryLayerSearch(ArrayList<Node> layers, I interval, int current)
         {
             Contract.Requires(layers != null);
             Contract.Requires(interval != null);
-            //Contract.Requires(layers.Last.IsEmpty);
+            Contract.Requires(layers.Last.Interval == null);
             // The high endpoints of the last interval in each layer is sorted
             Contract.Requires(Contract.ForAll(1, layers.Count - 1, l => layers[l].Interval.CompareHigh(layers[l - 1].Interval) < 0));
             // Result is non-negative and less than layer count
@@ -250,28 +250,28 @@ namespace C5.Intervals
             // The last interval in the layer below has a high greater than interval's high
             Contract.Ensures(Contract.Result<int>() == 0 || layers[Contract.Result<int>() - 1].Interval.CompareHigh(interval) > 0);
 
-            var low = 0;
-            var high = layers.Count - 1;
+            var lower = 0;
+            var upper = layers.Count - 1;
 
             do
             {
-                var compare = layers[layer].Interval.CompareHigh(interval);
+                var compare = layers[current].Interval.CompareHigh(interval);
 
                 // interval contains the last interval
                 if (compare < 0)
-                    high = layer;
+                    upper = current;
                 // The last interval contains interval
                 else if (compare > 0)
-                    low = layer + 1;
+                    lower = current + 1;
                 // We have found an interval with the same high
                 else
-                    return layer;
+                    return current;
 
                 // Binarily pick the next layer to check
-                layer = low + (high - low >> 2);
-            } while (low < high);
+                current = lower + (upper - lower >> 1);
+            } while (lower < upper);
 
-            return low;
+            return lower;
         }
 
         #endregion
