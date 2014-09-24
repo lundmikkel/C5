@@ -258,7 +258,7 @@ namespace C5.Intervals
                     return layer;
 
                 // Binarily pick the next layer to check
-                layer = low + (high - low >> 2);
+                layer = low + (high - low >> 1);
             } while (low < high);
 
             return low;
