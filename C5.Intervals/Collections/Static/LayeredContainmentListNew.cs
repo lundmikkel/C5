@@ -52,6 +52,19 @@ namespace C5.Intervals
             }
         }
 
+        /// <summary>
+        /// The number of intervals in the collection that are contained in another interval.
+        /// </summary>
+        public int ContainmentCount
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<int>() >= 0);
+
+                return _count - _firstLayerCount;
+            }
+        }
+
         #endregion
 
         #region Code Contracts
