@@ -870,9 +870,11 @@ namespace C5.Intervals
         }
 
         /// <summary>
-        /// Forcingly adds an interval, even if it has overlaps in the collection. The function must resolve any overlapping conflict for a pair of overlapping intervals, by moving either interval
-        ///  will be called to resolve any overlap conflicts arose from the insertion
-        /// .
+        /// Forcingly adds an interval, even if it has overlaps in the collection. The 
+        /// function must resolve any overlapping conflict for a pair of overlapping 
+        /// intervals by moving either interval. For each pair of overlapping interveals
+        /// <paramref name="action"/> will be called to resolve the conflicts that arose 
+        /// from the insertion.
         /// </summary>
         /// <param name="interval">The interval.</param>
         /// <param name="action">The action, that will resolve overlap conflict.</param>
@@ -883,6 +885,11 @@ namespace C5.Intervals
             Node node;
             _root = forceAdd(interval, _root, _first, ref rotationNeeded, out node);
             _count++;
+
+            // If interval has the same low value as node then we need to swap
+            if (node.Next.Key != null)
+                if (node.Key.CompareLow(node.Next.Key) == 0)
+                    node.Next.Swap(node);
 
             if (forcePosition && node.Previous != _first && node.Previous.Key.CompareHighLow(node.Key) <= 0)
             {

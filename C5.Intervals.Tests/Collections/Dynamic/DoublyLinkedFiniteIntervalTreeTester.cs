@@ -669,7 +669,7 @@ namespace C5.Intervals.Tests
                 var interval = new Interval(1, 2);
 
                 Assert.That(collection.ForceAdd(interval, action), Is.True);
-                Assert.That(interval, Is.EqualTo(collection.Skip(2).First()));
+                Assert.That(interval, Is.EqualTo(collection.Skip(1).First()));
                 Assert.That(callCount, Is.EqualTo(1));
             }
 
