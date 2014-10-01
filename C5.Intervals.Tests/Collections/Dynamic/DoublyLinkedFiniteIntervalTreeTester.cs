@@ -12,8 +12,6 @@ namespace C5.Intervals.Tests
     {
         using Interval = IntervalBase<int>;
 
-        // TODO: Re-enable all black-box tests
-
         #region Black-box
 
         class DoublyLinkedFiniteIntervalTreeTester_BlackBox : IntervalCollectionTester
@@ -111,17 +109,11 @@ namespace C5.Intervals.Tests
                         return new DoublyLinkedFiniteIntervalTree<Interval, int>();
 
                     // No specific intervals selected
-                    else
-                    {
-                        if (_count == null)
-                            _count = _count ?? _random.Next(10, 20);
+                    if (_intervals == null)
+                        _intervals = IntervalCollectionTester.NonOverlappingIntervals(_count ?? _random.Next(10, 20));
 
-                        _intervals = Enumerable.Range(0, (int) _count).Select(x => new IntervalBuilder().Build());
-
-                        return new DoublyLinkedFiniteIntervalTree<Interval, int>(_intervals);
-                    }
+                    return new DoublyLinkedFiniteIntervalTree<Interval, int>(_intervals);
                 }
-
                 public Collection WithOneInterval()
                 {
                     _count = 1;
@@ -231,6 +223,107 @@ namespace C5.Intervals.Tests
 
             #region Enumerable
             // TODO
+
+            #region Next Intervals
+
+            [Test]
+            public void NextIntervals_EmptyCollection_Empty()
+            {
+                var collection = new Collection().ThatIsEmpty().Build();
+                Assert.That(collection.NextIntervals(new IntervalBuilder().Build()), Is.Empty);
+            }
+
+            [Test]
+            public void NextIntervals_NonOverlappingIntervals_MatchingEnd()
+            {
+                const int count = 10;
+                var intervals = IntervalCollectionTester.NonOverlappingIntervals(count);
+                var collection = new Collection().WithIntervals(intervals).Build();
+
+                for (var i = 0; i < count; ++i)
+                {
+                    var nextIntervals = collection.NextIntervals(intervals[i]);
+                    Assert.That(nextIntervals.Count(), Is.EqualTo(count - i - 1));
+
+                    var expected = intervals.Skip(i + 1);
+                    Assert.That(nextIntervals, Is.EquivalentTo(expected));
+                }
+            }
+
+            [Test]
+            public void NextIntervals_NonOverlappingIntervals_NonContained()
+            {
+                const int count = 10;
+                var intervals = IntervalCollectionTester.NonOverlappingIntervals(count);
+                var collection = new Collection().WithIntervals(intervals).Build();
+                var queryIntervals = IntervalCollectionTester.NonOverlappingIntervals(count, 2);
+
+                for (var i = 0; i < count; ++i)
+                    Assert.That(collection.NextIntervals(queryIntervals[i]), Is.Empty);
+            }
+
+            [Test]
+            public void NextIntervals_NonOverlappingIntervalsLAstInterval_Empty()
+            {
+                const int count = 10;
+                var intervals = IntervalCollectionTester.NonOverlappingIntervals(count);
+                var collection = new Collection().WithIntervals(intervals).Build();
+
+                Assert.That(collection.NextIntervals(intervals.Last()), Is.Empty);
+            }
+
+            #endregion
+
+            #region Previous Intervals
+
+            [Test]
+            public void PreviousIntervals_EmptyCollection_Empty()
+            {
+                var collection = new Collection().ThatIsEmpty().Build();
+                Assert.That(collection.PreviousIntervals(new IntervalBuilder().Build()), Is.Empty);
+            }
+
+            [Test]
+            public void PreviousIntervals_NonOverlappingIntervals_MatchingEnd()
+            {
+                const int count = 10;
+                var intervals = IntervalCollectionTester.NonOverlappingIntervals(count);
+                var collection = new Collection().WithIntervals(intervals).Build();
+
+                for (var i = 0; i < count; ++i)
+                {
+                    var previousIntervals = collection.PreviousIntervals(intervals[i]);
+                    Assert.That(previousIntervals.Count(), Is.EqualTo(i));
+
+                    var expected = intervals.Take(i).Reverse();
+                    Assert.That(previousIntervals, Is.EquivalentTo(expected));
+                }
+            }
+
+            [Test]
+            public void PreviousIntervals_NonOverlappingIntervals_NonContained()
+            {
+                const int count = 10;
+                var intervals = IntervalCollectionTester.NonOverlappingIntervals(count);
+                var collection = new Collection().WithIntervals(intervals).Build();
+                var queryIntervals = IntervalCollectionTester.NonOverlappingIntervals(count, 2);
+
+                for (var i = 0; i < count; ++i)
+                    Assert.That(collection.PreviousIntervals(queryIntervals[i]), Is.Empty);
+            }
+
+            [Test]
+            public void PreviousIntervals_NonOverlappingIntervalsFirstInterval_Empty()
+            {
+                const int count = 10;
+                var intervals = IntervalCollectionTester.NonOverlappingIntervals(count);
+                var collection = new Collection().WithIntervals(intervals).Build();
+
+                Assert.That(collection.PreviousIntervals(intervals.First()), Is.Empty);
+            }
+
+            #endregion
+
             #endregion
 
             #region Interval Collection

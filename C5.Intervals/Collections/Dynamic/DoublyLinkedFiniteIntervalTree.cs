@@ -553,6 +553,38 @@ namespace C5.Intervals
             get { return previousNodes(_last.Previous).Select(node => node.Key); }
         }
 
+        #region Next/previous
+
+        #region Next
+
+        /// <summary>
+        /// Get a lazy enumerable of the intervals (in lexicographical order) following the 
+        /// interval (or an equal interval) in the collection. If the interval is not in the 
+        /// collection, the result will be empty.
+        /// </summary>
+        /// <param name="interval">The query interval. If not in the collection, the result 
+        /// will be empty.</param>
+        /// <returns>A lazy enumerable of the intervals following the interval in the 
+        /// collection.</returns>
+        [Pure]
+        public IEnumerable<I> NextIntervals(I interval)
+        {
+            Contract.Requires(interval != null);
+            Contract.Ensures(Contract.Result<IEnumerable<I>>() != null);
+
+            var node = findContainingNode(interval);
+            if (node == null)
+                return Enumerable.Empty<I>();
+
+            return nextIntervals(node.Next ?? node);
+        }
+
+        [Pure]
+        private IEnumerable<I> nextIntervals(Node node)
+        {
+            return nextNodes(node).Select(n => n.Key);
+        }
+
         [Pure]
         private IEnumerable<Node> nextNodes(Node node)
         {
@@ -570,10 +602,36 @@ namespace C5.Intervals
             }
         }
 
+        #endregion
+
+        #region Previous
+
+        /// <summary>
+        /// Get a lazy enumerable of the intervals (in reverse lexicographical order) 
+        /// preceding the interval (or an equal interval) in the collection. If the interval 
+        /// is not in the collection, the result will be empty.
+        /// </summary>
+        /// <param name="interval">The query interval. If not in the collection, the result 
+        /// will be empty.</param>
+        /// <returns>A lazy enumerable of the intervals following the interval in the 
+        /// collection.</returns>
         [Pure]
-        private IEnumerable<I> nextIntervals(Node node)
+        public IEnumerable<I> PreviousIntervals(I interval)
         {
-            return nextNodes(node).Select(n => n.Key);
+            Contract.Requires(interval != null);
+            Contract.Ensures(Contract.Result<IEnumerable<I>>() != null);
+
+            var node = findContainingNode(interval);
+            if (node == null)
+                return Enumerable.Empty<I>();
+
+            return previousIntervals(node.Previous ?? node);
+        }
+
+        [Pure]
+        private IEnumerable<I> previousIntervals(Node node)
+        {
+            return previousNodes(node).Select(n => n.Key);
         }
 
         [Pure]
@@ -592,6 +650,29 @@ namespace C5.Intervals
                 node = node.Previous;
             }
         }
+
+        #endregion
+
+        [Pure]
+        private Node findContainingNode(I interval)
+        {
+            var node = _root;
+
+            while (node != null)
+            {
+                var compare = interval.CompareLow(node.Key);
+                if (compare < 0)
+                    node = node.Left;
+                else if (compare > 0)
+                    node = node.Right;
+                else
+                    return interval.CompareHigh(node.Key) == 0 ? node : null;
+            }
+
+            return null;
+        }
+
+        #endregion
 
         #endregion
 
