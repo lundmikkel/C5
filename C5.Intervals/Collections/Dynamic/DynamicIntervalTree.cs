@@ -1195,6 +1195,16 @@ namespace C5.Intervals
         /// Construct an empty Dynamic Interval Tree that does not allow reference duplicates.
         /// </summary>
         /// <param name="intervals">A collection of intervals.</param>
+        public DynamicIntervalTree(IEnumerable<I> intervals)
+            : this(intervals, false)
+        {
+            Contract.Requires(intervals != null);
+        }
+
+        /// <summary>
+        /// Construct an empty Dynamic Interval Tree that does not allow reference duplicates.
+        /// </summary>
+        /// <param name="intervals">A collection of intervals.</param>
         public DynamicIntervalTree(IEnumerable<I> intervals, bool allowReferenceDuplicates = false)
         {
             Contract.Requires(intervals != null);

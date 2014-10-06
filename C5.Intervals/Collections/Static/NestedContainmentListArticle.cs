@@ -90,7 +90,7 @@ namespace C5.intervals
         #region Constructors
 
         // TODO: Make an out-of-place constructor
-        public NestedContainmentListArticle(IEnumerable<I> intervals, bool inplace = true)
+        public NestedContainmentListArticle(IEnumerable<I> intervals)
         {
             var intervalArray = intervals as I[] ?? intervals.ToArray();
 
