@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using C5.Intervals;
 
-namespace C5.intervals
+namespace C5.Intervals
 {
     public class NestedContainmentListArticle<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
         where I : class, IInterval<T>

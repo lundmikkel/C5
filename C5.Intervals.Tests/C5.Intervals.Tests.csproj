@@ -86,7 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\C5.Intervals\C5.Intervals.csproj">
-      <Project>{6c61dd88-12ec-4a7d-907c-56a8fd72edb2}</Project>
+      <Project>{6C61DD88-12EC-4A7D-907C-56A8FD72EDB2}</Project>
       <Name>C5.Intervals</Name>
     </ProjectReference>
     <ProjectReference Include="..\C5\C5.csproj">
@@ -94,7 +94,6 @@
       <Name>C5</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
