@@ -306,8 +306,11 @@ namespace C5.Intervals
             Contract.Requires(y != null);
             Contract.Ensures(Contract.Result<bool>() == (CompareTo(x, y) == 0));
 
-            return x.Low.CompareTo(y.Low) == 0 && x.High.CompareTo(y.High) == 0 && x.LowIncluded == y.LowIncluded &&
-                   x.HighIncluded == y.HighIncluded;
+            return
+                x.Low.CompareTo(y.Low) == 0 &&
+                x.High.CompareTo(y.High) == 0 &&
+                x.LowIncluded == y.LowIncluded &&
+                x.HighIncluded == y.HighIncluded;
         }
 
         /// <summary>
