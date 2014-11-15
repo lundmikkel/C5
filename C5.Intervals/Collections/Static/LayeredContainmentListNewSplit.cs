@@ -24,7 +24,7 @@ namespace C5.Intervals
         // Number of layers
         private readonly int _layerCount;
 
-        private readonly I[] _intervals;
+        protected readonly I[] _intervals;
         private readonly int[] _pointers;
         private readonly I[] intervalArray;
 
@@ -556,7 +556,7 @@ namespace C5.Intervals
                 if (!_intervals[first].Overlaps(query))
                 {
                     // We know first doesn't overlap so we can increment it before searching
-                    first = findFirst(query, ++first, upper);
+                    first = FindFirst(query, ++first, upper);
 
                     // If index is out of bound, or found interval doesn't overlap, then the list won't contain any overlaps
                     if (upper <= first || !_intervals[first].Overlaps(query))
@@ -576,7 +576,7 @@ namespace C5.Intervals
         }
 
         // TODO: Decide on using either start/end or lower/upper.
-        private int findFirst(IInterval<T> query, int lower, int upper)
+        protected virtual int FindFirst(IInterval<T> query, int lower, int upper)
         {
             Contract.Requires(query != null);
             // Bounds must be in bounds
@@ -712,7 +712,7 @@ namespace C5.Intervals
                 var layer = i >> 1;
 
                 if (firstOverlaps[layer] < 0)
-                    firstOverlaps[layer] = findFirst(query, start, end);
+                    firstOverlaps[layer] = FindFirst(query, start, end);
 
                 if (firstOverlaps[layer] >= end)
                     continue;
@@ -763,7 +763,7 @@ namespace C5.Intervals
                 return false;
 
             // Find first overlap
-            var i = findFirst(query, 0, _firstLayerCount);
+            var i = FindFirst(query, 0, _firstLayerCount);
 
             // Check if index is in bound and if the interval overlaps the query
             var result = 0 <= i && i < _firstLayerCount && _intervals[i].Overlaps(query);
@@ -806,7 +806,7 @@ namespace C5.Intervals
                 if (!_intervals[lower].Overlaps(query))
                 {
                     // We know first doesn't overlap so we can increment it before searching
-                    lower = findFirst(query, ++lower, upper);
+                    lower = FindFirst(query, ++lower, upper);
 
                     // If index is out of bound, or found interval doesn't overlap, then the layer won't contain any overlaps
                     // TODO: Can we tighten the check here? Like i.low < q.high...
@@ -854,7 +854,7 @@ namespace C5.Intervals
                 yield break;
 
             var last = _firstLayerCount;
-            var first = findFirst(query, 0, last);
+            var first = FindFirst(query, 0, last);
 
             // Cache variables to speed up iteration
             I interval;

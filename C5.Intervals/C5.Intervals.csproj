@@ -161,6 +161,7 @@
     <Compile Include="Collections\Dynamic\IntervalBinarySearchTreeOld.cs" />
     <Compile Include="Collections\IntervalCollectionFactory.cs" />
     <Compile Include="Collections\Static\BinaryIntervalSearch.cs" />
+    <Compile Include="Collections\Static\LayeredContainmentListNewSplit - Copy.cs" />
     <Compile Include="Collections\Static\LayeredContainmentListNewSplit.cs" />
     <Compile Include="Collections\Static\LayeredContainmentListNew.cs" />
     <Compile Include="Collections\Static\LayeredContainmentList.cs" />
