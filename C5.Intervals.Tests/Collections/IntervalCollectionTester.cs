@@ -144,6 +144,8 @@ namespace C5.Intervals.Tests
 
             if (count < 0)
                 count = Count;
+            else
+                Count = count;
 
             return Enumerable.Range(0, count).Select(i => SingleInterval()).ToArray();
         }
@@ -235,12 +237,12 @@ namespace C5.Intervals.Tests
 
         public static Interval[] NonOverlappingIntervals(int count, int length = 1, int space = 0)
         {
-            Contract.Ensures(Contract.ForAll(0, count, i => Contract.ForAll(i, count, j => !Contract.Result<IInterval<int>[]>()[i].Overlaps(Contract.Result<IInterval<int>[]>()[j]))));
+            Contract.Ensures(Contract.ForAll(0, count, i => Contract.ForAll(i + 1, count, j => !Contract.Result<IInterval<int>[]>()[i].Overlaps(Contract.Result<IInterval<int>[]>()[j]))));
 
             var intervals = new Interval[count];
 
             var low = 0;
-            for (var i = 0; i < count; i++)
+            for (var i = 0; i < count; ++i)
             {
                 intervals[i] = new Interval(low, low + length, IntervalType.LowIncluded);
                 low += length + space;
@@ -1041,11 +1043,14 @@ namespace C5.Intervals.Tests
             var intervals = DuplicateIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
 
-            Assert.AreEqual(collection.AllowsOverlaps ? Count : NonOverlapping(intervals).Count(), collection.MaximumDepth);
+            var expected = collection.AllowsOverlaps ? Count : NonOverlapping(intervals).Count();
+            Assert.AreEqual(expected, collection.MaximumDepth);
         }
 
         [Test]
         [Category("Maximum Depth")]
+        // 82771978
+        // -379836663
         public void MaximumDepth_NonOverlappingIntervals_One()
         {
             var intervals = NonOverlappingIntervals(Count);
@@ -2839,7 +2844,7 @@ namespace C5.Intervals.Tests
                     intervals['K' - 'A']
                 };
             var query = new Interval(13, 21);
-            CollectionAssert.AreEquivalent(expected, collection.FindOverlaps(query));   
+            CollectionAssert.AreEquivalent(expected, collection.FindOverlaps(query));
         }
 
         #endregion
