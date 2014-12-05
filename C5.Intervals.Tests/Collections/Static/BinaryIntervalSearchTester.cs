@@ -6,8 +6,7 @@ namespace C5.Intervals.Tests
     namespace BinaryIntervalSearch
     {
         #region Black-box
-
-        /*
+        
         class BinaryIntervalSearchTester_BlackBox : IntervalCollectionTester
         {
             protected override Type GetCollectionType()
@@ -15,12 +14,16 @@ namespace C5.Intervals.Tests
                 return typeof(BinaryIntervalSearch<,>);
             }
 
+            protected override Speed CountSpeed()
+            {
+                return Speed.Constant;
+            }
+
             protected override bool AllowsReferenceDuplicates()
             {
                 return true;
             }
         }
-        */
 
         #endregion
     }

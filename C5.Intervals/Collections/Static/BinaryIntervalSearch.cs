@@ -41,12 +41,7 @@ namespace C5.Intervals
             var lowComparer = IntervalExtensions.CreateComparer<I, T>();
             Sorting.IntroSort(_lowSorted, 0, _count, lowComparer);
 
-            var highComparer = ComparerFactory<I>.CreateComparer((x, y) =>
-                {
-                    var compare = x.CompareHigh(y);
-
-                    return compare != 0 ? compare : x.CompareLow(y);
-                });
+            var highComparer = ComparerFactory<I>.CreateComparer((x, y) => x.CompareHigh(y));
             Sorting.IntroSort(_highSorted, 0, _count, highComparer);
 
             _span = new IntervalBase<T>(_lowSorted.First(), _highSorted.Last());
@@ -192,15 +187,36 @@ namespace C5.Intervals
                 yield break;
 
             // Search for the last overlap
+            var first = findFirst(query);
             var last = findLast(query);
-            I interval;
 
-            // Enumerate collection until it is reached
-            for (var i = 0; i < last; i++)
+            var overlapsRemaining = last - first;
+
+            if (overlapsRemaining == 0)
+                yield break;
+
+            var intervals = _lowSorted;
+            var lower = 0;
+            var upper = last;
+
+            // If we have fewer intervals to iterate in high sorted list, we do that
+            if (_count - first < last)
             {
+                lower = first;
+                upper = _count;
+                intervals = _highSorted;
+            }
+
+            // Enumerate collection until end is reached or all overlaps have been found
+            for (var i = lower; 0 < overlapsRemaining && i < upper; ++i)
+            {
+                I interval;
                 // Only return if it actually overlaps
-                if ((interval = _lowSorted[i]).Overlaps(query))
+                if ((interval = intervals[i]).Overlaps(query))
+                {
                     yield return interval;
+                    --overlapsRemaining;
+                }
             }
         }
 
@@ -208,8 +224,6 @@ namespace C5.Intervals
         {
             Contract.Requires(query != null);
 
-            // Either the interval at index result overlaps or no intervals in the layer overlap
-            Contract.Ensures(Contract.Result<int>() < 0 || _count <= Contract.Result<int>() || _highSorted[Contract.Result<int>()].Overlaps(query) || Contract.ForAll(_highSorted, i => !i.Overlaps(query)));
             // All intervals before index result do not overlap the query
             Contract.Ensures(Contract.ForAll(0, Contract.Result<int>(), i => !_highSorted[i].Overlaps(query)));
 
@@ -236,9 +250,6 @@ namespace C5.Intervals
         {
             Contract.Requires(query != null);
 
-            // TODO: Look closer at contract
-            // Either the interval at index result overlaps or no intervals in the layer overlap
-            //Contract.Ensures(Contract.Result<int>() == 0 || _lowSorted[Contract.Result<int>() - 1].Overlaps(query) || Contract.ForAll(_lowSorted, x => !x.Overlaps(query)));
             // All intervals after index result do not overlap the query
             Contract.Ensures(Contract.ForAll(Contract.Result<int>(), _lowSorted.Count(), i => !_lowSorted[i].Overlaps(query)));
 
@@ -268,26 +279,21 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public bool FindOverlap(T query, out I overlap)
         {
-            return FindOverlap(new IntervalBase<T>(query), out overlap);
+            bool result;
+
+            using (var enumerator = FindOverlaps(query).GetEnumerator())
+                overlap = (result = enumerator.MoveNext()) ? enumerator.Current : null;
+
+            return result;
         }
 
         /// <inheritdoc/>
         public bool FindOverlap(IInterval<T> query, out I overlap)
         {
-            overlap = null;
+            bool result;
 
-            // No overlap if query is null, collection is empty, or query doesn't overlap collection
-            if (IsEmpty || !query.Overlaps(Span))
-                return false;
-
-            // Find first overlap
-            var i = findLast(query);
-
-            // Check if index is in bound and if the interval overlaps the query
-            var result = 0 <= i && i < _count && _lowSorted[i].Overlaps(query);
-
-            if (result)
-                overlap = _lowSorted[i];
+            using (var enumerator = FindOverlaps(query).GetEnumerator())
+                overlap = (result = enumerator.MoveNext()) ? enumerator.Current : null;
 
             return result;
         }
