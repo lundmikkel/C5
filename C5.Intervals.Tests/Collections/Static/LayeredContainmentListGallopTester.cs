@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace C5.Intervals.Tests
 {
-    namespace LayeredContainmentListNewSplitGallop
+    namespace LayeredContainmentListGallop
     {
         #region Black-box
 
