@@ -107,6 +107,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Collections\Static\LayeredContainmentListNewSplitGallopTester.cs" />
+    <Compile Include="Collections\Static\LayeredContainmentListNewSplitSortedTester.cs" />
     <Compile Include="Collections\Static\LayeredContainmentListNewSplitTester.cs" />
     <Compile Include="Collections\Static\LayeredContainmentListNewTester.cs" />
     <Compile Include="Collections\Static\NestedContainmentListArticleTester.cs" />
