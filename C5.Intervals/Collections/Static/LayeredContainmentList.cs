@@ -26,7 +26,7 @@ namespace C5.Intervals
 
         protected readonly I[] _intervals;
         private readonly int[] _pointers;
-        private readonly I[] intervalArray;
+        private readonly I[] _intervalArray;
 
         private readonly IInterval<T> _span;
 
@@ -156,13 +156,13 @@ namespace C5.Intervals
             // TODO: Calculate the maximum depth during construction based on argument
 
             // Make intervals to array to allow fast sorting and counting
-            intervalArray = intervals as I[] ?? intervals.ToArray();
+            _intervalArray = intervals as I[] ?? intervals.ToArray();
 
             // Stop if we have no intervals
-            if ((_count = intervalArray.Length) == 0)
+            if ((_count = _intervalArray.Length) == 0)
                 return;
 
-            constructLayers(ref intervalArray, out _intervals, out _pointers, out _layerCount, out _firstLayerCount);
+            constructLayers(ref _intervalArray, out _intervals, out _pointers, out _layerCount, out _firstLayerCount);
 
             // Cached values
             _span = new IntervalBase<T>(_intervals[0], _intervals[_firstLayerCount - 1]);
@@ -171,7 +171,7 @@ namespace C5.Intervals
         private void constructLayers(ref I[] intervalArray, out I[] intervals, out int[] pointers, out int layerCount, out int firstLayerCount)
         {
             // Sort intervals
-            Sorting.Timsort(this.intervalArray, IntervalExtensions.CreateComparer<I, T>());
+            Sorting.Timsort(intervalArray, IntervalExtensions.CreateComparer<I, T>());
 
             // Pointer is used to store the layers length
             var layers = new ArrayList<Node> {
@@ -282,7 +282,7 @@ namespace C5.Intervals
                     // Back up to previous value
                     lower = lower - (jump >> 1) + 1;
 
-                    return gallopBinaryLayerSearch(layers, query, lower, upper);
+                    return binaryLayerSearch(layers, query, lower, upper);
                 }
 
                 // Jump
@@ -293,7 +293,7 @@ namespace C5.Intervals
             }
         }
 
-        private static int gallopBinaryLayerSearch(ArrayList<Node> layers, I query, int lower, int upper)
+        private static int binaryLayerSearch(ArrayList<Node> layers, I query, int lower, int upper)
         {
             while (lower < upper)
             {
@@ -312,44 +312,6 @@ namespace C5.Intervals
                 else
                     return current;
             }
-
-            return lower;
-        }
-
-        private static int binaryLayerSearch(ArrayList<Node> layers, I interval, int current)
-        {
-            Contract.Requires(layers != null);
-            Contract.Requires(interval != null);
-            Contract.Requires(layers.Last.Interval == null);
-            // The high endpoints of the last interval in each layer is sorted
-            Contract.Requires(Contract.ForAll(1, layers.Count - 1, l => layers[l].Interval.CompareHigh(layers[l - 1].Interval) < 0));
-            // Result is non-negative and less than layer count
-            Contract.Ensures(0 <= Contract.Result<int>() && Contract.Result<int>() < layers.Count);
-            // The last interval in the layer has a high less than or equal to interval's high
-            Contract.Ensures(layers[Contract.Result<int>()].Interval == null || layers[Contract.Result<int>()].Interval.CompareHigh(interval) <= 0);
-            // The last interval in the layer below has a high greater than interval's high
-            Contract.Ensures(Contract.Result<int>() == 0 || layers[Contract.Result<int>() - 1].Interval.CompareHigh(interval) > 0);
-
-            var lower = 0;
-            var upper = layers.Count - 1;
-
-            do
-            {
-                var compare = layers[current].Interval.CompareHigh(interval);
-
-                // interval contains the last interval
-                if (compare < 0)
-                    upper = current;
-                // The last interval contains interval
-                else if (compare > 0)
-                    lower = current + 1;
-                // We have found an interval with the same high
-                else
-                    return current;
-
-                // Binarily pick the next layer to check
-                current = lower + (upper - lower >> 1);
-            } while (lower < upper);
 
             return lower;
         }
@@ -528,7 +490,8 @@ namespace C5.Intervals
         public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
 
         /// <inheritdoc/>
-        public IEnumerable<I> Sorted { get { return intervalArray; } }
+        // TODO: Return immutable copy
+        public IEnumerable<I> Sorted { get { return _intervalArray; } }
 
         #endregion
 
@@ -573,7 +536,6 @@ namespace C5.Intervals
             }
         }
 
-        // TODO: Decide on using either start/end or lower/upper.
         protected virtual int FindFirst(IInterval<T> query, int lower, int upper)
         {
             Contract.Requires(query != null);
@@ -645,101 +607,6 @@ namespace C5.Intervals
 
             return max;
         }
-
-        #region Sorted
-
-
-        // TODO: Solve the sorted enumeration problem!
-        /// <summary>
-        /// Create an enumerable, enumerating all intervals in the collection that overlap the query point in sorted order.
-        /// </summary>
-        /// <param name="query">The query point.</param>
-        /// <returns>All intervals that overlap the query point.</returns>
-        public IEnumerable<I> FindOverlapsSorted(T query)
-        {
-            Contract.Requires(query != null);
-
-            var queryInterval = new IntervalBase<T>(query);
-
-            // No overlap if collection is empty or query doesn't overlap collection
-            if (IsEmpty || !queryInterval.Overlaps(Span))
-                return Enumerable.Empty<I>();
-
-            return findOverlapsSorted(queryInterval);
-        }
-
-        /// <summary>
-        /// Create an enumerable, enumerating all intervals in the collection that overlap the query interval in sorted order.
-        /// </summary>
-        /// <param name="query">The query interval.</param>
-        /// <returns>All intervals that overlap the query interval.</returns>
-        public IEnumerable<I> FindOverlapsSorted(IInterval<T> query)
-        {
-            Contract.Requires(query != null);
-
-            // No overlap if collection is empty or query doesn't overlap collection
-            if (IsEmpty || !query.Overlaps(Span))
-                return Enumerable.Empty<I>();
-
-            return findOverlapsSorted(query);
-        }
-
-        private IEnumerable<I> findOverlapsSorted(IInterval<T> query)
-        {
-            // TODO: Fix! See Sorted enumerator
-
-            // Create our own stack to avoid stack overflow and to speed up the enumerator
-            var stack = new int[_layerCount << 1];
-            var i = 0;
-
-            // Keeps track of the index of the first overlap in each layer
-            var firstOverlaps = new int[_layerCount];
-            for (var l = 0; l < _layerCount; l++)
-                firstOverlaps[l] = -1;
-
-            // We stack both values consecutively instead of stacking pairs
-            stack[i++] = 0;
-            stack[i++] = _firstLayerCount;
-
-            // Continue as long as we still have values on the stack
-            while (i > 0)
-            {
-                // Get start and end from stack
-                var end = stack[--i];
-                var start = stack[--i];
-                var layer = i >> 1;
-
-                if (firstOverlaps[layer] < 0)
-                    firstOverlaps[layer] = FindFirst(query, start, end);
-
-                if (firstOverlaps[layer] >= end)
-                    continue;
-                if (start < firstOverlaps[layer])
-                    start = firstOverlaps[layer];
-
-                // Iterate through all overlaps
-                while (start < end && _intervals[start].CompareLowHigh(query) <= 0)
-                {
-                    yield return _intervals[start];
-
-                    // If this and the next interval point to different intervals in the next layer, we need to swap layer
-                    if (_pointers[start] < _pointers[start + 1])
-                    {
-                        // Push the current values
-                        stack[i++] = start + 1;
-                        stack[i++] = end;
-                        // Push the values for the next layer
-                        stack[i++] = _pointers[start];
-                        stack[i++] = _pointers[start + 1];
-                        break;
-                    }
-
-                    start++;
-                }
-            }
-        }
-
-        #endregion
 
         #endregion
 
