@@ -162,8 +162,7 @@
     <Compile Include="Collections\IntervalCollectionFactory.cs" />
     <Compile Include="Collections\Static\BinaryIntervalSearch.cs" />
     <Compile Include="Collections\Static\LayeredContainmentListNewSplitSorted.cs" />
-    <Compile Include="Collections\Static\LayeredContainmentListNewSplitGallop.cs" />
-    <Compile Include="Collections\Static\LayeredContainmentListNewSplit.cs" />
+    <Compile Include="Collections\Static\LayeredContainmentListGallop.cs" />
     <Compile Include="Collections\Static\LayeredContainmentList.cs" />
     <Compile Include="Collections\Static\NestedContainmentList.cs" />
     <Compile Include="Collections\Static\NestedContainmentList2.cs" />

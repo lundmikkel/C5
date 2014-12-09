@@ -11,11 +11,11 @@ namespace C5.Intervals
     /// </summary>
     /// <typeparam name="I">The interval type.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
-    public class LayeredContainmentListNewSplitGallop<I, T> : LayeredContainmentListNewSplit<I, T>
+    public class LayeredContainmentListGallop<I, T> : LayeredContainmentList<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
-        public LayeredContainmentListNewSplitGallop(IEnumerable<I> intervals)
+        public LayeredContainmentListGallop(IEnumerable<I> intervals)
             : base(intervals)
         {
         }
@@ -44,7 +44,7 @@ namespace C5.Intervals
 
             while (true)
             {
-                var compare = query.Low.CompareTo(_intervals[lower].High);
+                var compare = query.CompareLowHigh(_intervals[lower]);
 
                 var next = lower + jump;
 

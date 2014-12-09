@@ -13,7 +13,7 @@ namespace C5.Intervals.Tests
         {
             protected override Type GetCollectionType()
             {
-                return typeof(LayeredContainmentListNewSplitGallop<,>);
+                return typeof(LayeredContainmentListGallop<,>);
             }
 
             protected override Speed CountSpeed()
@@ -67,37 +67,37 @@ namespace C5.Intervals.Tests
             [Test]
             public void Constructor_Empty()
             {
-                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()));
+                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentListGallop<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()));
             }
 
             [Test]
             public void Constructor_OneInterval()
             {
-                CollectionAssert.AreEquivalent(dataSetA, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetA));
+                CollectionAssert.AreEquivalent(dataSetA, new LayeredContainmentListGallop<IInterval<int>, int>(dataSetA));
             }
 
             [Test]
             public void Constructor_MoreThanOneIntervalAndOneContainmentLayer()
             {
-                CollectionAssert.AreEquivalent(dataSetB, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetB));
+                CollectionAssert.AreEquivalent(dataSetB, new LayeredContainmentListGallop<IInterval<int>, int>(dataSetB));
             }
 
             [Test]
             public void Constructor_MoreThanOneIntervalAndTwoContainmentLayers()
             {
-                CollectionAssert.AreEquivalent(dataSetC, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetC));
+                CollectionAssert.AreEquivalent(dataSetC, new LayeredContainmentListGallop<IInterval<int>, int>(dataSetC));
             }
 
             [Test]
             public void Constructor_MoreThanOneIntervalAndMoreThanTwoContainmentLayers()
             {
-                CollectionAssert.AreEquivalent(dataSetD, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetD));
+                CollectionAssert.AreEquivalent(dataSetD, new LayeredContainmentListGallop<IInterval<int>, int>(dataSetD));
             }
 
             [Test]
             public void Constructor_ThreeContainments()
             {
-                var moreThanOne = new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[]
+                var moreThanOne = new LayeredContainmentListGallop<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(1, 7, true, true),
                         new IntervalBase<int>(2, 6, true, true),
@@ -128,7 +128,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_Empty()
             {
-                Assert.AreEqual(0, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).
+                Assert.AreEqual(0, new LayeredContainmentListGallop<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).
                     CountOverlaps(new IntervalBase<int>(2, 7, true, true)));
             }
 
@@ -141,21 +141,21 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_OneInterval()
             {
-                Assert.AreEqual(1, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetA).
+                Assert.AreEqual(1, new LayeredContainmentListGallop<IInterval<int>, int>(dataSetA).
                     CountOverlaps(new IntervalBase<int>(2, 7, true, true)));
             }
 
             [Test]
             public void CountOverlap_OneInterval2()
             {
-                Assert.AreEqual(1, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[] { new IntervalBase<int>(2, 7, false, true) }).
+                Assert.AreEqual(1, new LayeredContainmentListGallop<IInterval<int>, int>(new[] { new IntervalBase<int>(2, 7, false, true) }).
                     CountOverlaps(new IntervalBase<int>(2, 7, true, true)));
             }
 
             [Test]
             public void CountOverlap_MoreIntervals3()
             {
-                Assert.AreEqual(1, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentListGallop<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, true),
                         new IntervalBase<int>(1, 6, true, true),
@@ -167,7 +167,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_MoreIntervals4()
             {
-                Assert.AreEqual(1, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentListGallop<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, false, true),
                         new IntervalBase<int>(0, 6, true, true),
@@ -179,7 +179,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_MoreIntervals5()
             {
-                Assert.AreEqual(1, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentListGallop<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, false, true),
                         new IntervalBase<int>(0, 6, true, true),
@@ -191,7 +191,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_MoreIntervals6()
             {
-                Assert.AreEqual(1, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentListGallop<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, true),
                         new IntervalBase<int>(0, 6, true, true),
@@ -203,7 +203,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_MoreIntervals61()
             {
-                Assert.AreEqual(1, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentListGallop<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, false, true),
                         new IntervalBase<int>(0, 6, true, true),
@@ -215,7 +215,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_MoreIntervals7()
             {
-                Assert.AreEqual(1, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentListGallop<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, false, true),
                         new IntervalBase<int>(0, 6, true, true),
@@ -227,7 +227,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_MoreIntervals8()
             {
-                Assert.AreEqual(1, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentListGallop<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, true),
                         new IntervalBase<int>(0, 6, true, true),
@@ -241,7 +241,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_MoreIntervals9()
             {
-                Assert.AreEqual(1, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentListGallop<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, true),
                         new IntervalBase<int>(1, 6, true, true),
@@ -253,7 +253,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_MoreIntervals10()
             {
-                Assert.AreEqual(0, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[]
+                Assert.AreEqual(0, new LayeredContainmentListGallop<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7),
                         new IntervalBase<int>(1, 6, true, true),
@@ -265,7 +265,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_MoreIntervals11()
             {
-                Assert.AreEqual(0, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[]
+                Assert.AreEqual(0, new LayeredContainmentListGallop<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, true),
                         new IntervalBase<int>(1, 6, true, true),
@@ -277,7 +277,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_MoreIntervals12()
             {
-                Assert.AreEqual(0, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[]
+                Assert.AreEqual(0, new LayeredContainmentListGallop<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7),
                         new IntervalBase<int>(1, 6, true, true),
@@ -289,7 +289,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_MoreIntervals13()
             {
-                Assert.AreEqual(0, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[]
+                Assert.AreEqual(0, new LayeredContainmentListGallop<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7),
                         new IntervalBase<int>(1, 6, true, true),
@@ -301,7 +301,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_MoreIntervals14()
             {
-                Assert.AreEqual(0, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[]
+                Assert.AreEqual(0, new LayeredContainmentListGallop<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7),
                         new IntervalBase<int>(1, 6, true, true),
@@ -313,7 +313,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_MoreIntervals15()
             {
-                Assert.AreEqual(0, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[]
+                Assert.AreEqual(0, new LayeredContainmentListGallop<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, true),
                         new IntervalBase<int>(1, 6, true, true),
@@ -325,7 +325,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_MoreIntervals16()
             {
-                Assert.AreEqual(0, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[]
+                Assert.AreEqual(0, new LayeredContainmentListGallop<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, true),
                         new IntervalBase<int>(1, 6, true, true),
@@ -337,7 +337,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_MoreIntervals17()
             {
-                Assert.AreEqual(1, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentListGallop<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, true),
                         new IntervalBase<int>(1, 5, true, true),
@@ -349,7 +349,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_MoreIntervals18()
             {
-                Assert.AreEqual(1, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(new[]
+                Assert.AreEqual(1, new LayeredContainmentListGallop<IInterval<int>, int>(new[]
                     {
                         new IntervalBase<int>(2, 7, true, true),
                         new IntervalBase<int>(1, 5, true, true),
@@ -363,28 +363,28 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountOverlap_MoreThanOneInterval()
             {
-                Assert.AreEqual(5, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetD).
+                Assert.AreEqual(5, new LayeredContainmentListGallop<IInterval<int>, int>(dataSetD).
                     CountOverlaps(new IntervalBase<int>(6, 9, true, true)));
             }
 
             [Test]
             public void CountOverlap_ContainmentQueryHits()
             {
-                Assert.AreEqual(3, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetF).
+                Assert.AreEqual(3, new LayeredContainmentListGallop<IInterval<int>, int>(dataSetF).
                     CountOverlaps(new IntervalBase<int>(6, 7, true, true)));
             }
 
             [Test]
             public void CountOverlap_MoreThanOneIntervalQueryBefore()
             {
-                Assert.AreEqual(0, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetE).
+                Assert.AreEqual(0, new LayeredContainmentListGallop<IInterval<int>, int>(dataSetE).
                     CountOverlaps(new IntervalBase<int>(1, 2, true, true)));
             }
 
             [Test]
             public void CountOverlap_MoreThanOneIntervalQueryAfter()
             {
-                Assert.AreEqual(0, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetE).
+                Assert.AreEqual(0, new LayeredContainmentListGallop<IInterval<int>, int>(dataSetE).
                     CountOverlaps(new IntervalBase<int>(21, 23, true, true)));
             }
 
@@ -395,37 +395,37 @@ namespace C5.Intervals.Tests
             [Test]
             public void FindOverlapsStabbing_QueryZeroIntervals()
             {
-                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).FindOverlaps(2));
+                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentListGallop<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).FindOverlaps(2));
             }
 
             [Test]
             public void FindOverlapsRange_QueryZeroIntervals()
             {
-                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).FindOverlaps(new IntervalBase<int>(21, 23, true, true)));
+                CollectionAssert.AreEquivalent(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentListGallop<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).FindOverlaps(new IntervalBase<int>(21, 23, true, true)));
             }
 
             [Test]
             public void FindOverlapsStabbing_QueryPointOneOrMoreIntervals()
             {
-                CollectionAssert.AreEquivalent(new[] { A }, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetB).FindOverlaps(2));
+                CollectionAssert.AreEquivalent(new[] { A }, new LayeredContainmentListGallop<IInterval<int>, int>(dataSetB).FindOverlaps(2));
             }
 
             [Test]
             public void FindOverlaps_MoreThanOneIntervalQueryAfter()
             {
-                Assert.AreEqual(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetE).FindOverlaps(new IntervalBase<int>(21, 23, true, true)));
+                Assert.AreEqual(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentListGallop<IInterval<int>, int>(dataSetE).FindOverlaps(new IntervalBase<int>(21, 23, true, true)));
             }
 
             [Test]
             public void FindOverlaps_ContainmentQueryHits()
             {
-                Assert.AreEqual(3, new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetF).FindOverlaps(new IntervalBase<int>(6, 7, true, true)).Count());
+                Assert.AreEqual(3, new LayeredContainmentListGallop<IInterval<int>, int>(dataSetF).FindOverlaps(new IntervalBase<int>(6, 7, true, true)).Count());
             }
 
             [Test]
             public void FindOverlaps_MoreThanOneIntervalQueryBefore()
             {
-                Assert.AreEqual(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetE).FindOverlaps(new IntervalBase<int>(1, 2, true, true)));
+                Assert.AreEqual(Enumerable.Empty<IInterval<int>>(), new LayeredContainmentListGallop<IInterval<int>, int>(dataSetE).FindOverlaps(new IntervalBase<int>(1, 2, true, true)));
             }
 
             #endregion
@@ -436,7 +436,7 @@ namespace C5.Intervals.Tests
             public void Enumerator_Empty()
             {
                 var result = new ArrayList<IInterval<int>>();
-                var list = new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>());
+                var list = new LayeredContainmentListGallop<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>());
                 var enumerator = list.GetEnumerator();
 
                 while (enumerator.MoveNext())
@@ -451,7 +451,7 @@ namespace C5.Intervals.Tests
             public void Enumerator_OneInterval()
             {
                 var result = new ArrayList<IInterval<int>>();
-                var list = new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetA);
+                var list = new LayeredContainmentListGallop<IInterval<int>, int>(dataSetA);
                 var enumerator = list.GetEnumerator();
 
                 while (enumerator.MoveNext())
@@ -466,7 +466,7 @@ namespace C5.Intervals.Tests
             public void Enumerator_MoreContainments()
             {
                 var result = new ArrayList<IInterval<int>>();
-                var list = new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetC);
+                var list = new LayeredContainmentListGallop<IInterval<int>, int>(dataSetC);
                 var enumerator = list.GetEnumerator();
 
                 while (enumerator.MoveNext())
@@ -481,7 +481,7 @@ namespace C5.Intervals.Tests
             public void Enumerator_OneContainment()
             {
                 var result = new ArrayList<IInterval<int>>();
-                var list = new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetG);
+                var list = new LayeredContainmentListGallop<IInterval<int>, int>(dataSetG);
                 var enumerator = list.GetEnumerator();
 
                 while (enumerator.MoveNext())
@@ -505,7 +505,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void Span_MoreThanZero()
             {
-                Assert.That(new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetB).Span.Equals(new IntervalBase<int>(1, 20, true, true)));
+                Assert.That(new LayeredContainmentListGallop<IInterval<int>, int>(dataSetB).Span.Equals(new IntervalBase<int>(1, 20, true, true)));
             }
 
             #endregion
@@ -515,26 +515,26 @@ namespace C5.Intervals.Tests
             [Test]
             public void OverlapExists_Empty()
             {
-                Assert.False(new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).
+                Assert.False(new LayeredContainmentListGallop<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).
                     FindOverlap(new IntervalBase<int>(4, 5, true, true), out _overlap));
             }
 
             [Test]
             public void OverlapExists_QueryOutOfSpan()
             {
-                Assert.False(new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetB).FindOverlap(new IntervalBase<int>(21, 23, true, true), out _overlap));
+                Assert.False(new LayeredContainmentListGallop<IInterval<int>, int>(dataSetB).FindOverlap(new IntervalBase<int>(21, 23, true, true), out _overlap));
             }
 
             [Test]
             public void OverlapExists_Hit()
             {
-                Assert.True(new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetB).FindOverlap(new IntervalBase<int>(4, 5, true, true), out _overlap));
+                Assert.True(new LayeredContainmentListGallop<IInterval<int>, int>(dataSetB).FindOverlap(new IntervalBase<int>(4, 5, true, true), out _overlap));
             }
 
             [Test]
             public void OverlapExists_NoHit()
             {
-                Assert.False(new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetE).FindOverlap(new IntervalBase<int>(9, 11, true, true), out _overlap));
+                Assert.False(new LayeredContainmentListGallop<IInterval<int>, int>(dataSetE).FindOverlap(new IntervalBase<int>(9, 11, true, true), out _overlap));
             }
 
             #endregion
@@ -542,33 +542,33 @@ namespace C5.Intervals.Tests
             [Test]
             public void CountSpeed_NotEmpty()
             {
-                Assert.That(new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetA).CountSpeed.Equals(Speed.Constant));
+                Assert.That(new LayeredContainmentListGallop<IInterval<int>, int>(dataSetA).CountSpeed.Equals(Speed.Constant));
             }
 
             [Test]
             public void Choose_Empty()
             {
                 Assert.Throws<NoSuchItemException>(() =>
-                { new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).Choose(); });
+                { new LayeredContainmentListGallop<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>()).Choose(); });
             }
 
             [Test]
             public void Choose_NotEmpty()
             {
-                Assert.NotNull(new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetA).Choose());
+                Assert.NotNull(new LayeredContainmentListGallop<IInterval<int>, int>(dataSetA).Choose());
             }
 
             [Test]
             public void ToString_Null()
             {
-                var list = new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>());
+                var list = new LayeredContainmentListGallop<IInterval<int>, int>(Enumerable.Empty<IInterval<int>>());
                 Assert.AreEqual("{  }", list.ToString());
             }
 
             [Test]
             public void ToString_NotNull()
             {
-                var list = new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(dataSetA);
+                var list = new LayeredContainmentListGallop<IInterval<int>, int>(dataSetA);
                 Assert.AreEqual("{ [2:7] }", list.ToString());
             }
 
@@ -593,7 +593,7 @@ namespace C5.Intervals.Tests
                     new IntervalBase<int>(4, 5),
                 };
 
-                var collection = new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(intervals);
+                var collection = new LayeredContainmentListGallop<IInterval<int>, int>(intervals);
 
                 intervals = new[]
                 {
@@ -604,7 +604,7 @@ namespace C5.Intervals.Tests
                     new IntervalBase<int>(4, 5),
                 };
 
-                collection = new LayeredContainmentListNewSplitGallop<IInterval<int>, int>(intervals);
+                collection = new LayeredContainmentListGallop<IInterval<int>, int>(intervals);
 
                 //TODO: Expand beyond simple construction?
             }

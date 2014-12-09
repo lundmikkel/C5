@@ -1281,6 +1281,14 @@ namespace C5.Intervals.Tests
 
         [Test]
         [Category("Find Overlaps Stabbing")]
+        public void FindOverlapsStabbing_SingleObject_CountOrSingleOverlap_FixedSeed()
+        {
+            updateRandom(32236203);
+            FindOverlapsStabbing_SingleObject_CountOrSingleOverlap();
+        }
+
+        [Test]
+        [Category("Find Overlaps Stabbing")]
         public void FindOverlapsStabbing_SingleObject_CountOrSingleOverlap()
         {
             var intervals = SingleObject();
