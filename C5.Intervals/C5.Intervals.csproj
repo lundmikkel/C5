@@ -164,7 +164,6 @@
     <Compile Include="Collections\Static\LayeredContainmentListNewSplitSorted.cs" />
     <Compile Include="Collections\Static\LayeredContainmentListNewSplitGallop.cs" />
     <Compile Include="Collections\Static\LayeredContainmentListNewSplit.cs" />
-    <Compile Include="Collections\Static\LayeredContainmentListNew.cs" />
     <Compile Include="Collections\Static\LayeredContainmentList.cs" />
     <Compile Include="Collections\Static\NestedContainmentList.cs" />
     <Compile Include="Collections\Static\NestedContainmentList2.cs" />

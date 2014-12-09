@@ -109,7 +109,6 @@
     <Compile Include="Collections\Static\LayeredContainmentListNewSplitGallopTester.cs" />
     <Compile Include="Collections\Static\LayeredContainmentListNewSplitSortedTester.cs" />
     <Compile Include="Collections\Static\LayeredContainmentListNewSplitTester.cs" />
-    <Compile Include="Collections\Static\LayeredContainmentListNewTester.cs" />
     <Compile Include="Collections\Static\NestedContainmentListArticleTester.cs" />
     <Compile Include="Collections\Static\NestedContainmentListTester.cs" />
     <Compile Include="Extensions\IntervalExtensionTester.cs" />
