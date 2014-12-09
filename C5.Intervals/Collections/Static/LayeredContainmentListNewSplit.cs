@@ -164,10 +164,8 @@ namespace C5.Intervals
 
             constructLayers(ref intervalArray, out _intervals, out _pointers, out _layerCount, out _firstLayerCount);
 
-            // Cache span value
+            // Cached values
             _span = new IntervalBase<T>(_intervals[0], _intervals[_firstLayerCount - 1]);
-
-            return;
         }
 
         private void constructLayers(ref I[] intervalArray, out I[] intervals, out int[] pointers, out int layerCount, out int firstLayerCount)
@@ -559,7 +557,7 @@ namespace C5.Intervals
                     first = FindFirst(query, ++first, upper);
 
                     // If index is out of bound, or found interval doesn't overlap, then the list won't contain any overlaps
-                    if (upper <= first || !_intervals[first].Overlaps(query))
+                    if (upper <= first || !(_intervals[first].CompareLowHigh(query) <= 0))
                         yield break;
                 }
 
@@ -797,30 +795,28 @@ namespace C5.Intervals
             if (IsEmpty)
                 return 0;
 
-            int lower = 0, upper = _firstLayerCount, count = 0;
+            int first = 0, last = _firstLayerCount, count = 0;
 
-            while (lower < upper)
+            while (first < last)
             {
                 // The first interval doesn't overlap we need to search for it
-                // TODO: Can we tighten the check here? Like i.low < q.high...
-                if (!_intervals[lower].Overlaps(query))
+                if (!_intervals[first].Overlaps(query))
                 {
                     // We know first doesn't overlap so we can increment it before searching
-                    lower = FindFirst(query, ++lower, upper);
+                    first = FindFirst(query, ++first, last);
 
                     // If index is out of bound, or found interval doesn't overlap, then the layer won't contain any overlaps
-                    // TODO: Can we tighten the check here? Like i.low < q.high...
-                    if (upper <= lower || !_intervals[lower].Overlaps(query))
+                    if (last <= first || !(_intervals[first].CompareLowHigh(query) <= 0))
                         return count;
                 }
 
                 // We can use first as lower to speed up the search
-                upper = findLast(query, lower, upper);
+                last = findLast(query, first, last);
 
-                count += upper - lower;
+                count += last - first;
 
-                lower = _pointers[lower];
-                upper = _pointers[upper];
+                first = _pointers[first];
+                last = _pointers[last];
             }
 
             return count;
