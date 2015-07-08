@@ -246,6 +246,9 @@ namespace C5.Intervals
         public bool AllowsOverlaps { get { return true; } }
 
         /// <inheritdoc/>
+        public bool AllowsContainments { get { return true; } }
+
+        /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get { return true; } }
 
         #endregion

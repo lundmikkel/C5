@@ -366,6 +366,10 @@ namespace C5.Intervals
 
         // TODO: Support user setting the value
         /// <inheritdoc/>
+        public bool AllowsContainments { get { return true; } }
+
+        // TODO: Support user setting the value
+        /// <inheritdoc/>
         public bool AllowsReferenceDuplicates { get { return true; } }
 
         #endregion

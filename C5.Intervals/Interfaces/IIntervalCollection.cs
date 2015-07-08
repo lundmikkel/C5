@@ -23,18 +23,36 @@ namespace C5.Intervals
         #region Data Structure Properties
 
         /// <summary>
-        /// Indicates if the collection supports overlapping intervals. If a collection supports
-        /// overlaps, it must also support interval duplicate objects - that is other objects
-        /// with the same endpoints and inclusions.
+        /// Indicates if the collection can contain intervals that overlap eachother.
         /// </summary>
         /// <value>True if this collection allows overlapping intervals.</value>
         [Pure]
         bool AllowsOverlaps { get; }
 
         /// <summary>
-        /// Indicates if the collection supports object duplicates based on reference equality.
+        /// Indicates if the collection can contain intervals, where one contains another.
+        /// 
+        /// An interval contained in another interval breaks the high (low) endpoint ordering,
+        /// if a collection is sorted on low (high) endpoints. Collections disallowing
+        /// containments can normally be optimized more than collections that allow them,
+        /// giving much welcomed speed improvements in cases where containments are non-exisiting,
+        /// i.e. when all intervals have equal length.
+        /// 
+        /// If a collection supports containments, it must also support overlaps;
+        /// contained intervals must overlap the intervals they are contained in.
+        /// </summary>
+        /// <value>True if this collection allows contained intervals.</value>
+        [Pure]
+        bool AllowsContainments { get; }
+
+        /// <summary>
+        /// Indicates if the collection can contain reference equal objects.
+        /// 
+        /// If a collection supports reference equal objects, it must also support overlaps;
+        /// duplicates have the same endpoints and inclusions and therefore must overlap.
         /// </summary>
         /// <value>True if this collection allows reference duplicates.</value>
+        [Pure]
         bool AllowsReferenceDuplicates { get; }
 
         #endregion
@@ -261,12 +279,22 @@ namespace C5.Intervals
         #region Data Structure Properties
 
         public abstract bool AllowsOverlaps { get; }
+        public bool AllowsContainments
+        {
+            get
+            {
+                // If the collection supports containments is must support overlaps
+                Contract.Ensures(!Contract.Result<bool>() || AllowsOverlaps);
+
+                throw new NotImplementedException();
+            }
+        }
 
         public bool AllowsReferenceDuplicates
         {
             get
             {
-                // If the collection doesn't support overlaps it can't support reference duplicates either
+                // If the collection supports reference duplicates is must support overlaps
                 Contract.Ensures(!Contract.Result<bool>() || AllowsOverlaps);
 
                 throw new NotImplementedException();
