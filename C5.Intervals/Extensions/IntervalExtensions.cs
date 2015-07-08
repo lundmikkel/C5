@@ -314,6 +314,40 @@ namespace C5.Intervals
         }
 
         /// <summary>
+        /// Check if two intervals have equal low endpoints, i.e. have the same low endpoint value and inclusion.
+        /// </summary>
+        /// <param name="x">First interval.</param>
+        /// <param name="y">Second interval.</param>
+        /// <returns>True if both interval's low endpoints are equal.</returns>
+        [Pure]
+        public static bool LowEquals<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            Contract.Ensures(Contract.Result<bool>() == (CompareLow(x, y) == 0 && x.LowIncluded == y.LowIncluded));
+
+            // TODO: Test
+            return x.Low.CompareTo(y.Low) == 0 && x.LowIncluded == y.LowIncluded;
+        }
+
+        /// <summary>
+        /// Check if two intervals have equal high endpoints, i.e. have the same high endpoint value and inclusion.
+        /// </summary>
+        /// <param name="x">First interval.</param>
+        /// <param name="y">Second interval.</param>
+        /// <returns>True if both interval's high endpoints are equal.</returns>
+        [Pure]
+        public static bool HighEquals<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        {
+            Contract.Requires(x != null);
+            Contract.Requires(y != null);
+            Contract.Ensures(Contract.Result<bool>() == (CompareHigh(x, y) == 0 && x.HighIncluded == y.HighIncluded));
+
+            // TODO: Test
+            return x.High.CompareTo(y.High) == 0 && x.HighIncluded == y.HighIncluded;
+        }
+
+        /// <summary>
         /// Get the interval in which two intervals overlap.
         /// </summary>
         /// <param name="x">First interval.</param>
