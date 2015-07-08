@@ -33,8 +33,11 @@ namespace C5.Intervals
             if (first < lower || upper <= first || !_intervals[first].Overlaps(query))
                 yield break;
 
+            //*
             var last = findLastForwardsGallop(query, first, upper);
-
+            /*/
+            var last = findLast(query, first, upper);
+            //*/
             while (first < last)
             {
                 lower = _pointers[first];
@@ -43,11 +46,19 @@ namespace C5.Intervals
                 while (first < last)
                     yield return _intervals[first++];
 
+                //*
                 first = findFirstGallop(query, lower, upper);
+                /*/
+                first = findFirst(query, lower, upper);
+                //*/
                 if (first < lower || upper <= first || !_intervals[first].Overlaps(query))
                     yield break;
 
+                /*
                 last = findLastBackwardsGallop(query, first, upper);
+                /*/
+                last = findLast(query, first, upper);
+                //*/
             }
         }
 
@@ -67,6 +78,7 @@ namespace C5.Intervals
                 Contract.ForAll(lower, upper, i => !_intervals[i].Overlaps(query)) ||
                 _intervals[Contract.Result<int>()].Overlaps(query) && Contract.ForAll(lower, Contract.Result<int>(), i => !_intervals[i].Overlaps(query))
             );
+            Contract.Ensures(Contract.Result<int>() == findFirst(query, lower, upper));
 
             var jump = 1;
 
@@ -115,6 +127,7 @@ namespace C5.Intervals
                 Contract.ForAll(lower, upper, i => !_intervals[i].Overlaps(query)) ||
                 _intervals[Contract.Result<int>() - 1].Overlaps(query) && Contract.ForAll(Contract.Result<int>(), upper, i => !_intervals[i].Overlaps(query))
             );
+            Contract.Ensures(Contract.Result<int>() == findLast(query, lower, upper));
 
             var jump = 1;
 
@@ -163,6 +176,7 @@ namespace C5.Intervals
                 Contract.ForAll(lower, upper, i => !_intervals[i].Overlaps(query)) ||
                 _intervals[Contract.Result<int>() - 1].Overlaps(query) && Contract.ForAll(Contract.Result<int>(), upper, i => !_intervals[i].Overlaps(query))
             );
+            Contract.Ensures(Contract.Result<int>() == findLast(query, lower, upper));
 
             var jump = 1;
 
