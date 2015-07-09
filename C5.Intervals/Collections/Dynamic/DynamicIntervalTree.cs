@@ -13,7 +13,7 @@ namespace C5.Intervals
     /// <remarks>It is important to implement a proper hashing method for <see cref="I"/> not based on endpoints. Failing to do so will result in worse runtimes for interval duplicate objects.</remarks>
     /// <typeparam name="I">The interval type.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
-    public class DynamicIntervalTree<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
+    public class DynamicIntervalTree<I, T> : IntervalCollectionBase<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
@@ -21,6 +21,7 @@ namespace C5.Intervals
 
         private Node _root;
         private int _count;
+        private readonly bool _allowsReferenceDuplicates;
 
         // Comparer for IntervalList (sorting on high in non-ascending order)
         private static readonly IComparer<IInterval<T>> Comparer = ComparerFactory<IInterval<T>>.CreateComparer((x, y) => y.CompareHigh(x));
@@ -621,7 +622,7 @@ namespace C5.Intervals
             [ContractInvariantMethod]
             private void invariant()
             {
-                Contract.Invariant(Key != null);
+                Contract.Invariant(!ReferenceEquals(Key, null));
 
                 // The interval lists are either null or non-empty
                 Contract.Invariant(IncludedList == null || !IncludedList.IsEmpty);
@@ -670,7 +671,7 @@ namespace C5.Intervals
             public Node(I interval)
             {
                 Contract.Requires(interval != null);
-                Contract.Ensures(Key != null);
+                Contract.Ensures(!ReferenceEquals(Key, null));
                 Contract.Ensures(!LocalSpan.IsEmpty);
                 Contract.Ensures(!Span.IsEmpty);
                 Contract.Ensures(Key.Equals(interval.Low));
@@ -929,7 +930,7 @@ namespace C5.Intervals
                 Contract.Requires(successor != null);
                 Contract.Requires(LocalSpan.IsEmpty && IncludedList == null && ExcludedList == null);
 
-                Contract.Ensures(Key != null);
+                Contract.Ensures(!ReferenceEquals(Key, null));
                 // Ensures the successor is deletable
                 Contract.Ensures(successor.IsEmpty);
 
@@ -1188,7 +1189,7 @@ namespace C5.Intervals
         public DynamicIntervalTree(bool allowReferenceDuplicates = false)
         {
             // Set reference duplicate behavior
-            AllowsReferenceDuplicates = allowReferenceDuplicates;
+            _allowsReferenceDuplicates = allowReferenceDuplicates;
         }
 
         /// <summary>
@@ -1205,12 +1206,13 @@ namespace C5.Intervals
         /// Construct an empty Dynamic Interval Tree that does not allow reference duplicates.
         /// </summary>
         /// <param name="intervals">A collection of intervals.</param>
+        /// <param name="allowReferenceDuplicates">True if collection should allow reference equal intervals.</param>
         public DynamicIntervalTree(IEnumerable<I> intervals, bool allowReferenceDuplicates = false)
         {
             Contract.Requires(intervals != null);
 
             // Set reference duplicate behavior
-            AllowsReferenceDuplicates = allowReferenceDuplicates;
+            _allowsReferenceDuplicates = allowReferenceDuplicates;
 
             // TODO: Pre-build the tree structure
 
@@ -1228,8 +1230,9 @@ namespace C5.Intervals
         {
             get
             {
+                Contract.Ensures(Contract.Result<bool>() == (_count == 0));
                 Contract.Ensures(Contract.Result<bool>() == (_root == null));
-                return _root == null;
+                return _count == 0;
             }
         }
 
@@ -1267,20 +1270,6 @@ namespace C5.Intervals
 
         #endregion
 
-        #region Events
-
-        /// <inheritdoc/>
-        public override EventTypeEnum ListenableEvents { get { return EventTypeEnum.Basic; } }
-        //public EventTypeEnum ActiveEvents { get; private set; }
-        //public event CollectionChangedHandler<T> CollectionChanged;
-        //public event CollectionClearedHandler<T> CollectionCleared;
-        //public event ItemsAddedHandler<T> ItemsAdded;
-        //public event ItemInsertedHandler<T> ItemInserted;
-        //public event ItemsRemovedHandler<T> ItemsRemoved;
-        //public event ItemRemovedAtHandler<T> ItemRemovedAt;
-
-        #endregion
-
         #region Interval Collection
 
         #region Properties
@@ -1288,26 +1277,33 @@ namespace C5.Intervals
         #region Data Structure Properties
 
         /// <inheritdoc/>
-        public bool AllowsOverlaps { get { return true; } }
+        public override bool AllowsOverlaps { get { return true; } }
 
         /// <inheritdoc/>
-        public bool AllowsContainments { get { return true; } }
+        public override bool AllowsContainments { get { return true; } }
 
         /// <inheritdoc/>
-        public bool AllowsReferenceDuplicates { get; private set; }
+        public override bool AllowsReferenceDuplicates { get { return _allowsReferenceDuplicates; } }
+
+        /// <inheritdoc/>
+        public override bool IsReadOnly { get { return false; } }
+
+        /// <inheritdoc/>
+        // TODO: Make sorted
+        public override bool IsFindOverlapsSorted { get { return false; } }
 
         #endregion
 
         #region Collection Properties
 
         /// <inheritdoc/>
-        public IInterval<T> Span { get { return new IntervalBase<T>(_root.Span); } }
+        public override IInterval<T> Span { get { return new IntervalBase<T>(_root.Span); } }
 
         /// <inheritdoc/>
-        public I LowestInterval { get { return lowestList().Choose(); } }
+        public override I LowestInterval { get { return lowestList().Choose(); } }
 
         /// <inheritdoc/>
-        public IEnumerable<I> LowestIntervals { get { return IsEmpty ? Enumerable.Empty<I>() : lowestList(); } }
+        public override IEnumerable<I> LowestIntervals { get { return IsEmpty ? Enumerable.Empty<I>() : lowestList(); } }
 
         private IntervalList lowestList()
         {
@@ -1321,7 +1317,7 @@ namespace C5.Intervals
         }
 
         /// <inheritdoc/>
-        public I HighestInterval
+        public override I HighestInterval
         {
             get
             {
@@ -1367,7 +1363,7 @@ namespace C5.Intervals
             return node.ExcludedList.Highest;
         }
 
-        public IEnumerable<I> HighestIntervals
+        public override IEnumerable<I> HighestIntervals
         {
             get
             {
@@ -1385,7 +1381,7 @@ namespace C5.Intervals
             }
         }
 
-        public int MaximumDepth { get { return IsEmpty ? 0 : _root.Max; } }
+        public override int MaximumDepth { get { return IsEmpty ? 0 : _root.Max; } }
 
         #endregion
 
@@ -1399,7 +1395,7 @@ namespace C5.Intervals
             return Sorted.GetEnumerator();
         }
 
-        public IEnumerable<I> Sorted
+        public override IEnumerable<I> Sorted
         {
             get
             {
@@ -1470,15 +1466,8 @@ namespace C5.Intervals
         #region Find Overlaps
 
         /// <inheritdoc/>
-        public IEnumerable<I> FindOverlaps(T query)
+        public override IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
-            return FindOverlaps(new IntervalBase<T>(query));
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<I> FindOverlaps(IInterval<T> query)
-        {
-            // TODO: Make sorted
             if (IsEmpty)
                 yield break;
 
@@ -1569,73 +1558,22 @@ namespace C5.Intervals
 
         #endregion
 
-        #region Find Overlap
-
-        /// <inheritdoc/>
-        public bool FindOverlap(T query, out I overlap)
-        {
-            bool result;
-
-            using (var enumerator = FindOverlaps(query).GetEnumerator())
-                overlap = (result = enumerator.MoveNext()) ? enumerator.Current : null;
-
-            return result;
-        }
-
-        /// <inheritdoc/>
-        public bool FindOverlap(IInterval<T> query, out I overlap)
-        {
-            bool result;
-
-            using (var enumerator = FindOverlaps(query).GetEnumerator())
-                overlap = (result = enumerator.MoveNext()) ? enumerator.Current : null;
-
-            return result;
-        }
-
-        #endregion
-
-        #region Count Overlaps
-
-        /// <inheritdoc/>
-        public int CountOverlaps(T query)
-        {
-            return FindOverlaps(query).Count();
-        }
-
-        /// <inheritdoc/>
-        public int CountOverlaps(IInterval<T> query)
-        {
-            return FindOverlaps(query).Count();
-        }
-
-        #endregion
-
         #region Gaps
 
         /// <inheritdoc/>}
-        public IEnumerable<IInterval<T>> Gaps
+        public override IEnumerable<IInterval<T>> Gaps
         {
-            get { return sortedNodes(_root).Select(n => n.LocalSpan).Where(x => !x.IsEmpty).Cast<IInterval<T>>().Gaps(); }
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<IInterval<T>> FindGaps(IInterval<T> query)
-        {
-            return FindOverlaps(query).Gaps(query, false);
+            get { return sortedNodes(_root).Select(n => n.LocalSpan).Where(x => !x.IsEmpty).Gaps(); }
         }
 
         #endregion
 
         #region Extensible
 
-        /// <inheritdoc/>
-        public bool IsReadOnly { get { return false; } }
-
         #region Add
 
         /// <inheritdoc/>
-        public bool Add(I interval)
+        public override sealed bool Add(I interval)
         {
             var nodeWasAdded = false;
             var intervalWasAdded = false;
@@ -1653,13 +1591,6 @@ namespace C5.Intervals
             }
 
             return intervalWasAdded;
-        }
-
-        /// <inheritdoc/>
-        public void AddAll(IEnumerable<I> intervals)
-        {
-            foreach (var interval in intervals)
-                Add(interval);
         }
 
         private Node addLow(I interval, Node root, ref bool nodeWasAdded, ref bool intervalWasAdded)
@@ -1760,7 +1691,7 @@ namespace C5.Intervals
         #region Remove
 
         /// <inheritdoc/>
-        public bool Remove(I interval)
+        public override bool Remove(I interval)
         {
             // Nothing to remove is the collection is empty or the interval doesn't overlap the span
             if (IsEmpty || !interval.Overlaps(_root.Span))
@@ -1940,10 +1871,6 @@ namespace C5.Intervals
             return root;
         }
 
-        /// <summary>
-        /// Find the successor node.
-        /// </summary>
-        /// <returns>The successor node.</returns>
         private static Node findSuccessor(Node node)
         {
             Contract.Requires(node != null);
@@ -1961,27 +1888,7 @@ namespace C5.Intervals
         #region Clear
 
         /// <inheritdoc/>
-        public void Clear()
-        {
-            Contract.Ensures(_root == null);
-            Contract.Ensures(_count == 0);
-
-            // Return if tree is empty
-            if (IsEmpty)
-                return;
-
-            // Save old count and reset all values
-            var oldCount = _count;
-            clear();
-
-            // Raise events
-            if ((ActiveEvents & EventTypeEnum.Cleared) != 0)
-                raiseCollectionCleared(true, oldCount);
-            if ((ActiveEvents & EventTypeEnum.Changed) != 0)
-                raiseCollectionChanged();
-        }
-
-        private void clear()
+        protected override void clear()
         {
             Contract.Ensures(_root == null);
             Contract.Ensures(_count == 0);

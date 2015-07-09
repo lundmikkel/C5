@@ -159,6 +159,8 @@
     <Compile Include="Collections\Dynamic\DynamicIntervalTree.cs" />
     <Compile Include="Collections\Dynamic\IntervalBinarySearchTree.cs" />
     <Compile Include="Collections\Dynamic\IntervalBinarySearchTreeOld.cs" />
+    <Compile Include="Collections\FiniteIntervalCollectionBase.cs" />
+    <Compile Include="Collections\IntervalCollectionBase.cs" />
     <Compile Include="Collections\IntervalCollectionFactory.cs" />
     <Compile Include="Collections\Static\BinaryIntervalSearch.cs" />
     <Compile Include="Collections\Static\LayeredContainmentListGallop.cs" />

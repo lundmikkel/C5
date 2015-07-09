@@ -828,6 +828,68 @@ namespace C5.Intervals
             // Check for a gap within the span after the highest endpoint
             if (useSpan && highestHigh.CompareHigh(span) < 0)
                 yield return new IntervalBase<T>(highestHigh.High, span.High, !highestHigh.HighIncluded, span.HighIncluded);
+
+
+            // TODO: Check if this code actually works
+            // // Simple shortcut, empty or query does not overlap at all:
+            // if (IsEmpty
+            //     || query.CompareHighLow(LowestInterval) < 0
+            //     || query.CompareLowHigh(HighestInterval) > 0)
+            // {
+            //     yield return query;
+            //     yield break;
+            // }
+            // 
+            // // Supposing overlaps are ordered, and not overlapping. If not this 
+            // // implementation can not be inherited:
+            // 
+            // // Yield the very first gap if any:
+            // if (query.CompareLow(LowestInterval) < 0)
+            //     yield return new IntervalBase<T>(query.Low, LowestInterval.Low, query.LowIncluded, !LowestInterval.LowIncluded);
+            // 
+            // I previous = null;
+            // foreach (var interval in FindOverlaps(query))
+            // {
+            //     if (previous != null)
+            //     {
+            //         if (previous.High.CompareTo(interval.Low) >= 0 && (previous.HighIncluded || interval.LowIncluded))
+            //             continue;
+            // 
+            //         yield return new IntervalBase<T>(previous.High, interval.Low, !previous.HighIncluded, !interval.LowIncluded);
+            //     }
+            //     previous = interval;
+            // }
+            // 
+            // // Yield the latest gap if any:
+            // if (query.CompareHigh(HighestInterval) > 0)
+            //     yield return new IntervalBase<T>(HighestInterval.High, query.High, !HighestInterval.HighIncluded, query.HighIncluded);
+            // TODO: And this...
+            // if (!AllowsOverlaps)
+            // {
+            //     I previous = null;
+            //     foreach (var interval in Sorted)
+            //     {
+            //         if (previous != null)
+            //         {
+            // 
+            //             // Works only for strict no overlaps:
+            //             // if (previous.High.Equals(interval.Low) && (previous.HighIncluded || interval.LowIncluded ))
+            //             // Works for strict overlaps but no containment with no performance punishment:
+            //             if (previous.High.CompareTo(interval.Low) >= 0 && (previous.HighIncluded || interval.LowIncluded))
+            //             {
+            //                 // Not overlapping, but can not create any interval to yield:
+            //                 continue;
+            //             }
+            //             yield return new IntervalBase<T>(previous.High, interval.Low, !previous.HighIncluded, !interval.LowIncluded);
+            //         }
+            //         previous = interval;
+            //     }
+            // }
+            // else
+            // {
+            //     foreach (var interval in Sorted.Gaps())
+            //         yield return interval;
+            // }
         }
 
 

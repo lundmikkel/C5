@@ -5,8 +5,7 @@ using System.Linq;
 
 namespace C5.Intervals
 {
-
-    public class StaticFiniteIntervalList<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
+    public class StaticFiniteIntervalList<I, T> : FiniteIntervalCollectionBase<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
@@ -139,60 +138,23 @@ namespace C5.Intervals
         #region Data Structure Properties
 
         /// <inheritdoc/>
-        public bool AllowsOverlaps { get { return false; } }
+        public override bool IsReadOnly { get { return true; } }
 
         /// <inheritdoc/>
-        public bool AllowsContainments { get { return true; } }
-
-        /// <inheritdoc/>
-        public bool AllowsReferenceDuplicates { get { return false; } }
+        public override bool IsFindOverlapsSorted { get { return true; } }
 
         #endregion
 
         #region Collection Properties
 
         /// <inheritdoc/>
-        public IInterval<T> Span { get { return _span; } }
+        public override IInterval<T> Span { get { return _span; } }
 
         /// <inheritdoc/>
-        public I LowestInterval { get { return _intervals[0]; } }
+        public override I LowestInterval { get { return _intervals[0]; } }
 
         /// <inheritdoc/>
-        public IEnumerable<I> LowestIntervals
-        {
-            get
-            {
-                if (IsEmpty)
-                    yield break;
-
-                yield return LowestInterval;
-            }
-        }
-
-        /// <inheritdoc/>
-        public I HighestInterval { get { return _intervals[_count - 1]; } }
-
-        /// <inheritdoc/>
-        public IEnumerable<I> HighestIntervals
-        {
-            get
-            {
-                if (IsEmpty)
-                    yield break;
-
-                yield return HighestInterval;
-            }
-        }
-
-        #region Maximum Depth
-
-        /// <inheritdoc/>
-        public int MaximumDepth
-        {
-            get { return IsEmpty ? 0 : 1; }
-        }
-
-        #endregion
+        public override I HighestInterval { get { return _intervals[_count - 1]; } }
 
         #endregion
 
@@ -204,7 +166,7 @@ namespace C5.Intervals
         public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
 
         /// <inheritdoc/>
-        public IEnumerable<I> Sorted
+        public override IEnumerable<I> Sorted
         {
             get
             {
@@ -218,15 +180,7 @@ namespace C5.Intervals
         #region Find Overlaps
 
         /// <inheritdoc/>
-        public IEnumerable<I> FindOverlaps(T query)
-        {
-            I overlap;
-            if (findOverlap(query, out overlap))
-                yield return overlap;
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<I> FindOverlaps(IInterval<T> query)
+        public override IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
             // Break if we won't find any overlaps
             if (IsEmpty)
@@ -360,13 +314,13 @@ namespace C5.Intervals
         #region Find Overlap
 
         /// <inheritdoc/>
-        public bool FindOverlap(T query, out I overlap)
+        public override bool FindOverlap(T query, out I overlap)
         {
             return findOverlap(query, out overlap);
         }
 
         /// <inheritdoc/>
-        public bool FindOverlap(IInterval<T> query, out I overlap)
+        public override bool FindOverlap(IInterval<T> query, out I overlap)
         {
             overlap = null;
 
@@ -391,16 +345,9 @@ namespace C5.Intervals
         #region Count Overlaps
 
         /// <inheritdoc/>
-        public int CountOverlaps(T query)
+        public override int CountOverlaps(IInterval<T> query)
         {
-            I overlap = null;
-            return FindOverlap(query, out overlap) ? 1 : 0;
-        }
-
-        /// <inheritdoc/>
-        public int CountOverlaps(IInterval<T> query)
-        {
-            return !IsEmpty ? countOverlaps(query) : 0;
+            return IsEmpty ? 0 : countOverlaps(query);
         }
 
         private int countOverlaps(IInterval<T> query)
@@ -421,53 +368,6 @@ namespace C5.Intervals
             upper = findLast(query);
 
             return upper - lower;
-        }
-
-        #endregion
-
-        #region Gaps
-
-        /// <inheritdoc/>
-        public IEnumerable<IInterval<T>> Gaps
-        {
-            get { return Sorted.Gaps(); }
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<IInterval<T>> FindGaps(IInterval<T> query)
-        {
-            return FindOverlaps(query).Gaps(query);
-        }
-
-        #endregion
-
-        #region Extensible
-
-        /// <inheritdoc/>
-        public bool IsReadOnly { get { return true; } }
-
-        /// <inheritdoc/>
-        public bool Add(I interval)
-        {
-            throw new ReadOnlyCollectionException();
-        }
-
-        /// <inheritdoc/>
-        public void AddAll(IEnumerable<I> intervals)
-        {
-            throw new ReadOnlyCollectionException();
-        }
-
-        /// <inheritdoc/>
-        public bool Remove(I interval)
-        {
-            throw new ReadOnlyCollectionException();
-        }
-
-        /// <inheritdoc/>
-        public void Clear()
-        {
-            throw new ReadOnlyCollectionException();
         }
 
         #endregion
