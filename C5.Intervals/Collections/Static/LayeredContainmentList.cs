@@ -360,17 +360,9 @@ namespace C5.Intervals
 
         #region Data Structure Properties
 
-        // TODO: Support user setting the value
+        // TODO: Support user setting the value (also for AllowsContainments and AllowsReferenceDuplicates)
         /// <inheritdoc/>
         public override bool AllowsOverlaps { get { return true; } }
-
-        // TODO: Support user setting the value
-        /// <inheritdoc/>
-        public override bool AllowsContainments { get { return true; } }
-
-        // TODO: Support user setting the value
-        /// <inheritdoc/>
-        public override bool AllowsReferenceDuplicates { get { return true; } }
 
         /// <inheritdoc/>
         public override bool IsReadOnly { get { return true; } }

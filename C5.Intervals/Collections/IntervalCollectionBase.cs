@@ -86,18 +86,21 @@ namespace C5.Intervals
 
         #region Data Structure Properties
 
+        // TODO: Assign default values?
         /// <inheritdoc/>
         public abstract bool AllowsOverlaps { get; }
 
         /// <inheritdoc/>
-        public abstract bool AllowsContainments { get; }
+        public virtual bool AllowsContainments { get { return AllowsOverlaps; } }
 
         /// <inheritdoc/>
-        public abstract bool AllowsReferenceDuplicates { get; }
+        public virtual bool AllowsReferenceDuplicates { get { return AllowsOverlaps; } }
 
+        // TODO: Assign default values?
         /// <inheritdoc/>
         public abstract bool IsReadOnly { get; }
 
+        // TODO: Assign default values?
         /// <inheritdoc/>
         public abstract bool IsFindOverlapsSorted { get; }
 

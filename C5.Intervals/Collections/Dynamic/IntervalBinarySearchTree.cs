@@ -1453,9 +1453,6 @@ namespace C5.Intervals
         public override bool AllowsOverlaps { get { return true; } }
 
         /// <inheritdoc/>
-        public override bool AllowsContainments { get { return true; } }
-
-        /// <inheritdoc/>
         public override bool AllowsReferenceDuplicates { get { return false; } }
 
         /// <inheritdoc/>

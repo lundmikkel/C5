@@ -26,12 +26,6 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override bool AllowsOverlaps { get { return false; } }
 
-        /// <inheritdoc/>
-        public override bool AllowsContainments { get { return false; } }
-
-        /// <inheritdoc/>
-        public override bool AllowsReferenceDuplicates { get { return false; } }
-
         #endregion Data Structure Properties
 
         #region Collection Properties
