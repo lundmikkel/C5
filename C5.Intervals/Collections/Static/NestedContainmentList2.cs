@@ -274,7 +274,7 @@ namespace C5.Intervals
         public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
 
         /// <inheritdoc/>
-        public override IEnumerable<I> Sorted { get { return getEnumerator(_list); } }
+        public IEnumerable<I> Sorted { get { return getEnumerator(_list); } }
 
         private IEnumerable<I> getEnumerator(IEnumerable<Node> list)
         {

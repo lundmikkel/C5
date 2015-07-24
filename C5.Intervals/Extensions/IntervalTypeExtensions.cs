@@ -11,9 +11,10 @@ namespace C5.Intervals
             Contract.Ensures((Contract.Result<IntervalType>() == Intervals.IntervalType.Closed) == interval.IsClosed());
             Contract.Ensures((Contract.Result<IntervalType>() == Intervals.IntervalType.Open) == interval.IsOpen());
 
-            return (IntervalType) ((interval.LowIncluded ? 2 : 0) + (interval.HighIncluded ? 1 : 0));
+            return (IntervalType)((interval.LowIncluded ? 2 : 0) + (interval.HighIncluded ? 1 : 0));
         }
 
+        [Pure]
         public static bool IsOpen<T>(this IInterval<T> interval) where T : IComparable<T>
         {
             Contract.Requires(interval != null);
@@ -21,6 +22,7 @@ namespace C5.Intervals
             return !interval.LowIncluded && !interval.HighIncluded;
         }
 
+        [Pure]
         public static bool IsClosed<T>(this IInterval<T> interval) where T : IComparable<T>
         {
             Contract.Requires(interval != null);

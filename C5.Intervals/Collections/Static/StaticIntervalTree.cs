@@ -353,7 +353,7 @@ namespace C5.Intervals
         }
 
         /// <inheritdoc/>
-        public override IEnumerable<I> Sorted
+        public IEnumerable<I> Sorted
         {
             get
             {

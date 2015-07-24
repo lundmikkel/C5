@@ -100,9 +100,8 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public abstract bool IsReadOnly { get; }
 
-        // TODO: Assign default values?
         /// <inheritdoc/>
-        public abstract bool IsFindOverlapsSorted { get; }
+        public virtual bool IsFindOverlapsSorted { get { return false; } }
 
         #endregion Data Structure Properties
 
@@ -112,29 +111,10 @@ namespace C5.Intervals
         public virtual IInterval<T> Span { get { return new IntervalBase<T>(LowestInterval, HighestInterval); } }
 
         /// <inheritdoc/>
-        public virtual I LowestInterval { get { return Sorted.First(); } }
+        public abstract I LowestInterval { get; }
 
         /// <inheritdoc/>
-        public virtual IEnumerable<I> LowestIntervals
-        {
-            get
-            {
-                using (var enumerator = Sorted.GetEnumerator())
-                {
-                    // Advance the enumerator to the first element
-                    if (enumerator.MoveNext())
-                        yield break;
-
-                    var lowest = enumerator.Current;
-                    yield return lowest;
-
-                    I next;
-                    // Only enumerate intervals with same low as the first interval
-                    while (enumerator.MoveNext() && (next = enumerator.Current).LowEquals(lowest))
-                        yield return next;
-                }
-            }
-        }
+        public abstract IEnumerable<I> LowestIntervals { get; }
 
         /// <inheritdoc/>
         public abstract I HighestInterval { get; }
@@ -148,13 +128,6 @@ namespace C5.Intervals
         #endregion Collection Properties
 
         #endregion Properties
-
-        #region Enumerable
-
-        /// <inheritdoc/>
-        public abstract IEnumerable<I> Sorted { get; }
-
-        #endregion Enumerable
 
         #region Find Overlaps
 
@@ -210,7 +183,7 @@ namespace C5.Intervals
         #region Gaps
 
         /// <inheritdoc/>
-        public virtual IEnumerable<IInterval<T>> Gaps { get { return Sorted.Gaps(); } }
+        public virtual IEnumerable<IInterval<T>> Gaps { get { return this.Gaps(isSorted: false); } }
 
         /// <inheritdoc/>
         public virtual IEnumerable<IInterval<T>> FindGaps(IInterval<T> query)

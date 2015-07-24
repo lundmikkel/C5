@@ -143,7 +143,7 @@ namespace C5.Intervals
         public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
 
         /// <inheritdoc/>
-        public override IEnumerable<I> Sorted { get { return getEnumerator(_mainSublist); } }
+        public IEnumerable<I> Sorted { get { return getEnumerator(_mainSublist); } }
 
         private IEnumerable<I> getEnumerator(Sublist sublist)
         {

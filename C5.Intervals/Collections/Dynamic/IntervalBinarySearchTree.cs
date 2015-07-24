@@ -869,8 +869,8 @@ namespace C5.Intervals
                             root = rotateRight(root);
 
                             // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (sbyte) (root.Balance == +1 ? -1 : 0);
-                            root.Right.Balance = (sbyte) (root.Balance == -1 ? +1 : 0);
+                            root.Left.Balance = (sbyte)(root.Balance == +1 ? -1 : 0);
+                            root.Right.Balance = (sbyte)(root.Balance == -1 ? +1 : 0);
                             root.Balance = 0;
                             break;
                     }
@@ -893,8 +893,8 @@ namespace C5.Intervals
                             root = rotateLeft(root);
 
                             // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (sbyte) (root.Balance == +1 ? -1 : 0);
-                            root.Right.Balance = (sbyte) (root.Balance == -1 ? +1 : 0);
+                            root.Left.Balance = (sbyte)(root.Balance == +1 ? -1 : 0);
+                            root.Right.Balance = (sbyte)(root.Balance == -1 ? +1 : 0);
                             root.Balance = 0;
                             break;
                     }
@@ -949,8 +949,8 @@ namespace C5.Intervals
                             root = rotateRight(root);
 
                             // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (sbyte) ((root.Balance == +1) ? -1 : 0);
-                            root.Right.Balance = (sbyte) ((root.Balance == -1) ? +1 : 0);
+                            root.Left.Balance = (sbyte)((root.Balance == +1) ? -1 : 0);
+                            root.Right.Balance = (sbyte)((root.Balance == -1) ? +1 : 0);
                             root.Balance = 0;
                             break;
                     }
@@ -979,8 +979,8 @@ namespace C5.Intervals
                             root = rotateLeft(root);
 
                             // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (sbyte) (root.Balance == +1 ? -1 : 0);
-                            root.Right.Balance = (sbyte) (root.Balance == -1 ? +1 : 0);
+                            root.Left.Balance = (sbyte)(root.Balance == +1 ? -1 : 0);
+                            root.Right.Balance = (sbyte)(root.Balance == -1 ? +1 : 0);
                             root.Balance = 0;
                             break;
                     }
@@ -1242,7 +1242,7 @@ namespace C5.Intervals
             node.Left = createNodes(endpoints, lower, mid - 1, ref leftHeight);
             node.Right = createNodes(endpoints, mid + 1, upper, ref rightHeight);
 
-            node.Balance = (sbyte) (rightHeight - leftHeight);
+            node.Balance = (sbyte)(rightHeight - leftHeight);
 
             height = Math.Max(leftHeight, rightHeight) + 1;
 
@@ -1576,7 +1576,7 @@ namespace C5.Intervals
         }
 
         /// <inheritdoc/>
-        public override IEnumerable<I> Sorted
+        public IEnumerable<I> Sorted
         {
             get
             {
@@ -1628,7 +1628,7 @@ namespace C5.Intervals
         [Pure]
         private static int calcHeight(int count)
         {
-            return (int) Math.Ceiling(1.44 * Math.Log(count * 2 + 2, 2) - 0.328 + 2);
+            return (int)Math.Ceiling(1.44 * Math.Log(count * 2 + 2, 2) - 0.328 + 2);
         }
 
         [Pure]

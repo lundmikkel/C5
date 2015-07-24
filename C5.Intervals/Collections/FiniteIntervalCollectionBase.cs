@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace C5.Intervals
 {
@@ -13,7 +14,7 @@ namespace C5.Intervals
     /// <typeparam name="I">The interval type with endpoint type <typeparamref name="T"/>.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
     /// <seealso cref="IntervalCollectionBase{I,T}"/>
-    public abstract class FiniteIntervalCollectionBase<I, T> : IntervalCollectionBase<I, T>
+    public abstract class FiniteIntervalCollectionBase<I, T> : IntervalCollectionBase<I, T>, ISortedIntervalCollection<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
@@ -26,9 +27,19 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override bool AllowsOverlaps { get { return false; } }
 
+        // TODO: Should always give sorted FindOverlaps, right?
+        /// <inheritdoc/>
+        public override bool IsFindOverlapsSorted { get { return true; } }
+
+        /// <inheritdoc/>
+        public abstract Speed IndexingSpeed { get; }
+
         #endregion Data Structure Properties
 
         #region Collection Properties
+
+        /// <inheritdoc/>
+        public override I LowestInterval { get { return Sorted().First(); } }
 
         /// <inheritdoc/>
         public override IEnumerable<I> LowestIntervals
@@ -62,6 +73,32 @@ namespace C5.Intervals
         #endregion Collection Properties
 
         #endregion Properties
+
+        #region Sorted Enumeration
+
+        /// <inheritdoc/>
+        public abstract IEnumerable<I> Sorted();
+
+        /// <inheritdoc/>
+        public abstract IEnumerable<I> EnumerateFrom(T point, bool includeOverlaps = true);
+
+        /// <inheritdoc/>
+        public abstract IEnumerable<I> EnumerateFrom(I interval, bool includeInterval = true);
+
+        /// <inheritdoc/>
+        public abstract IEnumerable<I> EnumerateFromIndex(int index);
+
+        #endregion
+
+        #region Indexed Access
+
+        /// <inheritdoc/>
+        public abstract int IndexOf(I interval);
+
+        /// <inheritdoc/>
+        public abstract I this[int i] { get; }
+
+        #endregion
 
         #region Find Overlaps
 

@@ -444,7 +444,7 @@ namespace C5.Intervals
         [Pure]
         public static bool IsValidInterval<T>(this IInterval<T> x) where T : IComparable<T>
         {
-            if (x == null || x.Low == null || x.High == null)
+            if (x == null || ReferenceEquals(x.Low, null) || ReferenceEquals(x.High, null))
                 return false;
 
             var compare = x.Low.CompareTo(x.High);

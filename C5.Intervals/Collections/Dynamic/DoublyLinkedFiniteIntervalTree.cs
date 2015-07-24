@@ -28,8 +28,6 @@ namespace C5.Intervals
         private readonly Node _first;
         private readonly Node _last;
 
-        private int _count;
-
         #endregion
 
         #region Code Contracts
@@ -51,8 +49,8 @@ namespace C5.Intervals
             Contract.Invariant(this.IsSorted<I, T>());
 
             // Check that doubly linked lists are sorted in both direction
-            Contract.Invariant(nextNodes(_first).IsSorted());
-            Contract.Invariant(previousNodes(_last.Previous).Select(n => n.Key).IsSorted(IntervalExtensions.CreateReversedComparer<I, T>()));
+            Contract.Invariant(enumerateFrom(_first).IsSorted<I, T>());
+            Contract.Invariant(enumerateBackwardsFrom(_last.Previous).Reverse().IsSorted<I, T>());
 
             // Check in-order traversal is sorted
             Contract.Invariant(contractHelperInOrderNodes(_root).IsSorted());
@@ -116,13 +114,11 @@ namespace C5.Intervals
 
             public I Key;
 
-            public Node Left;
-            public Node Right;
-
-            public Node Previous;
-            public Node Next;
+            public Node Left, Right;
+            public Node Previous, Next;
 
             public int Balance;
+            public int Count;
 
 #if DEBUG
             public readonly bool Dummy;
@@ -136,6 +132,21 @@ namespace C5.Intervals
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
             private void invariant()
             {
+                Contract.Invariant(Key == null || Count == count(Left) + 1 + count(Right));
+                Contract.Invariant(Key == null || Count == subtree(this).Count());
+            }
+
+            private IEnumerable<Node> subtree(Node root)
+            {
+                if (root.Left != null)
+                    foreach (var node in subtree(root.Left))
+                        yield return node;
+
+                yield return root;
+
+                if (root.Right != null)
+                    foreach (var node in subtree(root.Right))
+                        yield return node;
             }
 
             #endregion
@@ -151,6 +162,7 @@ namespace C5.Intervals
                 Contract.Ensures(Next != null && Previous != null);
 
                 Key = key;
+                Count = 1;
                 insertAfter(previous);
             }
 
@@ -203,6 +215,11 @@ namespace C5.Intervals
                 successor.Key = tmp;
             }
 
+            public void UpdateCount()
+            {
+                Count = count(Left) + 1 + count(Right);
+            }
+
             public override string ToString()
             {
                 return Key == null ? "" : Key.ToIntervalString();
@@ -248,8 +265,8 @@ namespace C5.Intervals
                             root = rotateRight(root);
 
                             // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (sbyte) (root.Balance == +1 ? -1 : 0);
-                            root.Right.Balance = (sbyte) (root.Balance == -1 ? +1 : 0);
+                            root.Left.Balance = (sbyte)(root.Balance == +1 ? -1 : 0);
+                            root.Right.Balance = (sbyte)(root.Balance == -1 ? +1 : 0);
                             root.Balance = 0;
                             break;
                     }
@@ -272,8 +289,8 @@ namespace C5.Intervals
                             root = rotateLeft(root);
 
                             // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (sbyte) (root.Balance == +1 ? -1 : 0);
-                            root.Right.Balance = (sbyte) (root.Balance == -1 ? +1 : 0);
+                            root.Left.Balance = (sbyte)(root.Balance == +1 ? -1 : 0);
+                            root.Right.Balance = (sbyte)(root.Balance == -1 ? +1 : 0);
                             root.Balance = 0;
                             break;
                     }
@@ -328,8 +345,8 @@ namespace C5.Intervals
                             root = rotateRight(root);
 
                             // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (sbyte) ((root.Balance == +1) ? -1 : 0);
-                            root.Right.Balance = (sbyte) ((root.Balance == -1) ? +1 : 0);
+                            root.Left.Balance = (sbyte)((root.Balance == +1) ? -1 : 0);
+                            root.Right.Balance = (sbyte)((root.Balance == -1) ? +1 : 0);
                             root.Balance = 0;
                             break;
                     }
@@ -358,8 +375,8 @@ namespace C5.Intervals
                             root = rotateLeft(root);
 
                             // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (sbyte) (root.Balance == +1 ? -1 : 0);
-                            root.Right.Balance = (sbyte) (root.Balance == -1 ? +1 : 0);
+                            root.Left.Balance = (sbyte)(root.Balance == +1 ? -1 : 0);
+                            root.Right.Balance = (sbyte)(root.Balance == -1 ? +1 : 0);
                             root.Balance = 0;
                             break;
                     }
@@ -379,6 +396,9 @@ namespace C5.Intervals
             root.Left = node.Right;
             node.Right = root;
 
+            root.UpdateCount();
+            node.UpdateCount();
+
             return node;
         }
 
@@ -391,6 +411,9 @@ namespace C5.Intervals
             var node = root.Right;
             root.Right = node.Left;
             node.Left = root;
+
+            root.UpdateCount();
+            node.UpdateCount();
 
             return node;
         }
@@ -438,20 +461,18 @@ namespace C5.Intervals
         {
             get
             {
-                Contract.Ensures(Contract.Result<bool>() == (_count == 0));
                 Contract.Ensures(Contract.Result<bool>() == (_root == null));
-                return _count == 0;
+                return _root == null;
             }
         }
 
         /// <inheritdoc/>
-        public override int Count
+        public override int Count { get { return count(_root); } }
+
+        [Pure]
+        private static int count(Node node)
         {
-            get
-            {
-                Contract.Ensures(Contract.Result<int>() == _count);
-                return _count;
-            }
+            return node == null ? 0 : node.Count;
         }
 
         /// <inheritdoc/>
@@ -480,6 +501,9 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override bool IsFindOverlapsSorted { get { return true; } }
 
+        /// <inheritdoc/>
+        public override Speed IndexingSpeed { get { return Speed.Log; } }
+
         #endregion
 
         #region Collection Properties
@@ -497,123 +521,113 @@ namespace C5.Intervals
         #region Enumerable
 
         /// <inheritdoc/>
-        public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
+        public override IEnumerator<I> GetEnumerator() { return Sorted().GetEnumerator(); }
 
         /// <inheritdoc/>
-        public override IEnumerable<I> Sorted { get { return nextIntervals(_first.Next); } }
-
-        /// <summary>
-        /// Get the intervals in reverse order sorted in descending endpoint order.
-        /// </summary>
-        [Pure]
-        public IEnumerable<I> Reverse
-        {
-            get { return previousNodes(_last.Previous).Select(node => node.Key); }
-        }
-
-        #region Next/previous
-
-        #region Next
-
-        /// <summary>
-        /// Get a lazy enumerable of the intervals (in lexicographical order) following the 
-        /// interval (or an equal interval) in the collection. If the interval is not in the 
-        /// collection, the result will be empty.
-        /// </summary>
-        /// <param name="interval">The query interval. If not in the collection, the result 
-        /// will be empty.</param>
-        /// <returns>A lazy enumerable of the intervals following the interval in the 
-        /// collection.</returns>
-        [Pure]
-        public IEnumerable<I> NextIntervals(I interval)
-        {
-            Contract.Requires(interval != null);
-            Contract.Ensures(Contract.Result<IEnumerable<I>>() != null);
-
-            var node = findContainingNode(interval);
-            if (node == null)
-                return Enumerable.Empty<I>();
-
-            return nextIntervals(node.Next ?? node);
-        }
+        public override IEnumerable<I> Sorted() { return enumerateFrom(_first.Next); }
 
         [Pure]
-        private IEnumerable<I> nextIntervals(Node node)
-        {
-            return nextNodes(node).Select(n => n.Key);
-        }
-
-        [Pure]
-        private IEnumerable<Node> nextNodes(Node node)
+        private IEnumerable<I> enumerateFrom(Node node)
         {
             Contract.Requires(node != null);
 
             // Skip the _first node
             if (node == _first)
+            {
                 node = _first.Next;
+                //throw new Exception();
+            }
 
             // Iterate until the _last node
             while (node != _last)
             {
-                yield return node;
+                yield return node.Key;
                 node = node.Next;
             }
         }
 
-        #endregion
-
-        #region Previous
-
-        /// <summary>
-        /// Get a lazy enumerable of the intervals (in reverse lexicographical order) 
-        /// preceding the interval (or an equal interval) in the collection. If the interval 
-        /// is not in the collection, the result will be empty.
-        /// </summary>
-        /// <param name="interval">The query interval. If not in the collection, the result 
-        /// will be empty.</param>
-        /// <returns>A lazy enumerable of the intervals following the interval in the 
-        /// collection.</returns>
         [Pure]
-        public IEnumerable<I> PreviousIntervals(I interval)
-        {
-            Contract.Requires(interval != null);
-            Contract.Ensures(Contract.Result<IEnumerable<I>>() != null);
-
-            var node = findContainingNode(interval);
-            if (node == null)
-                return Enumerable.Empty<I>();
-
-            return previousIntervals(node.Previous ?? node);
-        }
-
-        [Pure]
-        private IEnumerable<I> previousIntervals(Node node)
-        {
-            return previousNodes(node).Select(n => n.Key);
-        }
-
-        [Pure]
-        private IEnumerable<Node> previousNodes(Node node)
+        private IEnumerable<I> enumerateBackwardsFrom(Node node)
         {
             Contract.Requires(node != null);
 
             // Skip the _last node
             if (node == _last)
+            {
                 node = _last.Previous;
+                //throw new Exception();
+            }
 
             // Iterate until the _first node
             while (node != _first)
             {
-                yield return node;
+                yield return node.Key;
                 node = node.Previous;
             }
         }
 
+        #region Enumerate from Point
+
+        /// <inheritdoc/>
+        public override IEnumerable<I> EnumerateFrom(T point, bool includeOverlaps = true)
+        {
+            var node = findLowestNodeNotBefore(point);
+            return node == null ? Enumerable.Empty<I>() : enumerateFrom(node);
+        }
+
+        [Pure]
+        private Node findLowestNodeNotBefore(T point)
+        {
+            Contract.Requires(ReferenceEquals(point, null));
+
+            var node = _root;
+            while (node != null)
+            {
+                var compare = node.Key.CompareHigh(point);
+                if (compare < 0)
+                {
+                    if (node.Right != null)
+                        node = node.Right;
+                    else
+                        return node.Next;
+                }
+                else if (compare > 0)
+                {
+                    if (node.Left != null)
+                        node = node.Left;
+                    else
+                        return node.Previous;
+                }
+                else
+                    return node.Key.HighIncluded ? node : node.Next;
+            }
+
+            return null;
+        }
+
         #endregion
+
+        #region Enumerate from Interval
+
+        /// <inheritdoc/>
+        public override IEnumerable<I> EnumerateFrom(I interval, bool includeInterval = true)
+        {
+            var node = findContainingNode(interval);
+            return node == null ? Enumerable.Empty<I>() : enumerateFrom(node);
+        }
+
+        // /// <inheritdoc/>
+        // public IEnumerable<I> EnumerateBackwardsFrom(I interval)
+        // {
+        //     var node = findContainingNode(interval);
+        //     return node == null ? Enumerable.Empty<I>() : previousIntervals(node.Previous ?? node);
+        // }
 
         [Pure]
         private Node findContainingNode(I interval)
         {
+            Contract.Requires(interval != null);
+
             var node = _root;
 
             while (node != null)
@@ -624,10 +638,20 @@ namespace C5.Intervals
                 else if (compare > 0)
                     node = node.Right;
                 else
-                    return interval.CompareHigh(node.Key) == 0 ? node : null;
+                    return ReferenceEquals(interval, node.Key) ? node : null;
             }
 
             return null;
+        }
+
+        #endregion
+
+        #region Enumerate from Index
+
+        /// <inheritdoc/>
+        public override IEnumerable<I> EnumerateFromIndex(int index)
+        {
+            return enumerateFrom(indexer(_root, index));
         }
 
         #endregion
@@ -679,7 +703,7 @@ namespace C5.Intervals
             }
 
             // Iterate overlaps
-            foreach (var interval in nextIntervals(node).TakeWhile(x => x.CompareLowHigh(query) <= 0))
+            foreach (var interval in enumerateFrom(node).TakeWhile(x => x.CompareLowHigh(query) <= 0))
                 yield return interval;
         }
 
@@ -795,20 +819,15 @@ namespace C5.Intervals
         #region Add
 
         /// <inheritdoc/>
-        public override sealed bool Add(I interval)
+        public override bool Add(I interval)
         {
-            Contract.Ensures(Contract.Result<bool>() != Contract.OldValue(Contract.Exists(this, x => x.Overlaps(interval))));
-
             var intervalWasAdded = false;
             var rotationNeeded = false;
 
             _root = add(interval, _root, _first, ref rotationNeeded, ref intervalWasAdded);
 
             if (intervalWasAdded)
-            {
-                _count++;
                 raiseForAdd(interval);
-            }
 
             return intervalWasAdded;
         }
@@ -847,104 +866,12 @@ namespace C5.Intervals
             }
             else
             {
-                // Interval was not added as it was contained already
+                // Interval was not added
                 return root;
             }
 
-            // Tree might be unbalanced after node was added, so we rotate
-            if (rotationNeeded)
-                root = rotateForAdd(root, ref rotationNeeded);
-
-            return root;
-        }
-
-        public bool ForceAdd(I interval, Func<I, I, bool> action, bool continueWhenNoConflict = false, bool forcePosition = false)
-        {
-            return ForceAdd(interval, action, () => continueWhenNoConflict, forcePosition);
-        }
-
-        /// <summary>
-        /// Forcingly adds an interval, even if it has overlaps in the collection. The 
-        /// function must resolve any overlapping conflict for a pair of overlapping 
-        /// intervals by moving either interval. For each pair of overlapping interveals
-        /// <paramref name="action"/> will be called to resolve the conflicts that arose 
-        /// from the insertion.
-        /// </summary>
-        /// <param name="interval">The interval.</param>
-        /// <param name="action">The action, that will resolve overlap conflict.</param>
-        // TODO: Document continueWhenNoConflict and forcePosition
-        /// <param name="continueWhenNoConflict"></param>
-        /// <param name="forcePosition"></param>
-        /// <returns>True, if the action was called to resolve a conflict.</returns>
-        public bool ForceAdd(I interval, Func<I, I, bool> action, Func<bool> continueWhenNoConflict, bool forcePosition = false)
-        {
-            var rotationNeeded = false;
-            Node node;
-            _root = forceAdd(interval, _root, _first, ref rotationNeeded, out node);
-            _count++;
-
-            // If interval has the same low value as node then we need to swap
-            if (node.Next.Key != null)
-                if (node.Key.CompareLow(node.Next.Key) == 0)
-                    node.Next.Swap(node);
-
-            if (forcePosition && node.Previous != _first && node.Previous.Key.CompareHighLow(node.Key) <= 0)
-            {
-                node.Previous.Swap(node);
-                node = node.Previous;
-            }
-
-            var result = false;
-
-            while (node.Next != _last && node.Key.CompareHighLow(node.Next.Key) >= 0 || continueWhenNoConflict())
-            {
-                result = true;
-                if (action(node.Key, node.Next.Key))
-                {
-                    Remove(node.Next.Key);
-                    continue;
-                }
-
-                if (node.Key.CompareHighLow(node.Next.Key) >= 0)
-                    throw new InvalidOperationException("The interval has to be schedule after the previous one. The invariant is now broken.");
-
-                // Move to next node
-                node = node.Next;
-            }
-
-            return result;
-        }
-
-        private Node forceAdd(I interval, Node root, Node previous, ref bool rotationNeeded, out Node startNode)
-        {
-            if (root == null)
-            {
-                rotationNeeded = true;
-                var node = new Node(interval, previous);
-
-                startNode = previous != _first && previous.Key.CompareHighLow(interval) >= 0 ? previous : node;
-
-                return node;
-            }
-
-            var compare = interval.CompareLow(root.Key);
-
-            if (compare < 0)
-            {
-                root.Left = forceAdd(interval, root.Left, root.Previous, ref rotationNeeded, out startNode);
-
-                // Adjust node balance, if node was added
-                if (rotationNeeded)
-                    root.Balance--;
-            }
-            else
-            {
-                root.Right = forceAdd(interval, root.Right, root, ref rotationNeeded, out startNode);
-
-                // Adjust node balance, if node was added
-                if (rotationNeeded)
-                    root.Balance++;
-            }
+            if (intervalWasAdded)
+                ++root.Count;
 
             // Tree might be unbalanced after node was added, so we rotate
             if (rotationNeeded)
@@ -952,6 +879,104 @@ namespace C5.Intervals
 
             return root;
         }
+
+        #region Force Add
+
+        // TODO: Does this belong in C5.Intervals?
+        // public bool ForceAdd(I interval, Func<I, I, bool> action, bool continueWhenNoConflict = false, bool forcePosition = false)
+        // {
+        //     return ForceAdd(interval, action, () => continueWhenNoConflict, forcePosition);
+        // }
+        // /// <summary>
+        // /// Forcingly adds an interval, even if it has overlaps in the collection. The 
+        // /// function must resolve any overlapping conflict for a pair of overlapping 
+        // /// intervals by moving either interval. For each pair of overlapping interveals
+        // /// <paramref name="action"/> will be called to resolve the conflicts that arose 
+        // /// from the insertion.
+        // /// </summary>
+        // /// <param name="interval">The interval.</param>
+        // /// <param name="action">The action, that will resolve overlap conflict.</param>
+        // // TODO: Document continueWhenNoConflict and forcePosition
+        // /// <param name="continueWhenNoConflict"></param>
+        // /// <param name="forcePosition"></param>
+        // /// <returns>True, if the action was called to resolve a conflict.</returns>
+        // public bool ForceAdd(I interval, Func<I, I, bool> action, Func<bool> continueWhenNoConflict, bool forcePosition = false)
+        // {
+        //     var rotationNeeded = false;
+        //     Node node;
+        //     _root = forceAdd(interval, _root, _first, ref rotationNeeded, out node);
+        // 
+        //     // If interval has the same low value as node then we need to swap
+        //     if (node.Next.Key != null)
+        //         if (node.Key.LowEquals(node.Next.Key))
+        //             node.Next.Swap(node);
+        // 
+        //     if (forcePosition && node.Previous != _first && node.Previous.Key.CompareHighLow(node.Key) <= 0)
+        //     {
+        //         node.Previous.Swap(node);
+        //         node = node.Previous;
+        //     }
+        // 
+        //     var result = false;
+        // 
+        //     while (node.Next != _last && node.Key.CompareHighLow(node.Next.Key) >= 0 || continueWhenNoConflict())
+        //     {
+        //         result = true;
+        //         if (action(node.Key, node.Next.Key))
+        //         {
+        //             Remove(node.Next.Key);
+        //             continue;
+        //         }
+        // 
+        //         if (node.Key.CompareHighLow(node.Next.Key) >= 0)
+        //             throw new InvalidOperationException("The interval has to be schedule after the previous one. The invariant is now broken.");
+        // 
+        //         // Move to next node
+        //         node = node.Next;
+        //     }
+        // 
+        //     return result;
+        // }
+        // 
+        // private Node forceAdd(I interval, Node root, Node previous, ref bool rotationNeeded, out Node startNode)
+        // {
+        //     if (root == null)
+        //     {
+        //         rotationNeeded = true;
+        //         var node = new Node(interval, previous);
+        // 
+        //         startNode = previous != _first && previous.Key.CompareHighLow(interval) >= 0 ? previous : node;
+        // 
+        //         return node;
+        //     }
+        // 
+        //     var compare = interval.CompareLow(root.Key);
+        // 
+        //     if (compare < 0)
+        //     {
+        //         root.Left = forceAdd(interval, root.Left, root.Previous, ref rotationNeeded, out startNode);
+        // 
+        //         // Adjust node balance, if node was added
+        //         if (rotationNeeded)
+        //             root.Balance--;
+        //     }
+        //     else
+        //     {
+        //         root.Right = forceAdd(interval, root.Right, root, ref rotationNeeded, out startNode);
+        // 
+        //         // Adjust node balance, if node was added
+        //         if (rotationNeeded)
+        //             root.Balance++;
+        //     }
+        // 
+        //     // Tree might be unbalanced after node was added, so we rotate
+        //     if (rotationNeeded)
+        //         root = rotateForAdd(root, ref rotationNeeded);
+        // 
+        //     return root;
+        // }
+
+        #endregion
 
         #endregion
 
@@ -965,10 +990,7 @@ namespace C5.Intervals
             _root = remove(interval, _root, ref intervalWasRemoved, ref rotationNeeded);
 
             if (intervalWasRemoved)
-            {
-                _count--;
                 raiseForRemove(interval);
-            }
 
             return intervalWasRemoved;
         }
@@ -995,7 +1017,9 @@ namespace C5.Intervals
                     root.Balance--;
             }
             else if (!ReferenceEquals(root.Key, interval))
+            {
                 return root;
+            }
             else if (root.Left != null && root.Right != null)
             {
                 var successor = root.Next;
@@ -1008,8 +1032,6 @@ namespace C5.Intervals
 
                 if (rotationNeeded)
                     root.Balance--;
-
-                Contract.Assert(intervalWasRemoved);
             }
             else
             {
@@ -1017,10 +1039,12 @@ namespace C5.Intervals
                 intervalWasRemoved = true;
                 root.Remove();
 
-                // Return Left if not null, otherwise Right
+                // Return Left if not null, otherwise Right - one must be null
                 return root.Left ?? root.Right;
             }
 
+            if (intervalWasRemoved)
+                --root.Count;
 
             if (rotationNeeded)
                 root = rotateForRemove(root, ref rotationNeeded);
@@ -1038,17 +1062,72 @@ namespace C5.Intervals
             Contract.Ensures(_root == null);
             Contract.Ensures(_first.Next == _last);
             Contract.Ensures(_last.Previous == _first);
-            Contract.Ensures(_count == 0);
 
             _root = null;
 
             _first.Next = _last;
             _last.Previous = _first;
-
-            _count = 0;
         }
 
         #endregion
+
+        #endregion
+
+        #region Indexed Access
+
+        public override int IndexOf(I interval)
+        {
+            bool intervalFound;
+            var index = indexOf(interval, _root, out intervalFound);
+            return intervalFound ? index : ~index;
+        }
+
+        private static int indexOf(I interval, Node root, out bool intervalFound)
+        {
+            intervalFound = false;
+            var index = 0;
+
+            while (root != null)
+            {
+                var compareLow = interval.CompareLow(root.Key);
+
+                if (compareLow < 0)
+                    root = root.Left;
+                else if (compareLow > 0)
+                {
+                    index += 1 + count(root.Left);
+                    root = root.Right;
+                }
+                else
+                {
+                    intervalFound = ReferenceEquals(interval, root.Key);
+                    index += count(root.Left) + (interval.CompareHigh(root.Key) <= 0 ? 0 : 1);
+                    break;
+                }
+            }
+
+            return index;
+        }
+
+        public override I this[int i] { get { return indexer(_root, i).Key; } }
+
+        private static Node indexer(Node node, int index)
+        {
+            while (true)
+            {
+                var leftCount = count(node.Left);
+
+                if (index < leftCount)
+                    node = node.Left;
+                else if (index > leftCount)
+                {
+                    node = node.Right;
+                    index -= leftCount + 1;
+                }
+                else
+                    return node;
+            }
+        }
 
         #endregion
 

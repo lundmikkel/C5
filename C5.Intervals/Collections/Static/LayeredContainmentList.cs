@@ -492,7 +492,7 @@ namespace C5.Intervals
         public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
 
         /// <inheritdoc/>
-        public override IEnumerable<I> Sorted
+        public IEnumerable<I> Sorted
         {
             get
             {
@@ -538,6 +538,7 @@ namespace C5.Intervals
             }
         }
 
+        [Pure]
         protected int findFirst(IInterval<T> query, int lower, int upper)
         {
             Contract.Requires(query != null);
@@ -574,6 +575,7 @@ namespace C5.Intervals
             return max;
         }
 
+        [Pure]
         protected int findLast(IInterval<T> query, int lower, int upper)
         {
             Contract.Requires(query != null);

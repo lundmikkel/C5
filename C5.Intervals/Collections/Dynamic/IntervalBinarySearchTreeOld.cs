@@ -15,6 +15,8 @@ namespace C5.Intervals
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
+        // TODO: Look into bulk insertion
+
         #region Fields
 
         private Node _root;
@@ -623,8 +625,8 @@ namespace C5.Intervals
                             root = rotateRight(root);
 
                             // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (sbyte) (root.Balance == +1 ? -1 : 0);
-                            root.Right.Balance = (sbyte) (root.Balance == -1 ? +1 : 0);
+                            root.Left.Balance = (sbyte)(root.Balance == +1 ? -1 : 0);
+                            root.Right.Balance = (sbyte)(root.Balance == -1 ? +1 : 0);
                             root.Balance = 0;
                             break;
                     }
@@ -647,8 +649,8 @@ namespace C5.Intervals
                             root = rotateLeft(root);
 
                             // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (sbyte) (root.Balance == +1 ? -1 : 0);
-                            root.Right.Balance = (sbyte) (root.Balance == -1 ? +1 : 0);
+                            root.Left.Balance = (sbyte)(root.Balance == +1 ? -1 : 0);
+                            root.Right.Balance = (sbyte)(root.Balance == -1 ? +1 : 0);
                             root.Balance = 0;
                             break;
                     }
@@ -703,8 +705,8 @@ namespace C5.Intervals
                             root = rotateRight(root);
 
                             // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (sbyte) ((root.Balance == +1) ? -1 : 0);
-                            root.Right.Balance = (sbyte) ((root.Balance == -1) ? +1 : 0);
+                            root.Left.Balance = (sbyte)((root.Balance == +1) ? -1 : 0);
+                            root.Right.Balance = (sbyte)((root.Balance == -1) ? +1 : 0);
                             root.Balance = 0;
                             break;
                     }
@@ -733,8 +735,8 @@ namespace C5.Intervals
                             root = rotateLeft(root);
 
                             // root.Balance is either -1, 0, or +1
-                            root.Left.Balance = (sbyte) (root.Balance == +1 ? -1 : 0);
-                            root.Right.Balance = (sbyte) (root.Balance == -1 ? +1 : 0);
+                            root.Left.Balance = (sbyte)(root.Balance == +1 ? -1 : 0);
+                            root.Right.Balance = (sbyte)(root.Balance == -1 ? +1 : 0);
                             root.Balance = 0;
                             break;
                     }
@@ -832,7 +834,7 @@ namespace C5.Intervals
             node.Left = createNodes(ref endpoints, lower, mid - 1, ref leftHeight);
             node.Right = createNodes(ref endpoints, mid + 1, upper, ref rightHeight);
 
-            node.Balance = (sbyte) (rightHeight - leftHeight);
+            node.Balance = (sbyte)(rightHeight - leftHeight);
 
             height = Math.Max(leftHeight, rightHeight) + 1;
 
@@ -1065,7 +1067,7 @@ namespace C5.Intervals
         #endregion
 
         /// <inheritdoc/>
-        public override IEnumerable<I> Sorted { get { return this.OrderBy(x => x, Comparer); } }
+        public IEnumerable<I> Sorted { get { return this.OrderBy(x => x, Comparer); } }
 
         #endregion
 
@@ -1371,14 +1373,6 @@ namespace C5.Intervals
             // TODO: Add event for change in maximum depth
 
             return intervalWasAdded;
-        }
-
-        /// <inheritdoc/>
-        public void AddAll(IEnumerable<I> intervals)
-        {
-            // TODO: Look into bulk insertion
-            foreach (var interval in intervals)
-                Add(interval);
         }
 
         private static void addLow(I interval, Node root, Node rightUp)

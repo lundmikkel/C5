@@ -143,6 +143,11 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override bool IsFindOverlapsSorted { get { return true; } }
 
+        public override Speed IndexingSpeed
+        {
+            get { return Speed.Constant; }
+        }
+
         #endregion
 
         #region Collection Properties
@@ -163,17 +168,44 @@ namespace C5.Intervals
         #region Enumerable
 
         /// <inheritdoc/>
-        public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
+        public override IEnumerator<I> GetEnumerator() { return Sorted().GetEnumerator(); }
 
         /// <inheritdoc/>
-        public override IEnumerable<I> Sorted
+        public override IEnumerable<I> Sorted()
         {
-            get
-            {
-                for (var i = 0; i < _count; i++)
-                    yield return _intervals[i];
-            }
+            for (var i = 0; i < _count; i++)
+                yield return _intervals[i];
         }
+
+        public override IEnumerable<I> EnumerateFrom(T point, bool includeOverlaps = true)
+        {
+            var query = new IntervalBase<T>(point);
+            var index = includeOverlaps ? findFirst(query) : findLast(query);
+            for (var i = index; i < _count; ++i)
+                yield return _intervals[i];
+        }
+
+        public override IEnumerable<I> EnumerateFrom(I interval, bool includeInterval = true)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IEnumerable<I> EnumerateFromIndex(int index)
+        {
+            for (var i = index; i < _count; i++)
+                yield return _intervals[i];
+        }
+
+        #endregion
+
+        #region Indexed Access
+
+        public override int IndexOf(I interval)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override I this[int i] { get { return _intervals[i]; } }
 
         #endregion
 

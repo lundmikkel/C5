@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Text;
 
 namespace C5.Intervals
 {
@@ -11,9 +9,9 @@ namespace C5.Intervals
     /// A collection that allows fast overlap queries on collections of intervals.
     /// </summary>
     /// <remarks>The data structures do not support updates on its intervals' values.
-    /// If you wish to change an interval's endpoints or their inclusion, the interval should 
-    /// be removed from the data structure first, changed and then added again.</remarks>
-    /// <typeparam name="I">The interval type in the collection. Especially used for return types for enumeration.</typeparam>
+    /// If you wish to change an interval's endpoints or their endpoint inclusion, the interval
+    /// should be removed from the collection first, changed and then added again.</remarks>
+    /// <typeparam name="I">The interval type in the collection.</typeparam>
     /// <typeparam name="T">The interval's endpoint values.</typeparam>
     [ContractClass(typeof(IntervalCollectionContract<,>))]
     public interface IIntervalCollection<I, T> : ICollectionValue<I>
@@ -27,7 +25,7 @@ namespace C5.Intervals
         // TODO: Test properties to ensure that are correct!
 
         /// <summary>
-        /// Indicates if the collection can contain intervals that overlap eachother.
+        /// Indicates if the collection can contain intervals that overlap each other.
         /// </summary>
         /// <value>True if this collection allows overlapping intervals.</value>
         [Pure]
@@ -39,7 +37,7 @@ namespace C5.Intervals
         /// An interval contained in another interval breaks the high (low) endpoint ordering,
         /// if a collection is sorted on low (high) endpoints. Collections disallowing
         /// containments can normally be optimized more than collections that allow them,
-        /// giving much welcomed speed improvements in cases where containments are non-exisiting,
+        /// giving speed improvements in cases where containments are non-exisiting,
         /// i.e. when all intervals have equal length.
         /// 
         /// If a collection supports containments, it must also support overlaps;
@@ -50,7 +48,9 @@ namespace C5.Intervals
         bool AllowsContainments { get; }
 
         /// <summary>
-        /// Indicates if the collection can contain reference equal objects.
+        /// Indicates if the collection can contain reference equal objects. Different interval
+        /// objects with equal endpoints are allowed, but a specific interval object can only
+        /// appear once.
         /// 
         /// If a collection supports reference equal objects, it must also support overlaps;
         /// duplicates have the same endpoints and inclusions and therefore must overlap.
@@ -66,6 +66,7 @@ namespace C5.Intervals
         [Pure]
         bool IsReadOnly { get; }
 
+        // TODO: Move to ISortedIntervalCollection
         /// <summary>
         /// Indicates if the <see cref="IEnumerable{T}"/> returned from <see cref="FindOverlaps(T)"/>
         /// and <see cref="FindOverlaps(IInterval{T})"/> is ordered according to
@@ -75,24 +76,18 @@ namespace C5.Intervals
         [Pure]
         bool IsFindOverlapsSorted { get; }
 
-        // TODO: Add property to indicate if enumerator is sorted?
-
         #endregion
 
         #region Collection Properties
 
+        //TODO: Use <c>coll</c>?
         /// <summary>
         /// The smallest interval that spans all intervals in the collection. The interval's low is
-        /// the lowest low endpoint in the collection and the high is the highest high endpoint.
+        /// the lowest low endpoint in the collection, and the high is the highest high endpoint.
         /// <c>coll.FindOverlaps(coll.Span())</c> will by definition return all intervals in the collection.
         /// </summary>
-        /// <remarks>
-        /// Not defined for an empty collection.
-        /// </remarks>
+        /// <remarks>Not defined for an empty collection.</remarks>
         /// <returns>The smallest spanning interval.</returns>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown if called on an empty collection.
-        /// </exception>
         [Pure]
         IInterval<T> Span { get; }
 
@@ -107,11 +102,11 @@ namespace C5.Intervals
         I LowestInterval { get; }
 
         /// <summary>
-        /// Returns all intervals with the highest (high) endpoint in the collection. If the
+        /// Returns all intervals with the lowest (low) endpoint in the collection. If the
         /// collection is empty, the enumerable will be empty. If the collection does not allow
         /// overlaps, the result will only contain one interval.
         /// </summary>
-        /// <value>All intervals with the highest endpoint in the collection.</value>
+        /// <value>All intervals with the lowest endpoint in the collection.</value>
         [Pure]
         IEnumerable<I> LowestIntervals { get; }
 
@@ -137,28 +132,12 @@ namespace C5.Intervals
         /// <summary>
         /// The maximum number of intervals overlapping at a single point in the collection.
         /// </summary>
-        /// <remarks>The point of maximum depth may not be representable with an endpoint value, as it could be between two discrete values.</remarks>
+        /// <remarks>The point of maximum depth may not be representable with an endpoint value,
+        /// as it could be between two discrete values.</remarks>
         [Pure]
         int MaximumDepth { get; }
 
         #endregion
-
-        #endregion
-
-        #region Enumerable
-
-        // TODO: Rename to SortedLowHigh?
-        // TODO: Add a ReversedSorted/SortedHighLow?
-        // TODO: Make field that tells if collection allows sorted enumeration efficiently/lazily
-        /// <summary>
-        /// Create an enumerable, enumerating all intervals in the collection in sorted order.
-        /// 
-        /// Contrary to the normal enumerator, this guarantess that intervals are ordered
-        /// according to <see cref="IntervalExtensions.CompareTo{T}"/>, however it might be
-        /// slower.
-        /// </summary>
-        [Pure]
-        IEnumerable<I> Sorted { get; }
 
         #endregion
 
@@ -239,6 +218,8 @@ namespace C5.Intervals
 
         #region Gaps
 
+        // TODO: Move to ISortedIntervalCollection?
+
         /// <summary>
         /// Find all gaps between the intervals in the collection. The gaps will have no
         /// overlaps with the collection, and all gaps will be contained in the span of the collection.
@@ -264,12 +245,18 @@ namespace C5.Intervals
 
         #region Extensible
 
+
         /// <summary>
         /// Add an interval to the collection.
         /// </summary>
+        // TODO: What does this even mean?
         /// <remarks>Different implementations may handle duplicates differently.</remarks>
         /// <param name="interval">The interval to add.</param>
         /// <returns>True if the interval was added.</returns>
+        // TODO: This should really be handled by contracts, and not user thrown exceptions!
+        /// <exception cref="ReadOnlyCollectionException">
+        /// Thrown if called on a read-only collection.
+        /// </exception>
         bool Add(I interval);
 
         /// <summary>
@@ -277,6 +264,9 @@ namespace C5.Intervals
         /// </summary>
         /// <remarks>Different implementations may handle duplicates differently.</remarks>
         /// <param name="intervals">The intervals to add.</param>
+        /// <exception cref="ReadOnlyCollectionException">
+        /// Thrown if called on a read-only collection.
+        /// </exception>
         void AddAll(IEnumerable<I> intervals);
 
         /// <summary>
@@ -285,12 +275,18 @@ namespace C5.Intervals
         /// <remarks>Different implementations may remove duplicates differently.</remarks>
         /// <param name="interval">The interval to remove.</param>
         /// <returns>True if the interval was removed.</returns>
+        /// <exception cref="ReadOnlyCollectionException">
+        /// Thrown if called on a read-only collection.
+        /// </exception>
         bool Remove(I interval);
         // TODO: Add RemoveAll?
 
         /// <summary>
         /// Remove all intervals from the collection.
         /// </summary>
+        /// <exception cref="ReadOnlyCollectionException">
+        /// Thrown if called on a read-only collection.
+        /// </exception>
         void Clear();
 
         #endregion
@@ -298,7 +294,7 @@ namespace C5.Intervals
 
     // TODO: Add helpful strings to code contracts instead of displaying the actual contract. Make sure it doesn't add extra dependencies
     [ContractClassFor(typeof(IIntervalCollection<,>))]
-    internal abstract class IntervalCollectionContract<I, T> : IIntervalCollection<I, T>
+    internal abstract class IntervalCollectionContract<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
@@ -342,7 +338,7 @@ namespace C5.Intervals
         {
             get
             {
-                Contract.Requires(!IsEmpty, "An empty collection has no span.");
+                Contract.Requires(!IsEmpty);
 
                 // Span is not null
                 Contract.Ensures(Contract.Result<IInterval<T>>() != null);
@@ -628,6 +624,9 @@ namespace C5.Intervals
             // If the interval is not added the count stays the same
             Contract.Ensures(Contract.Result<bool>() != (Count == Contract.OldValue(Count)));
 
+            // If overlaps are not allow, the result is the opposite of whether the collection had an interval that overlapped the added interval
+            Contract.Ensures(AllowsOverlaps || Contract.Result<bool>() != Contract.OldValue(Contract.Exists(this, x => x.Overlaps(interval))));
+
             // If the collection allows reference duplicates, the object will always be added
             Contract.Ensures(!AllowsReferenceDuplicates || Contract.Result<bool>());
             // If the collection doesn't allow reference duplicates, the object should only be added if it didn't contain the object
@@ -698,34 +697,6 @@ namespace C5.Intervals
 
             throw new NotImplementedException();
         }
-
-        #endregion
-
-        #region Non-interval methods
-
-        public abstract IEnumerator<I> GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() { throw new NotImplementedException(); }
-        public abstract bool IsEmpty { get; }
-        public abstract int Count { get; }
-        public abstract I Choose();
-        public abstract string ToString(string format, IFormatProvider formatProvider);
-        public abstract bool Show(StringBuilder stringbuilder, ref int rest, IFormatProvider formatProvider);
-        public abstract EventTypeEnum ListenableEvents { get; }
-        public abstract EventTypeEnum ActiveEvents { get; }
-        public abstract event CollectionChangedHandler<I> CollectionChanged;
-        public abstract event CollectionClearedHandler<I> CollectionCleared;
-        public abstract event ItemsAddedHandler<I> ItemsAdded;
-        public abstract event ItemInsertedHandler<I> ItemInserted;
-        public abstract event ItemsRemovedHandler<I> ItemsRemoved;
-        public abstract event ItemRemovedAtHandler<I> ItemRemovedAt;
-        public abstract Speed CountSpeed { get; }
-        public abstract void CopyTo(I[] array, int index);
-        public abstract I[] ToArray();
-        public abstract void Apply(Action<I> action);
-        public abstract bool Exists(Func<I, bool> predicate);
-        public abstract bool Find(Func<I, bool> predicate, out I item);
-        public abstract bool All(Func<I, bool> predicate);
-        public abstract IEnumerable<I> Filter(Func<I, bool> filter);
 
         #endregion
     }
@@ -891,6 +862,31 @@ namespace C5.Intervals
             }
 
             return max;
+        }
+
+
+
+        [Pure]
+        public static int IndexOfSorted<T>(this IEnumerable<T> sorted, T value, IComparer<T> comparer = null)
+        {
+            if (comparer == null)
+                comparer = Comparer<T>.Default;
+
+            var index = 0;
+            foreach (var item in sorted)
+            {
+                var compareTo = comparer.Compare(item, value);
+
+                if (compareTo > 0)
+                    break;
+
+                if (compareTo == 0)
+                    return index;
+
+                ++index;
+            }
+
+            return ~index;
         }
     }
 }
