@@ -5,98 +5,121 @@ using System.Linq;
 
 namespace C5.Intervals
 {
+    // TODO: Do a class for common interval algorithms like most non-overlapping intervals (weighted/unweighted), maximum depth, etc.
+
     /// <summary>
     /// Extends IIntervals with convenient methods for overlapping, containment, comparing, equality and hashcode, and string formatting.
     /// </summary>
     public static class IntervalExtensions
     {
+        #region Overlaps
+
         /// <summary>
         /// Check if two intervals overlap.
         /// </summary>
-        /// <param name="x">First interval</param>
-        /// <param name="y">Second interval</param>
+        /// <param name="first">First interval.</param>
+        /// <param name="second">Second interval.</param>
         /// <remarks>True if their intersection is not empty. The meaning should not be confused with <see cref="IntervalRelation.Overlaps"/> and <see cref="IntervalRelation.OverlappedBy"/>!</remarks>
         /// <returns>True if the intervals overlap.</returns>
         [Pure]
-        public static bool Overlaps<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        public static bool Overlaps<T>(this IInterval<T> first, IInterval<T> second) where T : IComparable<T>
         {
-            Contract.Requires(x != null);
-            Contract.Requires(y != null);
-            Contract.Ensures(Contract.Result<bool>() == (x.CompareLowHigh(y) <= 0 && y.CompareLowHigh(x) <= 0));
+            Contract.Requires(first != null);
+            Contract.Requires(second != null);
+            Contract.Ensures(Contract.Result<bool>() == (first.CompareLowHigh(second) <= 0 && second.CompareLowHigh(first) <= 0));
 
             // Save compare values to avoid comparing twice in case CompareTo() should be expensive
-            int xLowYHighCompare = x.Low.CompareTo(y.High), yLowXHighCompare = y.Low.CompareTo(x.High);
-            return (xLowYHighCompare < 0 || xLowYHighCompare == 0 && x.LowIncluded && y.HighIncluded)
-                && (yLowXHighCompare < 0 || yLowXHighCompare == 0 && y.LowIncluded && x.HighIncluded);
+            int xLowYHighCompare = first.Low.CompareTo(second.High), yLowXHighCompare = second.Low.CompareTo(first.High);
+            return (xLowYHighCompare < 0 || xLowYHighCompare == 0 && first.LowIncluded && second.HighIncluded)
+                && (yLowXHighCompare < 0 || yLowXHighCompare == 0 && second.LowIncluded && first.HighIncluded);
         }
 
         /// <summary>
         /// Compare an interval with a point interval to see if they overlap
         /// </summary>
-        /// <param name="x">Interval.</param>
-        /// <param name="p">Point interval.</param>
-        /// <returns>True if the intervals overlap.</returns>
+        /// <param name="interval">The interval.</param>
+        /// <param name="point">The point.</param>
+        /// <returns>True if the interval overlaps the point.</returns>
         [Pure]
-        public static bool Overlaps<T>(this IInterval<T> x, T p) where T : IComparable<T>
+        public static bool Overlaps<T>(this IInterval<T> interval, T point) where T : IComparable<T>
         {
-            Contract.Requires(x != null);
-            Contract.Requires(p != null);
+            Contract.Requires(interval != null);
+            Contract.Requires(point != null);
 
-            return Overlaps(x, new IntervalBase<T>(p));
+            return Overlaps(interval, new IntervalBase<T>(point));
         }
 
-        // TODO: Document
+        /// <summary>
+        /// Check if an interval overlaps any interval in a collection.
+        /// </summary>
+        /// <typeparam name="I"></typeparam>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="interval">The interval.</param>
+        /// <param name="intervals">The collection of intervals.</param>
+        /// <returns>True if any of the intervals in <paramref name="intervals"/> overlaps <paramref name="interval"/>.</returns>
         [Pure]
         public static bool OverlapsAny<I, T>(this IInterval<T> interval, IEnumerable<I> intervals)
             where I : IInterval<T>
             where T : IComparable<T>
         {
+            Contract.Requires(interval != null);
+            Contract.Requires(intervals != null);
+            Contract.Ensures(Contract.Result<bool>() == intervals.Any(x => x.Overlaps(interval)));
+
             return intervals.Any(x => x.Overlaps(interval));
         }
 
+        #endregion
+
+        #region Contains
+
         /// <summary>
-        /// Check if one interval contains another interval. The container interval
-        /// contains all of the contained interval possibly sharing endpoints.
+        /// Check if the first interval contains the second.
+        /// The first interval contains the whole of the second interval, possibly sharing endpoints.
         /// </summary>
-        /// <param name="x">Container interval.</param>
-        /// <param name="y">Contained interval.</param>
-        /// <returns>True if y is contained in x.</returns>
+        /// <param name="first">The container interval.</param>
+        /// <param name="second">The contained interval.</param>
+        /// <returns>True if the second interval is contained in the first.</returns>
         [Pure]
-        public static bool Contains<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        public static bool Contains<T>(this IInterval<T> first, IInterval<T> second) where T : IComparable<T>
         {
-            Contract.Requires(x != null);
-            Contract.Requires(y != null);
-            Contract.Ensures(Contract.Result<bool>() == (x.CompareLow(y) <= 0 && y.CompareHigh(x) <= 0));
+            Contract.Requires(first != null);
+            Contract.Requires(second != null);
+            Contract.Ensures(Contract.Result<bool>() == (first.CompareLow(second) <= 0 && second.CompareHigh(first) <= 0));
 
             // Save compare values to avoid comparing twice in case CompareTo() should be expensive
-            int lowCompare = x.Low.CompareTo(y.Low), highCompare = y.High.CompareTo(x.High);
+            int lowCompare = first.Low.CompareTo(second.Low), highCompare = second.High.CompareTo(first.High);
             return
-                (lowCompare < 0 || lowCompare == 0 && (x.LowIncluded || !y.LowIncluded))
-                && (highCompare < 0 || highCompare == 0 && (!y.HighIncluded || x.HighIncluded));
+                (lowCompare < 0 || lowCompare == 0 && (first.LowIncluded || !second.LowIncluded))
+                && (highCompare < 0 || highCompare == 0 && (!second.HighIncluded || first.HighIncluded));
         }
 
         // TODO: Replace with IsContaining
         /// <summary>
-        /// Check if one interval strictly contains another interval. The container interval
-        /// contains all of the contained interval without sharing endpoints.
+        /// Check if the first interval strictly contains the second interval.
+        /// The container interval contains all of the contained interval without sharing endpoints.
         /// </summary>
-        /// <param name="x">Container interval.</param>
-        /// <param name="y">Contained interval.</param>
-        /// <returns>True if y is strictly contained in x.</returns>
+        /// <param name="first">The container interval.</param>
+        /// <param name="second">The contained interval.</param>
+        /// <returns>True if the second interval is strictly contained in first interval.</returns>
         [Pure]
-        public static bool StrictlyContains<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        public static bool StrictlyContains<T>(this IInterval<T> first, IInterval<T> second) where T : IComparable<T>
         {
-            Contract.Requires(x != null);
-            Contract.Requires(y != null);
-            Contract.Ensures(Contract.Result<bool>() == (x.CompareLow(y) < 0 && y.CompareHigh(x) < 0));
-            Contract.Ensures(Contract.Result<bool>() == x.IsContaining(y));
+            Contract.Requires(first != null);
+            Contract.Requires(second != null);
+            Contract.Ensures(Contract.Result<bool>() == (first.CompareLow(second) < 0 && second.CompareHigh(first) < 0));
+            Contract.Ensures(Contract.Result<bool>() == first.IsContaining(second));
 
             // Save compare values to avoid comparing twice in case CompareTo() should be expensive
-            int lowCompare = x.Low.CompareTo(y.Low), highCompare = y.High.CompareTo(x.High);
+            int lowCompare = first.Low.CompareTo(second.Low), highCompare = second.High.CompareTo(first.High);
             return
-                (lowCompare < 0 || (lowCompare == 0 && x.LowIncluded && !y.LowIncluded))
-                && (highCompare < 0 || (highCompare == 0 && !y.HighIncluded && x.HighIncluded));
+                (lowCompare < 0 || (lowCompare == 0 && first.LowIncluded && !second.LowIncluded))
+                && (highCompare < 0 || (highCompare == 0 && !second.HighIncluded && first.HighIncluded));
         }
+
+        #endregion
+
+        #region Comparison
 
         /// <summary>
         /// Compare two intervals to determine which one is first in a sorting order.
@@ -109,37 +132,37 @@ namespace C5.Intervals
         /// If the high endpoints are equal, the interval with excluded high endpoint comes first.
         /// If the high endpoint inclusions are equal, the interval are equal.
         /// </summary>
-        /// <param name="x">First interval</param>
-        /// <param name="y">Second interval</param>
+        /// <param name="first">The first interval</param>
+        /// <param name="second">The second interval</param>
         /// <returns>Negative if first interval is before the second, 0 if they are equal, otherwise positive.</returns>
         [Pure]
-        public static int CompareTo<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        public static int CompareTo<T>(this IInterval<T> first, IInterval<T> second) where T : IComparable<T>
         {
-            Contract.Requires(x != null);
-            Contract.Requires(y != null);
-            Contract.Ensures(Contract.Result<int>() == (x.CompareLow(y) != 0 ? x.CompareLow(y) : x.CompareHigh(y)));
+            Contract.Requires(first != null);
+            Contract.Requires(second != null);
+            Contract.Ensures(Contract.Result<int>() == (first.CompareLow(second) != 0 ? first.CompareLow(second) : first.CompareHigh(second)));
 
-            var lowCompare = x.Low.CompareTo(y.Low);
+            var lowCompare = first.Low.CompareTo(second.Low);
 
             // Check if x starts y - their lows are the same
             if (lowCompare == 0)
             {
                 // If both include or exclude their low endpoint, we don't care which one is first
-                if (x.LowIncluded == y.LowIncluded)
+                if (first.LowIncluded == second.LowIncluded)
                 {
-                    var highCompare = x.High.CompareTo(y.High);
+                    var highCompare = first.High.CompareTo(second.High);
 
                     // Check endpoint inclusion, if values are equal, but inclusion is different
-                    if (highCompare == 0 && x.HighIncluded != y.HighIncluded)
+                    if (highCompare == 0 && first.HighIncluded != second.HighIncluded)
                         // Excluded high endpoints come before included
-                        return !x.HighIncluded ? -1 : 1;
+                        return !first.HighIncluded ? -1 : 1;
 
                     return highCompare;
                 }
 
                 // x.LowIncluded and y.LowIncluded are different
                 // So if x.LowIncluded is true it comes before y
-                return x.LowIncluded ? -1 : 1;
+                return first.LowIncluded ? -1 : 1;
 
             }
 
@@ -149,23 +172,23 @@ namespace C5.Intervals
 
         /// <summary>
         /// Compare the low endpoints of two intervals. If the low endpoint values are equal,
-        /// an included endpoint precedes an excluded endpoint
+        /// an included endpoint precedes an excluded endpoint. The high endpoints are not considered.
         /// </summary>
-        /// <param name="x">First interval</param>
-        /// <param name="y">Second interval</param>
+        /// <param name="first">The first interval.</param>
+        /// <param name="second">The second interval.</param>
         /// <returns>Negative if first interval's low is less than second's low endpoint, 0 if they are equal, otherwise positive.</returns>
         [Pure]
-        public static int CompareLow<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        public static int CompareLow<T>(this IInterval<T> first, IInterval<T> second) where T : IComparable<T>
         {
-            Contract.Requires(x != null);
-            Contract.Requires(y != null);
+            Contract.Requires(first != null);
+            Contract.Requires(second != null);
 
-            var compare = x.Low.CompareTo(y.Low);
+            var compare = first.Low.CompareTo(second.Low);
 
             // Check endpoint inclusion, if values are equal, but inclusion is different
-            if (compare == 0 && x.LowIncluded != y.LowIncluded)
+            if (compare == 0 && first.LowIncluded != second.LowIncluded)
                 // Included low endpoints come before excluded
-                return x.LowIncluded ? -1 : 1;
+                return first.LowIncluded ? -1 : 1;
 
             return compare;
         }
@@ -173,44 +196,44 @@ namespace C5.Intervals
         /// <summary>
         /// Compare the low endpoint of an interval to a point.
         /// </summary>
-        /// <param name="x">The interval.</param>
-        /// <param name="p">The point.</param>
+        /// <param name="interval">The interval.</param>
+        /// <param name="point">The point.</param>
         /// <returns>Negative if the interval's low is less than the point, 0 if they are equal, otherwise positive.</returns>
         [Pure]
-        public static int CompareLow<T>(this IInterval<T> x, T p) where T : IComparable<T>
+        public static int CompareLow<T>(this IInterval<T> interval, T point) where T : IComparable<T>
         {
-            Contract.Requires(x != null);
-            Contract.Requires(p != null);
-            Contract.Ensures(Contract.Result<int>() == x.CompareLow(new IntervalBase<T>(p)));
+            Contract.Requires(interval != null);
+            Contract.Requires(point != null);
+            Contract.Ensures(Contract.Result<int>() == interval.CompareLow(new IntervalBase<T>(point)));
 
-            var compare = x.Low.CompareTo(p);
+            var compare = interval.Low.CompareTo(point);
 
             // Check endpoint inclusion, if values are equal
             if (compare == 0)
-                return x.LowIncluded ? 0 : 1;
+                return interval.LowIncluded ? 0 : 1;
 
             return compare;
         }
 
         /// <summary>
         /// Compare the high endpoints of two intervals. If the high endpoint values are equal,
-        /// an excluded endpoint precedes an included endpoint
+        /// an excluded endpoint precedes an included endpoint.  The low endpoints are not considered.
         /// </summary>
-        /// <param name="x">First interval</param>
-        /// <param name="y">Second interval</param>
+        /// <param name="first">The first interval.</param>
+        /// <param name="second">The second interval.</param>
         /// <returns>Negative if first interval's high is less than second's high endpoint, 0 if they are equal, otherwise positive.</returns>
         [Pure]
-        public static int CompareHigh<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        public static int CompareHigh<T>(this IInterval<T> first, IInterval<T> second) where T : IComparable<T>
         {
-            Contract.Requires(x != null);
-            Contract.Requires(y != null);
+            Contract.Requires(first != null);
+            Contract.Requires(second != null);
 
-            var compare = x.High.CompareTo(y.High);
+            var compare = first.High.CompareTo(second.High);
 
             // Check endpoint inclusion, if values are equal, but inclusion is different
-            if (compare == 0 && x.HighIncluded != y.HighIncluded)
+            if (compare == 0 && first.HighIncluded != second.HighIncluded)
                 // Excluded high endpoints come before included
-                return !x.HighIncluded ? -1 : 1;
+                return !first.HighIncluded ? -1 : 1;
 
             return compare;
         }
@@ -218,21 +241,21 @@ namespace C5.Intervals
         /// <summary>
         /// Compare the high endpoint of an interval to a point.
         /// </summary>
-        /// <param name="x">The interval.</param>
-        /// <param name="p">The point.</param>
+        /// <param name="interval">The interval.</param>
+        /// <param name="point">The point.</param>
         /// <returns>Negative if the interval's high is less than the point, 0 if they are equal, otherwise positive.</returns>
         [Pure]
-        public static int CompareHigh<T>(this IInterval<T> x, T p) where T : IComparable<T>
+        public static int CompareHigh<T>(this IInterval<T> interval, T point) where T : IComparable<T>
         {
-            Contract.Requires(x != null);
-            Contract.Requires(p != null);
-            Contract.Ensures(Contract.Result<int>() == x.CompareHigh(new IntervalBase<T>(p)));
+            Contract.Requires(interval != null);
+            Contract.Requires(point != null);
+            Contract.Ensures(Contract.Result<int>() == interval.CompareHigh(new IntervalBase<T>(point)));
 
-            var compare = x.High.CompareTo(p);
+            var compare = interval.High.CompareTo(point);
 
             // Check endpoint inclusion, if values are equal, but inclusion is different
             if (compare == 0)
-                return !x.HighIncluded ? -1 : 0;
+                return !interval.HighIncluded ? -1 : 0;
 
             return compare;
         }
@@ -240,42 +263,43 @@ namespace C5.Intervals
         /// <summary>
         /// Compare the low endpoint of first interval to the high endpoint of the second interval.
         /// </summary>
-        /// <param name="x">First interval.</param>
-        /// <param name="y">Second interval.</param>
+        /// <param name="first">First interval.</param>
+        /// <param name="second">Second interval.</param>
         /// <returns>Negative if first interval's low is less than second's high endpoint, 0 if they are equal, otherwise positive.</returns>
         [Pure]
-        public static int CompareLowHigh<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        public static int CompareLowHigh<T>(this IInterval<T> first, IInterval<T> second) where T : IComparable<T>
         {
-            Contract.Requires(x != null);
-            Contract.Requires(y != null);
+            Contract.Requires(first != null);
+            Contract.Requires(second != null);
 
-            var compare = x.Low.CompareTo(y.High);
+            var compare = first.Low.CompareTo(second.High);
 
             // Check endpoint inclusion, if values are equal, but inclusion is different
             if (compare == 0)
                 // Excluded high endpoints come before included
-                return x.LowIncluded && y.HighIncluded ? 0 : 1;
+                return first.LowIncluded && second.HighIncluded ? 0 : 1;
 
             return compare;
         }
+
         /// <summary>
         /// Compare the high endpoint of first interval to the low endpoint of the second interval.
         /// </summary>
-        /// <param name="x">First interval.</param>
-        /// <param name="y">Second interval.</param>
+        /// <param name="first">The first interval.</param>
+        /// <param name="second">The second interval.</param>
         /// <returns>Negative if first interval's high is less than second's low endpoint, 0 if they are equal, otherwise positive.</returns>
         [Pure]
-        public static int CompareHighLow<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        public static int CompareHighLow<T>(this IInterval<T> first, IInterval<T> second) where T : IComparable<T>
         {
-            Contract.Requires(x != null);
-            Contract.Requires(y != null);
+            Contract.Requires(first != null);
+            Contract.Requires(second != null);
 
-            var compare = x.High.CompareTo(y.Low);
+            var compare = first.High.CompareTo(second.Low);
 
             // Check endpoint inclusion, if values are equal, but inclusion is different
             if (compare == 0)
                 // Excluded high endpoints come before included
-                return x.HighIncluded && y.LowIncluded ? 0 : -1;
+                return first.HighIncluded && second.LowIncluded ? 0 : -1;
 
             return compare;
         }
@@ -283,69 +307,123 @@ namespace C5.Intervals
         /// <summary>
         /// Compare the endpoint values of an interval with each other.
         /// </summary>
-        /// <param name="x">The interval.</param>
-        /// <returns>Negative if the high endpoint value is less than the low endpoint value, 0 if they are equal, otherwise positive.</returns>
+        /// <param name="interval">The interval.</param>
+        /// <returns>Negative if the low endpoint value is less than the high endpoint value, 0 if they are equal, otherwise positive.</returns>
         [Pure]
-        public static int CompareEndpointsValues<T>(this IInterval<T> x) where T : IComparable<T>
+        public static int CompareEndpointsValues<T>(this IInterval<T> interval) where T : IComparable<T>
         {
-            Contract.Requires(x != null);
+            Contract.Requires(interval != null);
 
-            return x.Low.CompareTo(x.High);
+            return interval.Low.CompareTo(interval.High);
         }
+
+        #endregion
+
+        #region Comparer Factories
+
+        public static IComparer<I> CreateComparer<I, T>()
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            return ComparerFactory<I>.CreateComparer((x, y) => x.CompareTo(y));
+        }
+
+        public static IComparer<I> CreateLowComparer<I, T>()
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            return ComparerFactory<I>.CreateComparer((x, y) => x.CompareLow(y));
+        }
+
+        public static IComparer<I> CreateHighComparer<I, T>()
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            return ComparerFactory<I>.CreateComparer((x, y) => x.CompareHigh(y));
+        }
+
+        public static IComparer<I> CreateReversedComparer<I, T>()
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            return ComparerFactory<I>.CreateComparer((x, y) => { var compare = y.CompareHigh(x); return compare != 0 ? compare : y.CompareLow(x); });
+        }
+
+        public static IEqualityComparer<I> CreateEqualityComparer<I, T>()
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            return ComparerFactory<I>.CreateEqualityComparer((x, y) => x.IntervalEquals(y), x => x.GetIntervalHashCode());
+        }
+
+        public static IEqualityComparer<I> CreateReferenceEqualityComparer<I, T>()
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            return ComparerFactory<I>.CreateEqualityComparer((x, y) => ReferenceEquals(x, y), x => x.GetIntervalHashCode());
+        }
+
+        #endregion
+
+        #region Equalities
 
         /// <summary>
         /// Check if two intervals are equal, i.e. have the same low and high endpoint including endpoint inclusion.
         /// </summary>
-        /// <param name="x">First interval.</param>
-        /// <param name="y">Second interval.</param>
+        /// <param name="first">The first interval.</param>
+        /// <param name="second">The second interval.</param>
         /// <returns>True if both endpoints are equal.</returns>
         [Pure]
-        public static bool IntervalEquals<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        public static bool IntervalEquals<T>(this IInterval<T> first, IInterval<T> second) where T : IComparable<T>
         {
-            Contract.Requires(x != null);
-            Contract.Requires(y != null);
-            Contract.Ensures(Contract.Result<bool>() == (CompareTo(x, y) == 0));
+            Contract.Requires(first != null);
+            Contract.Requires(second != null);
+            Contract.Ensures(Contract.Result<bool>() == (CompareTo(first, second) == 0));
 
             return
-                x.Low.CompareTo(y.Low) == 0 &&
-                x.High.CompareTo(y.High) == 0 &&
-                x.LowIncluded == y.LowIncluded &&
-                x.HighIncluded == y.HighIncluded;
+                first.Low.CompareTo(second.Low) == 0 &&
+                first.High.CompareTo(second.High) == 0 &&
+                first.LowIncluded == second.LowIncluded &&
+                first.HighIncluded == second.HighIncluded;
         }
 
         /// <summary>
         /// Check if two intervals have equal low endpoints, i.e. have the same low endpoint value and inclusion.
+        /// The high endpoints are not considered.
         /// </summary>
-        /// <param name="x">First interval.</param>
-        /// <param name="y">Second interval.</param>
+        /// <param name="first">First interval.</param>
+        /// <param name="second">Second interval.</param>
         /// <returns>True if both interval's low endpoints are equal.</returns>
         [Pure]
-        public static bool LowEquals<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        public static bool LowEquals<T>(this IInterval<T> first, IInterval<T> second) where T : IComparable<T>
         {
-            Contract.Requires(x != null);
-            Contract.Requires(y != null);
-            Contract.Ensures(Contract.Result<bool>() == (CompareLow(x, y) == 0 && x.LowIncluded == y.LowIncluded));
+            Contract.Requires(first != null);
+            Contract.Requires(second != null);
+            Contract.Ensures(Contract.Result<bool>() == (CompareLow(first, second) == 0 && first.LowIncluded == second.LowIncluded));
 
             // TODO: Test
-            return x.Low.CompareTo(y.Low) == 0 && x.LowIncluded == y.LowIncluded;
+            return first.Low.CompareTo(second.Low) == 0 && first.LowIncluded == second.LowIncluded;
         }
 
         /// <summary>
         /// Check if two intervals have equal high endpoints, i.e. have the same high endpoint value and inclusion.
+        /// The low endpoints are not considered.
         /// </summary>
-        /// <param name="x">First interval.</param>
-        /// <param name="y">Second interval.</param>
+        /// <param name="first">The first interval.</param>
+        /// <param name="second">The second interval.</param>
         /// <returns>True if both interval's high endpoints are equal.</returns>
         [Pure]
-        public static bool HighEquals<T>(this IInterval<T> x, IInterval<T> y) where T : IComparable<T>
+        public static bool HighEquals<T>(this IInterval<T> first, IInterval<T> second) where T : IComparable<T>
         {
-            Contract.Requires(x != null);
-            Contract.Requires(y != null);
-            Contract.Ensures(Contract.Result<bool>() == (CompareHigh(x, y) == 0 && x.HighIncluded == y.HighIncluded));
+            Contract.Requires(first != null);
+            Contract.Requires(second != null);
+            Contract.Ensures(Contract.Result<bool>() == (CompareHigh(first, second) == 0 && first.HighIncluded == second.HighIncluded));
 
             // TODO: Test
-            return x.High.CompareTo(y.High) == 0 && x.HighIncluded == y.HighIncluded;
+            return first.High.CompareTo(second.High) == 0 && first.HighIncluded == second.HighIncluded;
         }
+
+        #endregion
 
         /// <summary>
         /// Get the interval in which two intervals overlap.
@@ -505,34 +583,6 @@ namespace C5.Intervals
                 delimiter,
                 x.High,
                 x.HighIncluded ? "]" : ")");
-        }
-
-        public static IComparer<I> CreateComparer<I, T>()
-            where I : IInterval<T>
-            where T : IComparable<T>
-        {
-            return ComparerFactory<I>.CreateComparer((x, y) => x.CompareTo(y));
-        }
-
-        public static IComparer<I> CreateLowComparer<I, T>()
-            where I : IInterval<T>
-            where T : IComparable<T>
-        {
-            return ComparerFactory<I>.CreateComparer((x, y) => x.CompareLow(y));
-        }
-
-        public static IComparer<I> CreateHighComparer<I, T>()
-            where I : IInterval<T>
-            where T : IComparable<T>
-        {
-            return ComparerFactory<I>.CreateComparer((x, y) => x.CompareHigh(y));
-        }
-
-        public static IComparer<I> CreateReversedComparer<I, T>()
-            where I : IInterval<T>
-            where T : IComparable<T>
-        {
-            return ComparerFactory<I>.CreateComparer((x, y) => { var compare = y.CompareHigh(x); return compare != 0 ? compare : y.CompareLow(x); });
         }
 
         /// <summary>
@@ -721,7 +771,7 @@ namespace C5.Intervals
             Contract.Requires(intervals != null);
             Contract.Requires(IntervalContractHelper.IsSorted<I, T>(intervals, isSorted));
             Contract.Ensures(Contract.Result<int>() >= 0);
-            Contract.Ensures(Contract.Result<int>() == 0 || IntervalCollectionContractHelper.CountOverlaps(((IEnumerable<IInterval<T>>) intervals), Contract.ValueAtReturn(out intervalOfMaximumDepth)) == Contract.Result<int>());
+            Contract.Ensures(Contract.Result<int>() == 0 || IntervalCollectionContractHelper.CountOverlaps(((IEnumerable<IInterval<T>>)intervals), Contract.ValueAtReturn(out intervalOfMaximumDepth)) == Contract.Result<int>());
 
             // Sort the intervals if necessary
             if (!isSorted)
