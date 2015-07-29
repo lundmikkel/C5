@@ -35,62 +35,27 @@ namespace C5.Intervals
         /// </summary>
         /// <param name="intervals">The collection of intervals.</param>
         public StaticFiniteIntervalList(IEnumerable<I> intervals)
-            : this(intervals, false)
-        { }
-
-        /// <summary>
-        /// Create a Layered Containment List with a collection of intervals.
-        /// </summary>
-        /// <param name="intervals">The collection of intervals.</param>
-        public StaticFiniteIntervalList(IEnumerable<I> intervals, bool RemoveOverlapsInSortingOrder = false)
         {
             Contract.Requires(intervals != null);
 
-            // Make intervals to array to allow fast sorting and counting
-            var list = new List<I>(intervals);
+            var array = intervals as I[] ?? intervals.ToArray();
 
             // Stop if we have no intervals
-            if (!list.Any())
+            if (array.Length == 0)
                 return;
 
-            // Make sure the list is sorted
-            var comparer = IntervalExtensions.CreateComparer<I, T>();
-            if (!list.IsSorted(comparer))
-                list.Sort(comparer);
+            // TODO: Find a better solution - think BITS in dynamic sorted lists (SortedSplitList)
+            var list = new List<I>(array.Length);
+            foreach (var interval in array)
+                if (!interval.OverlapsAny(list))
+                    list.Add(interval);
 
-            // Create an array based on the current list count
-            _intervals = new I[list.Count];
+            _intervals = list.ToArray();
+            Sorting.Timsort(_intervals, IntervalExtensions.CreateComparer<I, T>());
 
-            var enumerator = list.GetEnumerator();
-            enumerator.MoveNext();
+            _count = list.Count;
 
-            var i = 0;
-            // Save the first interval to list and as previous
-            var previous = _intervals[i++] = enumerator.Current;
-
-            while (enumerator.MoveNext())
-            {
-                var interval = enumerator.Current;
-
-                // TODO: Fix when default behavior has been decided on
-                // Check if interval overlaps the previous interval
-                if (interval.Overlaps(previous))
-                    // If overlaps should be disregarded skip to the next one
-                    if (RemoveOverlapsInSortingOrder)
-                        continue;
-                    // Otherwise throw an error
-                    else
-                        throw new ArgumentException("Overlapping intervals are not allowed!");
-
-                // Add the interval and store it as the previous
-                previous = _intervals[i++] = interval;
-            }
-
-            // Update count based on the actual number of intervals added to the list
-            _count = i;
-
-            // Cache the collection span
-            _span = new IntervalBase<T>(_intervals[0], previous);
+            _span = new IntervalBase<T>(_intervals[0], _intervals[_count - 1]);
         }
 
         #endregion
@@ -173,27 +138,61 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override IEnumerable<I> Sorted()
         {
-            for (var i = 0; i < _count; i++)
-                yield return _intervals[i];
+            return enumerateFromIndex(0);
+        }
+
+        public override IEnumerable<I> SortedBackwards()
+        {
+            return enumerateBackwardsFromIndex(_count - 1);
         }
 
         public override IEnumerable<I> EnumerateFrom(T point, bool includeOverlaps = true)
         {
+            throw new NotImplementedException();
+
             var query = new IntervalBase<T>(point);
             var index = includeOverlaps ? findFirst(query) : findLast(query);
             for (var i = index; i < _count; ++i)
                 yield return _intervals[i];
         }
 
-        public override IEnumerable<I> EnumerateFrom(I interval, bool includeInterval = true)
+        public override IEnumerable<I> EnumerateBackwardsFrom(T point, bool includeOverlaps = true)
         {
             throw new NotImplementedException();
         }
 
+        public override IEnumerable<I> EnumerateFrom(I interval, bool includeInterval = true)
+        {
+            var index = IndexOf(interval);
+            return 0 <= index ? enumerateFromIndex(includeInterval ? index : index + 1) : Enumerable.Empty<I>();
+        }
+
+        public override IEnumerable<I> EnumerateBackwardsFrom(I interval, bool includeInterval = true)
+        {
+            var index = IndexOf(interval);
+            return 0 <= index ? enumerateBackwardsFromIndex(includeInterval ? index : index - 1) : Enumerable.Empty<I>();
+        }
+
         public override IEnumerable<I> EnumerateFromIndex(int index)
         {
-            for (var i = index; i < _count; i++)
-                yield return _intervals[i];
+            return enumerateFromIndex(index);
+        }
+
+        public override IEnumerable<I> EnumerateBackwardsFromIndex(int index)
+        {
+            return enumerateBackwardsFromIndex(index);
+        }
+
+        private IEnumerable<I> enumerateFromIndex(int i)
+        {
+            while (i < _count)
+                yield return _intervals[i++];
+        }
+
+        private IEnumerable<I> enumerateBackwardsFromIndex(int i)
+        {
+            while (i >= 0)
+                yield return _intervals[i--];
         }
 
         #endregion

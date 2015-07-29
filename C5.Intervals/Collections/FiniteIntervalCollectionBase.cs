@@ -14,7 +14,7 @@ namespace C5.Intervals
     /// <typeparam name="I">The interval type with endpoint type <typeparamref name="T"/>.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
     /// <seealso cref="IntervalCollectionBase{I,T}"/>
-    public abstract class FiniteIntervalCollectionBase<I, T> : IntervalCollectionBase<I, T>, ISortedIntervalCollection<I, T>
+    public abstract class FiniteIntervalCollectionBase<I, T> : IntervalCollectionBase<I, T>, IFiniteIntervalCollection<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
@@ -27,7 +27,6 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override bool AllowsOverlaps { get { return false; } }
 
-        // TODO: Should always give sorted FindOverlaps, right?
         /// <inheritdoc/>
         public override bool IsFindOverlapsSorted { get { return true; } }
 
@@ -80,13 +79,25 @@ namespace C5.Intervals
         public abstract IEnumerable<I> Sorted();
 
         /// <inheritdoc/>
+        public abstract IEnumerable<I> SortedBackwards();
+
+        /// <inheritdoc/>
         public abstract IEnumerable<I> EnumerateFrom(T point, bool includeOverlaps = true);
+
+        /// <inheritdoc/>
+        public abstract IEnumerable<I> EnumerateBackwardsFrom(T point, bool includeOverlaps = true);
 
         /// <inheritdoc/>
         public abstract IEnumerable<I> EnumerateFrom(I interval, bool includeInterval = true);
 
         /// <inheritdoc/>
+        public abstract IEnumerable<I> EnumerateBackwardsFrom(I interval, bool includeInterval = true);
+
+        /// <inheritdoc/>
         public abstract IEnumerable<I> EnumerateFromIndex(int index);
+
+        /// <inheritdoc/>
+        public abstract IEnumerable<I> EnumerateBackwardsFromIndex(int index);
 
         #endregion
 

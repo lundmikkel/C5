@@ -25,8 +25,7 @@ namespace C5.Intervals
         #region Fields
 
         private Node _root;
-        private readonly Node _first;
-        private readonly Node _last;
+        private readonly Node _first, _last;
 
         #endregion
 
@@ -49,7 +48,7 @@ namespace C5.Intervals
             Contract.Invariant(this.IsSorted<I, T>());
 
             // Check that doubly linked lists are sorted in both direction
-            Contract.Invariant(enumerateFrom(_first).IsSorted<I, T>());
+            Contract.Invariant(enumerateFrom(_first.Next).IsSorted<I, T>());
             Contract.Invariant(enumerateBackwardsFrom(_last.Previous).Reverse().IsSorted<I, T>());
 
             // Check in-order traversal is sorted
@@ -117,8 +116,7 @@ namespace C5.Intervals
             public Node Left, Right;
             public Node Previous, Next;
 
-            public int Balance;
-            public int Count;
+            public int Count, Balance;
 
 #if DEBUG
             public readonly bool Dummy;
@@ -441,14 +439,14 @@ namespace C5.Intervals
 
         /// <summary>
         /// Create an Doubly-linked Finite Interval Tree from a collection of intervals.
+        /// This has the same effect as creating the collection and then calling <see cref="IIntervalCollection{I,T}.AddAll"/>.
         /// </summary>
         public DoublyLinkedFiniteIntervalTree(IEnumerable<I> intervals)
             : this()
         {
             Contract.Requires(intervals != null);
 
-            // TODO: Remove ordering as soon as default behavior has been decided on
-            foreach (var interval in intervals.OrderBy(x => x, IntervalExtensions.CreateComparer<I, T>()))
+            foreach (var interval in intervals)
                 Add(interval);
         }
 
@@ -499,9 +497,6 @@ namespace C5.Intervals
         public override bool IsReadOnly { get { return false; } }
 
         /// <inheritdoc/>
-        public override bool IsFindOverlapsSorted { get { return true; } }
-
-        /// <inheritdoc/>
         public override Speed IndexingSpeed { get { return Speed.Log; } }
 
         #endregion
@@ -526,17 +521,70 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override IEnumerable<I> Sorted() { return enumerateFrom(_first.Next); }
 
+        /// <inheritdoc/>
+        public override IEnumerable<I> SortedBackwards() { return enumerateBackwardsFrom(_last.Previous); }
+
+        #region Enumerate from Point
+
+        /// <inheritdoc/>
+        public override IEnumerable<I> EnumerateFrom(T point, bool includeOverlaps = true)
+        {
+            bool overlaps;
+            var node = findNode(point, out overlaps);
+            return node == null ? Enumerable.Empty<I>() : enumerateFrom(!includeOverlaps && overlaps ? node.Next : node);
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<I> EnumerateBackwardsFrom(T point, bool includeOverlaps = true)
+        {
+            bool overlaps;
+            var node = findNode(point, out overlaps);
+            return node == null ? Enumerable.Empty<I>() : enumerateBackwardsFrom(includeOverlaps && overlaps ? node : node.Previous);
+        }
+
+        #endregion
+
+        #region Enumerate from Interval
+
+        /// <inheritdoc/>
+        public override IEnumerable<I> EnumerateFrom(I interval, bool includeInterval = true)
+        {
+            var node = findContainingNode(interval);
+            return node == null ? Enumerable.Empty<I>() : enumerateFrom(includeInterval ? node : node.Next);
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<I> EnumerateBackwardsFrom(I interval, bool includeInterval = true)
+        {
+            var node = findContainingNode(interval);
+            return node == null ? Enumerable.Empty<I>() : enumerateBackwardsFrom(includeInterval ? node : node.Previous);
+        }
+
+        #endregion
+
+        #region Enumerate from Index
+
+        /// <inheritdoc/>
+        public override IEnumerable<I> EnumerateFromIndex(int index)
+        {
+            return enumerateFrom(indexer(_root, index));
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<I> EnumerateBackwardsFromIndex(int index)
+        {
+            return enumerateBackwardsFrom(indexer(_root, index));
+        }
+
+        #endregion
+
+        #region Helpers
+
         [Pure]
         private IEnumerable<I> enumerateFrom(Node node)
         {
             Contract.Requires(node != null);
-
-            // Skip the _first node
-            if (node == _first)
-            {
-                node = _first.Next;
-                //throw new Exception();
-            }
+            Contract.Requires(node != _first);
 
             // Iterate until the _last node
             while (node != _last)
@@ -550,13 +598,7 @@ namespace C5.Intervals
         private IEnumerable<I> enumerateBackwardsFrom(Node node)
         {
             Contract.Requires(node != null);
-
-            // Skip the _last node
-            if (node == _last)
-            {
-                node = _last.Previous;
-                //throw new Exception();
-            }
+            Contract.Requires(node != _last);
 
             // Iterate until the _first node
             while (node != _first)
@@ -565,63 +607,6 @@ namespace C5.Intervals
                 node = node.Previous;
             }
         }
-
-        #region Enumerate from Point
-
-        /// <inheritdoc/>
-        public override IEnumerable<I> EnumerateFrom(T point, bool includeOverlaps = true)
-        {
-            var node = findLowestNodeNotBefore(point);
-            return node == null ? Enumerable.Empty<I>() : enumerateFrom(node);
-        }
-
-        [Pure]
-        private Node findLowestNodeNotBefore(T point)
-        {
-            Contract.Requires(ReferenceEquals(point, null));
-
-            var node = _root;
-            while (node != null)
-            {
-                var compare = node.Key.CompareHigh(point);
-                if (compare < 0)
-                {
-                    if (node.Right != null)
-                        node = node.Right;
-                    else
-                        return node.Next;
-                }
-                else if (compare > 0)
-                {
-                    if (node.Left != null)
-                        node = node.Left;
-                    else
-                        return node.Previous;
-                }
-                else
-                    return node.Key.HighIncluded ? node : node.Next;
-            }
-
-            return null;
-        }
-
-        #endregion
-
-        #region Enumerate from Interval
-
-        /// <inheritdoc/>
-        public override IEnumerable<I> EnumerateFrom(I interval, bool includeInterval = true)
-        {
-            var node = findContainingNode(interval);
-            return node == null ? Enumerable.Empty<I>() : enumerateFrom(node);
-        }
-
-        // /// <inheritdoc/>
-        // public IEnumerable<I> EnumerateBackwardsFrom(I interval)
-        // {
-        //     var node = findContainingNode(interval);
-        //     return node == null ? Enumerable.Empty<I>() : previousIntervals(node.Previous ?? node);
-        // }
 
         [Pure]
         private Node findContainingNode(I interval)
@@ -642,16 +627,6 @@ namespace C5.Intervals
             }
 
             return null;
-        }
-
-        #endregion
-
-        #region Enumerate from Index
-
-        /// <inheritdoc/>
-        public override IEnumerable<I> EnumerateFromIndex(int index)
-        {
-            return enumerateFrom(indexer(_root, index));
         }
 
         #endregion
@@ -714,11 +689,27 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override bool FindOverlap(T query, out I overlap)
         {
-            overlap = null;
+            bool overlaps;
+            var node = findNode(query, out overlaps);
+            overlap = overlaps ? node.Key : null;
+            return overlaps;
+        }
+
+        /// <summary>
+        /// Returns the node containing an interval overlapping <paramref name="query"/>.
+        /// If no interval overlaps, the node with the first interval after
+        /// <paramref name="query"/> is returned.
+        /// </summary>
+        /// <param name="query">The query point.</param>
+        /// <param name="overlaps">True if the node's interval overlaps <paramref name="query"/>.</param>
+        /// <returns>The node.</returns>
+        private Node findNode(T query, out bool overlaps)
+        {
+            overlaps = false;
 
             // Stop immediately if empty
             if (IsEmpty)
-                return false;
+                return null;
 
             var node = _root;
             while (true)
@@ -733,17 +724,17 @@ namespace C5.Intervals
                     else
                     {
                         // Move to the previous node as it might contain an overlapping interval
-                        node = node.Previous;
+                        var previous = node.Previous;
 
                         // Check if previous interval overlaps
-                        if (node != _first && node.Key.Overlaps(query))
+                        if (previous != _first && previous.Key.Overlaps(query))
                         {
-                            overlap = node.Key;
-                            return true;
+                            overlaps = true;
+                            return previous;
                         }
 
                         // Stop as no overlap exists
-                        return false;
+                        return node;
                     }
                 }
                 else if (compare > 0)
@@ -756,12 +747,12 @@ namespace C5.Intervals
                         // Check if interval overlaps
                         if (node.Key.Overlaps(query))
                         {
-                            overlap = node.Key;
-                            return true;
+                            overlaps = true;
+                            return node;
                         }
 
                         // Stop as no overlap exists
-                        return false;
+                        return node.Next;
                     }
                 }
                 else
@@ -769,22 +760,22 @@ namespace C5.Intervals
                     // Check if low is included, thereby overlapping the query
                     if (node.Key.LowIncluded)
                     {
-                        overlap = node.Key;
-                        return true;
+                        overlaps = true;
+                        return node;
                     }
 
-                    // Go to the previous node
-                    node = node.Previous;
+                    // Check if previous node contains overlap
+                    var previous = node.Previous;
 
                     // Check if the previous interval overlaps
-                    if (node != _first && node.Key.High.CompareTo(query) == 0 && node.Key.HighIncluded)
+                    if (previous != _first && previous.Key.High.CompareTo(query) == 0 && previous.Key.HighIncluded)
                     {
-                        overlap = node.Key;
-                        return true;
+                        overlaps = true;
+                        return previous;
                     }
 
                     // Stop as no overlap exists
-                    return false;
+                    return node;
                 }
             }
         }
@@ -819,7 +810,7 @@ namespace C5.Intervals
         #region Add
 
         /// <inheritdoc/>
-        public override bool Add(I interval)
+        public override sealed bool Add(I interval)
         {
             var intervalWasAdded = false;
             var rotationNeeded = false;

@@ -7,6 +7,10 @@ namespace C5.Intervals
 {
     /// <summary>
     /// A collection that allows fast overlap queries on collections of intervals.
+    /// 
+    /// If a data structure is not read-only (see <see cref="IsReadOnly"/>) and has a contructor
+    /// that takes an <code>IEnumerable&lt;I&gt;</code>, the result should be equal to creating
+    /// the data structure and calling <see cref="AddAll"/> afterwards.
     /// </summary>
     /// <remarks>The data structures do not support updates on its intervals' values.
     /// If you wish to change an interval's endpoints or their endpoint inclusion, the interval
@@ -260,7 +264,8 @@ namespace C5.Intervals
         bool Add(I interval);
 
         /// <summary>
-        /// Add a collection of intervals to the collection.
+        /// Add a collection of intervals to the collection. This must have the same effect as
+        /// enumerating through the intervals and calling <see cref="Add"/> for each of them.
         /// </summary>
         /// <remarks>Different implementations may handle duplicates differently.</remarks>
         /// <param name="intervals">The intervals to add.</param>
@@ -809,6 +814,8 @@ namespace C5.Intervals
             }
             else
             {
+                // TODO: Make this work with allowsOverlaps
+
                 foreach (var interval in newCollection)
                 {
                     if (!counter.Contains(interval))

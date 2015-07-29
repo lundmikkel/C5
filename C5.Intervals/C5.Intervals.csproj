@@ -177,7 +177,7 @@
     <Compile Include="Extensions\IntervalTypeExtensions.cs" />
     <Compile Include="Interfaces\IInterval.cs" />
     <Compile Include="Interfaces\IIntervalCollection.cs" />
-    <Compile Include="Interfaces\ISortedIntervalCollection.cs" />
+    <Compile Include="Interfaces\IFiniteIntervalCollection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
