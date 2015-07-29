@@ -25,6 +25,16 @@ namespace C5.Intervals.Tests
             {
                 return Speed.Constant;
             }
+
+            protected override bool AllowsOverlaps()
+            {
+                return true;
+            }
+
+            protected override bool AllowsContainments()
+            {
+                return true;
+            }
         }
 
         class DynamicIntervalTreeTester_BlackBox_ReferenceDuplicatesFalse : DynamicIntervalTreeTester_BlackBox
@@ -153,7 +163,7 @@ namespace C5.Intervals.Tests
             [Test]
             public void Add_SortedQueryingOutsideSpan()
             {
-                var count = (int) Math.Pow(2.0, 5.0);
+                var count = (int)Math.Pow(2.0, 5.0);
                 var intervals = new IntervalBase<int>[count];
 
                 for (var i = 0; i < count; i++)

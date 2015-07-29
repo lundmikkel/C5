@@ -21,6 +21,16 @@ namespace C5.Intervals.Tests
                 return Speed.Constant;
             }
 
+            protected override bool AllowsOverlaps()
+            {
+                return true;
+            }
+
+            protected override bool AllowsContainments()
+            {
+                return true;
+            }
+
             protected override bool AllowsReferenceDuplicates()
             {
                 return true;
