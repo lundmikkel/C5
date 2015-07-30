@@ -525,8 +525,30 @@ namespace C5.Intervals
             if (x == null || ReferenceEquals(x.Low, null) || ReferenceEquals(x.High, null))
                 return false;
 
-            var compare = x.Low.CompareTo(x.High);
-            return compare < 0 || compare == 0 && x.LowIncluded && x.HighIncluded;
+            var compareTo = x.Low.CompareTo(x.High);
+            return compareTo < 0 || compareTo == 0 && x.LowIncluded && x.HighIncluded;
+        }
+
+        /// <summary>
+        /// Check if an interval is valid.
+        /// </summary>
+        /// <param name="x">The interval.</param>
+        /// <param name="type">The interval type.</param>
+        /// <typeparam name="T">The endpoint type.</typeparam>
+        /// <returns>True if the interval is valid.</returns>
+        [Pure]
+        public static bool IsValidIntervalOfType<T>(this IInterval<T> x, IntervalType type) where T : IComparable<T>
+        {
+            Contract.Ensures(Contract.Result<bool>() == (x.IsValidInterval() && x.IntervalType() == type));
+
+            if (x == null || ReferenceEquals(x.Low, null) || ReferenceEquals(x.High, null))
+                return false;
+
+            if (x.IntervalType() != type)
+                return false;
+
+            var compareTo = x.Low.CompareTo(x.High);
+            return compareTo < 0 || compareTo == 0 && type == IntervalType.Closed;
         }
 
         /// <summary>
