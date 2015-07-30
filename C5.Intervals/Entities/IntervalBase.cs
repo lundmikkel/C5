@@ -11,19 +11,20 @@ namespace C5.Intervals
     {
         #region Fields
 
-        // Use read-only fields to avoid breaking data structures, if values were changed
+        // Uses read-only fields to avoid breaking data structures, if values were changed
+        // Uses protected fields to allow inheriting classes to access the fields directly avoiding the overhead from the accessor internally
         /// <inheritdoc/>
         [ContractPublicPropertyName("Low")]
-        private readonly T _low;
+        protected readonly T _low;
         /// <inheritdoc/>
         [ContractPublicPropertyName("High")]
-        private readonly T _high;
+        protected readonly T _high;
         /// <inheritdoc/>
         [ContractPublicPropertyName("LowIncluded")]
-        private readonly bool _lowIncluded;
+        protected readonly bool _lowIncluded;
         /// <inheritdoc/>
         [ContractPublicPropertyName("HighIncluded")]
-        private readonly bool _highIncluded;
+        protected readonly bool _highIncluded;
 
         /// <inheritdoc/>
         public T Low

@@ -10,7 +10,7 @@ namespace C5.Intervals
     {
         #region Fields
 
-        private readonly D _data;
+        protected readonly D _data;
 
         #endregion
 
@@ -48,6 +48,12 @@ namespace C5.Intervals
 
         #endregion
 
+        #region Properties
+
+        public D Data { get { return _data; } }
+
+        #endregion
+
         #region Public Methods
 
         /// <inheritdoc/>
@@ -57,26 +63,20 @@ namespace C5.Intervals
             if (ReferenceEquals(this, obj)) return true;
             if (GetType() != obj.GetType()) return false;
             var that = (IDataInterval<T, D>)obj;
-            return this.IntervalEquals(that) && this.Data.Equals(that.Data);
+            return this.IntervalEquals(that) && _data.Equals(that.Data);
         }
 
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return this.GetIntervalHashCode() * 31 + Data.GetHashCode();
+            return this.GetIntervalHashCode() * 31 + _data.GetHashCode();
         }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("{0} - {1}", this.ToIntervalString(), Data);
+            return string.Format("{0} - {1}", this.ToIntervalString(), _data);
         }
-
-        #endregion
-
-        #region Properties
-
-        public D Data { get { return _data; } }
 
         #endregion
     }
