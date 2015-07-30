@@ -170,11 +170,13 @@
     <Compile Include="Collections\Static\NestedContainmentListArticle.cs" />
     <Compile Include="Collections\Static\StaticFiniteIntervalList.cs" />
     <Compile Include="Collections\Static\StaticIntervalTree.cs" />
+    <Compile Include="Entities\DataIntervalBase.cs" />
     <Compile Include="Entities\IntervalBase.cs" />
     <Compile Include="Entities\IntervalType.cs" />
     <Compile Include="Extensions\IntervalExtensions.cs" />
     <Compile Include="Extensions\IntervalRelations.cs" />
     <Compile Include="Extensions\IntervalTypeExtensions.cs" />
+    <Compile Include="Interfaces\IDataInterval.cs" />
     <Compile Include="Interfaces\IInterval.cs" />
     <Compile Include="Interfaces\IIntervalCollection.cs" />
     <Compile Include="Interfaces\IFiniteIntervalCollection.cs" />
