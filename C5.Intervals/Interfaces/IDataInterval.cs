@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 
 namespace C5.Intervals
 {
@@ -13,6 +14,7 @@ namespace C5.Intervals
         /// The associated data.
         /// </summary>
         /// <value>The associated data.</value>
+        [Pure]
         D Data { get; }
     }
 }
