@@ -549,15 +549,17 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override IEnumerable<I> EnumerateFrom(I interval, bool includeInterval = true)
         {
-            var node = findContainingNode(interval);
-            return node == null ? Enumerable.Empty<I>() : enumerateFrom(includeInterval ? node : node.Next);
+            bool intervalFound;
+            var node = findContainingNode(interval, out intervalFound);
+            return intervalFound ? enumerateFrom(includeInterval ? node : node.Next) : Enumerable.Empty<I>();
         }
 
         /// <inheritdoc/>
         public override IEnumerable<I> EnumerateBackwardsFrom(I interval, bool includeInterval = true)
         {
-            var node = findContainingNode(interval);
-            return node == null ? Enumerable.Empty<I>() : enumerateBackwardsFrom(includeInterval ? node : node.Previous);
+            bool intervalFound;
+            var node = findContainingNode(interval, out intervalFound);
+            return intervalFound ? enumerateBackwardsFrom(includeInterval ? node : node.Previous) : Enumerable.Empty<I>();
         }
 
         #endregion
@@ -609,10 +611,11 @@ namespace C5.Intervals
         }
 
         [Pure]
-        private Node findContainingNode(I interval)
+        private Node findContainingNode(IInterval<T> interval, out bool intervalFound)
         {
             Contract.Requires(interval != null);
 
+            intervalFound = false;
             var node = _root;
 
             while (node != null)
@@ -623,13 +626,28 @@ namespace C5.Intervals
                 else if (compare > 0)
                     node = node.Right;
                 else
-                    return ReferenceEquals(interval, node.Key) ? node : null;
+                {
+                    intervalFound = ReferenceEquals(interval, node.Key);
+                    return node;
+                }
             }
 
             return null;
         }
 
         #endregion
+
+        #endregion
+
+        #region Find Equals
+
+        public override IEnumerable<I> FindEquals(IInterval<T> query)
+        {
+            bool intervalFound;
+            var node = findContainingNode(query, out intervalFound);
+            if (intervalFound || node != null)
+                yield return node.Key;
+        }
 
         #endregion
 
@@ -1073,7 +1091,7 @@ namespace C5.Intervals
             return intervalFound ? index : ~index;
         }
 
-        private static int indexOf(I interval, Node root, out bool intervalFound)
+        private static int indexOf(IInterval<T> interval, Node root, out bool intervalFound)
         {
             intervalFound = false;
             var index = 0;

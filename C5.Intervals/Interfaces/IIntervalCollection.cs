@@ -145,6 +145,17 @@ namespace C5.Intervals
 
         #endregion
 
+        #region Find Equals
+
+        /// <summary>
+        /// Find all intervals that are interval equal with the query interval.
+        /// </summary>
+        /// <param name="query">The query interval.</param>
+        /// <returns>All intervals that are equal to the query interval.</returns>
+        IEnumerable<I> FindEquals(IInterval<T> query);
+
+        #endregion
+
         #region Find Overlaps
 
         // @design: made to spare the user of making a point interval [q:q] and allow for more effective implementations of the interface for some data structures
@@ -456,6 +467,32 @@ namespace C5.Intervals
 
         #endregion
 
+        #region Find Equals
+
+        /// <summary>
+        /// Find all intervals that are interval equal with the query interval.
+        /// </summary>
+        /// <param name="query">The query interval.</param>
+        /// <returns>All intervals that are equal to the query interval.</returns>
+        public IEnumerable<I> FindEquals(IInterval<T> query)
+        {
+            // Query interval cannot be null
+            Contract.Requires(query != null);
+
+            // The collection of intervals that overlap the query must be equal to the result
+            Contract.Ensures(IntervalCollectionContractHelper.CollectionEquals(this.Where(x => x.IntervalEquals(query)), Contract.Result<IEnumerable<I>>()));
+            // All intervals in the collection that do not overlap cannot by in the result
+            Contract.Ensures(Contract.ForAll(this.Where(x => !x.IntervalEquals(query)), x => Contract.ForAll(Contract.Result<IEnumerable<I>>(), y => !ReferenceEquals(x, y))));
+            // If the collection is empty, then so is the result
+            Contract.Ensures(!IsEmpty || !Contract.Result<IEnumerable<I>>().Any());
+            // If the collection doesn't allow overlaps, there can at most be one equal to the query
+            Contract.Ensures(AllowsOverlaps || Contract.Result<IEnumerable<I>>().Count() <= 1);
+
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
         #region Find Overlaps
 
         public IEnumerable<I> FindOverlaps(T query)
@@ -471,6 +508,8 @@ namespace C5.Intervals
             Contract.Ensures(AllowsOverlaps || Contract.Result<IEnumerable<I>>().Count() <= 1);
             // Result is sorted if IsFindOverlaps is true
             Contract.Ensures(!IsFindOverlapsSorted || Contract.Result<IEnumerable<I>>().IsSorted<IInterval<T>, T>());
+            // If the collection is empty, then so is the result
+            Contract.Ensures(!IsEmpty || !Contract.Result<IEnumerable<I>>().Any());
 
             throw new NotImplementedException();
         }
@@ -486,6 +525,8 @@ namespace C5.Intervals
             Contract.Ensures(Contract.ForAll(this.Where(x => !x.Overlaps(query)), x => Contract.ForAll(Contract.Result<IEnumerable<I>>(), y => !ReferenceEquals(x, y))));
             // Result is sorted if IsFindOverlaps is true
             Contract.Ensures(!IsFindOverlapsSorted || Contract.Result<IEnumerable<I>>().IsSorted<IInterval<T>, T>());
+            // If the collection is empty, then so is the result
+            Contract.Ensures(!IsEmpty || !Contract.Result<IEnumerable<I>>().Any());
             throw new NotImplementedException();
         }
 
@@ -502,6 +543,8 @@ namespace C5.Intervals
 
             // A found overlap is not null and overlaps query
             Contract.Ensures(!Contract.Result<bool>() || Contract.ValueAtReturn(out overlap) != null && Contract.ValueAtReturn(out overlap).Overlaps(query));
+            // If the collection is empty, then the result is false
+            Contract.Ensures(!IsEmpty || !Contract.Result<bool>());
 
             throw new NotImplementedException();
         }
@@ -515,6 +558,8 @@ namespace C5.Intervals
 
             // A found overlap is not null and overlaps query
             Contract.Ensures(!Contract.Result<bool>() || Contract.ValueAtReturn(out overlap) != null && Contract.ValueAtReturn(out overlap).Overlaps(query));
+            // If the collection is empty, then the result is false
+            Contract.Ensures(!IsEmpty || !Contract.Result<bool>());
 
             throw new NotImplementedException();
         }
@@ -533,6 +578,8 @@ namespace C5.Intervals
             Contract.Ensures(Contract.Result<int>() <= Count);
             // Result is equal to the number of intervals in the collection that overlap the query
             Contract.Ensures(Contract.Result<int>() == this.Count(x => IntervalExtensions.Overlaps(x, query)));
+            // If the collection is empty, then the result is zero
+            Contract.Ensures(!IsEmpty || Contract.Result<int>() == 0);
 
             throw new NotImplementedException();
         }
@@ -547,6 +594,8 @@ namespace C5.Intervals
             Contract.Ensures(Contract.Result<int>() <= Count);
             // Result is equal to the number of intervals in the collection that overlap the query
             Contract.Ensures(Contract.Result<int>() == this.Count(x => IntervalExtensions.Overlaps(x, query)));
+            // If the collection is empty, then the result is zero
+            Contract.Ensures(!IsEmpty || Contract.Result<int>() == 0);
 
             throw new NotImplementedException();
         }

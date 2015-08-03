@@ -1251,6 +1251,64 @@ namespace C5.Intervals.Tests
 
         #endregion
 
+        #region Find Equals
+
+        [Test]
+        [Category("Find Equals")]
+        public void FindEquals_EmptyCollection_Empty()
+        {
+            var collection = CreateEmptyCollection<Interval, int>();
+            CollectionAssert.IsEmpty(collection.FindEquals(SingleInterval()));
+        }
+
+        [Test]
+        [Category("Find Equals")]
+        public void FindEquals_SingleInterval_SingleInterval()
+        {
+            var interval = SingleInterval();
+            var collection = CreateCollection<Interval, int>(interval);
+
+            CollectionAssert.AreEqual(new[] { interval }, collection.FindEquals(interval));
+        }
+
+        [Test]
+        [Category("Find Equals")]
+        public void FindEquals_SingleObject_AllOrSingleInterval()
+        {
+            var intervals = SingleObject();
+            var interval = intervals.First();
+            var collection = CreateCollection<Interval, int>(intervals);
+            var expected = collection.AllowsReferenceDuplicates ? intervals : intervals.Take(1).ToArray();
+
+            CollectionAssert.AreEqual(expected, collection.FindEquals(interval));
+        }
+
+        [Test]
+        [Category("Find Equals")]
+        public void FindEquals_DuplicateIntervals_AllOrSingleInterval()
+        {
+            var intervals = DuplicateIntervals();
+            var interval = intervals.First();
+            var collection = CreateCollection<Interval, int>(intervals);
+            var expected = collection.AllowsOverlaps ? intervals : intervals.Take(1).ToArray();
+
+            CollectionAssert.AreEquivalent(expected, collection.FindEquals(interval));
+        }
+
+        [Test]
+        [Category("Find Equals")]
+        public void FindEquals_ManyIntervals_EqualIntervals()
+        {
+            var intervals = ManyIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+            var expected = collection.AllowsOverlaps ? intervals : NonOverlapping(intervals);
+
+            foreach (var interval in expected)
+                CollectionAssert.AreEquivalent(expected.Where(x => x.IntervalEquals(interval)), collection.FindEquals(interval));
+        }
+
+        #endregion
+
         #region Find Overlaps
 
         #region Stabbing

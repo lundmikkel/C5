@@ -17,7 +17,7 @@ namespace C5.Intervals
     public interface IFiniteIntervalCollection<I, T> : IIntervalCollection<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
-    {
+    {   
         #region Properties
 
         #region Data Structure Properties

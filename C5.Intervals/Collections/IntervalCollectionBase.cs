@@ -129,6 +129,26 @@ namespace C5.Intervals
 
         #endregion Properties
 
+        #region Find Equals
+
+        // TODO: Implement properly in subclasses!
+        /// <inheritdoc/>
+        public virtual IEnumerable<I> FindEquals(IInterval<T> query)
+        {
+            IEnumerable<I> overlaps;
+
+            if (query.LowIncluded)
+                overlaps = FindOverlaps(query.Low);
+            else if (query.HighIncluded)
+                overlaps = FindOverlaps(query.High);
+            else
+                overlaps = FindOverlaps(query);
+
+            return overlaps.Where(interval => interval.IntervalEquals(query));
+        }
+
+        #endregion
+
         #region Find Overlaps
 
         /// <inheritdoc/>
