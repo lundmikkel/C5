@@ -107,8 +107,8 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
-    <Compile Include="Collections\FiniteIntervalCollectionTester.cs" />
-    <Compile Include="Collections\IntervalCollectionWithoutContainmentsTester.cs" />
+    <Compile Include="Collections\OverlapFreeIntervalCollectionTester.cs" />
+    <Compile Include="Collections\ContainmentFreeIntervalCollectionTester.cs" />
     <Compile Include="Collections\Static\LayeredContainmentListGallopTester.cs" />
     <Compile Include="Collections\Static\NestedContainmentListArticleTester.cs" />
     <Compile Include="Collections\Static\NestedContainmentListTester.cs" />

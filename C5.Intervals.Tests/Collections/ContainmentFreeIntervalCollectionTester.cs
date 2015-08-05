@@ -11,7 +11,7 @@ namespace C5.Intervals.Tests
     // ReSharper disable RedundantArgumentDefaultValue
 
     [TestFixture]
-    abstract class IntervalCollectionWithoutContainmentsTester : IntervalCollectionTester
+    abstract class ContainmentFreeIntervalCollectionTester : IntervalCollectionTester
     {
         /*
          * Things to check for for each method:
@@ -49,19 +49,19 @@ namespace C5.Intervals.Tests
         }
 
         // TODO: Change interface once this is sorted out
-        protected new IFiniteIntervalCollection<I, T> CreateCollection<I, T>(params I[] intervals)
+        protected new IOverlapFreeIntervalCollection<I, T> CreateCollection<I, T>(params I[] intervals)
             where I : class, IInterval<T>
             where T : IComparable<T>
         {
-            return (IFiniteIntervalCollection<I, T>)base.CreateCollection<I, T>(intervals);
+            return (IOverlapFreeIntervalCollection<I, T>)base.CreateCollection<I, T>(intervals);
         }
 
         // TODO: Change interface once this is sorted out
-        protected new IFiniteIntervalCollection<I, T> CreateEmptyCollection<I, T>()
+        protected new IOverlapFreeIntervalCollection<I, T> CreateEmptyCollection<I, T>()
             where I : class, IInterval<T>
             where T : IComparable<T>
         {
-            return (IFiniteIntervalCollection<I, T>)base.CreateEmptyCollection<I, T>();
+            return (IOverlapFreeIntervalCollection<I, T>)base.CreateEmptyCollection<I, T>();
         }
 
         #endregion

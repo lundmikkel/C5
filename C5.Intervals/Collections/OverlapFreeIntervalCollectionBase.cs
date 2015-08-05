@@ -14,7 +14,7 @@ namespace C5.Intervals
     /// <typeparam name="I">The interval type with endpoint type <typeparamref name="T"/>.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
     /// <seealso cref="IntervalCollectionBase{I,T}"/>
-    public abstract class FiniteIntervalCollectionBase<I, T> : IntervalCollectionBase<I, T>, IFiniteIntervalCollection<I, T>
+    public abstract class OverlapFreeIntervalCollectionBase<I, T> : IntervalCollectionBase<I, T>, IOverlapFreeIntervalCollection<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {

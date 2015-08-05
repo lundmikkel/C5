@@ -13,7 +13,7 @@ namespace C5.Intervals.Tests
 
         #region Black-box
 
-        class DoublyLinkedFiniteIntervalTreeTesterBlackBox : FiniteIntervalCollectionTester
+        class DoublyLinkedFiniteIntervalTreeTesterBlackBox : OverlapFreeIntervalCollectionTester
         {
             protected override Type GetCollectionType()
             {

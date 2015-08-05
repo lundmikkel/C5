@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace C5.Intervals
 {
-    public class StaticFiniteIntervalList<I, T> : FiniteIntervalCollectionBase<I, T>
+    public class StaticFiniteIntervalList<I, T> : OverlapFreeIntervalCollectionBase<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace C5.Intervals
 {
-    // TODO: Split into something like IIntervalCollectionWithoutOverlaps and IFiniteIntervalCollection. Maybe also Sorted and Indexed.
+    // TODO: Split into something like IIntervalCollectionWithoutOverlaps and IOverlapFreeIntervalCollection. Maybe also Sorted and Indexed.
     /// <summary>
     /// An interval collection where intervals do not overlap
     /// and where they are sorted based on lowest low, then lowest high endpoint.
@@ -13,8 +13,8 @@ namespace C5.Intervals
     /// </summary>
     /// <typeparam name="I">The interval type in the collection. Especially used for return types for enumeration.</typeparam>
     /// <typeparam name="T">The interval's endpoint values.</typeparam>
-    [ContractClass(typeof(FiniteIntervalCollectionContract<,>))]
-    public interface IFiniteIntervalCollection<I, T> : IIntervalCollection<I, T>
+    [ContractClass(typeof(OverlapFreeIntervalCollectionContract<,>))]
+    public interface IOverlapFreeIntervalCollection<I, T> : IIntervalCollection<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
@@ -198,8 +198,8 @@ namespace C5.Intervals
         }
     }
 
-    [ContractClassFor(typeof(IFiniteIntervalCollection<,>))]
-    internal abstract class FiniteIntervalCollectionContract<I, T> : IntervalCollectionBase<I, T>, IFiniteIntervalCollection<I, T>
+    [ContractClassFor(typeof(IOverlapFreeIntervalCollection<,>))]
+    internal abstract class OverlapFreeIntervalCollectionContract<I, T> : IntervalCollectionBase<I, T>, IOverlapFreeIntervalCollection<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {

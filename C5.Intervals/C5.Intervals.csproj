@@ -159,7 +159,7 @@
     <Compile Include="Collections\Dynamic\DynamicIntervalTree.cs" />
     <Compile Include="Collections\Dynamic\IntervalBinarySearchTree.cs" />
     <Compile Include="Collections\Dynamic\IntervalBinarySearchTreeOld.cs" />
-    <Compile Include="Collections\FiniteIntervalCollectionBase.cs" />
+    <Compile Include="Collections\OverlapFreeIntervalCollectionBase.cs" />
     <Compile Include="Collections\IntervalCollectionBase.cs" />
     <Compile Include="Collections\IntervalCollectionFactory.cs" />
     <Compile Include="Collections\Static\BinaryIntervalSearch.cs" />
@@ -179,7 +179,7 @@
     <Compile Include="Interfaces\IDataInterval.cs" />
     <Compile Include="Interfaces\IInterval.cs" />
     <Compile Include="Interfaces\IIntervalCollection.cs" />
-    <Compile Include="Interfaces\IFiniteIntervalCollection.cs" />
+    <Compile Include="Interfaces\IOverlapFreeIntervalCollection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

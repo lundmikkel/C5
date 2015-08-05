@@ -6,7 +6,7 @@ namespace C5.Intervals.Tests
     {
         #region Black-box
 
-        class StaticFiniteIntervalListTesterBlackBox : FiniteIntervalCollectionTester
+        class StaticFiniteIntervalListTesterBlackBox : OverlapFreeIntervalCollectionTester
         {
             protected override Type GetCollectionType()
             {

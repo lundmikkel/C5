@@ -18,7 +18,7 @@ namespace C5.Intervals
     /// </summary>
     /// <typeparam name="I">The interval type.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
-    public class DoublyLinkedFiniteIntervalTree<I, T> : FiniteIntervalCollectionBase<I, T>
+    public class DoublyLinkedFiniteIntervalTree<I, T> : OverlapFreeIntervalCollectionBase<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
