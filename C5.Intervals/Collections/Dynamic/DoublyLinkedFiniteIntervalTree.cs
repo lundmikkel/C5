@@ -26,6 +26,7 @@ namespace C5.Intervals
 
         private Node _root;
         private readonly Node _first, _last;
+        private readonly IDictionary<I, Node> _nodeDictionary;
 
         #endregion
 
@@ -53,6 +54,11 @@ namespace C5.Intervals
 
             // Check in-order traversal is sorted
             Contract.Invariant(contractHelperInOrderNodes(_root).IsSorted());
+
+            // Check node dictionary isn't bigger than tree
+            Contract.Invariant(Count == _nodeDictionary.Count);
+            // Check that node dictionary is up to date
+            Contract.Invariant(contractHelperDictionaryIsUpdated());
         }
 
         /// <summary>
@@ -101,6 +107,22 @@ namespace C5.Intervals
 
             foreach (var node in contractHelperInOrderNodes(root.Right))
                 yield return node;
+        }
+
+        [Pure]
+        private bool contractHelperDictionaryIsUpdated()
+        {
+            var node = _first.Next;
+
+            while (node != _last)
+            {
+                if (!ReferenceEquals(_nodeDictionary[node.Key], node))
+                    return false;
+
+                node = node.Next;
+            }
+
+            return true;
         }
 
         #endregion
@@ -435,6 +457,8 @@ namespace C5.Intervals
 
             _first.Next = _last;
             _last.Previous = _first;
+
+            _nodeDictionary = new HashDictionary<I, Node>(IntervalExtensions.CreateReferenceEqualityComparer<I, T>());
         }
 
         /// <summary>
@@ -614,6 +638,7 @@ namespace C5.Intervals
         private Node findContainingNode(IInterval<T> interval, out bool intervalFound)
         {
             Contract.Requires(interval != null);
+            Contract.Ensures(!Contract.ValueAtReturn(out intervalFound) || ReferenceEquals(Contract.Result<Node>(), _nodeDictionary[interval as I]));
 
             intervalFound = false;
             var node = _root;
@@ -633,6 +658,17 @@ namespace C5.Intervals
             }
 
             return null;
+        }
+
+        [Pure]
+        private Node findContainingNode(I interval, out bool intervalFound)
+        {
+            Contract.Requires(interval != null);
+            Contract.Ensures(Contract.ValueAtReturn(out intervalFound) == (Contract.Result<Node>() != null));
+
+            Node node;
+            intervalFound = _nodeDictionary.Find(ref interval, out node);
+            return node;
         }
 
         #endregion
@@ -889,7 +925,9 @@ namespace C5.Intervals
 
                 rotationNeeded = true;
                 intervalWasAdded = true;
-                return new Node(interval, previous);
+                var node = new Node(interval, previous);
+                _nodeDictionary.Add(interval, node);
+                return node;
             }
 
             var compare = interval.CompareLow(root.Key);
@@ -1041,7 +1079,7 @@ namespace C5.Intervals
             return intervalWasRemoved;
         }
 
-        private static Node remove(I interval, Node root, ref bool intervalWasRemoved, ref bool rotationNeeded)
+        private Node remove(I interval, Node root, ref bool intervalWasRemoved, ref bool rotationNeeded)
         {
             if (root == null)
                 return null;
@@ -1070,8 +1108,13 @@ namespace C5.Intervals
             {
                 var successor = root.Next;
 
+                // Update dictionary
+                _nodeDictionary.Remove(interval);
+                _nodeDictionary[successor.Key] = root;
+
                 // Swap root and successor nodes
                 root.Swap(successor);
+
 
                 // Remove the successor node
                 root.Right = remove(successor.Key, root.Right, ref intervalWasRemoved, ref rotationNeeded);
@@ -1084,6 +1127,9 @@ namespace C5.Intervals
                 rotationNeeded = true;
                 intervalWasRemoved = true;
                 root.Remove();
+
+                // Update dictionary
+                _nodeDictionary.Remove(interval);
 
                 // Return Left if not null, otherwise Right - one must be null
                 return root.Left ?? root.Right;
