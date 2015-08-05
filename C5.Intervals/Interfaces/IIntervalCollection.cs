@@ -944,5 +944,11 @@ namespace C5.Intervals
 
             return ~index;
         }
+
+
+        public static T GetReturnValue<T>(Func<T> func)
+        {
+            return func();
+        }
     }
 }

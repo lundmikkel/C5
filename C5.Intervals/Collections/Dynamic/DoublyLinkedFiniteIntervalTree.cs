@@ -821,6 +821,43 @@ namespace C5.Intervals
             return false;
         }
 
+
+        #region Neighbourhood
+
+        /// <inheritdoc/>
+        public override Neighbourhood<I, T> GetNeighbourhood(T query)
+        {
+            if (IsEmpty)
+                return new Neighbourhood<I, T>();
+
+            bool overlaps;
+            var node = findNode(query, out overlaps);
+
+            var previous = node != _first ? node.Previous.Key : null;
+            var overlap = overlaps ? node.Key : null;
+            var next = overlaps ? node.Next.Key : node.Key;
+
+            return new Neighbourhood<I, T>(previous, overlap, next);
+        }
+
+        /// <inheritdoc/>
+        public override Neighbourhood<I, T> GetNeighbourhood(I query)
+        {
+            bool intervalFound;
+            var node = findContainingNode(query, out intervalFound);
+
+            if (!intervalFound)
+                return new Neighbourhood<I, T>();
+
+            var previous = node != _first ? node.Previous.Key : null;
+            var overlap = query;
+            var next = node != _last ? node.Next.Key : null;
+
+            return new Neighbourhood<I, T>(previous, overlap, next);
+        }
+
+        #endregion
+
         #endregion
 
         #region Extensible

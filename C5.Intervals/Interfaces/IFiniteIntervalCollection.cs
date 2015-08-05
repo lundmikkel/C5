@@ -17,7 +17,7 @@ namespace C5.Intervals
     public interface IFiniteIntervalCollection<I, T> : IIntervalCollection<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
-    {   
+    {
         #region Properties
 
         #region Data Structure Properties
@@ -162,6 +162,40 @@ namespace C5.Intervals
         I this[int i] { get; }
 
         #endregion Indexed Access
+
+        #region Neighbourhood
+
+        Neighbourhood<I, T> GetNeighbourhood(T query);
+
+        Neighbourhood<I, T> GetNeighbourhood(I query);
+
+        #endregion
+    }
+
+    public class Neighbourhood<I, T>
+        where I : class, IInterval<T>
+        where T : IComparable<T>
+    {
+        public readonly I Previous;
+        public readonly I Overlap;
+        public readonly I Next;
+
+        public Neighbourhood() { }
+
+        public Neighbourhood(I previous, I overlap, I next)
+        {
+            Previous = previous;
+            Overlap = overlap;
+            Next = next;
+        }
+
+        public bool IsEmpty
+        {
+            get
+            {
+                return Previous == null && Overlap == null && Next == null;
+            }
+        }
     }
 
     [ContractClassFor(typeof(IFiniteIntervalCollection<,>))]
@@ -264,6 +298,9 @@ namespace C5.Intervals
             Contract.Requires(interval != null);
 
             Contract.Ensures(Contract.Result<IEnumerable<I>>() != null);
+
+            // If the collection doesn't contain the interval, the result is empty
+            Contract.Ensures(this.Contains(interval) || !Contract.Result<IEnumerable<I>>().Any());
             // The intervals are sorted
             Contract.Ensures(Contract.Result<IEnumerable<I>>().IsSorted<I, T>());
             // Highs are sorted as well
@@ -283,6 +320,8 @@ namespace C5.Intervals
             Contract.Requires(interval != null);
 
             Contract.Ensures(Contract.Result<IEnumerable<I>>() != null);
+            // If the collection doesn't contain the interval, the result is empty
+            Contract.Ensures(this.Contains(interval) || !Contract.Result<IEnumerable<I>>().Any());
             // The intervals are sorted
             Contract.Ensures(Contract.Result<IEnumerable<I>>().Reverse().IsSorted<I, T>());
             // Highs are sorted as well
@@ -337,6 +376,7 @@ namespace C5.Intervals
 
         #endregion
 
+        #region Indexed Access
         public int IndexOf(I interval)
         {
             Contract.Requires(interval != null);
@@ -365,5 +405,84 @@ namespace C5.Intervals
                 throw new NotImplementedException();
             }
         }
+
+        #endregion
+
+        #region Neighbourhood
+
+        public Neighbourhood<I, T> GetNeighbourhood(T query)
+        {
+            // Query cannot be null
+            Contract.Requires(!ReferenceEquals(query, null));
+
+            // Result is never null
+            Contract.Ensures(Contract.Result<Neighbourhood<I, T>>() != null);
+
+            // The previous interval comes before the query
+            Contract.Ensures(Contract.Result<Neighbourhood<I, T>>().Previous == null || Contract.Result<Neighbourhood<I, T>>().Previous.CompareHigh(query) < 0);
+            // If there is an overlap, it must overlap the query
+            Contract.Ensures(Contract.Result<Neighbourhood<I, T>>().Overlap == null || Contract.Result<Neighbourhood<I, T>>().Overlap.Overlaps(query));
+            // The next interval comes after the query
+            Contract.Ensures(Contract.Result<Neighbourhood<I, T>>().Next == null || Contract.Result<Neighbourhood<I, T>>().Next.CompareLow(query) > 0);
+
+            // Previous is the last interval before the query
+            Contract.Ensures(Contract.Result<Neighbourhood<I, T>>().Previous == null ||
+                Contract.ForAll(
+                    this.EnumerateBackwardsFrom(query, false),
+                    interval => interval.CompareHighLow(Contract.Result<Neighbourhood<I, T>>().Previous) < 0 || ReferenceEquals(interval, Contract.Result<Neighbourhood<I, T>>().Previous)
+                )
+            );
+            // Overlap is set, if there is an overlap
+            Contract.Ensures((Contract.Result<Neighbourhood<I, T>>().Overlap != null) == IntervalCollectionContractHelper.GetReturnValue(() => { I overlap; return FindOverlap(query, out overlap); }));
+            // Next is the first interval after the query
+            Contract.Ensures(Contract.Result<Neighbourhood<I, T>>().Next == null ||
+                Contract.ForAll(
+                    this.EnumerateFrom(query, false),
+                    interval => Contract.Result<Neighbourhood<I, T>>().Next.CompareHighLow(interval) < 0 || ReferenceEquals(interval, Contract.Result<Neighbourhood<I, T>>().Next)
+                )
+            );
+
+            throw new NotImplementedException();
+        }
+
+        public Neighbourhood<I, T> GetNeighbourhood(I query)
+        {
+            // Query cannot be null
+            Contract.Requires(query != null);
+
+            // Result is never null
+            Contract.Ensures(Contract.Result<Neighbourhood<I, T>>() != null);
+
+            // If the collection doesn't contain the interval, the result is empty
+            Contract.Ensures(this.Contains(query) || Contract.Result<Neighbourhood<I, T>>().Previous == null && Contract.Result<Neighbourhood<I, T>>().Overlap == null && Contract.Result<Neighbourhood<I, T>>().Next == null);
+            // The previous interval comes before the query
+            Contract.Ensures(Contract.Result<Neighbourhood<I, T>>().Previous == null || Contract.Result<Neighbourhood<I, T>>().Previous.CompareHighLow(query) < 0);
+            // If there is an overlap, it must overlap the query
+            Contract.Ensures(Contract.Result<Neighbourhood<I, T>>().Overlap == null || ReferenceEquals(Contract.Result<Neighbourhood<I, T>>().Overlap, query));
+            // The next interval comes after the query
+            Contract.Ensures(Contract.Result<Neighbourhood<I, T>>().Next == null || query.CompareHighLow(Contract.Result<Neighbourhood<I, T>>().Next) < 0);
+
+
+            // Previous is the last interval before the query
+            Contract.Ensures(Contract.Result<Neighbourhood<I, T>>().Previous == null ||
+                Contract.ForAll(
+                    this.EnumerateBackwardsFrom(query, false),
+                    interval => interval.CompareHighLow(Contract.Result<Neighbourhood<I, T>>().Previous) < 0 || ReferenceEquals(interval, Contract.Result<Neighbourhood<I, T>>().Previous)
+                )
+            );
+            // Overlap is set, if there is an overlap
+            Contract.Ensures((Contract.Result<Neighbourhood<I, T>>().Overlap != null) == IntervalCollectionContractHelper.GetReturnValue(() => { I overlap; return FindOverlap(query, out overlap) && ReferenceEquals(overlap, query); }));
+            // Next is the first interval after the query
+            Contract.Ensures(Contract.Result<Neighbourhood<I, T>>().Next == null ||
+                Contract.ForAll(
+                    this.EnumerateFrom(query, false),
+                    interval => Contract.Result<Neighbourhood<I, T>>().Next.CompareHighLow(interval) < 0 || ReferenceEquals(interval, Contract.Result<Neighbourhood<I, T>>().Next)
+                )
+            );
+
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }

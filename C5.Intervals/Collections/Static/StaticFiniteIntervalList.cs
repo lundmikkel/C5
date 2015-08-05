@@ -208,6 +208,16 @@ namespace C5.Intervals
 
         #endregion
 
+        #region Neighbourhood
+
+        /// <inheritdoc/>
+        public override Neighbourhood<I, T> GetNeighbourhood(T query)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
         #region Find Overlaps
 
         /// <inheritdoc/>

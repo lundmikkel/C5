@@ -111,6 +111,32 @@ namespace C5.Intervals
 
         #endregion
 
+        #region Neighbourhood
+
+        /// <inheritdoc/>
+        public abstract Neighbourhood<I, T> GetNeighbourhood(T query);
+
+        /// <inheritdoc/>
+        public virtual Neighbourhood<I, T> GetNeighbourhood(I query)
+        {
+            var i = IndexOf(query);
+
+            // The interval was not found, return empty neighbourhood
+            if (i < 0)
+                return new Neighbourhood<I, T>();
+
+            // Make sure we have a previous interval
+            var previous = 0 < i ? this[i - 1] : null;
+            // Overlap must be query interval
+            var overlap = query;
+            // Make sure we have a next interval
+            var next = i + 1 < Count ? this[i + 1] : null;
+
+            return new Neighbourhood<I, T>(previous, overlap, next);
+        }
+
+        #endregion
+
         #region Find Overlaps
 
         /// <inheritdoc/>
