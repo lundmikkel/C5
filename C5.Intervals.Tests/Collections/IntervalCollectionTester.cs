@@ -2986,4 +2986,12 @@ namespace C5.Intervals.Tests
 
         #endregion
     }
+
+    internal class AdditionalSeedsAttribute : Attribute
+    {
+        public AdditionalSeedsAttribute(params int[] seeds)
+        {
+            //throw new NotImplementedException();
+        }
+    }
 }

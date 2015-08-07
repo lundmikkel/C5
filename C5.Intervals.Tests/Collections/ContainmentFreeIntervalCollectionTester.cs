@@ -48,20 +48,18 @@ namespace C5.Intervals.Tests
             }
         }
 
-        // TODO: Change interface once this is sorted out
-        protected new IOverlapFreeIntervalCollection<I, T> CreateCollection<I, T>(params I[] intervals)
+        protected new IContainmentFreeIntervalCollection<I, T> CreateCollection<I, T>(params I[] intervals)
             where I : class, IInterval<T>
             where T : IComparable<T>
         {
-            return (IOverlapFreeIntervalCollection<I, T>)base.CreateCollection<I, T>(intervals);
+            return (IContainmentFreeIntervalCollection<I, T>)base.CreateCollection<I, T>(intervals);
         }
 
-        // TODO: Change interface once this is sorted out
-        protected new IOverlapFreeIntervalCollection<I, T> CreateEmptyCollection<I, T>()
+        protected new IContainmentFreeIntervalCollection<I, T> CreateEmptyCollection<I, T>()
             where I : class, IInterval<T>
             where T : IComparable<T>
         {
-            return (IOverlapFreeIntervalCollection<I, T>)base.CreateEmptyCollection<I, T>();
+            return (IContainmentFreeIntervalCollection<I, T>)base.CreateEmptyCollection<I, T>();
         }
 
         #endregion
@@ -198,7 +196,6 @@ namespace C5.Intervals.Tests
 
         #endregion
 
-        // TODO
         #region Enumerable
 
         #region Enumerate From Point
@@ -938,71 +935,6 @@ namespace C5.Intervals.Tests
 
         #endregion
 
-        // TODO: Write proper tests
-        #region Indexed Access
-
-        [Test]
-        [Category("Indexer")]
-        public void Indexer_ManyIntervals_NotNullAndMatchesIndexOf()
-        {
-            var intervals = NonOverlapping(ManyIntervals(maxLength: 10000));
-            if (intervals.Length % 2 == 0)
-                Array.Resize(ref intervals, intervals.Length - 1);
-
-            Sorting.Timsort(intervals, IntervalExtensions.CreateComparer<Interval, int>());
-
-            var notInCollection = intervals.Where((item, i) => i % 2 == 0).ToArray();
-            var inCollection = intervals.Where((item, i) => i % 2 == 1).ToArray();
-
-            var collection = CreateCollection<Interval, int>(inCollection);
-
-            for (var i = 0; i < collection.Count; ++i)
-            {
-                var interval = collection[i];
-                Assert.NotNull(interval);
-                var j = collection.IndexOf(interval);
-                Assert.AreEqual(i, j);
-            }
-
-            for (var i = 0; i < notInCollection.Length; ++i)
-            {
-                var interval = notInCollection[i];
-                var j = collection.IndexOf(interval);
-                Assert.That(j < 0);
-                Assert.AreEqual(i, ~j);
-
-                collection.Add(interval);
-                var k = collection.IndexOf(interval);
-                Assert.AreEqual(k, ~j);
-                collection.Remove(interval);
-            }
-        }
-
-        [Test]
-        [Category("EnumerateFromIndex")]
-        public void EnumerateFromIndex_ManyIntervals_MatchingInterval()
-        {
-            var intervals = ManyIntervals();
-            var collection = CreateCollection<Interval, int>(intervals);
-            intervals = collection.AllowsOverlaps ? intervals : NonOverlapping(intervals);
-            Sorting.Timsort(intervals, IntervalExtensions.CreateComparer<Interval, int>());
-            var expected = intervals;
-            for (var i = 0; i < collection.Count; ++i)
-            {
-                CollectionAssert.AreEqual(expected.Skip(i), collection.EnumerateFromIndex(i));
-            }
-        }
-
         #endregion
-
-        #endregion
-    }
-
-    internal class AdditionalSeedsAttribute : Attribute
-    {
-        public AdditionalSeedsAttribute(params int[] seeds)
-        {
-            //throw new NotImplementedException();
-        }
     }
 }

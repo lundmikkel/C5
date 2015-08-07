@@ -6,17 +6,24 @@ using System.Linq;
 namespace C5.Intervals
 {
     /// <summary>
+    /// <para>
     /// A collection that allows fast overlap queries on collections of intervals.
-    /// 
-    /// If a data structure is not read-only (see <see cref="IsReadOnly"/>) and has a contructor
-    /// that takes an <code>IEnumerable&lt;I&gt;</code>, the result should be equal to creating
-    /// the data structure and calling <see cref="AddAll"/> afterwards.
+    /// </para>
     /// </summary>
-    /// <remarks>The data structures do not support updates on its intervals' values.
-    /// If you wish to change an interval's endpoints or their endpoint inclusion, the interval
-    /// should be removed from the collection first, changed and then added again.</remarks>
     /// <typeparam name="I">The interval type in the collection.</typeparam>
     /// <typeparam name="T">The interval's endpoint values.</typeparam>
+    /// <remarks>
+    /// <para>
+    /// The data structures do not support updates on its intervals' values.  If you wish to
+    /// change an interval's endpoints or their  inclusion, the interval should be removed
+    /// from the collection first, changed and then added again.
+    /// </para>
+    /// <para>
+    /// If a data structure is not read-only (see <see cref="IsReadOnly" />) and has a
+    /// constructor that takes an <code>IEnumerable&lt;I&gt;</code>, the result will be 
+    /// equal to creating the data structure and calling <see cref="AddAll" /> afterwards.
+    /// </para>
+    /// </remarks>
     [ContractClass(typeof(IntervalCollectionContract<,>))]
     public interface IIntervalCollection<I, T> : ICollectionValue<I>
         where I : class, IInterval<T>
@@ -26,45 +33,46 @@ namespace C5.Intervals
 
         #region Data Structure Properties
 
-        // TODO: Test properties to ensure that are correct!
-
         /// <summary>
-        /// Indicates if the collection can contain intervals that overlap each other.
-        /// </summary>
-        /// <value>True if this collection allows overlapping intervals.</value>
-        [Pure]
-        bool AllowsOverlaps { get; }
-
-        /// <summary>
-        /// Indicates if the collection can contain intervals, where one contains another.
-        /// 
-        /// An interval contained in another interval breaks the high (low) endpoint ordering,
-        /// if a collection is sorted on low (high) endpoints. Collections disallowing
-        /// containments can normally be optimized more than collections that allow them,
-        /// giving speed improvements in cases where containments are non-exisiting,
-        /// i.e. when all intervals have equal length.
-        /// 
-        /// If a collection supports containments, it must also support overlaps;
-        /// contained intervals must overlap the intervals they are contained in.
-        /// </summary>
-        /// <value>True if this collection allows contained intervals.</value>
-        [Pure]
-        bool AllowsContainments { get; }
-
-        /// <summary>
-        /// Indicates if the collection can contain reference equal objects. Different interval
-        /// objects with equal endpoints are allowed, but a specific interval object can only
-        /// appear once.
-        /// 
-        /// If a collection supports reference equal objects, it must also support overlaps;
-        /// duplicates have the same endpoints and inclusions and therefore must overlap.
+        /// Indicates if the collection can contain reference equal objects. Different 
+        /// interval objects with equal endpoints and inclusions are allowed, but a specific
+        /// interval object can only appear once.
         /// </summary>
         /// <value>True if this collection allows reference duplicates.</value>
+        /// <remarks>
+        /// If a collection supports reference equal objects, it must also support overlaps;
+        /// duplicates have the same endpoints and inclusions and therefore must overlap.
+        /// </remarks>
         [Pure]
         bool AllowsReferenceDuplicates { get; }
 
         /// <summary>
-        /// If true any call of an updating operation will throw a <see cref="ReadOnlyCollectionException"/>.
+        /// Indicates if the collection can contain intervals, where one contains another.
+        /// </summary>
+        /// <value>
+        /// True if this collection allows contained intervals.
+        /// </value>
+        /// <remarks>
+        /// If a collection supports containments, it must also support overlaps; contained
+        /// intervals must overlap the intervals they are contained in.
+        /// </remarks>
+        /// <seealso cref="IContainmentFreeIntervalCollection{I,T}" />
+        [Pure]
+        bool AllowsContainments { get; }
+
+        /// <summary>
+        /// Indicates if the collection can contain intervals that overlap each other.
+        /// </summary>
+        /// <value>
+        /// True if this collection allows overlapping intervals.
+        /// </value>
+        /// <seealso cref="IOverlapFreeIntervalCollection{I,T}" />
+        [Pure]
+        bool AllowsOverlaps { get; }
+
+        /// <summary>
+        /// If true any call of an updating operation will throw a
+        /// <see cref="ReadOnlyCollectionException"/>.
         /// </summary>
         /// <value>True if this collection is read-only.</value>
         [Pure]
@@ -72,9 +80,9 @@ namespace C5.Intervals
 
         // TODO: Move to ISortedIntervalCollection
         /// <summary>
-        /// Indicates if the <see cref="IEnumerable{T}"/> returned from <see cref="FindOverlaps(T)"/>
-        /// and <see cref="FindOverlaps(IInterval{T})"/> is ordered according to
-        /// <see cref="IntervalExtensions.CompareTo{T}"/>.
+        /// Indicates if the <see cref="IEnumerable{T}"/> returned from
+        /// <see cref="FindOverlaps(T)"/> and <see cref="FindOverlaps(IInterval{T})"/> is 
+        /// ordered according to <see cref="IntervalExtensions.CompareTo{T}"/>.
         /// </summary>
         /// <value>True if <see cref="FindOverlaps(T)"/> is sorted.</value>
         [Pure]
@@ -84,50 +92,50 @@ namespace C5.Intervals
 
         #region Collection Properties
 
-        //TODO: Use <c>coll</c>?
         /// <summary>
-        /// The smallest interval that spans all intervals in the collection. The interval's low is
-        /// the lowest low endpoint in the collection, and the high is the highest high endpoint.
-        /// <c>coll.FindOverlaps(coll.Span())</c> will by definition return all intervals in the collection.
+        /// The smallest interval that spans all intervals in the collection. The interval's
+        /// low is the lowest low endpoint in the collection, and its high is the highest
+        /// high endpoint. <c>coll.FindOverlaps(coll.Span())</c> will by definition return 
+        /// all intervals in the collection.
         /// </summary>
-        /// <remarks>Not defined for an empty collection.</remarks>
         /// <returns>The smallest spanning interval.</returns>
+        /// <remarks>Not defined for an empty collection.</remarks>
         [Pure]
         IInterval<T> Span { get; }
 
         /// <summary>
-        /// Returns the interval with the lowest (low) endpoint in the collection. If there are
-        /// multiple intervals that share the lowest endpoint, the interval that is fastest to
-        /// retrieve will be returned.
+        /// Returns the interval with the lowest (low) endpoint in the collection. If there 
+        /// are multiple intervals that share the lowest endpoint, the interval that is 
+        /// fastest to retrieve will be returned.
         /// </summary>
-        /// <remarks>Not defined for an empty collection.</remarks>
         /// <value>An interval with the lowest endpoint in the collection.</value>
+        /// <remarks>Not defined for an empty collection.</remarks>
         [Pure]
         I LowestInterval { get; }
 
         /// <summary>
         /// Returns all intervals with the lowest (low) endpoint in the collection. If the
-        /// collection is empty, the enumerable will be empty. If the collection does not allow
-        /// overlaps, the result will only contain one interval.
+        /// collection is empty, the enumerable will be empty. If the collection does not 
+        /// allow overlaps, the result will only contain one interval.
         /// </summary>
         /// <value>All intervals with the lowest endpoint in the collection.</value>
         [Pure]
         IEnumerable<I> LowestIntervals { get; }
 
         /// <summary>
-        /// Returns the interval with the highest (high) endpoint in the collection. If there are
-        /// multiple intervals that share the highest endpoint, the interval that is fastest to
-        /// retrieve will be returned.
+        /// Returns the interval with the highest (high) endpoint in the collection. If 
+        /// there are multiple intervals that share the highest endpoint, the interval that
+        /// is fastest to retrieve will be returned.
         /// </summary>
-        /// <remarks>Not defined for an empty collection.</remarks>
         /// <value>An interval with the highest endpoint in the collection.</value>
+        /// <remarks>Not defined for an empty collection.</remarks>
         [Pure]
         I HighestInterval { get; }
 
         /// <summary>
         /// Returns all intervals with the highest (high) endpoint in the collection. If the
-        /// collection is empty, the enumerable will be empty. If the collection does not allow
-        /// overlaps, the result will only contain one interval.
+        /// collection is empty, the enumerable will be empty. If the collection does not 
+        /// allow overlaps, the result will only contain one interval.
         /// </summary>
         /// <value>All intervals with the highest endpoint in the collection.</value>
         [Pure]
@@ -136,8 +144,8 @@ namespace C5.Intervals
         /// <summary>
         /// The maximum number of intervals overlapping at a single point in the collection.
         /// </summary>
-        /// <remarks>The point of maximum depth may not be representable with an endpoint value,
-        /// as it could be between two discrete values.</remarks>
+        /// <remarks>The point of maximum depth may not be representable with an endpoint
+        /// value, as it could be between two discrete values.</remarks>
         [Pure]
         int MaximumDepth { get; }
 
@@ -152,25 +160,32 @@ namespace C5.Intervals
         /// </summary>
         /// <param name="query">The query interval.</param>
         /// <returns>All intervals that are equal to the query interval.</returns>
+        /// <seealso cref="IntervalExtensions.IntervalEquals{T}"/>
+        [Pure]
         IEnumerable<I> FindEquals(IInterval<T> query);
 
         #endregion
 
         #region Find Overlaps
 
-        // @design: made to spare the user of making a point interval [q:q] and allow for more effective implementations of the interface for some data structures
+        // @design: made to spare the user of making a point interval [q:q] and allow for
+        // more effective implementations of the interface for some data structures
+
         /// <summary>
+        /// <para>
         /// Create an enumerable, enumerating all intervals that overlap the query point.
-        /// 
+        /// </para>
+        /// <para>
         /// The enumerable will be sorted if <see cref="IsFindOverlapsSorted"/> is true,
         /// or if <see cref="AllowsOverlaps"/> is false.
+        /// </para>
         /// </summary>
-        /// <remarks>If the collection does not allow overlaps (see <see cref="AllowsOverlaps"/>),
-        /// the enumerator will contain at most one interval.</remarks>
         /// <param name="query">The query point.</param>
         /// <returns>All intervals that overlap the query point.</returns>
+        /// <remarks> If the collection does not allow overlaps, the enumerator will contain
+        /// at most one interval.</remarks>
         /// <seealso cref="FindOverlaps(IInterval{T})"/>
-        // TODO: Check seealso in documentation. Does it actually reference the other overloaded method? Add it to FindOverlap as well
+        /// <seealso cref="AllowsOverlaps"/>
         [Pure]
         IEnumerable<I> FindOverlaps(T query);
 
@@ -190,20 +205,28 @@ namespace C5.Intervals
         /// <summary>
         /// Check if there exists an interval that overlaps the query point.
         /// </summary>
-        /// <remarks>There is no guaranty of which interval will be returned, but implementations must assure that the interval returned is the fastest to retrieve.</remarks>
         /// <param name="query">The query point.</param>
         /// <param name="overlap">The overlapping interval found, if return is true.</param>
         /// <returns>True if an interval overlapped the query.</returns>
+        /// <remarks>
+        /// There is no guaranty of which interval will be returned, but implementations
+        /// must assure that the interval returned is the fastest to retrieve.
+        /// </remarks>
+        /// <seealso cref="FindOverlap(IInterval{T},out I)"/>
         [Pure]
         bool FindOverlap(T query, out I overlap);
 
         /// <summary>
         /// Check if there exists an interval that overlaps the query interval.
         /// </summary>
-        /// <remarks>There is no guaranty of which interval will be returned, but implementations must assure that the interval returned is the fastest to retrieve.</remarks>
         /// <param name="query">The query interval.</param>
         /// <param name="overlap">The overlapping interval found, if return is true.</param>
         /// <returns>True if an interval overlapped the query.</returns>
+        /// <remarks>
+        /// There is no guaranty of which interval will be returned, but implementations
+        /// must assure that the interval returned is the fastest to retrieve.
+        /// </remarks>
+        /// <seealso cref="FindOverlap(T,out I)"/>
         [Pure]
         bool FindOverlap(IInterval<T> query, out I overlap);
 
@@ -214,18 +237,26 @@ namespace C5.Intervals
         /// <summary>
         /// Count the number of intervals overlapping the query point.
         /// </summary>
-        /// <param name="query">The query interval</param>
-        /// <remarks>Beware that not all data structure support this operation any faster than <c>FindOverlaps.Count()</c>!</remarks>
+        /// <param name="query">The query interval.</param>
         /// <returns>The number of intervals that overlap the query point.</returns>
+        /// <remarks>
+        /// Beware that not all data structure support this operation any faster than
+        /// <c>coll.FindOverlaps.Count()</c>!
+        /// </remarks>
+        /// <seealso cref="CountOverlaps(IInterval{T})"/>
         [Pure]
         int CountOverlaps(T query);
 
         /// <summary>
         /// Count the number of intervals overlapping the query interval.
-        /// Beware that not all data structure support this operation any faster than FindOverlaps.Count().
         /// </summary>
-        /// <param name="query">The query interval</param>
+        /// <param name="query">The query interval.</param>
         /// <returns>The number of intervals that overlap the query</returns>
+        /// <remarks>
+        /// Beware that not all data structure support this operation any faster than
+        /// <c>coll.FindOverlaps.Count()</c>!
+        /// </remarks>
+        /// <seealso cref="CountOverlaps(T)"/>
         [Pure]
         int CountOverlaps(IInterval<T> query);
 
@@ -233,26 +264,29 @@ namespace C5.Intervals
 
         #region Gaps
 
-        // TODO: Move to ISortedIntervalCollection?
-
+        // TODO: Polish the documentation a bit?
         /// <summary>
         /// Find all gaps between the intervals in the collection. The gaps will have no
-        /// overlaps with the collection, and all gaps will be contained in the span of the collection.
+        /// overlaps with the collection, and all gaps will be contained in the span of the
+        /// collection.
         /// </summary>
+        /// <seealso cref="FindGaps"/>
         [Pure]
         IEnumerable<IInterval<T>> Gaps { get; }
 
         /// <summary>
         /// Find all gaps between the intervals in the collection that overlap the query
-        /// interval. The gaps will have no overlaps with the collection, and all gaps will be
-        /// contained in the query interval.
+        /// interval. The gaps will have no overlaps with the collection, and all gaps will 
+        /// be contained in the query interval.
         /// </summary>
         /// <param name="query">
-        /// Query interval that determines within which intervals the gaps must be.
+        /// The query interval that determines between which intervals the gaps must be.
         /// </param>
         /// <returns>
-        /// Gaps contained in the query interval, not overlapping any of the intervals in the collection.
+        /// The gaps contained in the query interval, not overlapping any of the intervals
+        /// in the collection.
         /// </returns>
+        /// <seealso cref="Gaps"/>
         [Pure]
         IEnumerable<IInterval<T>> FindGaps(IInterval<T> query);
 
@@ -260,26 +294,47 @@ namespace C5.Intervals
 
         #region Extensible
 
-
         /// <summary>
         /// Add an interval to the collection.
         /// </summary>
-        // TODO: What does this even mean?
-        /// <remarks>Different implementations may handle duplicates differently.</remarks>
         /// <param name="interval">The interval to add.</param>
         /// <returns>True if the interval was added.</returns>
+        /// <remarks>
+        /// Adding an interval may fail for the following reasons:
+        /// <list type="bullet">
+        /// <item>
+        /// <description>The collection does not allow reference duplicates, and the added
+        /// interval object is already in the collection.</description>
+        /// </item>
+        /// <item>
+        /// <description>The collection does not allow containments, and the added interval
+        /// is either contained in an interval already in the collection, or an interval 
+        /// already in the collection contains the added interval.</description>
+        /// </item>
+        /// <item>
+        /// <description>The collection does not allow overlaps, and the added interval
+        /// overlaps an interval already in the collection.</description>
+        /// </item>
+        /// </list>
+        /// </remarks>
         // TODO: This should really be handled by contracts, and not user thrown exceptions!
         /// <exception cref="ReadOnlyCollectionException">
         /// Thrown if called on a read-only collection.
         /// </exception>
+        /// <seealso cref="AllowsReferenceDuplicates"/>
+        /// <seealso cref="AllowsContainments"/>
+        /// <seealso cref="AllowsOverlaps"/>
         bool Add(I interval);
 
         /// <summary>
-        /// Add a collection of intervals to the collection. This must have the same effect as
-        /// enumerating through the intervals and calling <see cref="Add"/> for each of them.
+        /// Add a collection of intervals to the collection. This will have the same effect 
+        /// as enumerating through the intervals and calling <see cref="Add"/> for each of 
+        /// them.
         /// </summary>
-        /// <remarks>Different implementations may handle duplicates differently.</remarks>
         /// <param name="intervals">The intervals to add.</param>
+        /// <remarks>
+        /// For more information on how/if an interval is added, see <seealso cref="Add"/>.
+        /// </remarks>
         /// <exception cref="ReadOnlyCollectionException">
         /// Thrown if called on a read-only collection.
         /// </exception>
@@ -288,9 +343,13 @@ namespace C5.Intervals
         /// <summary>
         /// Remove an interval from the collection.
         /// </summary>
-        /// <remarks>Different implementations may remove duplicates differently.</remarks>
         /// <param name="interval">The interval to remove.</param>
         /// <returns>True if the interval was removed.</returns>
+        /// <remarks>
+        /// Removing an interval will fail, if the collection does not contain the interval
+        /// object. Removing an interval that is only interval equal to an interval in the 
+        /// collection will have no effect; the interval must be in the collection.
+        /// </remarks>
         /// <exception cref="ReadOnlyCollectionException">
         /// Thrown if called on a read-only collection.
         /// </exception>
@@ -308,7 +367,6 @@ namespace C5.Intervals
         #endregion
     }
 
-    // TODO: Add helpful strings to code contracts instead of displaying the actual contract. Make sure it doesn't add extra dependencies
     [ContractClassFor(typeof(IIntervalCollection<,>))]
     internal abstract class IntervalCollectionContract<I, T> : CollectionValueBase<I>, IIntervalCollection<I, T>
         where I : class, IInterval<T>
@@ -318,7 +376,16 @@ namespace C5.Intervals
 
         #region Data Structure Properties
 
-        public abstract bool AllowsOverlaps { get; }
+        public bool AllowsReferenceDuplicates
+        {
+            get
+            {
+                // If the collection supports reference duplicates is must support overlaps
+                Contract.Ensures(!Contract.Result<bool>() || AllowsOverlaps);
+
+                throw new NotImplementedException();
+            }
+        }
 
         public bool AllowsContainments
         {
@@ -331,16 +398,7 @@ namespace C5.Intervals
             }
         }
 
-        public bool AllowsReferenceDuplicates
-        {
-            get
-            {
-                // If the collection supports reference duplicates is must support overlaps
-                Contract.Ensures(!Contract.Result<bool>() || AllowsOverlaps);
-
-                throw new NotImplementedException();
-            }
-        }
+        public abstract bool AllowsOverlaps { get; }
 
         public abstract bool IsReadOnly { get; }
 
@@ -445,25 +503,6 @@ namespace C5.Intervals
         }
 
         #endregion
-
-        #endregion
-
-        #region Enumerable
-
-        public IEnumerable<I> Sorted
-        {
-            get
-            {
-                Contract.Ensures(IsEmpty != Contract.Result<IEnumerable<I>>().Any());
-
-                // The intervals are sorted
-                Contract.Ensures(Contract.Result<IEnumerable<I>>().IsSorted<I, T>());
-                // The enumerator is equal to the normal enumerator
-                Contract.Ensures(IntervalCollectionContractHelper.CollectionEquals(this, Contract.Result<IEnumerable<I>>()));
-
-                throw new NotImplementedException();
-            }
-        }
 
         #endregion
 
@@ -606,7 +645,6 @@ namespace C5.Intervals
 
         // TODO: Make a contract that ensures all gaps have been found. Maybe something with collection + gaps = no gaps
 
-        /// <inheritdoc/>
         public IEnumerable<IInterval<T>> Gaps
         {
             get
@@ -631,7 +669,6 @@ namespace C5.Intervals
             }
         }
 
-        /// <inheritdoc/>
         public IEnumerable<IInterval<T>> FindGaps(IInterval<T> query)
         {
             Contract.Requires(query != null);

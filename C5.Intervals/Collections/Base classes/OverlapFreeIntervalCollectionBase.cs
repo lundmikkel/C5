@@ -14,7 +14,7 @@ namespace C5.Intervals
     /// <typeparam name="I">The interval type with endpoint type <typeparamref name="T"/>.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
     /// <seealso cref="IntervalCollectionBase{I,T}"/>
-    public abstract class OverlapFreeIntervalCollectionBase<I, T> : IntervalCollectionBase<I, T>, IOverlapFreeIntervalCollection<I, T>
+    public abstract class OverlapFreeIntervalCollectionBase<I, T> : ContainmentFreeIntervalCollectionBase<I, T>, IOverlapFreeIntervalCollection<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
@@ -29,9 +29,6 @@ namespace C5.Intervals
 
         /// <inheritdoc/>
         public override bool IsFindOverlapsSorted { get { return true; } }
-
-        /// <inheritdoc/>
-        public abstract Speed IndexingSpeed { get; }
 
         #endregion Data Structure Properties
 
@@ -73,41 +70,10 @@ namespace C5.Intervals
 
         #endregion Properties
 
-        #region Sorted Enumeration
-
-        /// <inheritdoc/>
-        public abstract IEnumerable<I> Sorted();
-
-        /// <inheritdoc/>
-        public abstract IEnumerable<I> SortedBackwards();
-
-        /// <inheritdoc/>
-        public abstract IEnumerable<I> EnumerateFrom(T point, bool includeOverlaps = true);
-
-        /// <inheritdoc/>
-        public abstract IEnumerable<I> EnumerateBackwardsFrom(T point, bool includeOverlaps = true);
-
-        /// <inheritdoc/>
-        public abstract IEnumerable<I> EnumerateFrom(I interval, bool includeInterval = true);
-
-        /// <inheritdoc/>
-        public abstract IEnumerable<I> EnumerateBackwardsFrom(I interval, bool includeInterval = true);
-
-        /// <inheritdoc/>
-        public abstract IEnumerable<I> EnumerateFromIndex(int index);
-
-        /// <inheritdoc/>
-        public abstract IEnumerable<I> EnumerateBackwardsFromIndex(int index);
-
-        #endregion
-
         #region Indexed Access
 
         /// <inheritdoc/>
         public abstract int IndexOf(I interval);
-
-        /// <inheritdoc/>
-        public abstract I this[int i] { get; }
 
         #endregion
 

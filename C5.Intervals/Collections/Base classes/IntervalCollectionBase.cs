@@ -19,10 +19,6 @@ namespace C5.Intervals
     /// <see cref="HighestInterval"/>.</description>
     /// </item>
     /// <item>
-    /// <description><see cref="LowestInterval"/>, <see cref="LowestInterval"/>, <see cref="Gaps"/>: both use <see cref="Sorted"/>.
-    /// </description>
-    /// </item>
-    /// <item>
     /// <description><see cref="FindOverlaps(T)"/>, <see cref="FindOverlap(C5.Intervals.IInterval{T},out I)"/>,
     /// <see cref="FindOverlap(T, out I)"/>, <see cref="CountOverlaps(C5.Intervals.IInterval{T})"/>,
     /// <see cref="CountOverlaps(T)"/>, <see cref="FindGaps"/>: use <see cref="FindOverlaps(C5.Intervals.IInterval{T})"/>.
@@ -86,7 +82,6 @@ namespace C5.Intervals
 
         #region Data Structure Properties
 
-        // TODO: Assign default values?
         /// <inheritdoc/>
         public abstract bool AllowsOverlaps { get; }
 
@@ -96,12 +91,11 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public virtual bool AllowsReferenceDuplicates { get { return AllowsOverlaps; } }
 
-        // TODO: Assign default values?
         /// <inheritdoc/>
         public abstract bool IsReadOnly { get; }
 
         /// <inheritdoc/>
-        public virtual bool IsFindOverlapsSorted { get { return false; } }
+        public abstract bool IsFindOverlapsSorted { get; }
 
         #endregion Data Structure Properties
 

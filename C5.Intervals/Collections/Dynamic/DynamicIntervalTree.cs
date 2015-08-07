@@ -1285,8 +1285,8 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override bool IsReadOnly { get { return false; } }
 
-        /// <inheritdoc/>
         // TODO: Make sorted
+        /// <inheritdoc/>
         public override bool IsFindOverlapsSorted { get { return false; } }
 
         #endregion
