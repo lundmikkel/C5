@@ -698,7 +698,7 @@ namespace C5.Intervals
 
         [Pure]
         public static IEnumerable<I> LowestIntervals<I, T>(this IEnumerable<I> intervals)
-            where I : IInterval<T>
+            where I : class, IInterval<T>
             where T : IComparable<T>
         {
             Contract.Requires(intervals.Any());
@@ -728,7 +728,8 @@ namespace C5.Intervals
         }
 
         [Pure]
-        public static IInterval<T> HighestInterval<T>(this IEnumerable<IInterval<T>> intervals)
+        public static I HighestInterval<I, T>(this IEnumerable<I> intervals)
+            where I : class, IInterval<T>
             where T : IComparable<T>
         {
             Contract.Requires(intervals.Any());
@@ -785,6 +786,7 @@ namespace C5.Intervals
         /// <typeparam name="I">The interval type.</typeparam>
         /// <typeparam name="T">The endpoint type.</typeparam>
         /// <returns>The maximum depth.</returns>
+        // TODO: Should be an out parameter!
         [Pure]
         public static int MaximumDepth<I, T>(this IEnumerable<I> intervals, ref IInterval<T> intervalOfMaximumDepth, bool isSorted = true)
             where I : IInterval<T>

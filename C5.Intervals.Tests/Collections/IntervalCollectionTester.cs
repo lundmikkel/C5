@@ -983,7 +983,7 @@ namespace C5.Intervals.Tests
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            var highestInterval = (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).HighestInterval();
+            var highestInterval = (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).HighestInterval<Interval, int>();
 
             Assert.True(collection.HighestInterval.CompareHigh(highestInterval) == 0);
         }
