@@ -50,15 +50,17 @@ namespace C5.Intervals
         #region Sorted Enumeration
 
         // TODO: Use IDirectedEnumerable?
+        // TODO: Move to ISortedIntervalCollection
+
         /// <summary>
         /// Create an enumerable, enumerating all intervals in the collection sorted by lowest low, then lowest high endpoint.
         /// </summary>
         /// <remarks>
         /// The result is equal to a stable sorting of the collection using <see cref="IntervalExtensions.CompareTo{T}"/>.
         /// </remarks>
-        /// <returns>An enumerable, enumerating all collection intervals in sorted order.</returns>
+        /// <value>An enumerable, enumerating all collection intervals in sorted order.</value>
         [Pure]
-        IEnumerable<I> Sorted();
+        IEnumerable<I> Sorted { get; }
 
         // TODO: Review documentation
         /// <summary>
@@ -102,6 +104,7 @@ namespace C5.Intervals
         [Pure]
         IEnumerable<I> EnumerateBackwardsFrom(T point, bool includeOverlaps = true);
 
+        // TODO: Move to ISortedIntervalCollection<I, T>?
         // TODO: Consider if this should be based on interval or reference equality
         /// <summary>
         /// Create an enumerable, enumerating all intervals in the collection in sorted order
@@ -187,22 +190,27 @@ namespace C5.Intervals
 
         #region Sorted Enumeration
 
-        public IEnumerable<I> Sorted()
+        // TODO: Move to SortedIntervalCollectionContract
+
+        public IEnumerable<I> Sorted
         {
-            Contract.Ensures(IsEmpty != Contract.Result<IEnumerable<I>>().Any());
+            get
+            {
+                Contract.Ensures(IsEmpty != Contract.Result<IEnumerable<I>>().Any());
 
-            // The intervals are sorted
-            Contract.Ensures(Contract.Result<IEnumerable<I>>().IsSorted<I, T>());
-            // Highs are sorted as well
-            Contract.Ensures(Contract.Result<IEnumerable<I>>().IsSorted<I>(IntervalExtensions.CreateHighComparer<I, T>()));
-            // The enumerator is equal to the normal enumerator
-            Contract.Ensures(Enumerable.SequenceEqual(
-                this,
-                Contract.Result<IEnumerable<I>>(),
-                IntervalExtensions.CreateReferenceEqualityComparer<I, T>())
-            );
+                // The intervals are sorted
+                Contract.Ensures(Contract.Result<IEnumerable<I>>().IsSorted<I, T>());
+                // Highs are sorted as well
+                Contract.Ensures(Contract.Result<IEnumerable<I>>().IsSorted<I>(IntervalExtensions.CreateHighComparer<I, T>()));
+                // The enumerator is equal to the normal enumerator
+                Contract.Ensures(Enumerable.SequenceEqual(
+                    this,
+                    Contract.Result<IEnumerable<I>>(),
+                    IntervalExtensions.CreateReferenceEqualityComparer<I, T>())
+                    );
 
-            throw new NotImplementedException();
+                throw new NotImplementedException();
+            }
         }
 
         public IEnumerable<I> SortedBackwards()
@@ -215,7 +223,7 @@ namespace C5.Intervals
             Contract.Ensures(Contract.Result<IEnumerable<I>>().Reverse().IsSorted<I>(IntervalExtensions.CreateHighComparer<I, T>()));
             // The backwards enumerator is equal to the sorted reversed
             Contract.Ensures(Enumerable.SequenceEqual(
-                Sorted().Reverse(),
+                Sorted.Reverse(),
                 Contract.Result<IEnumerable<I>>(),
                 IntervalExtensions.CreateReferenceEqualityComparer<I, T>())
             );
@@ -235,8 +243,8 @@ namespace C5.Intervals
             // Enumerable is the same as skipping as long as high is lower than point
             Contract.Ensures(Enumerable.SequenceEqual(
                 includeOverlaps
-                    ? Sorted().SkipWhile(x => x.CompareHigh(point) < 0)
-                    : Sorted().SkipWhile(x => x.CompareLow(point) <= 0),
+                    ? Sorted.SkipWhile(x => x.CompareHigh(point) < 0)
+                    : Sorted.SkipWhile(x => x.CompareLow(point) <= 0),
                 Contract.Result<IEnumerable<I>>(),
                 IntervalExtensions.CreateReferenceEqualityComparer<I, T>()
             ));
@@ -279,7 +287,7 @@ namespace C5.Intervals
             Contract.Ensures(Contract.Result<IEnumerable<I>>().IsSorted<I>(IntervalExtensions.CreateHighComparer<I, T>()));
             // Enumerable is the same as skipping until interval is met
             Contract.Ensures(Enumerable.SequenceEqual(
-                Sorted().SkipWhile(x => !ReferenceEquals(x, interval)).SkipWhile(x => !includeInterval && ReferenceEquals(x, interval)),
+                Sorted.SkipWhile(x => !ReferenceEquals(x, interval)).SkipWhile(x => !includeInterval && ReferenceEquals(x, interval)),
                 Contract.Result<IEnumerable<I>>(),
                 IntervalExtensions.CreateReferenceEqualityComparer<I, T>()
             ));
@@ -319,7 +327,7 @@ namespace C5.Intervals
             Contract.Ensures(Contract.Result<IEnumerable<I>>().IsSorted<I>(IntervalExtensions.CreateHighComparer<I, T>()));
             // Enumerable is the same as skipping the first index intervals
             Contract.Ensures(Enumerable.SequenceEqual(
-                Sorted().Skip(index),
+                Sorted.Skip(index),
                 Contract.Result<IEnumerable<I>>(),
                 IntervalExtensions.CreateReferenceEqualityComparer<I, T>()
             ));
@@ -338,7 +346,7 @@ namespace C5.Intervals
             Contract.Ensures(Contract.Result<IEnumerable<I>>().Reverse().IsSorted<I>(IntervalExtensions.CreateHighComparer<I, T>()));
             // Enumerable is the same as skipping the first index intervals
             Contract.Ensures(Enumerable.SequenceEqual(
-                Sorted().Take(index + 1).Reverse(),
+                Sorted.Take(index + 1).Reverse(),
                 Contract.Result<IEnumerable<I>>(),
                 IntervalExtensions.CreateReferenceEqualityComparer<I, T>()
             ));
@@ -362,7 +370,7 @@ namespace C5.Intervals
                 // If the index is correct, the output can never be null
                 Contract.Ensures(Contract.Result<I>() != null);
                 // Result is the same as skipping the first i elements
-                Contract.Ensures(ReferenceEquals(Contract.Result<I>(), Sorted().Skip(i).First()));
+                Contract.Ensures(ReferenceEquals(Contract.Result<I>(), Sorted.Skip(i).First()));
 
                 throw new NotImplementedException();
             }

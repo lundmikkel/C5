@@ -262,6 +262,7 @@ namespace C5.Intervals
 
         #endregion
 
+        // TODO: Move Gaps to IOverlapFreeIntervalCollection?
         #region Gaps
 
         // TODO: Polish the documentation a bit?

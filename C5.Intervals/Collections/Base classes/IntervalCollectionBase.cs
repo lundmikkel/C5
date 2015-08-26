@@ -196,6 +196,7 @@ namespace C5.Intervals
 
         #region Gaps
 
+        // TODO: Improve in SortedIntervalCollection
         /// <inheritdoc/>
         public virtual IEnumerable<IInterval<T>> Gaps { get { return this.Gaps(isSorted: false); } }
 

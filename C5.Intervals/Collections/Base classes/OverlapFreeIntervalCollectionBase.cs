@@ -35,7 +35,7 @@ namespace C5.Intervals
         #region Collection Properties
 
         /// <inheritdoc/>
-        public override I LowestInterval { get { return Sorted().First(); } }
+        public override I LowestInterval { get { return Sorted.First(); } }
 
         /// <inheritdoc/>
         public override IEnumerable<I> LowestIntervals
