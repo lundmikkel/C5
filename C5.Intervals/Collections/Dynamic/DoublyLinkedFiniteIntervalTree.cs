@@ -607,7 +607,7 @@ namespace C5.Intervals
             if (index < 0 || IsEmpty)
                 return Enumerable.Empty<I>();
             if (Count <= index)
-                return Sorted;
+                return SortedBackwards();
 
             return enumerateBackwardsFrom(indexer(_root, index));
         }

@@ -783,13 +783,13 @@ namespace C5.Intervals.Tests
 
         [Test]
         [Category("Enumerate Backwards From Index")]
-        public void EnumerateBackwardsFromIndex_PositiveIndex_SortedCollection()
+        public void EnumerateBackwardsFromIndex_PositiveIndex_BackwardsSortedCollection()
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            CollectionAssert.AreEqual(collection.Sorted, collection.EnumerateBackwardsFromIndex(collection.Count));
+            CollectionAssert.AreEqual(collection.SortedBackwards(), collection.EnumerateBackwardsFromIndex(collection.Count));
             var index = Random.Next(collection.Count, int.MaxValue);
-            CollectionAssert.AreEqual(collection.Sorted, collection.EnumerateBackwardsFromIndex(index));
+            CollectionAssert.AreEqual(collection.SortedBackwards(), collection.EnumerateBackwardsFromIndex(index));
         }
 
         [Test]
