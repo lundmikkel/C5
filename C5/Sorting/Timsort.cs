@@ -31,7 +31,7 @@ namespace C5
             Contract.Requires(0 <= start, "start must be non-negative.");
             Contract.Requires(0 <= length, "length must be non-negative.");
             Contract.Requires(start + length <= array.Length);
-            Contract.Ensures(Contract.ForAll(1, array.Length, i => (comparer ?? Comparer<T>.Default).Compare(array[i - 1], array[i]) <= 0));
+            Contract.Ensures(length == 0 || Contract.ForAll(1, array.Length, i => (comparer ?? Comparer<T>.Default).Compare(array[i - 1], array[i]) <= 0));
 
             new TimSorter<T>(array, comparer).Timsort(start, length);
         }
