@@ -596,12 +596,22 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override IEnumerable<I> EnumerateFromIndex(int index)
         {
+            if (Count <= index)
+                return Enumerable.Empty<I>();
+            if (index < 0)
+                return Sorted;
+
             return enumerateFrom(indexer(_root, index));
         }
 
         /// <inheritdoc/>
         public override IEnumerable<I> EnumerateBackwardsFromIndex(int index)
         {
+            if (index < 0 || IsEmpty)
+                return Enumerable.Empty<I>();
+            if (Count <= index)
+                return Sorted;
+
             return enumerateBackwardsFrom(indexer(_root, index));
         }
 

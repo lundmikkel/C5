@@ -691,32 +691,32 @@ namespace C5.Intervals.Tests
 
         [Test]
         [Category("Enumerate From Index")]
-        public void EnumerateFromIndex_InvalidInput_ThrowsContractException()
+        public void EnumerateFromIndex_NegativeIndex_SortedCollection()
         {
-            AssertThrowsContractException((() =>
-            {
-                var intervals = ManyIntervals();
-                var collection = CreateCollection<Interval, int>(intervals);
-                collection.EnumerateFromIndex(-1);
-            }));
-
-            AssertThrowsContractException((() =>
-            {
-                var intervals = ManyIntervals();
-                var collection = CreateCollection<Interval, int>(intervals);
-                collection.EnumerateFromIndex(intervals.Length);
-            }));
+            var intervals = ManyIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+            CollectionAssert.AreEqual(collection.Sorted, collection.EnumerateFromIndex(-1));
+            var index = Random.Next(int.MinValue, 0);
+            CollectionAssert.AreEqual(collection.Sorted, collection.EnumerateFromIndex(index));
         }
 
         [Test]
         [Category("Enumerate From Index")]
-        public void EnumerateFromIndex_EmptyCollection_ThrowsContractException()
+        public void EnumerateFromIndex_PositiveIndex_Empty()
         {
-            AssertThrowsContractException((() =>
-            {
-                var collection = CreateEmptyCollection<Interval, int>();
-                collection.EnumerateFromIndex(0);
-            }));
+            var intervals = ManyIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+            CollectionAssert.IsEmpty(collection.EnumerateFromIndex(collection.Count));
+            var index = Random.Next(collection.Count, int.MaxValue);
+            CollectionAssert.IsEmpty(collection.EnumerateFromIndex(index));
+        }
+
+        [Test]
+        [Category("Enumerate From Index")]
+        public void EnumerateFromIndex_EmptyCollection_Empty()
+        {
+            var collection = CreateEmptyCollection<Interval, int>();
+            CollectionAssert.IsEmpty(collection.EnumerateFromIndex(0));
         }
 
         [Test]
@@ -772,32 +772,32 @@ namespace C5.Intervals.Tests
 
         [Test]
         [Category("Enumerate Backwards From Index")]
-        public void EnumerateBackwardsFromIndex_InvalidInput_ThrowsContractException()
+        public void EnumerateBackwardsFromIndex_NegativeIndex_SortedCollection()
         {
-            AssertThrowsContractException((() =>
-            {
-                var intervals = ManyIntervals();
-                var collection = CreateCollection<Interval, int>(intervals);
-                collection.EnumerateBackwardsFromIndex(-1);
-            }));
-
-            AssertThrowsContractException((() =>
-            {
-                var intervals = ManyIntervals();
-                var collection = CreateCollection<Interval, int>(intervals);
-                collection.EnumerateBackwardsFromIndex(intervals.Length);
-            }));
+            var intervals = ManyIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+            CollectionAssert.IsEmpty(collection.EnumerateBackwardsFromIndex(-1));
+            var index = Random.Next(int.MinValue, 0);
+            CollectionAssert.IsEmpty(collection.EnumerateBackwardsFromIndex(index));
         }
 
         [Test]
         [Category("Enumerate Backwards From Index")]
-        public void EnumerateBackwardsFromIndex_EmptyCollection_ThrowsContractException()
+        public void EnumerateBackwardsFromIndex_PositiveIndex_SortedCollection()
         {
-            AssertThrowsContractException((() =>
-            {
-                var collection = CreateEmptyCollection<Interval, int>();
-                collection.EnumerateBackwardsFromIndex(0);
-            }));
+            var intervals = ManyIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+            CollectionAssert.AreEqual(collection.Sorted, collection.EnumerateBackwardsFromIndex(collection.Count));
+            var index = Random.Next(collection.Count, int.MaxValue);
+            CollectionAssert.AreEqual(collection.Sorted, collection.EnumerateBackwardsFromIndex(index));
+        }
+
+        [Test]
+        [Category("Enumerate Backwards From Index")]
+        public void EnumerateBackwardsFromIndex_EmptyCollection_EmptyResult()
+        {
+            var collection = CreateEmptyCollection<Interval, int>();
+            CollectionAssert.IsEmpty(collection.EnumerateBackwardsFromIndex(0));
         }
 
         [Test]

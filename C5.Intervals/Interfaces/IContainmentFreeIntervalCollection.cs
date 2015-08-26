@@ -115,7 +115,6 @@ namespace C5.Intervals
         [Pure]
         IEnumerable<I> EnumerateBackwardsFrom(I interval, bool includeInterval = true);
 
-        // TODO: Compare to definition of Skip, which returns the same collection for index <= 0 and an empty collection for index > count
         /// <summary>
         /// Create an enumerable, enumerating all intervals in the collection in sorted order
         /// starting from the interval at <paramref name="index"/>.
@@ -298,7 +297,8 @@ namespace C5.Intervals
 
         public IEnumerable<I> EnumerateFromIndex(int index)
         {
-            Contract.Requires(0 <= index && index < Count);
+            // Removes constraint to work like Skip()
+            // Contract.Requires(0 <= index && index < Count);
 
             Contract.Ensures(Contract.Result<IEnumerable<I>>() != null);
             // The intervals are sorted
@@ -312,12 +312,30 @@ namespace C5.Intervals
                 IntervalExtensions.CreateReferenceEqualityComparer<I, T>()
             ));
 
+            // Negative indices is the same as Sorted
+            Contract.Ensures(0 <= index ||
+                Enumerable.SequenceEqual(
+                    Sorted,
+                    Contract.Result<IEnumerable<I>>(),
+                    IntervalExtensions.CreateReferenceEqualityComparer<I, T>()
+                )
+            );
+            // Indices greater than or equal to count are empty
+            Contract.Ensures(index < Count ||
+                Enumerable.SequenceEqual(
+                    Enumerable.Empty<I>(),
+                    Contract.Result<IEnumerable<I>>(),
+                    IntervalExtensions.CreateReferenceEqualityComparer<I, T>()
+                )
+            );
+
             throw new NotImplementedException();
         }
 
         public IEnumerable<I> EnumerateBackwardsFromIndex(int index)
         {
-            Contract.Requires(0 <= index && index < Count);
+            // Removes constraint to work like Skip()
+            // Contract.Requires(0 <= index && index < Count);
 
             Contract.Ensures(Contract.Result<IEnumerable<I>>() != null);
             // The intervals are sorted
@@ -330,6 +348,23 @@ namespace C5.Intervals
                 Contract.Result<IEnumerable<I>>(),
                 IntervalExtensions.CreateReferenceEqualityComparer<I, T>()
             ));
+
+            // Negative indices is the same as empty
+            Contract.Ensures(0 <= index ||
+                Enumerable.SequenceEqual(
+                    Enumerable.Empty<I>(),
+                    Contract.Result<IEnumerable<I>>(),
+                    IntervalExtensions.CreateReferenceEqualityComparer<I, T>()
+                )
+            );
+            // Indices greater than or equal to count are empty
+            Contract.Ensures(index < Count ||
+                Enumerable.SequenceEqual(
+                    SortedBackwards(),
+                    Contract.Result<IEnumerable<I>>(),
+                    IntervalExtensions.CreateReferenceEqualityComparer<I, T>()
+                )
+            );
 
             throw new NotImplementedException();
         }
