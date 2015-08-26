@@ -540,10 +540,13 @@ namespace C5.Intervals
         #region Enumerable
 
         /// <inheritdoc/>
-        public override IEnumerator<I> GetEnumerator() { return Sorted().GetEnumerator(); }
+        public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
 
         /// <inheritdoc/>
-        public override IEnumerable<I> Sorted() { return enumerateFrom(_first.Next); }
+        public override IEnumerable<I> Sorted
+        {
+            get { return enumerateFrom(_first.Next); }
+        }
 
         /// <inheritdoc/>
         public override IEnumerable<I> SortedBackwards() { return enumerateBackwardsFrom(_last.Previous); }

@@ -157,6 +157,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Code contracts\IntervalContractHelper.cs" />
+    <Compile Include="Collections\Base classes\SortedIntervalCollectionBase.cs" />
     <Compile Include="Collections\Dynamic\DoublyLinkedFiniteIntervalTree.cs" />
     <Compile Include="Collections\Dynamic\DynamicIntervalTree.cs" />
     <Compile Include="Collections\Dynamic\IntervalBinarySearchTree.cs" />
@@ -181,6 +182,7 @@
     <Compile Include="Extensions\IntervalTypeExtensions.cs" />
     <Compile Include="Interfaces\IDataInterval.cs" />
     <Compile Include="Interfaces\IInterval.cs" />
+    <Compile Include="Interfaces\ISortedIntervalCollection.cs" />
     <Compile Include="Interfaces\IIntervalCollection.cs" />
     <Compile Include="Interfaces\IContainmentFreeIntervalCollection.cs" />
     <Compile Include="Interfaces\IOverlapFreeIntervalCollection.cs" />

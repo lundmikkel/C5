@@ -9,7 +9,7 @@ namespace C5.Intervals.Tests
     {
         #region Black-box
 
-        class NestedContainmentListTester_BlackBox : IntervalCollectionTester
+        class NestedContainmentListTester_BlackBox : SortedIntervalCollectionTester
         {
             protected override Type GetCollectionType()
             {

@@ -1,4 +1,5 @@
 ﻿using System;
+using NUnit.Framework;
 
 namespace C5.Intervals.Tests
 {
@@ -6,6 +7,7 @@ namespace C5.Intervals.Tests
     {
         #region Black-box
 
+        [Ignore]
         class StaticFiniteIntervalListTesterBlackBox : OverlapFreeIntervalCollectionTester
         {
             protected override Type GetCollectionType()
@@ -35,7 +37,7 @@ namespace C5.Intervals.Tests
         }
 
         #endregion
-
+        
         #region White-box
 
         #endregion

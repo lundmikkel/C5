@@ -11,7 +11,7 @@ namespace C5.Intervals.Tests
     // ReSharper disable RedundantArgumentDefaultValue
 
     [TestFixture]
-    abstract class ContainmentFreeIntervalCollectionTester : IntervalCollectionTester
+    abstract class ContainmentFreeIntervalCollectionTester : SortedIntervalCollectionTester
     {
         /*
          * Things to check for for each method:
@@ -24,19 +24,7 @@ namespace C5.Intervals.Tests
 
         #region Meta
 
-        // TODO: Fix when NUnit uses generic comparers
-        static readonly IComparer comparer = new Comparer();
-        static readonly IComparer backwardsComparer = new BackwardsComparer();
-
-        private class Comparer : IComparer
-        {
-            private readonly IComparer<Interval> genericComparer = IntervalExtensions.CreateComparer<Interval, int>();
-
-            public int Compare(object x, object y)
-            {
-                return genericComparer.Compare((Interval)x, (Interval)y);
-            }
-        }
+        private static readonly IComparer backwardsComparer = new BackwardsComparer();
 
         private class BackwardsComparer : IComparer
         {
@@ -44,10 +32,10 @@ namespace C5.Intervals.Tests
 
             public int Compare(object x, object y)
             {
-                return genericComparer.Compare((Interval)x, (Interval)y);
+                return genericComparer.Compare((Interval) x, (Interval) y);
             }
         }
-
+        
         protected new IContainmentFreeIntervalCollection<I, T> CreateCollection<I, T>(params I[] intervals)
             where I : class, IInterval<T>
             where T : IComparable<T>
@@ -65,78 +53,6 @@ namespace C5.Intervals.Tests
         #endregion
 
         #region Test Methods
-
-        #region Sorted
-
-        [Test]
-        [Category("Sorted")]
-        public void Sorted_EmptyCollection_Empty()
-        {
-            var collection = CreateEmptyCollection<Interval, int>();
-            CollectionAssert.IsEmpty(collection.Sorted());
-        }
-
-        [Test]
-        [Category("Sorted")]
-        public void Sorted_SingleInterval_AreEqual()
-        {
-            var interval = SingleInterval();
-            var collection = CreateCollection<Interval, int>(interval);
-            CollectionAssert.AreEqual(new[] { interval }, collection.Sorted());
-            CollectionAssert.IsOrdered(collection.Sorted(), comparer);
-        }
-
-        [Test]
-        [Category("Sorted")]
-        public void Sorted_SingleObject_AreEqual()
-        {
-            var intervals = SingleObject();
-            var collection = CreateCollection<Interval, int>(intervals);
-            var expected = collection.AllowsReferenceDuplicates ? intervals : new[] { intervals.First() };
-            CollectionAssert.AreEqual(expected, collection.Sorted());
-            CollectionAssert.IsOrdered(collection.Sorted(), comparer);
-        }
-
-        [Test]
-        [Category("Sorted")]
-        public void Sorted_DuplicateIntervals_AreEqual()
-        {
-            var intervals = DuplicateIntervals();
-            var collection = CreateCollection<Interval, int>(intervals);
-            var expected = collection.AllowsOverlaps ? intervals : new[] { intervals.First() };
-            CollectionAssert.AreEqual(expected, collection.Sorted());
-            CollectionAssert.IsOrdered(collection.Sorted(), comparer);
-        }
-
-        [Test]
-        [Category("Sorted"), AdditionalSeeds(36342054, -1127807792)]
-        public void Sorted_ManyIntervals_AreEqual()
-        {
-            var intervals = ManyIntervals();
-            var collection = CreateCollection<Interval, int>(intervals);
-            var expected = collection.AllowsOverlaps ? intervals : NonOverlapping(intervals);
-            Sorting.Timsort(expected, IntervalExtensions.CreateComparer<Interval, int>());
-            CollectionAssert.AreEqual(expected, collection.Sorted());
-            CollectionAssert.AllItemsAreUnique(collection.Sorted());
-            CollectionAssert.IsOrdered(collection.Sorted(), comparer);
-        }
-
-        // TODO: Move to sorted tester
-        // [Test]
-        // [Category("Sorted")]
-        // public void Sorted_LCListTrickyCase_Sorted()
-        // {
-        //     var collection = CreateCollection<Interval, int>(
-        //         new Interval(0, 8),
-        //         new Interval(1, 7),
-        //         new Interval(2, 3),
-        //         new Interval(4, 9),
-        //         new Interval(5, 6)
-        //     );
-        //     CollectionAssert.IsOrdered(collection.Sorted(), comparer);
-        // }
-
-        #endregion
 
         #region Sorted Backwards
 
@@ -343,7 +259,7 @@ namespace C5.Intervals.Tests
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            CollectionAssert.AreEqual(collection.Sorted(), collection.EnumerateFrom(Int32.MinValue));
+            CollectionAssert.AreEqual(collection.Sorted, collection.EnumerateFrom(Int32.MinValue));
         }
 
         [Test]
@@ -665,7 +581,7 @@ namespace C5.Intervals.Tests
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            var interval = collection.Sorted().Last();
+            var interval = collection.Sorted.Last();
             CollectionAssert.IsEmpty(collection.EnumerateFrom(interval, false));
         }
 

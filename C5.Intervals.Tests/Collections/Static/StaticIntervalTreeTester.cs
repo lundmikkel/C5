@@ -9,7 +9,7 @@ namespace C5.Intervals.Tests
     {
         #region Black-box
 
-        class StaticIntervalTreeTester_BlackBox : IntervalCollectionTester
+        class StaticIntervalTreeTester_BlackBox : SortedIntervalCollectionTester
         {
             protected override Type GetCollectionType()
             {

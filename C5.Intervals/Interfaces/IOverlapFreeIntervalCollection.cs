@@ -84,7 +84,7 @@ namespace C5.Intervals
         {
             Contract.Requires(interval != null);
 
-            Contract.Ensures(Contract.Result<int>() == Sorted().IndexOfSorted(interval, IntervalExtensions.CreateComparer<I, T>()));
+            Contract.Ensures(Contract.Result<int>() == Sorted.IndexOfSorted(interval, IntervalExtensions.CreateComparer<I, T>()));
             Contract.Ensures(!this.Any(x => ReferenceEquals(interval, x)) || 0 <= Contract.Result<int>() && Contract.Result<int>() < Count);
             Contract.Ensures(this.Any(x => ReferenceEquals(interval, x)) || 0 > Contract.Result<int>() && Contract.Result<int>() >= ~Count);
 

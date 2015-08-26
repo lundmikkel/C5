@@ -11,7 +11,7 @@ namespace C5.Intervals
     /// </summary>
     /// <typeparam name="I">The interval type.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
-    public class LayeredContainmentList<I, T> : IntervalCollectionBase<I, T>
+    public class LayeredContainmentList<I, T> : SortedIntervalCollectionBase<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
@@ -492,7 +492,7 @@ namespace C5.Intervals
         public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
 
         /// <inheritdoc/>
-        public IEnumerable<I> Sorted
+        public override IEnumerable<I> Sorted
         {
             get
             {

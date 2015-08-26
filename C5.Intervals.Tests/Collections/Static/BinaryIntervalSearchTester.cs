@@ -1,5 +1,4 @@
 ﻿using System;
-using C5.Intervals;
 
 namespace C5.Intervals.Tests
 {
@@ -7,7 +6,7 @@ namespace C5.Intervals.Tests
     {
         #region Black-box
 
-        class BinaryIntervalSearchTester_BlackBox : IntervalCollectionTester
+        class BinaryIntervalSearchTester_BlackBox : SortedIntervalCollectionTester
         {
             protected override Type GetCollectionType()
             {

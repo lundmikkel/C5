@@ -25,7 +25,7 @@ namespace C5.Intervals
     /// containing interval.
     /// </remarks>
     [ContractClass(typeof(ContainmentFreeIntervalCollectionContract<,>))]
-    public interface IContainmentFreeIntervalCollection<I, T> : IIntervalCollection<I, T>
+    public interface IContainmentFreeIntervalCollection<I, T> : ISortedIntervalCollection<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
@@ -35,9 +35,9 @@ namespace C5.Intervals
 
         /// <summary>
         /// The value indicates the type of asymptotic complexity in terms of the indexer of
-        /// this collection. This is to allow generic algorithms to alter their behavior 
+        /// this collection. This is to allow generic algorithms to alter their behaviour 
         /// for collections that provide good performance when applied to either random or
-        /// sequential access.
+        /// sequencial access.
         /// </summary>
         /// <value>A characterization of the speed of lookup operations.</value>
         [Pure]
@@ -48,19 +48,6 @@ namespace C5.Intervals
         #endregion
 
         #region Sorted Enumeration
-
-        // TODO: Use IDirectedEnumerable?
-        // TODO: Move to ISortedIntervalCollection
-
-        /// <summary>
-        /// Create an enumerable, enumerating all intervals in the collection sorted by lowest low, then lowest high endpoint.
-        /// </summary>
-        /// <remarks>
-        /// The result is equal to a stable sorting of the collection using <see cref="IntervalExtensions.CompareTo{T}"/>.
-        /// </remarks>
-        /// <value>An enumerable, enumerating all collection intervals in sorted order.</value>
-        [Pure]
-        IEnumerable<I> Sorted { get; }
 
         // TODO: Review documentation
         /// <summary>
@@ -163,7 +150,7 @@ namespace C5.Intervals
     }
 
     [ContractClassFor(typeof(IContainmentFreeIntervalCollection<,>))]
-    internal abstract class ContainmentFreeIntervalCollectionContract<I, T> : IntervalCollectionBase<I, T>, IContainmentFreeIntervalCollection<I, T>
+    internal abstract class ContainmentFreeIntervalCollectionContract<I, T> : SortedIntervalCollectionBase<I, T>, IContainmentFreeIntervalCollection<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
@@ -189,17 +176,10 @@ namespace C5.Intervals
         #endregion
 
         #region Sorted Enumeration
-
-        // TODO: Move to SortedIntervalCollectionContract
-
-        public IEnumerable<I> Sorted
+        public override IEnumerable<I> Sorted
         {
             get
             {
-                Contract.Ensures(IsEmpty != Contract.Result<IEnumerable<I>>().Any());
-
-                // The intervals are sorted
-                Contract.Ensures(Contract.Result<IEnumerable<I>>().IsSorted<I, T>());
                 // Highs are sorted as well
                 Contract.Ensures(Contract.Result<IEnumerable<I>>().IsSorted<I>(IntervalExtensions.CreateHighComparer<I, T>()));
                 // The enumerator is equal to the normal enumerator
@@ -207,12 +187,12 @@ namespace C5.Intervals
                     this,
                     Contract.Result<IEnumerable<I>>(),
                     IntervalExtensions.CreateReferenceEqualityComparer<I, T>())
-                    );
+                );
 
                 throw new NotImplementedException();
             }
         }
-
+        
         public IEnumerable<I> SortedBackwards()
         {
             Contract.Ensures(IsEmpty != Contract.Result<IEnumerable<I>>().Any());

@@ -6,7 +6,7 @@ using System.Linq;
 namespace C5.Intervals
 {
     // TODO: Finish data structure
-    public class BinaryIntervalSearch<I, T> : IntervalCollectionBase<I, T>
+    public class BinaryIntervalSearch<I, T> : SortedIntervalCollectionBase<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
@@ -191,7 +191,7 @@ namespace C5.Intervals
         public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
 
         /// <inheritdoc/>
-        public IEnumerable<I> Sorted
+        public override IEnumerable<I> Sorted
         {
             get
             {

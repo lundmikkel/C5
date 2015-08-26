@@ -133,12 +133,12 @@ namespace C5.Intervals
         #region Enumerable
 
         /// <inheritdoc/>
-        public override IEnumerator<I> GetEnumerator() { return Sorted().GetEnumerator(); }
+        public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
 
         /// <inheritdoc/>
-        public override IEnumerable<I> Sorted()
+        public override IEnumerable<I> Sorted
         {
-            return enumerateFromIndex(0);
+            get { return enumerateFromIndex(0); }
         }
 
         public override IEnumerable<I> SortedBackwards()

@@ -27,15 +27,9 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override bool AllowsOverlaps { get { return false; } }
 
-        /// <inheritdoc/>
-        public override bool IsFindOverlapsSorted { get { return true; } }
-
         #endregion Data Structure Properties
 
         #region Collection Properties
-
-        /// <inheritdoc/>
-        public override I LowestInterval { get { return Sorted.First(); } }
 
         /// <inheritdoc/>
         public override IEnumerable<I> LowestIntervals

@@ -11,7 +11,7 @@ namespace C5.Intervals
     /// <remarks>The collection will not contain duplicate intervals based on reference equality. Two intervals in the collection are allowed to contain the same interval data, but the collection can only contain an object once.</remarks>
     /// <typeparam name="I">The interval type.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
-    public class IntervalBinarySearchTreeOld<I, T> : IntervalCollectionBase<I, T>
+    public class IntervalBinarySearchTreeOld<I, T> : SortedIntervalCollectionBase<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
@@ -1067,7 +1067,7 @@ namespace C5.Intervals
         #endregion
 
         /// <inheritdoc/>
-        public IEnumerable<I> Sorted { get { return this.OrderBy(x => x, Comparer); } }
+        public override IEnumerable<I> Sorted { get { return this.OrderBy(x => x, Comparer); } }
 
         #endregion
 

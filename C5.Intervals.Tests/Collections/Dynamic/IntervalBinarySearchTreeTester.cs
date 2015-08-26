@@ -8,7 +8,7 @@ namespace C5.Intervals.Tests
     {
         #region Black-box
 
-        abstract class IntervalBinarySearchTreeTester_BlackBox : IntervalCollectionTester
+        abstract class IntervalBinarySearchTreeTester_BlackBox : SortedIntervalCollectionTester
         {
             protected override Type GetCollectionType()
             {

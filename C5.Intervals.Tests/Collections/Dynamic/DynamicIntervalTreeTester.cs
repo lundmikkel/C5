@@ -8,7 +8,7 @@ namespace C5.Intervals.Tests
     {
         #region Black-box
 
-        abstract class DynamicIntervalTreeTester_BlackBox : IntervalCollectionTester
+        abstract class DynamicIntervalTreeTester_BlackBox : SortedIntervalCollectionTester
         {
             protected override Type GetCollectionType()
             {

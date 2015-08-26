@@ -9,7 +9,7 @@ namespace C5.Intervals.Tests
     {
         #region Black-box
 
-        class IntervalBinarySearchTreeOldTester_BlackBox : IntervalCollectionTester
+        class IntervalBinarySearchTreeOldTester_BlackBox : SortedIntervalCollectionTester
         {
             protected override Type GetCollectionType()
             {

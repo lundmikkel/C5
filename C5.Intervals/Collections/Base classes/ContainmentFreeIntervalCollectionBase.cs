@@ -13,23 +13,15 @@ namespace C5.Intervals
     /// <typeparam name="I">The interval type with endpoint type <typeparamref name="T"/>.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
     /// <seealso cref="IntervalCollectionBase{I,T}"/>
-    public abstract class ContainmentFreeIntervalCollectionBase<I, T> : IntervalCollectionBase<I, T>, IContainmentFreeIntervalCollection<I, T>
+    public abstract class ContainmentFreeIntervalCollectionBase<I, T> : SortedIntervalCollectionBase<I, T>, IContainmentFreeIntervalCollection<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
-
-        /// <inheritdoc/>
         #region Properties
 
         #region Data Structure Properties
 
-        /// <summary>
-        /// The value indicates the type of asymptotic complexity in terms of the indexer of
-        /// this collection. This is to allow generic algorithms to alter their behaviour 
-        /// for collections that provide good performance when applied to either random or
-        /// sequencial access.
-        /// </summary>
-        /// <value>A characterization of the speed of lookup operations.</value>
+        /// <inheritdoc/>
         public abstract Speed IndexingSpeed { get; }
 
         #endregion
@@ -37,9 +29,6 @@ namespace C5.Intervals
         #endregion
 
         #region Sorted Enumeration
-
-        /// <inheritdoc/>
-        public abstract IEnumerable<I> Sorted();
 
         /// <inheritdoc/>
         public abstract IEnumerable<I> SortedBackwards();

@@ -18,7 +18,7 @@ namespace C5.Intervals
     /// <remarks>It is important to implement a proper hashing method for <see cref="I"/> not based on endpoints. Failing to do so will result in worse runtimes for interval duplicate objects.</remarks>
     /// <typeparam name="I">The interval type.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
-    public class IntervalBinarySearchTree<I, T> : IntervalCollectionBase<I, T>
+    public class IntervalBinarySearchTree<I, T> : SortedIntervalCollectionBase<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
@@ -1568,6 +1568,7 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override IEnumerator<I> GetEnumerator()
         {
+            // TODO: Remove SelectMany
             return nodes(_root)
                 .SelectMany(node => node
                     .IntervalsEndingInNode
@@ -1576,7 +1577,7 @@ namespace C5.Intervals
         }
 
         /// <inheritdoc/>
-        public IEnumerable<I> Sorted
+        public override IEnumerable<I> Sorted
         {
             get
             {
@@ -1595,6 +1596,7 @@ namespace C5.Intervals
         /// <returns>An enumerable of intervals</returns>
         private static IEnumerable<I> intervals(Node root)
         {
+            // TODO: Remove SelectMany
             return nodesStatic(root).SelectMany(node => node.IntervalsEndingInNode);
         }
 

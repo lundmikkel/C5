@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace C5.Intervals
 {
-    public class NestedContainmentListArticle<I, T> : IntervalCollectionBase<I, T>
+    public class NestedContainmentListArticle<I, T> : SortedIntervalCollectionBase<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
@@ -400,7 +400,7 @@ namespace C5.Intervals
         }
 
         /// <inheritdoc/>
-        public IEnumerable<I> Sorted
+        public override IEnumerable<I> Sorted
         {
             get
             {

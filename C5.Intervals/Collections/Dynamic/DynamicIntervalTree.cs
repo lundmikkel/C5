@@ -13,7 +13,7 @@ namespace C5.Intervals
     /// <remarks>It is important to implement a proper hashing method for <see cref="I"/> not based on endpoints. Failing to do so will result in worse runtimes for interval duplicate objects.</remarks>
     /// <typeparam name="I">The interval type.</typeparam>
     /// <typeparam name="T">The interval endpoint type.</typeparam>
-    public class DynamicIntervalTree<I, T> : IntervalCollectionBase<I, T>
+    public class DynamicIntervalTree<I, T> : SortedIntervalCollectionBase<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
@@ -1392,7 +1392,7 @@ namespace C5.Intervals
             return Sorted.GetEnumerator();
         }
 
-        public IEnumerable<I> Sorted
+        public override IEnumerable<I> Sorted
         {
             get
             {
