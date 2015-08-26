@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace C5.Intervals
 {
@@ -26,9 +27,63 @@ namespace C5.Intervals
 
         #endregion
 
+        #region Collection Property
+
+        public override I HighestInterval
+        {
+            get
+            {
+                return SortedBackwards().First();
+            }
+        }
+
+        public override IEnumerable<I> HighestIntervals
+        {
+            get
+            {
+                var enumerator = SortedBackwards().GetEnumerator();
+
+                if (!enumerator.MoveNext())
+                {
+                    yield break;
+                }
+
+                var highestInterval = enumerator.Current;
+                yield return highestInterval;
+
+                while (enumerator.MoveNext())
+                {
+                    var interval = enumerator.Current;
+                    if (interval.HighEquals(highestInterval))
+                        yield return interval;
+                    else
+                        yield break;
+                }
+            }
+        }
+
+        public override int MaximumDepth
+        {
+            get
+            {
+                // TODO: Enumerate while keeping tract of currently overlapping intervals and their count. Maybe use circular queue?
+
+                throw new NotImplementedException();
+            }
+        }
+
+        #endregion
+
         #endregion
 
         #region Sorted Enumeration
+
+        /// <inheritdoc/>
+        public override IEnumerator<I> GetEnumerator()
+        {
+            // It is expected that the default enumerator _is_ the sorted enumerator!
+            return Sorted.GetEnumerator();
+        }
 
         /// <inheritdoc/>
         public abstract IEnumerable<I> SortedBackwards();

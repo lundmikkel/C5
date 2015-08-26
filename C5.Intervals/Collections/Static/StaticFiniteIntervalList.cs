@@ -133,17 +133,14 @@ namespace C5.Intervals
         #region Enumerable
 
         /// <inheritdoc/>
-        public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
-
-        /// <inheritdoc/>
         public override IEnumerable<I> Sorted
         {
-            get { return enumerateFromIndex(0); }
+            get { return EnumerateFromIndex(0); }
         }
 
         public override IEnumerable<I> SortedBackwards()
         {
-            return enumerateBackwardsFromIndex(_count - 1);
+            return EnumerateBackwardsFromIndex(_count - 1);
         }
 
         public override IEnumerable<I> EnumerateFrom(T point, bool includeOverlaps = true)
@@ -164,35 +161,25 @@ namespace C5.Intervals
         public override IEnumerable<I> EnumerateFrom(I interval, bool includeInterval = true)
         {
             var index = IndexOf(interval);
-            return 0 <= index ? enumerateFromIndex(includeInterval ? index : index + 1) : Enumerable.Empty<I>();
+            return 0 <= index ? EnumerateFromIndex(includeInterval ? index : index + 1) : Enumerable.Empty<I>();
         }
 
         public override IEnumerable<I> EnumerateBackwardsFrom(I interval, bool includeInterval = true)
         {
             var index = IndexOf(interval);
-            return 0 <= index ? enumerateBackwardsFromIndex(includeInterval ? index : index - 1) : Enumerable.Empty<I>();
+            return 0 <= index ? EnumerateBackwardsFromIndex(includeInterval ? index : index - 1) : Enumerable.Empty<I>();
         }
 
         public override IEnumerable<I> EnumerateFromIndex(int index)
         {
-            return enumerateFromIndex(index);
+            while (index < _count)
+                yield return _intervals[index++];
         }
 
         public override IEnumerable<I> EnumerateBackwardsFromIndex(int index)
         {
-            return enumerateBackwardsFromIndex(index);
-        }
-
-        private IEnumerable<I> enumerateFromIndex(int i)
-        {
-            while (i < _count)
-                yield return _intervals[i++];
-        }
-
-        private IEnumerable<I> enumerateBackwardsFromIndex(int i)
-        {
-            while (i >= 0)
-                yield return _intervals[i--];
+            while (index >= 0)
+                yield return _intervals[index--];
         }
 
         #endregion
