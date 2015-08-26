@@ -48,7 +48,8 @@ namespace C5.Intervals
 
             return Overlaps(interval, new IntervalBase<T>(point));
         }
-
+        
+        // TODO: Change argument order
         /// <summary>
         /// Check if an interval overlaps any interval in a collection.
         /// </summary>
@@ -58,8 +59,7 @@ namespace C5.Intervals
         /// <param name="intervals">The collection of intervals.</param>
         /// <returns>True if any of the intervals in <paramref name="intervals"/> overlaps <paramref name="interval"/>.</returns>
         [Pure]
-        public static bool OverlapsAny<I, T>(this IInterval<T> interval, IEnumerable<I> intervals)
-            where I : IInterval<T>
+        public static bool OverlapsAny<T>(this IInterval<T> interval, IEnumerable<IInterval<T>> intervals)
             where T : IComparable<T>
         {
             Contract.Requires(interval != null);
