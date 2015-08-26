@@ -2173,7 +2173,7 @@ namespace C5.Intervals.Tests
                 new IntervalBase<int>(160, 190)
             };
 
-            var weld1Paint = new DynamicIntervalTree<IInterval<int>, int>(weld1);
+            var weld1Paint = CreateCollection<IInterval<int>, int>(weld1);
             weld1Paint.AddAll(paint);
             var weld1Result = new[]
                     {
@@ -2185,7 +2185,7 @@ namespace C5.Intervals.Tests
             // TODO: Fix contract exception!!
             //weld1Paint.AddAll(paint);
 
-            var weld2Paint = new DynamicIntervalTree<IInterval<int>, int>(weld2);
+            var weld2Paint = CreateCollection<IInterval<int>, int>(weld2);
             weld2Paint.AddAll(paint);
             var weld2Result = new[]
             {
