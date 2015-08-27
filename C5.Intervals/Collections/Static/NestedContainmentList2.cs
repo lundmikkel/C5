@@ -238,7 +238,7 @@ namespace C5.Intervals
             get
             {
                 if (_maximumDepth < 0)
-                    _maximumDepth = Sorted.MaximumDepth(ref _intervalOfMaximumDepth);
+                    _maximumDepth = Sorted.MaximumDepth(out _intervalOfMaximumDepth);
 
                 return _maximumDepth;
             }
@@ -252,7 +252,7 @@ namespace C5.Intervals
             get
             {
                 if (_maximumDepth < 0)
-                    _maximumDepth = Sorted.MaximumDepth(ref _intervalOfMaximumDepth);
+                    _maximumDepth = Sorted.MaximumDepth(out _intervalOfMaximumDepth);
 
                 return _intervalOfMaximumDepth;
             }

@@ -786,9 +786,8 @@ namespace C5.Intervals
         /// <typeparam name="I">The interval type.</typeparam>
         /// <typeparam name="T">The endpoint type.</typeparam>
         /// <returns>The maximum depth.</returns>
-        // TODO: Should be an out parameter!
         [Pure]
-        public static int MaximumDepth<I, T>(this IEnumerable<I> intervals, ref IInterval<T> intervalOfMaximumDepth, bool isSorted = true)
+        public static int MaximumDepth<I, T>(this IEnumerable<I> intervals, out IInterval<T> intervalOfMaximumDepth, bool isSorted = true)
             where I : IInterval<T>
             where T : IComparable<T>
         {
@@ -806,6 +805,7 @@ namespace C5.Intervals
             }
 
             var max = 0;
+            intervalOfMaximumDepth = null;
 
             // Create queue sorted on high intervals
             var comparer = ComparerFactory<IInterval<T>>.CreateComparer(CompareHigh);

@@ -170,8 +170,8 @@ namespace C5.Intervals
             {
                 if (_maximumDepth < 0)
                 {
-                    IInterval<T> intervalOfMaximumDepth = null;
-                    _maximumDepth = Sorted.MaximumDepth(ref intervalOfMaximumDepth);
+                    IInterval<T> intervalOfMaximumDepth;
+                    _maximumDepth = Sorted.MaximumDepth(out intervalOfMaximumDepth);
                 }
 
                 return _maximumDepth;

@@ -436,7 +436,7 @@ namespace C5.Intervals
                 Contract.Ensures(Contract.Result<int>() >= _layerCount);
 
                 if (_maximumDepth < 0)
-                    _maximumDepth = Sorted.MaximumDepth(ref _intervalOfMaximumDepth);
+                    _maximumDepth = Sorted.MaximumDepth(out _intervalOfMaximumDepth);
 
                 return _maximumDepth;
             }
@@ -451,11 +451,8 @@ namespace C5.Intervals
             {
                 Contract.Ensures(_maximumDepth >= _layerCount);
 
-                // If the Maximum Depth is below 0, then the interval of maximum depth has not been set yet
-                Contract.Assert(_maximumDepth >= 0 || _intervalOfMaximumDepth == null);
-
                 if (_maximumDepth < 0)
-                    _maximumDepth = Sorted.MaximumDepth(ref _intervalOfMaximumDepth);
+                    _maximumDepth = Sorted.MaximumDepth(out _intervalOfMaximumDepth);
 
                 return _intervalOfMaximumDepth;
             }
@@ -474,7 +471,7 @@ namespace C5.Intervals
             Contract.Ensures(Contract.Result<int>() >= 0);
 
             IInterval<T> intervalOfMaximumDepth = null;
-            return Sorted.Where(filter).MaximumDepth(ref intervalOfMaximumDepth);
+            return Sorted.Where(filter).MaximumDepth(out intervalOfMaximumDepth);
         }
 
         #endregion
