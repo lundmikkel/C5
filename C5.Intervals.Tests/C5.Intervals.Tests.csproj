@@ -107,6 +107,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="Collections\EndpointSortedIntervalCollectionTester.cs" />
     <Compile Include="Collections\SortedIntervalCollectionTester.cs" />
     <Compile Include="Collections\OverlapFreeIntervalCollectionTester.cs" />
     <Compile Include="Collections\ContainmentFreeIntervalCollectionTester.cs" />
