@@ -52,6 +52,18 @@ namespace C5.Intervals
         #region Collection Value
 
         /// <inheritdoc/>
+        public override bool IsEmpty
+        {
+            get { return Count == 0; }
+        }
+
+        /// <inheritdoc/>
+        public override Speed CountSpeed
+        {
+            get { return Speed.Constant; }
+        }
+
+        /// <inheritdoc/>
         public override I Choose()
         {
             if (IsEmpty)

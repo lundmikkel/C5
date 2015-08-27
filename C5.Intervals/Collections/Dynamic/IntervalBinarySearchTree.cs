@@ -1430,9 +1430,6 @@ namespace C5.Intervals
         }
 
         /// <inheritdoc/>
-        public override Speed CountSpeed { get { return Speed.Constant; } }
-
-        /// <inheritdoc/>
         public override I Choose()
         {
             if (IsEmpty)
