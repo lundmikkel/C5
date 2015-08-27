@@ -66,9 +66,24 @@ namespace C5.Intervals
         {
             get
             {
-                // TODO: Enumerate while keeping tract of currently overlapping intervals and their count. Maybe use circular queue?
+                var intervals = Sorted;
+                var max = 0;
+                var queue = new CircularQueue<I>();
 
-                throw new NotImplementedException();
+                // Loop through intervals in sorted order
+                foreach (var interval in intervals)
+                {
+                    // Remove all intervals from the queue not overlapping the current interval
+                    while (!queue.IsEmpty && interval.CompareLowHigh(queue[0]) > 0)
+                        queue.Dequeue();
+
+                    queue.Enqueue(interval);
+
+                    if (queue.Count > max)
+                        max = queue.Count;
+                }
+
+                return max;
             }
         }
 
