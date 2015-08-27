@@ -12,12 +12,15 @@ namespace C5.Intervals
         where T : IComparable<T>
     {
         #region Fields
-        private readonly I[] _intervals;
+        private readonly List<I> _intervals;
         private static readonly IComparer<I> Comparer = IntervalExtensions.CreateComparer<I, T>();
         #endregion
 
         #region Constructor
-        public EndpointSortedIntervalCollection() { }
+
+        public EndpointSortedIntervalCollection()
+        {
+        }
 
         public EndpointSortedIntervalCollection(IEnumerable<I> intervals)
         {
@@ -27,14 +30,16 @@ namespace C5.Intervals
                 if (!interval.OverlapsAny(list))
                     list.Add(interval);
 
-            _intervals = list.ToArray();
-            Sorting.Timsort(_intervals, 0, _intervals.Length, Comparer);
+            var array = list.ToArray();
+            Sorting.Timsort(array, 0, list.Count, Comparer);
+
+            _intervals = new List<I>(array);
         }
         #endregion
 
         public override int Count
         {
-            get { return _intervals.Length; }
+            get { return _intervals.Count; }
         }
 
         public override bool AllowsOverlaps
@@ -117,8 +122,7 @@ namespace C5.Intervals
 
         public override IEnumerable<I> EnumerateFrom(I interval, bool includeInterval = true)
         {
-
-            var index = Array.BinarySearch(_intervals, interval, Comparer);
+            var index = _intervals.BinarySearch(interval, Comparer);
             if (index < 0)
                 return Enumerable.Empty<I>();
             return includeInterval ? EnumerateFromIndex(index) : EnumerateFromIndex(index + 1);
@@ -126,7 +130,7 @@ namespace C5.Intervals
 
         public override IEnumerable<I> EnumerateBackwardsFrom(I interval, bool includeInterval = true)
         {
-            var index = Array.BinarySearch(_intervals, interval, Comparer);
+            var index = _intervals.BinarySearch(interval, Comparer);
             return includeInterval ? EnumerateBackwardsFromIndex(index) : EnumerateBackwardsFromIndex(index - 1);
         }
 
@@ -182,7 +186,7 @@ namespace C5.Intervals
             // All intervals before index result do not overlap the query
             Contract.Ensures(Contract.ForAll(0, Contract.Result<int>(), i => !_intervals[i].Overlaps(query)));
 
-            int min = - 1, max = Count;
+            int min = -1, max = Count;
 
             while (min + 1 < max)
             {
