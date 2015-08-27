@@ -80,7 +80,7 @@ namespace C5.UserGuideExamples.Intervals
             Console.Out.WriteLine("intervals.Span(): {0}\n", intervals.Span()); // [1:5)
 
             IInterval<int> intervalOfMaximumDepth = null;
-            Console.Out.WriteLine("intervals.MaximumDepth(ref intervalOfMaximumDepth, false): {0}", intervals.MaximumDepth(ref intervalOfMaximumDepth, false)); // 3
+            Console.Out.WriteLine("intervals.MaximumDepth(ref intervalOfMaximumDepth, false): {0}", intervals.MaximumDepth(out intervalOfMaximumDepth, false)); // 3
             Console.Out.WriteLine("intervalOfMaximumDepth: {0}", intervalOfMaximumDepth); // [3:3]
 
 
