@@ -7,12 +7,19 @@
 
         #region Black-box
 
-        class EndpointSortedIntervalCollectionTesterBlackBox : ContainmentFreeIntervalCollectionTester
+        abstract class EndpointSortedIntervalCollectionTesterBlackBox : ContainmentFreeIntervalCollectionTester
         {
             protected override Type GetCollectionType()
             {
                 return typeof(EndpointSortedIntervalCollection<,>);
             }
+
+            protected override object[] AdditionalParameters()
+            {
+                return new object[] { IsReadOnly() };
+            }
+
+            protected abstract bool IsReadOnly();
 
             protected override Speed CountSpeed()
             {
@@ -30,6 +37,22 @@
             }
 
             protected override bool AllowsReferenceDuplicates()
+            {
+                return false;
+            }
+        }
+
+        class EndpointSortedIntervalCollectionTesterBlackBox_IsReadOnly : EndpointSortedIntervalCollectionTesterBlackBox
+        {
+            protected override bool IsReadOnly()
+            {
+                return true;
+            }
+        }
+
+        class EndpointSortedIntervalCollectionTesterBlackBox_IsNotReadOnly : EndpointSortedIntervalCollectionTesterBlackBox
+        {
+            protected override bool IsReadOnly()
             {
                 return false;
             }
