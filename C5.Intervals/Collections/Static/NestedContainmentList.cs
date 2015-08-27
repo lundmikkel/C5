@@ -143,9 +143,9 @@ namespace C5.Intervals
         public override IEnumerator<I> GetEnumerator() { return Sorted.GetEnumerator(); }
 
         /// <inheritdoc/>
-        public override IEnumerable<I> Sorted { get { return getEnumerator(_mainSublist); } }
+        public override IEnumerable<I> Sorted { get { return sorted(_mainSublist); } }
 
-        private IEnumerable<I> getEnumerator(Sublist sublist)
+        private IEnumerable<I> sorted(Sublist sublist)
         {
             // Just for good measures
             if (_list == null || sublist.Length == 0)
@@ -159,7 +159,7 @@ namespace C5.Intervals
                 yield return node.Interval;
 
                 if (node.Sublist.Length > 0)
-                    foreach (var interval in getEnumerator(node.Sublist))
+                    foreach (var interval in sorted(node.Sublist))
                         yield return interval;
             }
         }
