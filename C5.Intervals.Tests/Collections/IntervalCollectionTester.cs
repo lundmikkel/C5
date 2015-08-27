@@ -672,7 +672,7 @@ namespace C5.Intervals.Tests
         #region Span
 
         [Test]
-        [Category("Span")]
+        [Category("Span"), AdditionalSeeds(-1724642727)]
         public void Span_EmptyCollection_Exception()
         {
             const string contractExceptionName = "System.Diagnostics.Contracts.__ContractsRuntime+ContractException";
@@ -769,7 +769,7 @@ namespace C5.Intervals.Tests
         #region Lowest Interval
 
         [Test]
-        [Category("Lowest Interval")]
+        [Category("Lowest Interval"), AdditionalSeeds(153548762)]
         public void LowestInterval_EmptyCollection_Exception()
         {
             const string contractExceptionName = "System.Diagnostics.Contracts.__ContractsRuntime+ContractException";
@@ -915,7 +915,7 @@ namespace C5.Intervals.Tests
         #region Highest Interval
 
         [Test]
-        [Category("Highest Interval")]
+        [Category("Highest Interval"), AdditionalSeeds(309396561)]
         public void HighestInterval_EmptyCollection_Exception()
         {
             const string contractExceptionName = "System.Diagnostics.Contracts.__ContractsRuntime+ContractException";
