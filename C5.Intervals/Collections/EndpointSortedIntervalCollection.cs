@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Reflection;
 
 namespace C5.Intervals
 {
@@ -16,7 +18,7 @@ namespace C5.Intervals
         private readonly List<I> _intervals;
         private readonly bool _isReadOnly;
 
-        private static readonly IComparer<I> Comparer = IntervalExtensions.CreateComparer<I, T>();
+        private static readonly IComparer<IInterval<T>> Comparer = IntervalExtensions.CreateComparer<IInterval<T>, T>();
 
         #endregion
 
@@ -25,6 +27,9 @@ namespace C5.Intervals
         [ContractInvariantMethod]
         private void invariants()
         {
+            // Interval list is never null
+            Contract.Invariant(_intervals != null);
+
             // Intervals are sorted
             Contract.Invariant(_intervals.IsSorted(IntervalExtensions.CreateComparer<I, T>()));
             // Highs are sorted as well
@@ -37,10 +42,12 @@ namespace C5.Intervals
 
         public EndpointSortedIntervalCollection(bool isReadOnly = false)
         {
+            _intervals = new List<I>();
             _isReadOnly = isReadOnly;
         }
 
-        public EndpointSortedIntervalCollection(IEnumerable<I> intervals, bool isReadOnly = false) : this(isReadOnly)
+        public EndpointSortedIntervalCollection(IEnumerable<I> intervals, bool isReadOnly = false)
+            : this(isReadOnly)
         {
             // TODO: Find a better solution
             var list = new List<I>();
@@ -51,7 +58,7 @@ namespace C5.Intervals
             var array = list.ToArray();
             Sorting.Timsort(array, 0, list.Count, Comparer);
 
-            _intervals = new List<I>(array);
+            _intervals.AddRange(array);
         }
         #endregion
 
@@ -86,7 +93,7 @@ namespace C5.Intervals
         {
             get { return Speed.Constant; }
         }
-        
+
         #endregion
 
         #region Sorted Enumeration
@@ -192,7 +199,7 @@ namespace C5.Intervals
             while (index >= 0)
                 yield return _intervals[index--];
         }
-        
+
         #endregion
 
         #region Indexed Access
@@ -201,6 +208,27 @@ namespace C5.Intervals
         public override I this[int i]
         {
             get { return _intervals[i]; }
+        }
+
+        #endregion
+
+        #region Find Equals
+
+        public override IEnumerable<I> FindEquals(IInterval<T> query)
+        {
+            // TODO: Not a good solution!
+            var array = (IInterval<T>[]) _intervals.GetType()
+                .GetField("_items", BindingFlags.Instance | BindingFlags.NonPublic)
+                .GetValue(_intervals);
+
+            var index = Array.BinarySearch(array, 0, Count, query, Comparer);
+
+            if (index < 0)
+                yield break;
+
+            I interval;
+            while (index < Count && (interval = _intervals[index++]).IntervalEquals(query))
+                yield return interval;
         }
 
         #endregion
@@ -273,7 +301,74 @@ namespace C5.Intervals
 
             return max;
         }
-        
+
+        #endregion
+
+        #region Find Overlap
+
+        /// <inheritdoc/>
+        public override bool FindOverlap(T query, out I overlap)
+        {
+            return FindOverlap(new IntervalBase<T>(query), out overlap);
+        }
+
+        /// <inheritdoc/>
+        public override bool FindOverlap(IInterval<T> query, out I overlap)
+        {
+            overlap = null;
+
+            // Check if query overlaps the collection at all
+            if (IsEmpty || !query.Overlaps(Span))
+                return false;
+
+            // Find first overlap
+            var i = findFirst(query);
+
+            // Check if index is in bound and if the interval overlaps the query
+            var result = 0 <= i && i < Count && _intervals[i].Overlaps(query);
+
+            if (result)
+                overlap = _intervals[i];
+
+            return result;
+        }
+
+        #endregion
+
+        #region Count Overlaps
+
+        /// <inheritdoc/>
+        public override int CountOverlaps(T query)
+        {
+            return countOverlaps(new IntervalBase<T>(query));
+        }
+
+        /// <inheritdoc/>
+        public override int CountOverlaps(IInterval<T> query)
+        {
+            return countOverlaps(query);
+        }
+
+        private int countOverlaps(IInterval<T> query)
+        {
+            Contract.Requires(query != null);
+
+            if (IsEmpty)
+                return 0;
+
+            // We know first doesn't overlap so we can increment it before searching
+            var first = findFirst(query);
+
+            // If index is out of bound, or found interval doesn't overlap, then the layer won't contain any overlaps
+            if (Count <= first || !(_intervals[first].CompareLowHigh(query) <= 0))
+                return 0;
+
+            // We can use first as lower to speed up the search
+            var last = findLast(query);
+
+            return last - first;
+        }
+
         #endregion
 
         #endregion
