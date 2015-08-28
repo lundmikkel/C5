@@ -28,7 +28,7 @@
 
             protected override bool AllowsOverlaps()
             {
-                return false;
+                return true;
             }
 
             protected override bool AllowsContainments()
@@ -38,7 +38,8 @@
 
             protected override bool AllowsReferenceDuplicates()
             {
-                return false;
+                // TODO: Test this?
+                return true;
             }
         }
 

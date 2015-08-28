@@ -139,7 +139,7 @@ namespace C5.Intervals.Tests
             var max = maxLength <= 2 ? Int32.MaxValue : low + maxLength;
             if (max < low) max = Int32.MaxValue - 3;
             var high = Random.Next(low + 2, max);
-            var intervalType = 0 <= type && type < 4 ? (IntervalType)type : (IntervalType)Random.Next(0, 4);
+            var intervalType = 0 <= type && type < 4 ? (IntervalType) type : (IntervalType) Random.Next(0, 4);
             return new Interval(low, high, intervalType);
         }
 
@@ -153,6 +153,38 @@ namespace C5.Intervals.Tests
                 Count = count;
 
             return Enumerable.Range(0, count).Select(i => SingleInterval(maxLength)).ToArray();
+        }
+
+        public static IEnumerable<Interval> InsertedIntervals(IIntervalCollection<Interval, int> collection, IEnumerable<Interval> intervals)
+        {
+            if (!collection.AllowsOverlaps)
+                return NonOverlapping(intervals);
+
+            var insertedInterval = !collection.AllowsContainments ? NonContained(intervals) : intervals;
+
+            return !collection.AllowsReferenceDuplicates ? ReferenceDuplicateFree(insertedInterval) : insertedInterval;
+        }
+
+        public static IEnumerable<Interval> ReferenceDuplicateFree(IEnumerable<Interval> intervals)
+        {
+            var list = new List<Interval>();
+
+            foreach (var interval in intervals)
+                if (list.All(x => !ReferenceEquals(x, interval)))
+                    list.Add(interval);
+
+            return list;
+        }
+
+        public static IEnumerable<Interval> NonContained(IEnumerable<Interval> intervals)
+        {
+            var list = new List<Interval>();
+
+            foreach (var interval in intervals)
+                if (list.All(x => !interval.StrictlyContains(x) && !x.StrictlyContains(interval)))
+                    list.Add(interval);
+
+            return list;
         }
 
         public static Interval[] NonOverlapping(IEnumerable<Interval> intervals)
@@ -170,7 +202,7 @@ namespace C5.Intervals.Tests
         {
             var intervals = new Interval[count];
 
-            var lastInterval = intervals[0] = new Interval(0, Random.Next(1, 1 + length), (IntervalType)Random.Next(0, 4));
+            var lastInterval = intervals[0] = new Interval(0, Random.Next(1, 1 + length), (IntervalType) Random.Next(0, 4));
             for (var i = 1; i < count; i++)
             {
                 lastInterval = intervals[i] = new Interval(lastInterval.High, Random.Next(lastInterval.High + 1, lastInterval.High + 1 + length), !lastInterval.HighIncluded, Convert.ToBoolean(Random.Next(0, 2)));
@@ -268,7 +300,7 @@ namespace C5.Intervals.Tests
 
             Type[] typeArgs = { typeof(I), typeof(T) };
             var genericType = type.MakeGenericType(typeArgs);
-            return (IIntervalCollection<I, T>)Activator.CreateInstance(genericType, parameters);
+            return (IIntervalCollection<I, T>) Activator.CreateInstance(genericType, parameters);
         }
 
         protected IIntervalCollection<I, T> CreateEmptyCollection<I, T>()
@@ -436,7 +468,7 @@ namespace C5.Intervals.Tests
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            var expected = collection.AllowsOverlaps ? Count : NonOverlapping(intervals).Count();
+            var expected = InsertedIntervals(collection, intervals).Count();
             Assert.AreEqual(expected, collection.Count);
         }
 
@@ -712,7 +744,7 @@ namespace C5.Intervals.Tests
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            var span = (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).Span();
+            var span = (InsertedIntervals(collection, intervals)).Span();
 
             Assert.True(span.IntervalEquals(collection.Span));
             Assert.True(collection.All(span.Contains));
@@ -827,7 +859,7 @@ namespace C5.Intervals.Tests
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            var lowestInterval = (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).LowestInterval<Interval, int>();
+            var lowestInterval = (InsertedIntervals(collection, intervals)).LowestInterval<Interval, int>();
             Assert.True(collection.LowestInterval.CompareLow(lowestInterval) == 0);
         }
 
@@ -874,7 +906,7 @@ namespace C5.Intervals.Tests
         {
             var intervals = DuplicateIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            var lowestIntervals = collection.AllowsOverlaps ? intervals : NonOverlapping(intervals);
+            var lowestIntervals = InsertedIntervals(collection, intervals);
 
             Assert.That(collection.LowestIntervals, Is.EqualTo(lowestIntervals));
         }
@@ -885,7 +917,7 @@ namespace C5.Intervals.Tests
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            var lowestIntervals = (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).LowestIntervals<Interval, int>();
+            var lowestIntervals = (InsertedIntervals(collection, intervals)).LowestIntervals<Interval, int>();
 
             Assert.That(collection.LowestIntervals, Is.EqualTo(lowestIntervals));
         }
@@ -905,7 +937,7 @@ namespace C5.Intervals.Tests
             intervals = intervals.Concat(lowIntervals);
 
             var collection = CreateCollection<Interval, int>(intervals.ToArray());
-            var lowestIntervals = (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).LowestIntervals<Interval, int>();
+            var lowestIntervals = (InsertedIntervals(collection, intervals)).LowestIntervals<Interval, int>();
 
             Assert.That(collection.LowestIntervals, Is.EquivalentTo(lowestIntervals));
         }
@@ -983,7 +1015,7 @@ namespace C5.Intervals.Tests
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            var highestInterval = (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).HighestInterval<Interval, int>();
+            var highestInterval = (InsertedIntervals(collection, intervals)).HighestInterval<Interval, int>();
 
             Assert.True(collection.HighestInterval.CompareHigh(highestInterval) == 0);
         }
@@ -1030,7 +1062,7 @@ namespace C5.Intervals.Tests
         {
             var intervals = DuplicateIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            var highestIntervals = collection.AllowsOverlaps ? intervals : NonOverlapping(intervals);
+            var highestIntervals = InsertedIntervals(collection, intervals);
 
             Assert.That(collection.HighestIntervals, Is.EqualTo(highestIntervals));
         }
@@ -1041,7 +1073,7 @@ namespace C5.Intervals.Tests
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            var highestIntervals = (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).HighestIntervals<Interval, int>();
+            var highestIntervals = (InsertedIntervals(collection, intervals)).HighestIntervals<Interval, int>();
 
             Assert.That(collection.HighestIntervals, Is.EqualTo(highestIntervals));
         }
@@ -1061,7 +1093,7 @@ namespace C5.Intervals.Tests
             intervals = intervals.Concat(highIntervals);
 
             var collection = CreateCollection<Interval, int>(intervals.ToArray());
-            var highestIntervals = (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).HighestIntervals<Interval, int>();
+            var highestIntervals = (InsertedIntervals(collection, intervals)).HighestIntervals<Interval, int>();
 
             Assert.That(collection.HighestIntervals, Is.EquivalentTo(highestIntervals));
         }
@@ -1102,7 +1134,7 @@ namespace C5.Intervals.Tests
         {
             var intervals = DuplicateIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            var expected = collection.AllowsOverlaps ? Count : NonOverlapping(intervals).Count();
+            var expected = InsertedIntervals(collection, intervals).Count();
             Assert.AreEqual(expected, collection.MaximumDepth);
         }
 
@@ -1165,7 +1197,8 @@ namespace C5.Intervals.Tests
                 };
             var collection = CreateCollection<Interval, int>(intervals);
 
-            Assert.AreEqual(collection.AllowsOverlaps ? 4 : 1, collection.MaximumDepth);
+            var expected = collection.AllowsOverlaps ? collection.AllowsContainments ? 4 : 2 : 1;
+            Assert.AreEqual(expected, collection.MaximumDepth);
         }
 
         [Test]
@@ -1242,7 +1275,7 @@ namespace C5.Intervals.Tests
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            var expected = collection.AllowsOverlaps ? intervals : NonOverlapping(intervals);
+            var expected = InsertedIntervals(collection, intervals);
             CollectionAssert.AreEquivalent(expected, collection);
             CollectionAssert.AllItemsAreUnique(collection);
         }
@@ -1278,9 +1311,10 @@ namespace C5.Intervals.Tests
             var intervals = SingleObject();
             var interval = intervals.First();
             var collection = CreateCollection<Interval, int>(intervals);
-            var expected = collection.AllowsReferenceDuplicates ? intervals : intervals.Take(1).ToArray();
+            var expected = InsertedIntervals(collection, intervals).Where(x => x.IntervalEquals(interval));
 
-            CollectionAssert.AreEqual(expected, collection.FindEquals(interval));
+            var actual = collection.FindEquals(interval);
+            CollectionAssert.AreEqual(expected, actual);
         }
 
         [Test]
@@ -1290,7 +1324,7 @@ namespace C5.Intervals.Tests
             var intervals = DuplicateIntervals();
             var interval = intervals.First();
             var collection = CreateCollection<Interval, int>(intervals);
-            var expected = collection.AllowsOverlaps ? intervals : intervals.Take(1).ToArray();
+            var expected = InsertedIntervals(collection, intervals).Where(x => x.IntervalEquals(interval));
 
             CollectionAssert.AreEquivalent(expected, collection.FindEquals(interval));
         }
@@ -1301,10 +1335,10 @@ namespace C5.Intervals.Tests
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            var expected = collection.AllowsOverlaps ? intervals : NonOverlapping(intervals);
+            var insertedIntervals = InsertedIntervals(collection, intervals);
 
-            foreach (var interval in expected)
-                CollectionAssert.AreEquivalent(expected.Where(x => x.IntervalEquals(interval)), collection.FindEquals(interval));
+            foreach (var interval in insertedIntervals)
+                CollectionAssert.AreEquivalent(insertedIntervals.Where(x => x.IntervalEquals(interval)), collection.FindEquals(interval));
         }
 
         #endregion
@@ -1423,8 +1457,8 @@ namespace C5.Intervals.Tests
 
             foreach (var interval in intervals)
             {
-                CollectionAssert.AreEquivalent((collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).Where(x => x.Overlaps(interval.Low)), collection.FindOverlaps(interval.Low));
-                CollectionAssert.AreEquivalent((collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).Where(x => x.Overlaps(interval.High)), collection.FindOverlaps(interval.High));
+                CollectionAssert.AreEquivalent((InsertedIntervals(collection, intervals)).Where(x => x.Overlaps(interval.Low)), collection.FindOverlaps(interval.Low));
+                CollectionAssert.AreEquivalent((InsertedIntervals(collection, intervals)).Where(x => x.Overlaps(interval.High)), collection.FindOverlaps(interval.High));
             }
         }
 
@@ -1433,15 +1467,13 @@ namespace C5.Intervals.Tests
         public void FindOverlapsStabbing_SingleIntervalAllEndpointCombinations_Overlaps()
         {
             var interval = SingleInterval();
-            var intervals = Enumerable.Range(0, 4).Select(i => new Interval(interval.Low, interval.High, (IntervalType)i)).ToArray();
+            var intervals = Enumerable.Range(0, 4).Select(i => new Interval(interval.Low, interval.High, (IntervalType) i)).ToArray();
             var collection = CreateCollection<Interval, int>(intervals);
+            var insertedIntervals = InsertedIntervals(collection, intervals).ToArray();
 
-            if (!collection.AllowsOverlaps)
-                intervals = NonOverlapping(intervals);
-
-            CollectionAssert.AreEquivalent(intervals.Where(x => x.LowIncluded), collection.FindOverlaps(interval.Low));
-            CollectionAssert.AreEquivalent(intervals.Where(x => x.HighIncluded), collection.FindOverlaps(interval.High));
-            CollectionAssert.AreEquivalent(intervals, collection.FindOverlaps(interval.Low / 2 + interval.High / 2));
+            CollectionAssert.AreEquivalent(insertedIntervals.Where(x => x.LowIncluded), collection.FindOverlaps(interval.Low));
+            CollectionAssert.AreEquivalent(insertedIntervals.Where(x => x.HighIncluded), collection.FindOverlaps(interval.High));
+            CollectionAssert.AreEquivalent(insertedIntervals, collection.FindOverlaps(interval.Low / 2 + interval.High / 2));
         }
 
         #endregion
@@ -1584,7 +1616,7 @@ namespace C5.Intervals.Tests
             var collection = CreateCollection<Interval, int>(intervals);
 
             foreach (var query in ManyIntervals())
-                CollectionAssert.AreEquivalent((collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).Where(x => x.Overlaps(query)), collection.FindOverlaps(query));
+                CollectionAssert.AreEquivalent((InsertedIntervals(collection, intervals)).Where(x => x.Overlaps(query)), collection.FindOverlaps(query));
         }
 
         #endregion
@@ -1743,7 +1775,7 @@ namespace C5.Intervals.Tests
         public void FindOverlapStabbing_SingleIntervalAllEndpointCombinations_Overlaps()
         {
             var interval = SingleInterval();
-            var intervals = Enumerable.Range(0, 4).Select(i => new Interval(interval.Low, interval.High, (IntervalType)i)).ToArray();
+            var intervals = Enumerable.Range(0, 4).Select(i => new Interval(interval.Low, interval.High, (IntervalType) i)).ToArray();
             var collection = CreateCollection<Interval, int>(intervals);
             Interval overlap;
 
@@ -1918,6 +1950,25 @@ namespace C5.Intervals.Tests
         [Category("Count Overlaps Range")]
         public void CountOverlapsRange_LayerExample()
         {
+            // ****************************************
+            // | 0    5   10   15   20   25   30   35 |
+            // | |    |    |    |    |    |    |    | |
+            // |                                      |
+            // | intervals:                           |
+            // | [    )                               |
+            // |  [  )                                |
+            // |   |                                  |
+            // |       [     )                        |
+            // |         [)                           |
+            // |           [)                         |
+            // |              [)                      |
+            // |                                      |
+            // | queries:                             |
+            // |         [)                           |
+            // |    [   )                             |
+            // |                                      |
+            // ****************************************
+
             var intervals = new[]
             {
                 new Interval(0, 5),
@@ -1931,8 +1982,13 @@ namespace C5.Intervals.Tests
 
             var collection = CreateCollection<Interval, int>(intervals);
 
-            Assert.AreEqual(collection.AllowsOverlaps ? 2 : 1, collection.CountOverlaps(new Interval(8, 9)));
-            Assert.AreEqual(collection.AllowsOverlaps ? 3 : 2, collection.CountOverlaps(new Interval(3, 7)));
+            var expected1 = collection.AllowsContainments ? 2 : 1;
+            var actual1 = collection.CountOverlaps(new Interval(8, 9));
+            Assert.AreEqual(expected1, actual1);
+
+            var expected2 = collection.AllowsContainments ? 3 : 2;
+            var actual2 = collection.CountOverlaps(new Interval(3, 7));
+            Assert.AreEqual(expected2, actual2);
         }
 
         #endregion
@@ -2000,9 +2056,9 @@ namespace C5.Intervals.Tests
             Assert.AreEqual(1, collection.CountOverlaps(new Interval(30, 35, IntervalType.Closed)));
 
             // Many overlaps
-            Assert.AreEqual(collection.AllowsOverlaps ? 2 : 1, collection.CountOverlaps(new Interval(23, 25, IntervalType.Closed)));
-            Assert.AreEqual(collection.AllowsOverlaps ? 4 : 1, collection.CountOverlaps(new Interval(5, 8, IntervalType.Closed)));
-            Assert.AreEqual(collection.AllowsOverlaps ? 9 : 1, collection.CountOverlaps(new Interval(13, 13, IntervalType.Closed)));
+            Assert.AreEqual(collection.AllowsContainments ? 2 : 1, collection.CountOverlaps(new Interval(23, 25, IntervalType.Closed)));
+            Assert.AreEqual(collection.AllowsContainments ? 4 : 1, collection.CountOverlaps(new Interval(5, 8, IntervalType.Closed)));
+            Assert.AreEqual(collection.AllowsContainments ? 9 : 1, collection.CountOverlaps(new Interval(13, 13, IntervalType.Closed)));
         }
 
         #endregion
@@ -2174,7 +2230,7 @@ namespace C5.Intervals.Tests
             // |             [)                       |
             // |                 [  )                 |
             // ****************************************
-            
+
             var weld1 = new[]
             {
                 new IntervalBase<int>( 0,  3),
@@ -2426,11 +2482,23 @@ namespace C5.Intervals.Tests
                 for (var i = 0; i < Count; i++)
                 {
                     if (i == 0)
+                    {
                         Assert.True(collection.Add(intervals[i]));
+                    }
                     else
-                        Assert.AreEqual(collection.AllowsOverlaps || !collection.Any(x => x.Overlaps(intervals[i])), collection.Add(intervals[i]));
+                    {
+                        Assert.AreEqual(
+                            AddTest(collection, intervals, intervals[i]),
+                            collection.Add(intervals[i])
+                        );
+                    }
                 }
             }
+        }
+
+        private static bool AddTest(IIntervalCollection<Interval, int> collection, Interval[] intervals, Interval interval)
+        {
+            return collection.AllowsOverlaps ? collection.AllowsContainments || !collection.Any(x => x.StrictlyContains(interval) || interval.StrictlyContains(x)) : !interval.OverlapsAny(collection);
         }
 
         #region Events
@@ -2447,9 +2515,9 @@ namespace C5.Intervals.Tests
                 Interval eventInterval = null;
                 IIntervalCollection<Interval, int> eventCollection = null;
                 collection.ItemsAdded += (sender, args) => eventInterval = args.Item;
-                collection.CollectionChanged += sender => eventCollection = (IIntervalCollection<Interval, int>)sender;
+                collection.CollectionChanged += sender => eventCollection = (IIntervalCollection<Interval, int>) sender;
 
-                foreach (var interval in (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)))
+                foreach (var interval in (InsertedIntervals(collection, intervals)))
                 {
                     Assert.True(collection.Add(interval));
                     Assert.AreSame(interval, eventInterval);
@@ -2608,7 +2676,7 @@ namespace C5.Intervals.Tests
 
             if (!collection.IsReadOnly)
             {
-                foreach (var interval in (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)))
+                foreach (var interval in (InsertedIntervals(collection, intervals)))
                 {
                     Assert.False(collection.Remove(new Interval(interval)));
                     Assert.True(collection.Remove(interval));
@@ -2638,7 +2706,7 @@ namespace C5.Intervals.Tests
 
             if (!collection.IsReadOnly)
             {
-                foreach (var interval in (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)))
+                foreach (var interval in (InsertedIntervals(collection, intervals)))
                 {
                     Assert.False(collection.Remove(new Interval(interval)));
                     Assert.True(collection.Remove(interval));
@@ -2660,7 +2728,7 @@ namespace C5.Intervals.Tests
                     Assert.False(collection.Remove(interval));
             }
 
-            Assert.AreEqual(collection.AllowsOverlaps ? Count : NonOverlapping(intervals).Count(), collection.Count);
+            Assert.AreEqual(InsertedIntervals(collection, intervals).Count(), collection.Count);
         }
 
         #region Events
@@ -2693,9 +2761,9 @@ namespace C5.Intervals.Tests
                 IInterval<int> eventInterval = null;
                 IIntervalCollection<Interval, int> eventCollection = null;
                 collection.ItemsRemoved += (sender, args) => eventInterval = args.Item;
-                collection.CollectionChanged += sender => eventCollection = (IIntervalCollection<Interval, int>)sender;
+                collection.CollectionChanged += sender => eventCollection = (IIntervalCollection<Interval, int>) sender;
 
-                foreach (var interval in (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)))
+                foreach (var interval in (InsertedIntervals(collection, intervals)))
                 {
                     Assert.True(collection.Remove(interval));
                     Assert.AreSame(interval, eventInterval);
@@ -2808,7 +2876,7 @@ namespace C5.Intervals.Tests
                 var eventThrown = false;
                 IIntervalCollection<Interval, int> eventCollection = null;
                 collection.CollectionCleared += (sender, args) => eventThrown = true;
-                collection.CollectionChanged += sender => eventCollection = (IIntervalCollection<Interval, int>)sender;
+                collection.CollectionChanged += sender => eventCollection = (IIntervalCollection<Interval, int>) sender;
 
                 collection.Clear();
                 Assert.True(eventThrown);
@@ -2871,14 +2939,17 @@ namespace C5.Intervals.Tests
 
             foreach (var point in intervals.UniqueEndpointValues())
             {
-                var expected = (collection.AllowsOverlaps ? intervals : NonOverlapping(intervals)).Where(x => x.Overlaps(point));
+                var expected = (InsertedIntervals(collection, intervals)).Where(x => x.Overlaps(point));
                 CollectionAssert.AreEquivalent(expected, collection.FindOverlaps(point));
             }
 
-            var span = collection.AllowsOverlaps ? new Interval(int.MinValue, 20, IntervalType.HighIncluded) : new Interval(2, 19, IntervalType.Closed);
+            var span = InsertedIntervals(collection, intervals).Span();
             Assert.True(span.IntervalEquals(collection.Span));
 
-            Assert.AreEqual(collection.AllowsOverlaps ? 5 : 1, collection.MaximumDepth);
+            {
+                var expected = collection.AllowsOverlaps ? collection.AllowsContainments ? 5 : 4 : 1;
+                Assert.AreEqual(expected, collection.MaximumDepth);
+            }
 
             if (!collection.IsReadOnly)
             {
@@ -2929,19 +3000,9 @@ namespace C5.Intervals.Tests
 
             var collection = CreateCollection<Interval, int>(intervals);
 
-            // Skip finite data structures
-            if (!collection.AllowsOverlaps)
-                return;
-
-            var expected = new[]
-                {
-                    intervals['C' - 'A'],
-                    intervals['G' - 'A'],
-                    intervals['I' - 'A'],
-                    intervals['J' - 'A'],
-                    intervals['K' - 'A']
-                };
             var query = new Interval(13, 21);
+            var expected = InsertedIntervals(collection, intervals).Where(x => x.Overlaps(query));
+
             CollectionAssert.AreEquivalent(expected, collection.FindOverlaps(query));
         }
 

@@ -43,19 +43,15 @@ namespace C5.Intervals
         class EndpointSortedIntervalList : IEnumerable<I>
         {
             private readonly List<I> _intervals;
+            private readonly Func<IInterval<T>, IInterval<T>, bool> _conflictsWithNeighbour;
 
-            public EndpointSortedIntervalList(IEnumerable<I> intervals)
+            public EndpointSortedIntervalList(IEnumerable<I> intervals, Func<IInterval<T>, IInterval<T>, bool> conflictsWithNeighbour)
             {
-                // TODO: Find a better solution
-                var list = new List<I>();
+                _intervals = new List<I>();
+                _conflictsWithNeighbour = conflictsWithNeighbour;
+
                 foreach (var interval in intervals)
-                    if (!interval.OverlapsAny(list))
-                        list.Add(interval);
-
-                var array = list.ToArray();
-                Sorting.Timsort(array, 0, list.Count, Comparer);
-
-                _intervals = new List<I>(array);
+                    Add(interval);
             }
 
             public int Count { get { return _intervals.Count; } }
@@ -67,11 +63,31 @@ namespace C5.Intervals
 
             public int Find(IInterval<T> query)
             {
-                var array = (IInterval<T>[]) _intervals.GetType()
-                    .GetField("_items", BindingFlags.Instance | BindingFlags.NonPublic)
-                    .GetValue(_intervals);
+                Contract.Ensures(Contract.Result<int>() == IntervalCollectionContractHelper.IndexOfSorted(_intervals, query, IntervalExtensions.CreateComparer<IInterval<T>, T>()));
+                
+                var low = 0;
+                var high = _intervals.Count - 1;
 
-                return Array.BinarySearch(array, 0, Count, query, Comparer);
+                while (low <= high)
+                {
+                    var mid = low + (high - low >> 1);
+                    var compareTo = _intervals[mid].CompareTo(query);
+
+                    if (compareTo < 0)
+                        low = mid + 1;
+                    else if (compareTo > 0)
+                        high = mid - 1;
+                    //Equal but range is not fully scanned
+                    else if (low != mid)
+                        //Set upper bound to current number and rescan
+                        high = mid;
+                    //Equal and full range is scanned
+                    else
+                        return mid;
+                }
+
+                // key not found. return insertion point
+                return ~low;
             }
 
             public int FindFirst(IInterval<T> query)
@@ -160,15 +176,15 @@ namespace C5.Intervals
                 _intervals.Clear();
             }
 
-            public bool Add(I interval, Func<IInterval<T>, IInterval<T>, bool> ConflictsWithNeighbour)
+            public bool Add(I interval)
             {
                 var index = Find(interval);
 
                 if (index < 0)
                     index = ~index;
 
-                if (index > 0 && ConflictsWithNeighbour(interval, _intervals[index - 1])
-                    || index < Count && ConflictsWithNeighbour(interval, _intervals[index]))
+                if (index > 0 && _conflictsWithNeighbour(interval, _intervals[index - 1])
+                    || index < Count && _conflictsWithNeighbour(interval, _intervals[index]))
                     return false;
 
                 _intervals.Insert(index, interval);
@@ -214,7 +230,7 @@ namespace C5.Intervals
 
         private EndpointSortedIntervalList createList(IEnumerable<I> intervals)
         {
-            return new EndpointSortedIntervalList(intervals);
+            return new EndpointSortedIntervalList(intervals, ConflictsWithNeighbour);
         }
 
         #endregion
@@ -236,7 +252,7 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override bool AllowsOverlaps
         {
-            get { return false; }
+            get { return true; }
         }
 
         /// <inheritdoc/>
@@ -275,31 +291,16 @@ namespace C5.Intervals
         public override IEnumerable<I> EnumerateFrom(T point, bool includeOverlaps = true)
         {
             var query = new IntervalBase<T>(point);
-            var index = _list.FindFirst(query);
-
-            if (Count <= index)
-                return Enumerable.Empty<I>();
-
-            return !includeOverlaps && _list[index].Overlaps(point)
-                ? EnumerateFromIndex(index + 1)
-                : EnumerateFromIndex(index);
+            var index = includeOverlaps ? _list.FindFirst(query) : _list.FindLast(query);
+            return EnumerateFromIndex(index);
         }
 
         /// <inheritdoc/>
         public override IEnumerable<I> EnumerateBackwardsFrom(T point, bool includeOverlaps = true)
         {
-            if (IsEmpty)
-                return Enumerable.Empty<I>();
-
             var query = new IntervalBase<T>(point);
-            var index = _list.FindLast(query) - 1;
-
-            if (index < 0)
-                return Enumerable.Empty<I>();
-
-            return !includeOverlaps && _list[index].Overlaps(point)
-                ? EnumerateBackwardsFromIndex(index - 1)
-                : EnumerateBackwardsFromIndex(index);
+            var index = (includeOverlaps ? _list.FindLast(query) : _list.FindFirst(query)) - 1;
+            return EnumerateBackwardsFromIndex(index);
         }
 
         /// <inheritdoc/>
@@ -438,7 +439,7 @@ namespace C5.Intervals
             if (IsReadOnly)
                 throw new ReadOnlyCollectionException();
 
-            var intervalWasAdded = _list.Add(interval, ConflictsWithNeighbour);
+            var intervalWasAdded = _list.Add(interval);
 
             if (intervalWasAdded)
                 raiseForAdd(interval);
@@ -448,7 +449,7 @@ namespace C5.Intervals
 
         protected virtual bool ConflictsWithNeighbour(IInterval<T> interval, IInterval<T> neighbour)
         {
-            return interval.Overlaps(neighbour);
+            return interval.StrictlyContains(neighbour) || neighbour.StrictlyContains(interval);
         }
 
         #endregion

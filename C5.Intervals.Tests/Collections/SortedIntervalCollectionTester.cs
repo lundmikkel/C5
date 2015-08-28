@@ -103,8 +103,9 @@ namespace C5.Intervals.Tests
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            var expected = collection.AllowsOverlaps ? intervals : NonOverlapping(intervals);
+            var expected = InsertedIntervals(collection, intervals).ToArray();
             Sorting.Timsort(expected, IntervalExtensions.CreateComparer<Interval, int>());
+
             CollectionAssert.AreEqual(expected, collection.Sorted);
             CollectionAssert.AllItemsAreUnique(collection.Sorted);
             CollectionAssert.IsOrdered(collection.Sorted, comparer);

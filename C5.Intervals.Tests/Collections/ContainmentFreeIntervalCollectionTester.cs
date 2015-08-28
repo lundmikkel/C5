@@ -102,7 +102,7 @@ namespace C5.Intervals.Tests
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            var array = collection.AllowsOverlaps ? intervals : NonOverlapping(intervals);
+            var array = InsertedIntervals(collection, intervals).ToArray();
             Sorting.Timsort(array, IntervalExtensions.CreateComparer<Interval, int>());
             var expected = array.Reverse();
             CollectionAssert.AreEqual(expected, collection.SortedBackwards());
@@ -760,10 +760,10 @@ namespace C5.Intervals.Tests
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            var expected = collection.AllowsOverlaps ? intervals : NonOverlapping(intervals);
-            Sorting.Timsort(expected, IntervalExtensions.CreateComparer<Interval, int>());
-            for (var i = 0; i < expected.Count(); ++i)
-                CollectionAssert.AreEqual(expected.Skip(i), collection.EnumerateFromIndex(i));
+            var array = InsertedIntervals(collection, intervals).ToArray();
+            Sorting.Timsort(array, IntervalExtensions.CreateComparer<Interval, int>());
+            for (var i = 0; i < array.Length; ++i)
+                CollectionAssert.AreEqual(array.Skip(i), collection.EnumerateFromIndex(i));
         }
 
         #endregion
@@ -841,10 +841,10 @@ namespace C5.Intervals.Tests
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            var expected = collection.AllowsOverlaps ? intervals : NonOverlapping(intervals);
-            Sorting.Timsort(expected, IntervalExtensions.CreateComparer<Interval, int>());
-            for (var i = 0; i < expected.Count(); ++i)
-                CollectionAssert.AreEqual(expected.Take(i + 1).Reverse(), collection.EnumerateBackwardsFromIndex(i));
+            var array = InsertedIntervals(collection, intervals).ToArray();
+            Sorting.Timsort(array, IntervalExtensions.CreateComparer<Interval, int>());
+            for (var i = 0; i < array.Length; ++i)
+                CollectionAssert.AreEqual(array.Take(i + 1).Reverse(), collection.EnumerateBackwardsFromIndex(i));
         }
 
         #endregion
