@@ -706,23 +706,24 @@ namespace C5.Intervals
             Contract.Ensures(!IsEmpty);
 
             // The collection contains the interval
-            Contract.Ensures(!AllowsOverlaps || Contract.Exists(this, x => ReferenceEquals(x, interval)));
+            Contract.Ensures(!Contract.Result<bool>() || Contract.Exists(this, x => ReferenceEquals(x, interval)));
+
             // If the interval was added, the number of object with the same reference goes up by one
             Contract.Ensures(Contract.Result<bool>() == (this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval))) + 1));
             // If the interval wasn't added, the number of object with the same reference stays the same
             Contract.Ensures(Contract.Result<bool>() != (this.Count(x => ReferenceEquals(x, interval)) == Contract.OldValue(this.Count(x => ReferenceEquals(x, interval)))));
+
             // If the interval is added the count goes up by one
             Contract.Ensures(Contract.Result<bool>() == (Count == Contract.OldValue(Count) + 1));
             // If the interval is not added the count stays the same
             Contract.Ensures(Contract.Result<bool>() != (Count == Contract.OldValue(Count)));
 
-            // If overlaps are not allow, the result is the opposite of whether the collection had an interval that overlapped the added interval
-            Contract.Ensures(AllowsOverlaps || Contract.Result<bool>() != Contract.OldValue(Contract.Exists(this, x => x.Overlaps(interval))));
-
-            // If the collection allows reference duplicates, the object will always be added
-            Contract.Ensures(!AllowsReferenceDuplicates || Contract.Result<bool>());
-            // If the collection doesn't allow reference duplicates, the object should only be added if it didn't contain the object
-            Contract.Ensures(AllowsReferenceDuplicates || !AllowsOverlaps || Contract.Result<bool>() != Contract.OldValue(Contract.Exists(this, x => ReferenceEquals(x, interval))));
+            // If overlaps are not allowed and we get one, the result must be false
+            Contract.Ensures(AllowsOverlaps || Contract.OldValue(Contract.ForAll(this, x => !x.Overlaps(interval))) || !Contract.Result<bool>());
+            // If containments are not allowed and we get one, the result must be false
+            Contract.Ensures(AllowsContainments || Contract.OldValue(Contract.ForAll(this, x => !x.StrictlyContains(interval) && !interval.StrictlyContains(x))) || !Contract.Result<bool>());
+            // If reference duplicates are not allowed and we get one, the result must be false
+            Contract.Ensures(AllowsReferenceDuplicates || Contract.OldValue(Contract.ForAll(this, x => !ReferenceEquals(x, interval))) || !Contract.Result<bool>());
 
             throw new NotImplementedException();
         }
@@ -744,7 +745,6 @@ namespace C5.Intervals
             Contract.Ensures(AllowsReferenceDuplicates || Count == Contract.OldValue(Count) + intervals.Distinct(ComparerFactory<I>.CreateEqualityComparer((x, y) => ReferenceEquals(x, y), x => x.GetHashCode())).Count(x => !Contract.OldValue(this.Contains(x))));
             // If intervals is empty, the count is unchanged
             Contract.Ensures(intervals.Any() || Count == Contract.OldValue(Count));
-
 
             throw new NotImplementedException();
         }

@@ -78,6 +78,35 @@ namespace C5.Intervals
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
+        #region Properties
+
+        #region Data Structure Properties
+
+        public override bool AllowsOverlaps
+        {
+            get
+            {
+                // Overlaps not allowed
+                Contract.Ensures(!Contract.Result<bool>());
+
+                throw new NotImplementedException();
+            }
+        }
+
+        public override bool AllowsReferenceDuplicates
+        {
+            get
+            {
+                // Reference duplicates not allowed
+                Contract.Ensures(!Contract.Result<bool>());
+
+                throw new NotImplementedException();
+            }
+        }
+
+        #endregion
+
+        #endregion
 
         #region Indexed Access
         public int IndexOf(I interval)

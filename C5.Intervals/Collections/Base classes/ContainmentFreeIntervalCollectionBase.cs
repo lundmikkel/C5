@@ -22,6 +22,8 @@ namespace C5.Intervals
 
         #region Data Structure Properties
 
+        public override bool AllowsContainments { get { return false; } }
+
         /// <inheritdoc/>
         public abstract Speed IndexingSpeed { get; }
 

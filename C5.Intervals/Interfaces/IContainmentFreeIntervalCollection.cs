@@ -161,7 +161,7 @@ namespace C5.Intervals
         {
             get
             {
-                // Disallow containments
+                // Containments not allowed
                 Contract.Ensures(!Contract.Result<bool>());
 
                 throw new NotImplementedException();
