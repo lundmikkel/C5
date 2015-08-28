@@ -15,8 +15,6 @@ namespace C5.Intervals
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
-        #region Properties
-
         #region Data Structure Properties
 
         /// <inheritdoc/>
@@ -61,8 +59,6 @@ namespace C5.Intervals
             }
         }
         
-        #endregion
-
         #endregion
 
         #region Sorted Enumeration

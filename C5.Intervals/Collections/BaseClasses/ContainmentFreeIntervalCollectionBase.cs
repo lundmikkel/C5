@@ -18,8 +18,6 @@ namespace C5.Intervals
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
-        #region Properties
-
         #region Data Structure Properties
 
         public override bool AllowsContainments { get { return false; } }
@@ -88,8 +86,6 @@ namespace C5.Intervals
                 return max;
             }
         }
-
-        #endregion
 
         #endregion
 

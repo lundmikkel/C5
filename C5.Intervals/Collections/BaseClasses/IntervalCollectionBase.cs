@@ -89,9 +89,7 @@ namespace C5.Intervals
         #endregion
 
         #region Interval Collection
-
-        #region Properties
-
+        
         #region Data Structure Properties
 
         /// <inheritdoc/>
@@ -132,8 +130,6 @@ namespace C5.Intervals
         public abstract int MaximumDepth { get; }
 
         #endregion Collection Properties
-
-        #endregion Properties
 
         #region Find Equals
 

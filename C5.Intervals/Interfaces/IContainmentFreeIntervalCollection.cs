@@ -29,8 +29,6 @@ namespace C5.Intervals
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
-        #region Properties
-
         #region Data Structure Properties
 
         /// <summary>
@@ -42,8 +40,6 @@ namespace C5.Intervals
         /// <value>A characterization of the speed of lookup operations.</value>
         [Pure]
         Speed IndexingSpeed { get; }
-
-        #endregion
 
         #endregion
 
@@ -153,8 +149,6 @@ namespace C5.Intervals
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
-        #region Properties
-
         #region Data Structure Properties
 
         public override bool AllowsContainments
@@ -169,8 +163,6 @@ namespace C5.Intervals
         }
 
         public abstract Speed IndexingSpeed { get; }
-
-        #endregion
 
         #endregion
 

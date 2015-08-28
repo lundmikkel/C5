@@ -29,8 +29,6 @@ namespace C5.Intervals
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
-        #region Properties
-
         #region Data Structure Properties
 
         /// <summary>
@@ -150,9 +148,7 @@ namespace C5.Intervals
         int MaximumDepth { get; }
 
         #endregion
-
-        #endregion
-
+        
         #region Find Equals
 
         /// <summary>
@@ -373,8 +369,6 @@ namespace C5.Intervals
         where I : class, IInterval<T>
         where T : IComparable<T>
     {
-        #region Properties
-
         #region Data Structure Properties
 
         public bool AllowsReferenceDuplicates
@@ -502,8 +496,6 @@ namespace C5.Intervals
                 throw new NotImplementedException();
             }
         }
-
-        #endregion
 
         #endregion
 

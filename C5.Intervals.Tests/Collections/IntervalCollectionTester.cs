@@ -543,9 +543,7 @@ namespace C5.Intervals.Tests
         #endregion
 
         #region Interval Collection
-
-        #region Properties
-
+        
         #region Data Structure Properties
 
         #region Allows Overlaps
@@ -1225,9 +1223,7 @@ namespace C5.Intervals.Tests
         #endregion
 
         #endregion
-
-        #endregion
-
+        
         #region Enumerable
 
         #region Get Enumerator

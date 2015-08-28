@@ -1269,8 +1269,6 @@ namespace C5.Intervals
 
         #region Interval Collection
 
-        #region Properties
-
         #region Data Structure Properties
 
         /// <inheritdoc/>
@@ -1378,9 +1376,7 @@ namespace C5.Intervals
         public override int MaximumDepth { get { return IsEmpty ? 0 : _root.Max; } }
 
         #endregion
-
-        #endregion
-
+        
         #region Enumerable
 
         /// <inheritdoc/>

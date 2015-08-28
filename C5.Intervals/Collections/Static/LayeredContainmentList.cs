@@ -353,8 +353,6 @@ namespace C5.Intervals
 
         #region Interval Collection
 
-        #region Properties
-
         #region Data Structure Properties
 
         // TODO: Support user setting the value (also for AllowsContainments and AllowsReferenceDuplicates)
@@ -473,8 +471,6 @@ namespace C5.Intervals
             IInterval<T> intervalOfMaximumDepth = null;
             return Sorted.Where(filter).MaximumDepth(out intervalOfMaximumDepth);
         }
-
-        #endregion
 
         #endregion
 

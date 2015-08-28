@@ -510,8 +510,6 @@ namespace C5.Intervals
 
         #region Interval Collection
 
-        #region Properties
-
         #region Data Structure Properties
 
         /// <inheritdoc/>
@@ -529,8 +527,6 @@ namespace C5.Intervals
 
         /// <inheritdoc/>
         public override I HighestInterval { get { return _last.Previous.Key; } }
-
-        #endregion
 
         #endregion
 
