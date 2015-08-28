@@ -157,14 +157,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Code contracts\IntervalContractHelper.cs" />
-    <Compile Include="Collections\Base classes\SortedIntervalCollectionBase.cs" />
+    <Compile Include="Collections\BaseClasses\SortedIntervalCollectionBase.cs" />
     <Compile Include="Collections\Dynamic\DoublyLinkedFiniteIntervalTree.cs" />
     <Compile Include="Collections\Dynamic\DynamicIntervalTree.cs" />
     <Compile Include="Collections\Dynamic\IntervalBinarySearchTree.cs" />
     <Compile Include="Collections\Dynamic\IntervalBinarySearchTreeOld.cs" />
-    <Compile Include="Collections\Base classes\ContainmentFreeIntervalCollectionBase.cs" />
-    <Compile Include="Collections\Base classes\OverlapFreeIntervalCollectionBase.cs" />
-    <Compile Include="Collections\Base classes\IntervalCollectionBase.cs" />
+    <Compile Include="Collections\BaseClasses\ContainmentFreeIntervalCollectionBase.cs" />
+    <Compile Include="Collections\BaseClasses\OverlapFreeIntervalCollectionBase.cs" />
+    <Compile Include="Collections\BaseClasses\IntervalCollectionBase.cs" />
     <Compile Include="Collections\EndpointSortedIntervalCollection.cs" />
     <Compile Include="Collections\IntervalCollectionFactory.cs" />
     <Compile Include="Collections\Static\BinaryIntervalSearch.cs" />
