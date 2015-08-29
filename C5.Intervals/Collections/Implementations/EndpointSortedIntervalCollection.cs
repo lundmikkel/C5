@@ -14,7 +14,7 @@ namespace C5.Intervals
     {
         #region Fields
 
-        private readonly EndpointSortedIntervalList _list;
+        private readonly IEndpointSortedIntervalList<I, T> _list;
         private readonly bool _allowsReferenceDuplicates;
         private readonly bool _allowsOverlaps;
         private readonly bool _isReadOnly;
@@ -30,190 +30,9 @@ namespace C5.Intervals
             Contract.Invariant(_list != null);
 
             // Intervals are sorted
-            Contract.Invariant(_list.IsSorted(IntervalExtensions.CreateComparer<I, T>()));
+            Contract.Invariant(_list.IsSorted<I>(IntervalExtensions.CreateComparer<I, T>()));
             // Highs are sorted as well
             Contract.Invariant(_list.IsSorted<I>(IntervalExtensions.CreateHighComparer<I, T>()));
-        }
-
-        #endregion
-
-        #region Inner Class
-
-        public class EndpointSortedIntervalList : IEnumerable<I>
-        {
-            private readonly List<I> _intervals;
-            private readonly Func<IInterval<T>, IInterval<T>, bool> _conflictsWithNeighbour;
-
-            public EndpointSortedIntervalList(IEnumerable<I> intervals, Func<IInterval<T>, IInterval<T>, bool> conflictsWithNeighbour)
-            {
-                _intervals = new List<I>();
-                _conflictsWithNeighbour = conflictsWithNeighbour;
-
-                foreach (var interval in intervals)
-                    Add(interval);
-            }
-
-            public Speed IndexingSpeed { get { return Speed.Constant; } }
-
-            public int Count { get { return _intervals.Count; } }
-
-            public I this[int i]
-            {
-                get { return _intervals[i]; }
-            }
-
-            public int Find(IInterval<T> query)
-            {
-                Contract.Ensures(Contract.Result<int>() == IntervalCollectionContractHelper.IndexOfSorted(_intervals, query, IntervalExtensions.CreateComparer<IInterval<T>, T>()));
-
-                var low = 0;
-                var high = _intervals.Count - 1;
-
-                while (low <= high)
-                {
-                    var mid = low + (high - low >> 1);
-                    var compareTo = _intervals[mid].CompareTo(query);
-
-                    if (compareTo < 0)
-                        low = mid + 1;
-                    else if (compareTo > 0)
-                        high = mid - 1;
-                    //Equal but range is not fully scanned
-                    else if (low != mid)
-                        //Set upper bound to current number and rescan
-                        high = mid;
-                    //Equal and full range is scanned
-                    else
-                        return mid;
-                }
-
-                // key not found. return insertion point
-                return ~low;
-            }
-
-            public int FindFirst(IInterval<T> query)
-            {
-                Contract.Requires(query != null);
-
-                // Either the interval at index result overlaps or no intervals in the layer overlap
-                Contract.Ensures(Contract.Result<int>() < 0 || Count <= Contract.Result<int>() || _intervals[Contract.Result<int>()].Overlaps(query) || Contract.ForAll(0, Count, i => !_intervals[i].Overlaps(query)));
-                // All intervals before index result do not overlap the query
-                Contract.Ensures(Contract.ForAll(0, Contract.Result<int>(), i => !_intervals[i].Overlaps(query)));
-
-                int min = -1, max = Count;
-
-                while (min + 1 < max)
-                {
-                    var middle = min + ((max - min) >> 1);
-                    if (query.CompareLowHigh(_intervals[middle]) <= 0)
-                        max = middle;
-                    else
-                        min = middle;
-                }
-
-                return max;
-            }
-
-            public int FindLast(IInterval<T> query)
-            {
-                Contract.Requires(query != null);
-
-                // Either the interval at index result overlaps or no intervals in the layer overlap
-                Contract.Ensures(Contract.Result<int>() == 0 || _intervals[Contract.Result<int>() - 1].Overlaps(query) || Contract.ForAll(_intervals, x => !x.Overlaps(query)));
-                // All intervals after index result do not overlap the query
-                Contract.Ensures(Contract.ForAll(Contract.Result<int>(), Count, i => !_intervals[i].Overlaps(query)));
-
-                int min = -1, max = Count;
-
-                while (min + 1 < max)
-                {
-                    var middle = min + ((max - min) >> 1);
-                    if (_intervals[middle].CompareLowHigh(query) <= 0)
-                        min = middle;
-                    else
-                        max = middle;
-                }
-
-                return max;
-            }
-
-            public IEnumerator<I> GetEnumerator()
-            {
-                return _intervals.GetEnumerator();
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
-
-            public IEnumerable<I> EnumerateFromIndex(int index)
-            {
-                Contract.Requires(0 <= index && index < Count);
-
-                return EnumerateRange(index, Count);
-            }
-
-            public IEnumerable<I> EnumerateRange(int inclusiveFrom, int exclusiveTo)
-            {
-                Contract.Requires(0 <= inclusiveFrom && inclusiveFrom < Count);
-                Contract.Requires(1 <= exclusiveTo && exclusiveTo <= Count);
-                Contract.Requires(inclusiveFrom < exclusiveTo);
-
-                while (inclusiveFrom < exclusiveTo)
-                    yield return _intervals[inclusiveFrom++];
-            }
-
-            public IEnumerable<I> EnumerateBackwardsFromIndex(int index)
-            {
-                Contract.Requires(0 <= index && index < Count);
-
-                while (index >= 0)
-                    yield return _intervals[index--];
-            }
-
-            public void Clear()
-            {
-                _intervals.Clear();
-            }
-
-            public bool Add(I interval)
-            {
-                var index = Find(interval);
-
-                if (index < 0)
-                    index = ~index;
-
-                if (index > 0 && _conflictsWithNeighbour(interval, _intervals[index - 1])
-                    || index < Count && _conflictsWithNeighbour(interval, _intervals[index]))
-                    return false;
-
-                _intervals.Insert(index, interval);
-                return true;
-            }
-
-            public bool Remove(I interval)
-            {
-                var index = Find(interval);
-
-                if (index < 0 || Count <= index)
-                    return false;
-
-                while (index < Count && _intervals[index].IntervalEquals(interval))
-                {
-                    if (ReferenceEquals(_intervals[index], interval))
-                    {
-                        _intervals.RemoveAt(index);
-                        return true;
-                    }
-                    ++index;
-                }
-
-                return false;
-            }
-
-            public I First { get { return _intervals[0]; } }
-            public I Last { get { return _intervals[Count - 1]; } }
         }
 
         #endregion
@@ -233,9 +52,9 @@ namespace C5.Intervals
             _list = allowsOverlaps ? CreateList(intervals, IntervalExtensions.EndpointsUnsortable) : CreateList(intervals, IntervalExtensions.Overlaps);
         }
 
-        protected virtual EndpointSortedIntervalList CreateList(IEnumerable<I> intervals, Func<IInterval<T>, IInterval<T>, bool> conflictsWithNeighbour)
+        protected virtual IEndpointSortedIntervalList<I, T> CreateList(IEnumerable<I> intervals, Func<IInterval<T>, IInterval<T>, bool> conflictsWithNeighbour)
         {
-            return new EndpointSortedIntervalList(intervals, conflictsWithNeighbour);
+            return new EndpointSortedIntervalList<I, T>(intervals, conflictsWithNeighbour);
         }
 
         #endregion
