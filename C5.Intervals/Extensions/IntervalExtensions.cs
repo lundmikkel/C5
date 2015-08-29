@@ -53,7 +53,6 @@ namespace C5.Intervals
         /// <summary>
         /// Check if an interval overlaps any interval in a collection.
         /// </summary>
-        /// <typeparam name="I"></typeparam>
         /// <typeparam name="T"></typeparam>
         /// <param name="interval">The interval.</param>
         /// <param name="intervals">The collection of intervals.</param>
@@ -115,6 +114,47 @@ namespace C5.Intervals
             return
                 (lowCompare < 0 || (lowCompare == 0 && first.LowIncluded && !second.LowIncluded))
                 && (highCompare < 0 || (highCompare == 0 && !second.HighIncluded && first.HighIncluded));
+        }
+
+        /// <summary>
+        /// Check if two intervals can be sorted in a way that makes their endpoints sorted
+        /// as well. This is the case if neither strictly contains the other.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="first">The first interval.</param>
+        /// <param name="second">The second interval.</param>
+        /// <returns>True if endpoints can be sorted.</returns>
+        /// <seealso cref="EndpointsUnsortable{T}"/>
+        public static bool EndpointsSortable<T>(IInterval<T> first, IInterval<T> second) where T : IComparable<T>
+        {
+            Contract.Requires(first != null);
+            Contract.Requires(second != null);
+            Contract.Ensures(Contract.Result<bool>() == (!first.StrictlyContains(second) && !second.StrictlyContains(first)));
+
+            var compareLow = first.CompareLow(second);
+            var compareHigh = first.CompareHigh(second);
+            return !(compareLow < 0 && compareHigh > 0 || compareLow > 0 && compareHigh < 0);
+        }
+
+
+        /// <summary>
+        /// Check if two intervals cannot be sorted in a way that makes their endpoints 
+        /// sorted as well. This is the case if either strictly contains the other.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="first">The first interval.</param>
+        /// <param name="second">The second interval.</param>
+        /// <returns>True if endpoints cannot be sorted.</returns>
+        /// <seealso cref="EndpointsSortable{T}"/>
+        public static bool EndpointsUnsortable<T>(IInterval<T> first, IInterval<T> second) where T : IComparable<T>
+        {
+            Contract.Requires(first != null);
+            Contract.Requires(second != null);
+            Contract.Ensures(Contract.Result<bool>() == (first.StrictlyContains(second) || second.StrictlyContains(first)));
+
+            var compareLow = first.CompareLow(second);
+            var compareHigh = first.CompareHigh(second);
+            return compareLow < 0 && compareHigh > 0 || compareLow > 0 && compareHigh < 0;
         }
 
         #endregion
@@ -1126,6 +1166,18 @@ namespace C5.Intervals
         public static IEnumerable<T> ToEnumerable<T>(this IEnumerator<T> enumerator)
         {
             while (enumerator.MoveNext()) yield return enumerator.Current;
+        }
+
+        /// <summary>
+        /// Makes an enumerable from a single item.
+        /// </summary>
+        /// <typeparam name="T">The item type.</typeparam>
+        /// <param name="item">The item.</param>
+        /// <returns>The item as an enumerable.</returns>
+        [Pure]
+        public static IEnumerable<T> AsEnumerable<T>(this T item)
+        {
+            yield return item;
         }
 
         [Pure]

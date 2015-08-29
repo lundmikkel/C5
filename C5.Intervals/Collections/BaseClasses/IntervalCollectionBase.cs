@@ -167,7 +167,6 @@ namespace C5.Intervals
         #region Find Overlap
 
         /// <inheritdoc/>
-        // TODO: Use FindOverlap?
         public virtual bool FindOverlap(T query, out I overlap)
         {
             return (overlap = FindOverlaps(query).FirstOrDefault()) != null;
@@ -178,6 +177,7 @@ namespace C5.Intervals
             //     overlap = (result = enumerator.MoveNext()) ? enumerator.Current : null;
             // return result;
         }
+
         /// <inheritdoc/>
         public virtual bool FindOverlap(IInterval<T> query, out I overlap)
         {

@@ -575,6 +575,8 @@ namespace C5.Intervals
 
             // A found overlap is not null and overlaps query
             Contract.Ensures(!Contract.Result<bool>() || Contract.ValueAtReturn(out overlap) != null && Contract.ValueAtReturn(out overlap).Overlaps(query));
+            // If no overlap is found, overlap should be null
+            Contract.Ensures(Contract.Result<bool>() || Contract.ValueAtReturn(out overlap) == null);
             // If the collection is empty, then the result is false
             Contract.Ensures(!IsEmpty || !Contract.Result<bool>());
 
@@ -590,6 +592,8 @@ namespace C5.Intervals
 
             // A found overlap is not null and overlaps query
             Contract.Ensures(!Contract.Result<bool>() || Contract.ValueAtReturn(out overlap) != null && Contract.ValueAtReturn(out overlap).Overlaps(query));
+            // If no overlap is found, overlap should be null
+            Contract.Ensures(Contract.Result<bool>() || Contract.ValueAtReturn(out overlap) == null);
             // If the collection is empty, then the result is false
             Contract.Ensures(!IsEmpty || !Contract.Result<bool>());
 

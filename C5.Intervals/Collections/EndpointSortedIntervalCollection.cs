@@ -39,7 +39,7 @@ namespace C5.Intervals
 
         #region Inner Class
 
-        class EndpointSortedIntervalList : IEnumerable<I>
+        public class EndpointSortedIntervalList : IEnumerable<I>
         {
             private readonly List<I> _intervals;
             private readonly Func<IInterval<T>, IInterval<T>, bool> _conflictsWithNeighbour;
@@ -52,6 +52,8 @@ namespace C5.Intervals
                 foreach (var interval in intervals)
                     Add(interval);
             }
+
+            public Speed IndexingSpeed { get { return Speed.Constant; } }
 
             public int Count { get { return _intervals.Count; } }
 
@@ -209,6 +211,9 @@ namespace C5.Intervals
 
                 return false;
             }
+
+            public I First { get { return _intervals[0]; } }
+            public I Last { get { return _intervals[Count - 1]; } }
         }
 
         #endregion
@@ -225,10 +230,10 @@ namespace C5.Intervals
             _allowsOverlaps = allowsOverlaps;
             _isReadOnly = isReadOnly;
 
-            _list = allowsOverlaps ? createList(intervals, ContainsNeighbour) : createList(intervals, OverlapsNeighbour);
+            _list = allowsOverlaps ? CreateList(intervals, IntervalExtensions.EndpointsUnsortable) : CreateList(intervals, IntervalExtensions.Overlaps);
         }
 
-        private EndpointSortedIntervalList createList(IEnumerable<I> intervals, Func<IInterval<T>, IInterval<T>, bool> conflictsWithNeighbour)
+        protected virtual EndpointSortedIntervalList CreateList(IEnumerable<I> intervals, Func<IInterval<T>, IInterval<T>, bool> conflictsWithNeighbour)
         {
             return new EndpointSortedIntervalList(intervals, conflictsWithNeighbour);
         }
@@ -270,7 +275,65 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override Speed IndexingSpeed
         {
-            get { return Speed.Constant; }
+            get { return _list.IndexingSpeed; }
+        }
+
+        #endregion
+
+        #region Collection Properties
+
+        /// <inheritdoc/>
+        public override I LowestInterval
+        {
+            get { return _list.First; }
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<I> LowestIntervals
+        {
+            get
+            {
+                if (AllowsOverlaps)
+                    return base.LowestIntervals;
+
+                if (IsEmpty)
+                    return Enumerable.Empty<I>();
+
+                return _list.First.AsEnumerable();
+            }
+        }
+
+        /// <inheritdoc/>
+        public override I HighestInterval
+        {
+            get { return _list.Last; }
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<I> HighestIntervals
+        {
+            get
+            {
+                if (AllowsOverlaps)
+                    return base.HighestIntervals;
+
+                if (IsEmpty)
+                    return Enumerable.Empty<I>();
+
+                return _list.Last.AsEnumerable();
+            }
+        }
+
+        /// <inheritdoc/>
+        public override int MaximumDepth
+        {
+            get
+            {
+                if (AllowsOverlaps)
+                    return base.MaximumDepth;
+
+                return IsEmpty ? 0 : 1;
+            }
         }
 
         #endregion
@@ -367,15 +430,8 @@ namespace C5.Intervals
 
         public override IEnumerable<I> FindEquals(IInterval<T> query)
         {
-            if (IsEmpty)
-                return Enumerable.Empty<I>();
-
             var index = _list.Find(query);
-
-            if (index < 0)
-                return Enumerable.Empty<I>();
-
-            return _list.EnumerateFromIndex(index).TakeWhile(interval => interval.IntervalEquals(query));
+            return index < 0 ? Enumerable.Empty<I>() : _list.EnumerateFromIndex(index).TakeWhile(interval => interval.IntervalEquals(query));
         }
 
         #endregion
@@ -393,7 +449,7 @@ namespace C5.Intervals
             var first = _list.FindFirst(query);
 
             // If index is out of bound, or found interval doesn't overlap, then the list won't contain any overlaps
-            if (Count <= first || !_list[first].Overlaps(query))
+            if (Count <= first || !(_list[first].CompareLowHigh(query) <= 0))
                 return Enumerable.Empty<I>();
 
             // We can use first as lower to minimize search area
@@ -425,14 +481,11 @@ namespace C5.Intervals
             if (IsEmpty)
                 return 0;
 
-            // We know first doesn't overlap so we can increment it before searching
             var first = _list.FindFirst(query);
 
-            // If index is out of bound, or found interval doesn't overlap, then the layer won't contain any overlaps
             if (Count <= first || !(_list[first].CompareLowHigh(query) <= 0))
                 return 0;
 
-            // We can use first as lower to speed up the search
             var last = _list.FindLast(query);
 
             return last - first;
@@ -455,16 +508,6 @@ namespace C5.Intervals
                 raiseForAdd(interval);
 
             return intervalWasAdded;
-        }
-
-        private bool ContainsNeighbour(IInterval<T> interval, IInterval<T> neighbour)
-        {
-            return interval.StrictlyContains(neighbour) || neighbour.StrictlyContains(interval);
-        }
-
-        private bool OverlapsNeighbour(IInterval<T> interval, IInterval<T> neighbour)
-        {
-            return interval.Overlaps(neighbour);
         }
 
         #endregion
