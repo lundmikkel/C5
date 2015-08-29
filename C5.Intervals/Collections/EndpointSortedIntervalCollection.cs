@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Reflection;
 
 namespace C5.Intervals
 {
@@ -16,9 +15,9 @@ namespace C5.Intervals
         #region Fields
 
         private readonly EndpointSortedIntervalList _list;
+        private readonly bool _allowsReferenceDuplicates;
+        private readonly bool _allowsOverlaps;
         private readonly bool _isReadOnly;
-
-        private static readonly IComparer<IInterval<T>> Comparer = IntervalExtensions.CreateComparer<IInterval<T>, T>();
 
         #endregion
 
@@ -64,7 +63,7 @@ namespace C5.Intervals
             public int Find(IInterval<T> query)
             {
                 Contract.Ensures(Contract.Result<int>() == IntervalCollectionContractHelper.IndexOfSorted(_intervals, query, IntervalExtensions.CreateComparer<IInterval<T>, T>()));
-                
+
                 var low = 0;
                 var high = _intervals.Count - 1;
 
@@ -216,21 +215,22 @@ namespace C5.Intervals
 
         #region Constructors
 
-        public EndpointSortedIntervalCollection(bool isReadOnly = false)
+        public EndpointSortedIntervalCollection(/*bool allowsReferenceDuplicates = false, */ bool allowsOverlaps = false, bool isReadOnly = false)
+            : this(Enumerable.Empty<I>(), /*allowsReferenceDuplicates, */ allowsOverlaps, isReadOnly)
+        { }
+
+        public EndpointSortedIntervalCollection(IEnumerable<I> intervals, /*bool allowsReferenceDuplicates = false,*/ bool allowsOverlaps = false, bool isReadOnly = false)
         {
-            _list = createList(Enumerable.Empty<I>());
+            _allowsReferenceDuplicates = allowsOverlaps; // allowsReferenceDuplicates;
+            _allowsOverlaps = allowsOverlaps;
             _isReadOnly = isReadOnly;
+
+            _list = allowsOverlaps ? createList(intervals, ContainsNeighbour) : createList(intervals, OverlapsNeighbour);
         }
 
-        public EndpointSortedIntervalCollection(IEnumerable<I> intervals, bool isReadOnly = false)
+        private EndpointSortedIntervalList createList(IEnumerable<I> intervals, Func<IInterval<T>, IInterval<T>, bool> conflictsWithNeighbour)
         {
-            _list = createList(intervals);
-            _isReadOnly = isReadOnly;
-        }
-
-        private EndpointSortedIntervalList createList(IEnumerable<I> intervals)
-        {
-            return new EndpointSortedIntervalList(intervals, ConflictsWithNeighbour);
+            return new EndpointSortedIntervalList(intervals, conflictsWithNeighbour);
         }
 
         #endregion
@@ -250,9 +250,15 @@ namespace C5.Intervals
         #region Data Structure Properties
 
         /// <inheritdoc/>
+        public override bool AllowsReferenceDuplicates
+        {
+            get { return _allowsReferenceDuplicates; }
+        }
+
+        /// <inheritdoc/>
         public override bool AllowsOverlaps
         {
-            get { return true; }
+            get { return _allowsOverlaps; }
         }
 
         /// <inheritdoc/>
@@ -451,9 +457,14 @@ namespace C5.Intervals
             return intervalWasAdded;
         }
 
-        protected virtual bool ConflictsWithNeighbour(IInterval<T> interval, IInterval<T> neighbour)
+        private bool ContainsNeighbour(IInterval<T> interval, IInterval<T> neighbour)
         {
             return interval.StrictlyContains(neighbour) || neighbour.StrictlyContains(interval);
+        }
+
+        private bool OverlapsNeighbour(IInterval<T> interval, IInterval<T> neighbour)
+        {
+            return interval.Overlaps(neighbour);
         }
 
         #endregion

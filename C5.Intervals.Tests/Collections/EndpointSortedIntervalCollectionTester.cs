@@ -16,7 +16,7 @@
 
             protected override object[] AdditionalParameters()
             {
-                return new object[] { IsReadOnly() };
+                return new object[] { AllowsOverlaps(), IsReadOnly() };
             }
 
             protected abstract bool IsReadOnly();
@@ -26,11 +26,6 @@
                 return Speed.Constant;
             }
 
-            protected override bool AllowsOverlaps()
-            {
-                return true;
-            }
-
             protected override bool AllowsContainments()
             {
                 return false;
@@ -38,22 +33,54 @@
 
             protected override bool AllowsReferenceDuplicates()
             {
-                // TODO: Test this?
-                return true;
+                return AllowsOverlaps();
             }
         }
 
-        class EndpointSortedIntervalCollectionTesterBlackBox_IsReadOnly : EndpointSortedIntervalCollectionTesterBlackBox
+        class EndpointSortedIntervalCollectionTesterBlackBox_StaticContainmentFree : EndpointSortedIntervalCollectionTesterBlackBox
         {
             protected override bool IsReadOnly()
             {
                 return true;
             }
+
+            protected override bool AllowsOverlaps()
+            {
+                return true;
+            }
         }
 
-        class EndpointSortedIntervalCollectionTesterBlackBox_IsNotReadOnly : EndpointSortedIntervalCollectionTesterBlackBox
+        class EndpointSortedIntervalCollectionTesterBlackBox_DynamicContainmentFree : EndpointSortedIntervalCollectionTesterBlackBox
         {
             protected override bool IsReadOnly()
+            {
+                return false;
+            }
+            protected override bool AllowsOverlaps()
+            {
+                return true;
+            }
+        }
+
+        class EndpointSortedIntervalCollectionTesterBlackBox_StaticOverlapFree : EndpointSortedIntervalCollectionTesterBlackBox
+        {
+            protected override bool IsReadOnly()
+            {
+                return true;
+            }
+            protected override bool AllowsOverlaps()
+            {
+                return false;
+            }
+        }
+
+        class EndpointSortedIntervalCollectionTesterBlackBox_DynamicOverlapFree : EndpointSortedIntervalCollectionTesterBlackBox
+        {
+            protected override bool IsReadOnly()
+            {
+                return false;
+            }
+            protected override bool AllowsOverlaps()
             {
                 return false;
             }
