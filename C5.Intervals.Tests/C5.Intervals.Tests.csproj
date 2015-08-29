@@ -107,24 +107,24 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
-    <Compile Include="Collections\EndpointSortedIntervalCollectionTester.cs" />
-    <Compile Include="Collections\SortedIntervalCollectionTester.cs" />
-    <Compile Include="Collections\OverlapFreeIntervalCollectionTester.cs" />
-    <Compile Include="Collections\ContainmentFreeIntervalCollectionTester.cs" />
-    <Compile Include="Collections\Static\LayeredContainmentListGallopTester.cs" />
-    <Compile Include="Collections\Static\NestedContainmentListArticleTester.cs" />
-    <Compile Include="Collections\Static\NestedContainmentListTester.cs" />
+    <Compile Include="Collections\Implementations\EndpointSortedIntervalCollectionTester.cs" />
+    <Compile Include="Collections\BaseClasses\SortedIntervalCollectionTester.cs" />
+    <Compile Include="Collections\BaseClasses\OverlapFreeIntervalCollectionTester.cs" />
+    <Compile Include="Collections\BaseClasses\ContainmentFreeIntervalCollectionTester.cs" />
+    <Compile Include="Collections\Implementations\LayeredContainmentListGallopTester.cs" />
+    <Compile Include="Collections\Implementations\NestedContainmentListArticleTester.cs" />
+    <Compile Include="Collections\Implementations\NestedContainmentListTester.cs" />
     <Compile Include="Extensions\IntervalExtensionTester.cs" />
     <Compile Include="Extensions\IntervalRelationsTester.cs" />
-    <Compile Include="Collections\Static\BinaryIntervalSearchTester.cs" />
-    <Compile Include="Collections\Dynamic\DoublyLinkedFiniteIntervalTreeTester.cs" />
-    <Compile Include="Collections\Dynamic\DynamicIntervalTreeTester.cs" />
-    <Compile Include="Collections\Dynamic\IntervalBinarySearchTreeOldTester.cs" />
-    <Compile Include="Collections\Dynamic\IntervalBinarySearchTreeTester.cs" />
-    <Compile Include="Collections\IntervalCollectionTester.cs" />
-    <Compile Include="Collections\Static\LayeredContainmentListTester.cs" />
-    <Compile Include="Collections\Static\StaticFiniteIntervalListTester.cs" />
-    <Compile Include="Collections\Static\StaticIntervalTreeTester.cs" />
+    <Compile Include="Collections\Implementations\BinaryIntervalSearchTester.cs" />
+    <Compile Include="Collections\Implementations\DoublyLinkedFiniteIntervalTreeTester.cs" />
+    <Compile Include="Collections\Implementations\DynamicIntervalTreeTester.cs" />
+    <Compile Include="Collections\Implementations\IntervalBinarySearchTreeOldTester.cs" />
+    <Compile Include="Collections\Implementations\IntervalBinarySearchTreeTester.cs" />
+    <Compile Include="Collections\BaseClasses\IntervalCollectionTester.cs" />
+    <Compile Include="Collections\Implementations\LayeredContainmentListTester.cs" />
+    <Compile Include="Collections\Implementations\StaticFiniteIntervalListTester.cs" />
+    <Compile Include="Collections\Implementations\StaticIntervalTreeTester.cs" />
     <Compile Include="Extensions\IntervalTypeExtensionTester.cs" />
     <Compile Include="Helper\TestHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
