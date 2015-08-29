@@ -16,9 +16,9 @@ namespace C5.Intervals.Tests
         /*
          * Things to check for for each method:
          *  - Empty collection                                 (EmptyCollection)
-         *  - Single interval collection                       (SingleInterval)
-         *  - Many intervals collection - all same object      (SingleObject)
-         *  - Many intervals collection - all same interval    (DuplicateIntervals)
+         *  - Single interval collection                       (SingleInterval) 
+         *  - Many intervals collection - all same object      (SingleObject)       // TODO: Rename to ReferenceDuplicates
+         *  - Many intervals collection - all same interval    (DuplicateIntervals) // TODO: Rename to IntervalDuplicates
          *  - Many intervals collection                        (ManyIntervals)
          */
 
@@ -497,13 +497,13 @@ namespace C5.Intervals.Tests
             AssertThrowsContractException((() =>
             {
                 var collection = CreateEmptyCollection<Interval, int>();
-                collection.EnumerateFrom(interval: null, includeInterval: true);
+                collection.EnumerateFrom(interval: null, includeOverlaps: true);
             }));
 
             AssertThrowsContractException((() =>
             {
                 var collection = CreateEmptyCollection<Interval, int>();
-                collection.EnumerateFrom(interval: null, includeInterval: false);
+                collection.EnumerateFrom(interval: null, includeOverlaps: false);
             }));
         }
 
@@ -522,10 +522,9 @@ namespace C5.Intervals.Tests
         {
             var interval = SingleInterval();
             var collection = CreateCollection<Interval, int>(interval);
-            CollectionAssert.AreEqual(new[] { interval }, collection.EnumerateFrom(interval, true));
-            CollectionAssert.IsEmpty(collection.EnumerateFrom(interval, false));
-            CollectionAssert.IsEmpty(collection.EnumerateFrom(SingleInterval(), true));
-            CollectionAssert.IsEmpty(collection.EnumerateFrom(SingleInterval(), false));
+            var query = new Interval(interval);
+            CollectionAssert.AreEqual(new[] { interval }, collection.EnumerateFrom(query, true));
+            CollectionAssert.IsEmpty(collection.EnumerateFrom(query, false));
         }
 
         [Test]
@@ -533,13 +532,11 @@ namespace C5.Intervals.Tests
         public void EnumerateFromInterval_SingleObject_Mixed()
         {
             var intervals = SingleObject();
-            var interval = intervals.First();
+            var query = new Interval(intervals.First());
             var collection = CreateCollection<Interval, int>(intervals);
-            var expected = collection.AllowsReferenceDuplicates ? intervals : intervals.Take(1);
-            CollectionAssert.AreEqual(expected, collection.EnumerateFrom(interval, true));
-            CollectionAssert.IsEmpty(collection.EnumerateFrom(interval, false));
-            CollectionAssert.IsEmpty(collection.EnumerateFrom(SingleInterval(), true));
-            CollectionAssert.IsEmpty(collection.EnumerateFrom(SingleInterval(), false));
+            var expected = InsertedIntervals(collection, intervals);
+            CollectionAssert.AreEqual(expected, collection.EnumerateFrom(query, true));
+            CollectionAssert.IsEmpty(collection.EnumerateFrom(query, false));
         }
 
         [Test]
@@ -547,13 +544,11 @@ namespace C5.Intervals.Tests
         public void EnumerateFromInterval_DuplicateIntervals_Mixed()
         {
             var intervals = DuplicateIntervals();
-            var interval = intervals.First();
+            var query = new Interval(intervals.First());
             var collection = CreateCollection<Interval, int>(intervals);
-            var expected = collection.AllowsReferenceDuplicates ? intervals : intervals.Take(1).ToArray();
-            CollectionAssert.AreEqual(expected, collection.EnumerateFrom(interval, true));
-            CollectionAssert.AreEqual(expected.Skip(1), collection.EnumerateFrom(interval, false));
-            CollectionAssert.IsEmpty(collection.EnumerateFrom(SingleInterval(), true));
-            CollectionAssert.IsEmpty(collection.EnumerateFrom(SingleInterval(), false));
+            var expected = InsertedIntervals(collection, intervals).ToArray();
+            CollectionAssert.AreEqual(expected, collection.EnumerateFrom(query, true));
+            CollectionAssert.IsEmpty(collection.EnumerateFrom(query, false));
         }
 
         [Test]
@@ -562,27 +557,36 @@ namespace C5.Intervals.Tests
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            intervals = collection.AllowsOverlaps ? intervals : NonOverlapping(intervals);
-            Sorting.Timsort(intervals, IntervalExtensions.CreateComparer<Interval, int>());
-            var counter = 0;
-            foreach (var interval in intervals)
+            var array = InsertedIntervals(collection, intervals).ToArray();
+            Sorting.Timsort(array, IntervalExtensions.CreateComparer<Interval, int>());
+            for (var i = 0; i < array.Length; i++)
             {
-                CollectionAssert.AreEqual(intervals.Skip(counter), collection.EnumerateFrom(interval, true));
-                CollectionAssert.AreEqual(intervals.Skip(counter + 1), collection.EnumerateFrom(interval, false));
-                ++counter;
+                var interval = array[i];
+                Assert.GreaterOrEqual(collection.EnumerateFrom(interval, true).Count(), array.Length - i);
+                Assert.LessOrEqual(collection.EnumerateFrom(interval, false).Count(), array.Length - i - 1);
             }
 
-            CollectionAssert.IsEmpty(collection.EnumerateFrom(SingleInterval(), true));
-            CollectionAssert.IsEmpty(collection.EnumerateFrom(SingleInterval(), false));
+            CollectionAssert.IsEmpty(collection.EnumerateFrom(array.Last(), false));
         }
 
         [Test]
+        [Category("Enumerate From Interval")]
         public void EnumerateFromInterval_ManyIntervalsEnumerateFromLastIntervalExcluded_Empty()
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            var interval = collection.Sorted.Last();
-            CollectionAssert.IsEmpty(collection.EnumerateFrom(interval, false));
+            var query = new Interval(collection.Sorted.Last());
+            CollectionAssert.IsEmpty(collection.EnumerateFrom(query, false));
+        }
+
+        [Test]
+        [Category("Enumerate From Interval")]
+        public void EnumerateFromInterval_ManyIntervalsSpan_SortedAndEmpty()
+        {
+            var intervals = ManyIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+            CollectionAssert.AreEqual(collection.Sorted, collection.EnumerateFrom(collection.Span, true));
+            CollectionAssert.IsEmpty(collection.EnumerateFrom(collection.Span, false));
         }
 
         #endregion
@@ -596,13 +600,13 @@ namespace C5.Intervals.Tests
             AssertThrowsContractException((() =>
             {
                 var collection = CreateEmptyCollection<Interval, int>();
-                collection.EnumerateBackwardsFrom(interval: null, includeInterval: true);
+                collection.EnumerateBackwardsFrom(interval: null, includeOverlaps: true);
             }));
 
             AssertThrowsContractException((() =>
             {
                 var collection = CreateEmptyCollection<Interval, int>();
-                collection.EnumerateBackwardsFrom(interval: null, includeInterval: false);
+                collection.EnumerateBackwardsFrom(interval: null, includeOverlaps: false);
             }));
         }
 
@@ -621,10 +625,9 @@ namespace C5.Intervals.Tests
         {
             var interval = SingleInterval();
             var collection = CreateCollection<Interval, int>(interval);
-            CollectionAssert.AreEqual(new[] { interval }, collection.EnumerateBackwardsFrom(interval, true));
-            CollectionAssert.IsEmpty(collection.EnumerateBackwardsFrom(interval, false));
-            CollectionAssert.IsEmpty(collection.EnumerateBackwardsFrom(SingleInterval(), true));
-            CollectionAssert.IsEmpty(collection.EnumerateBackwardsFrom(SingleInterval(), false));
+            var query = new Interval(interval);
+            CollectionAssert.AreEqual(new[] { interval }, collection.EnumerateBackwardsFrom(query, true));
+            CollectionAssert.IsEmpty(collection.EnumerateBackwardsFrom(query, false));
         }
 
         [Test]
@@ -632,13 +635,11 @@ namespace C5.Intervals.Tests
         public void EnumerateBackwardsFromInterval_SingleObject_Mixed()
         {
             var intervals = SingleObject();
-            var interval = intervals.First();
+            var query = new Interval(intervals.First());
             var collection = CreateCollection<Interval, int>(intervals);
-            var expected = collection.AllowsReferenceDuplicates ? intervals : intervals.Take(1);
-            CollectionAssert.AreEqual(expected, collection.EnumerateBackwardsFrom(interval, true));
-            CollectionAssert.IsEmpty(collection.EnumerateBackwardsFrom(interval, false));
-            CollectionAssert.IsEmpty(collection.EnumerateBackwardsFrom(SingleInterval(), true));
-            CollectionAssert.IsEmpty(collection.EnumerateBackwardsFrom(SingleInterval(), false));
+            var expected = InsertedIntervals(collection, intervals);
+            CollectionAssert.AreEqual(expected, collection.EnumerateBackwardsFrom(query, true));
+            CollectionAssert.IsEmpty(collection.EnumerateBackwardsFrom(query, false));
         }
 
         [Test]
@@ -646,13 +647,11 @@ namespace C5.Intervals.Tests
         public void EnumerateBackwardsFromInterval_DuplicateIntervals_Mixed()
         {
             var intervals = DuplicateIntervals();
+            var query = new Interval(intervals.First());
             var collection = CreateCollection<Interval, int>(intervals);
-            var expected = collection.AllowsReferenceDuplicates ? intervals.Reverse().ToArray() : intervals.Take(1).ToArray();
-            var interval = expected.First();
-            CollectionAssert.AreEqual(expected, collection.EnumerateBackwardsFrom(interval, true));
-            CollectionAssert.AreEqual(expected.Skip(1), collection.EnumerateBackwardsFrom(interval, false));
-            CollectionAssert.IsEmpty(collection.EnumerateBackwardsFrom(SingleInterval(), true));
-            CollectionAssert.IsEmpty(collection.EnumerateBackwardsFrom(SingleInterval(), false));
+            var expected = InsertedIntervals(collection, intervals).ToArray();
+            CollectionAssert.AreEqual(expected, collection.EnumerateBackwardsFrom(query, true));
+            CollectionAssert.IsEmpty(collection.EnumerateBackwardsFrom(query, false));
         }
 
         [Test]
@@ -661,28 +660,38 @@ namespace C5.Intervals.Tests
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
-            intervals = collection.AllowsOverlaps ? intervals : NonOverlapping(intervals);
-            Sorting.Timsort(intervals, IntervalExtensions.CreateComparer<Interval, int>());
-            var expected = intervals.Reverse().ToArray();
-            var counter = 0;
-            foreach (var interval in expected)
+            var array = InsertedIntervals(collection, intervals).ToArray();
+            Sorting.Timsort(array, IntervalExtensions.CreateComparer<Interval, int>());
+            for (var i = 0; i < array.Length; i++)
             {
-                CollectionAssert.AreEqual(expected.Skip(counter), collection.EnumerateBackwardsFrom(interval, true));
-                CollectionAssert.AreEqual(expected.Skip(counter + 1), collection.EnumerateBackwardsFrom(interval, false));
-                ++counter;
+                var interval = array[i];
+                Assert.GreaterOrEqual(collection.EnumerateBackwardsFrom(interval, true).Count(), i + 1);
+                Assert.LessOrEqual(collection.EnumerateBackwardsFrom(interval, false).Count(), i);
             }
 
-            CollectionAssert.IsEmpty(collection.EnumerateBackwardsFrom(SingleInterval(), true));
-            CollectionAssert.IsEmpty(collection.EnumerateBackwardsFrom(SingleInterval(), false));
+            CollectionAssert.IsEmpty(collection.EnumerateBackwardsFrom(array.First(), false));
         }
 
         [Test]
+        [Category("Enumerate Backwards From Interval")]
         public void EnumerateBackwardsFromInterval_ManyIntervalsEnumerateBackwardsFromLastIntervalExcluded_Empty()
         {
             var intervals = ManyIntervals();
             var collection = CreateCollection<Interval, int>(intervals);
             var interval = collection.SortedBackwards().Last();
             CollectionAssert.IsEmpty(collection.EnumerateBackwardsFrom(interval, false));
+        }
+
+        [Test]
+        [Category("Enumerate Backwards From Interval")]
+        public void EnumerateBackwardsFromInterval_ManyIntervalsSpan_SortedAndEmpty()
+        {
+            var intervals = ManyIntervals();
+            var collection = CreateCollection<Interval, int>(intervals);
+            var expected = collection.SortedBackwards();
+            var actual = collection.EnumerateBackwardsFrom(collection.Span, true);
+            CollectionAssert.AreEqual(expected, actual);
+            CollectionAssert.IsEmpty(collection.EnumerateBackwardsFrom(collection.Span, false));
         }
 
         #endregion

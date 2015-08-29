@@ -304,19 +304,23 @@ namespace C5.Intervals
         }
 
         /// <inheritdoc/>
-        public override IEnumerable<I> EnumerateFrom(I interval, bool includeInterval = true)
+        public override IEnumerable<I> EnumerateFrom(IInterval<T> interval, bool includeOverlaps = true)
         {
-            var index = _list.Find(interval);
-            if (index < 0)
+            if (IsEmpty)
                 return Enumerable.Empty<I>();
-            return includeInterval ? EnumerateFromIndex(index) : EnumerateFromIndex(index + 1);
+
+            var index = includeOverlaps ? _list.FindFirst(interval) : _list.FindLast(interval);
+            return EnumerateFromIndex(index);
         }
 
         /// <inheritdoc/>
-        public override IEnumerable<I> EnumerateBackwardsFrom(I interval, bool includeInterval = true)
+        public override IEnumerable<I> EnumerateBackwardsFrom(IInterval<T> interval, bool includeOverlaps = true)
         {
-            var index = _list.Find(interval);
-            return includeInterval ? EnumerateBackwardsFromIndex(index) : EnumerateBackwardsFromIndex(index - 1);
+            if (IsEmpty)
+                return Enumerable.Empty<I>();
+
+            var index = includeOverlaps ? _list.FindLast(interval) : _list.FindFirst(interval);
+            return EnumerateBackwardsFromIndex(index - 1);
         }
 
         /// <inheritdoc/>

@@ -564,19 +564,23 @@ namespace C5.Intervals
         #region Enumerate from Interval
 
         /// <inheritdoc/>
-        public override IEnumerable<I> EnumerateFrom(I interval, bool includeInterval = true)
+        public override IEnumerable<I> EnumerateFrom(IInterval<T> interval, bool includeOverlaps = true)
         {
-            bool intervalFound;
-            var node = findContainingNode(interval, out intervalFound);
-            return intervalFound ? enumerateFrom(includeInterval ? node : node.Next) : Enumerable.Empty<I>();
+            if (IsEmpty)
+                return Enumerable.Empty<I>();
+
+            var node = includeOverlaps ? findFirst(interval) : findLast(interval);
+            return enumerateFrom(node);
         }
 
         /// <inheritdoc/>
-        public override IEnumerable<I> EnumerateBackwardsFrom(I interval, bool includeInterval = true)
+        public override IEnumerable<I> EnumerateBackwardsFrom(IInterval<T> interval, bool includeOverlaps = true)
         {
-            bool intervalFound;
-            var node = findContainingNode(interval, out intervalFound);
-            return intervalFound ? enumerateBackwardsFrom(includeInterval ? node : node.Previous) : Enumerable.Empty<I>();
+            if (IsEmpty)
+                return Enumerable.Empty<I>();
+
+            var node = includeOverlaps ? findLast(interval) : findFirst(interval);
+            return enumerateBackwardsFrom(node.Previous);
         }
 
         #endregion
@@ -698,6 +702,15 @@ namespace C5.Intervals
             if (IsEmpty)
                 yield break;
 
+            var node = findFirst(query);
+
+            // Iterate overlaps
+            foreach (var interval in enumerateFrom(node).TakeWhile(x => x.CompareLowHigh(query) <= 0))
+                yield return interval;
+        }
+
+        private Node findFirst(IInterval<T> query)
+        {
             var node = _root;
 
             // Search for the node containing the first overlap
@@ -708,7 +721,7 @@ namespace C5.Intervals
                 if (compare < 0)
                 {
                     if (node.Left == null)
-                        break;
+                        return node;
 
                     // Move left
                     node = node.Left;
@@ -718,25 +731,47 @@ namespace C5.Intervals
                     if (node.Right == null)
                     {
                         // If there is no right node, use the next in sorting order
-                        node = node.Next;
-
-                        // Make sure the low is still lower or equal to the query's high
-                        if (node == _last || query.CompareLowHigh(node.Key) > 0)
-                            yield break;
-
-                        break;
+                        return node.Next;
                     }
 
                     // Move right
                     node = node.Right;
                 }
                 else
-                    break;
+                    return node;
             }
+        }
 
-            // Iterate overlaps
-            foreach (var interval in enumerateFrom(node).TakeWhile(x => x.CompareLowHigh(query) <= 0))
-                yield return interval;
+        private Node findLast(IInterval<T> query)
+        {
+            var node = _root;
+
+            while (true)
+            {
+                var compare = query.CompareHighLow(node.Key);
+
+                if (compare < 0)
+                {
+                    if (node.Left == null)
+                        return node;
+
+                    // Move left
+                    node = node.Left;
+                }
+                else if (compare > 0)
+                {
+                    if (node.Right == null)
+                    {
+                        // If there is no right node, use the next in sorting order
+                        return node.Next;
+                    }
+
+                    // Move right
+                    node = node.Right;
+                }
+                else
+                    return node.Next;
+            }
         }
 
         #endregion

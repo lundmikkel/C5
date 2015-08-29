@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace C5.Intervals
 {
+    // TODO: Rename to IEndpointSortedIntervalCollection?
     /// <summary>
     /// <para>
     /// An interval collection that does not allow contained intervals.
@@ -47,69 +48,94 @@ namespace C5.Intervals
 
         // TODO: Review documentation
         /// <summary>
-        /// Create an enumerable, enumerating all intervals in the collection sorted by highest high, then highest low.
+        /// Create an enumerable, enumerating all intervals in the collection sorted by 
+        /// highest high, then highest low.
         /// </summary>
         /// <remarks>
         /// The result is equal to <c>coll.Sorted().Reverse()</c>.
         /// </remarks>
-        /// <returns>An enumerable, enumerating the collection backwards in sorted order.</returns>
+        /// <returns>
+        /// An enumerable, enumerating the collection backwards in sorted order.
+        /// </returns>
         [Pure]
         IEnumerable<I> SortedBackwards();
 
         /// <summary>
-        /// Create an enumerable, enumerating all intervals in the collection in sorted order
-        /// starting from the first interval that overlaps or follows <paramref name="point"/>.
+        /// Create an enumerable, enumerating all intervals in the collection in sorted 
+        /// order starting from the first interval that overlaps or follows 
+        /// <paramref name="point"/>.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// The result is equal to
+        /// <c>coll.Sorted().SkipWhile(x => x.CompareHigh(point) &lt; 0)</c>.
+        /// </para>
+        /// <para>
         /// None of the intervals are guaranteed to overlap <paramref name="point"/>.
-        /// This is equal to <c>coll.Sorted().SkipWhile(x => x.CompareHigh(point) &lt; 0)</c>.
+        /// </para>
         /// </remarks>
-        /// <param name="point">The comparable point from which to start the enumeration.</param>
-        /// <param name="includeOverlaps">If false, any overlap is excluded.
-        /// This is equal to <c>coll.Sorted().SkipWhile(x => x.CompareLow(point) &lt;= 0)</c>.</param>
-        /// <returns>An enumerable, enumerating all collection intervals not less than the point in sorted order.</returns>
+        /// <param name="point">The point from which to start the enumeration.</param>
+        /// <param name="includeOverlaps">
+        /// If false, any overlap is excluded. The result is equal to
+        /// <c>coll.Sorted().SkipWhile(x => x.CompareLow(point) &lt;= 0)</c>.
+        /// </param>
+        /// <returns>An enumerable, enumerating all collection intervals not less than the 
+        /// point in sorted order.</returns>
         [Pure]
         IEnumerable<I> EnumerateFrom(T point, bool includeOverlaps = true);
 
         // TODO: Review documentation
         /// <summary>
-        /// Create an enumerable, enumerating all intervals in the collection backwards in sorted order
-        /// starting from the first interval that overlaps or comes before <paramref name="point"/>.
+        /// Create an enumerable, enumerating all intervals in the collection backwards in 
+        /// sorted order starting from the first interval that overlaps or comes before
+        /// <paramref name="point"/>.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// This is equal to
+        /// <c>coll.SortedBackwards().SkipWhile(x => x.CompareLow(point) &gt; 0)</c>.
+        /// </para>
+        /// <para>
         /// None of the intervals are guaranteed to overlap <paramref name="point"/>.
-        /// This is equal to <c>coll.SortedBackwards().SkipWhile(x => x.CompareLow(point) &gt; 0)</c>.
+        /// </para>
         /// </remarks>
-        /// <param name="point">The comparable point from which to start the enumeration.</param>
-        /// <param name="includeOverlaps">If false, any overlap is excluded.
-        /// This is equal to <c>coll.SortedBackwards().SkipWhile(x => x.CompareHigh(point) &gt;= 0)</c>.</param>
-        /// <returns>An enumerable, enumerating backwards all collection intervals not greater than the point in sorted order.</returns>
+        /// <param name="point">The point from which to start the backwards enumeration.</param>
+        /// <param name="includeOverlaps">
+        /// If false, any overlap is excluded. This is equal to
+        /// <c>coll.SortedBackwards().SkipWhile(x => x.CompareHigh(point) &gt;= 0)</c>.
+        /// </param>
+        /// <returns>An enumerable, enumerating backwards all collection intervals not 
+        /// greater than the point in sorted order.</returns>
         [Pure]
         IEnumerable<I> EnumerateBackwardsFrom(T point, bool includeOverlaps = true);
 
-        // TODO: Move to ISortedIntervalCollection<I, T>?
-        // TODO: Consider if this should be based on interval or reference equality
         /// <summary>
-        /// Create an enumerable, enumerating all intervals in the collection in sorted order
-        /// starting from the given interval object <paramref name="interval"/>.
-        /// 
-        /// If the interval object is not in the collection, the result will be empty.
+        /// Create an enumerable, enumerating all intervals in the collection in sorted 
+        /// order starting from the first interval that overlaps or follows 
+        /// <paramref name="interval"/>.
         /// </summary>
         /// <remarks>
-        /// This works on reference equality and not interval equality. If <see cref="IIntervalCollection{I,T}.AllowsReferenceDuplicates"/>
-        /// is true, the enumeration will start from the first reference duplicate.
-        /// This is equal to <code>Sorted().SkipWhile(x => !ReferenceEqual(interval, x))</code>.
+        /// <para>
+        /// The result is equal to
+        /// <c>coll.Sorted().SkipWhile(x => x.CompareHighLow(interval) &lt; 0)</c>.
+        /// </para>
+        /// <para>
+        /// None of the intervals are guaranteed to overlap <paramref name="interval"/>.
+        /// </para>
         /// </remarks>
-        /// <param name="interval">The interval object to locate in the collection.</param>
-        /// <param name="includeInterval">If false, the interval object is excluded from the enumerator. This is equal to
-        /// <code>Sorted().SkipWhile(x => !ReferenceEqual(interval, x)).SkipWhile(x => ReferenceEqual(interval, x))</code>.</param>
-        /// <returns>An enumerable, enumerating all collection intervals starting from the given object.</returns>
+        /// <param name="interval">The interval from which to start the enumeration.</param>
+        /// <param name="includeOverlaps">
+        /// If false, any overlap is excluded. The result is equal to
+        /// <c>coll.Sorted().SkipWhile(x => x.CompareLowHigh(interval) &lt;= 0)</c>.
+        /// </param>
+        /// <returns>An enumerable, enumerating all collection intervals not less than the 
+        /// point in sorted order.</returns>
         [Pure]
-        IEnumerable<I> EnumerateFrom(I interval, bool includeInterval = true);
+        IEnumerable<I> EnumerateFrom(IInterval<T> interval, bool includeOverlaps = true);
 
         // TODO: Document
         [Pure]
-        IEnumerable<I> EnumerateBackwardsFrom(I interval, bool includeInterval = true);
+        IEnumerable<I> EnumerateBackwardsFrom(IInterval<T> interval, bool includeOverlaps = true);
 
         /// <summary>
         /// Create an enumerable, enumerating all intervals in the collection in sorted order
@@ -244,21 +270,21 @@ namespace C5.Intervals
             throw new NotImplementedException();
         }
 
-        public IEnumerable<I> EnumerateFrom(I interval, bool includeInterval = true)
+        public IEnumerable<I> EnumerateFrom(IInterval<T> interval, bool includeOverlaps = true)
         {
             Contract.Requires(interval != null);
 
             Contract.Ensures(Contract.Result<IEnumerable<I>>() != null);
 
-            // If the collection doesn't contain the interval, the result is empty
-            Contract.Ensures(this.Contains(interval) || !Contract.Result<IEnumerable<I>>().Any());
             // The intervals are sorted
             Contract.Ensures(Contract.Result<IEnumerable<I>>().IsSorted<I, T>());
             // Highs are sorted as well
             Contract.Ensures(Contract.Result<IEnumerable<I>>().IsSorted<I>(IntervalExtensions.CreateHighComparer<I, T>()));
-            // Enumerable is the same as skipping until interval is met
+            // Enumerable is the same as skipping as long as high is lower than point
             Contract.Ensures(Enumerable.SequenceEqual(
-                Sorted.SkipWhile(x => !ReferenceEquals(x, interval)).SkipWhile(x => !includeInterval && ReferenceEquals(x, interval)),
+                includeOverlaps
+                    ? Sorted.SkipWhile(x => x.CompareHighLow(interval) < 0)
+                    : Sorted.SkipWhile(x => x.CompareLowHigh(interval) <= 0),
                 Contract.Result<IEnumerable<I>>(),
                 IntervalExtensions.CreateReferenceEqualityComparer<I, T>()
             ));
@@ -266,20 +292,20 @@ namespace C5.Intervals
             throw new NotImplementedException();
         }
 
-        public IEnumerable<I> EnumerateBackwardsFrom(I interval, bool includeInterval = true)
+        public IEnumerable<I> EnumerateBackwardsFrom(IInterval<T> interval, bool includeOverlaps = true)
         {
             Contract.Requires(interval != null);
 
             Contract.Ensures(Contract.Result<IEnumerable<I>>() != null);
-            // If the collection doesn't contain the interval, the result is empty
-            Contract.Ensures(this.Contains(interval) || !Contract.Result<IEnumerable<I>>().Any());
             // The intervals are sorted
             Contract.Ensures(Contract.Result<IEnumerable<I>>().Reverse().IsSorted<I, T>());
             // Highs are sorted as well
             Contract.Ensures(Contract.Result<IEnumerable<I>>().Reverse().IsSorted<I>(IntervalExtensions.CreateHighComparer<I, T>()));
-            // Enumerable is the same as skipping until interval is met
+            // Enumerable is the same as skipping as long as high is lower than point
             Contract.Ensures(Enumerable.SequenceEqual(
-                SortedBackwards().SkipWhile(x => !ReferenceEquals(x, interval)).SkipWhile(x => !includeInterval && ReferenceEquals(x, interval)),
+                includeOverlaps
+                    ? SortedBackwards().SkipWhile(x => x.CompareLowHigh(interval) > 0)
+                    : SortedBackwards().SkipWhile(x => x.CompareHighLow(interval) >= 0),
                 Contract.Result<IEnumerable<I>>(),
                 IntervalExtensions.CreateReferenceEqualityComparer<I, T>()
             ));

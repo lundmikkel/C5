@@ -108,10 +108,10 @@ namespace C5.Intervals
         public abstract IEnumerable<I> EnumerateBackwardsFrom(T point, bool includeOverlaps = true);
 
         /// <inheritdoc/>
-        public abstract IEnumerable<I> EnumerateFrom(I interval, bool includeInterval = true);
+        public abstract IEnumerable<I> EnumerateFrom(IInterval<T> interval, bool includeOverlaps = true);
 
         /// <inheritdoc/>
-        public abstract IEnumerable<I> EnumerateBackwardsFrom(I interval, bool includeInterval = true);
+        public abstract IEnumerable<I> EnumerateBackwardsFrom(IInterval<T> interval, bool includeOverlaps = true);
 
         /// <inheritdoc/>
         public abstract IEnumerable<I> EnumerateFromIndex(int index);

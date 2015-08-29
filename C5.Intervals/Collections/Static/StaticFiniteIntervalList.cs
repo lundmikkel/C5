@@ -155,16 +155,16 @@ namespace C5.Intervals
             throw new NotImplementedException();
         }
 
-        public override IEnumerable<I> EnumerateFrom(I interval, bool includeInterval = true)
+        public override IEnumerable<I> EnumerateFrom(IInterval<T> interval, bool includeOverlaps = true)
         {
-            var index = IndexOf(interval);
-            return 0 <= index ? EnumerateFromIndex(includeInterval ? index : index + 1) : Enumerable.Empty<I>();
+            var index = includeOverlaps ? findFirst(interval) : findLast(interval);
+            return index < 0 ? Enumerable.Empty<I>() : EnumerateFromIndex(index);
         }
 
-        public override IEnumerable<I> EnumerateBackwardsFrom(I interval, bool includeInterval = true)
+        public override IEnumerable<I> EnumerateBackwardsFrom(IInterval<T> interval, bool includeOverlaps = true)
         {
-            var index = IndexOf(interval);
-            return 0 <= index ? EnumerateBackwardsFromIndex(includeInterval ? index : index - 1) : Enumerable.Empty<I>();
+            var index = (includeOverlaps ? findLast(interval) : findFirst(interval)) - 1;
+            return index < 0 ? Enumerable.Empty<I>() : EnumerateBackwardsFromIndex(index);
         }
 
         public override IEnumerable<I> EnumerateFromIndex(int index)
