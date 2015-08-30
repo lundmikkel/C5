@@ -1188,6 +1188,22 @@ namespace C5.Intervals
             return collection.IsSorted(IntervalExtensions.CreateComparer<I, T>());
         }
 
+        [Pure]
+        public static bool IsEndpointSorted<I, T>(this IEnumerable<I> collection)
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            return collection.ForAllConsecutiveElements((x, y) => x.CompareLow(y) <= 0 && x.CompareHigh(y) <= 0);
+        }
+
+        [Pure]
+        public static bool IsEndpointBackwardsSorted<I, T>(this IEnumerable<I> collection)
+            where I : IInterval<T>
+            where T : IComparable<T>
+        {
+            return collection.ForAllConsecutiveElements((x, y) => x.CompareLow(y) >= 0 && x.CompareHigh(y) >= 0);
+        }
+
         /// <summary>
         /// Check if an IEnumerable is sorted in non-descending order.
         /// </summary>

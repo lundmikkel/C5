@@ -143,7 +143,7 @@ namespace C5.Intervals
         /// </summary>
         /// <param name="index">The index to start from.</param>
         /// <remarks>
-        /// This is equal to <code>coll.Sorted().Skip(x)</code>.
+        /// This is equal to <code>coll.Sorted().Skip(index)</code>.
         /// </remarks>
         /// <returns>An enumerable, enumerating all collection intervals starting from the given index.</returns>
         [Pure]
@@ -188,7 +188,13 @@ namespace C5.Intervals
             }
         }
 
-        public abstract Speed IndexingSpeed { get; }
+        public Speed IndexingSpeed
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         #endregion
 

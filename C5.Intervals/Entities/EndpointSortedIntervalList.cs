@@ -43,6 +43,8 @@ namespace C5.Intervals
 
         #region Properties
 
+        public Func<IInterval<T>, IInterval<T>, bool> ConflictFunction { get { return _conflictsWithNeighbour; } }
+
         /// <inheritdoc/>
         public Speed IndexingSpeed { get { return Speed.Constant; } }
 
@@ -63,10 +65,8 @@ namespace C5.Intervals
         #region Find
 
         /// <inheritdoc/>
-        public int Find(IInterval<T> query)
+        public int IndexOf(IInterval<T> query)
         {
-            Contract.Ensures(Contract.Result<int>() == IntervalCollectionContractHelper.IndexOfSorted(_list, query, IntervalExtensions.CreateComparer<IInterval<T>, T>()));
-
             var low = 0;
             var high = _list.Count - 1;
 
@@ -93,15 +93,8 @@ namespace C5.Intervals
         }
 
         /// <inheritdoc/>
-        public int FindFirst(IInterval<T> query)
+        public int FindFirstOverlap(IInterval<T> query)
         {
-            Contract.Requires(query != null);
-
-            // Either the interval at index result overlaps or no intervals in the layer overlap
-            Contract.Ensures(Contract.Result<int>() < 0 || Count <= Contract.Result<int>() || _list[Contract.Result<int>()].Overlaps(query) || Contract.ForAll(0, Count, i => !_list[i].Overlaps(query)));
-            // All intervals before index result do not overlap the query
-            Contract.Ensures(Contract.ForAll(0, Contract.Result<int>(), i => !_list[i].Overlaps(query)));
-
             int min = -1, max = Count;
 
             while (min + 1 < max)
@@ -117,15 +110,8 @@ namespace C5.Intervals
         }
 
         /// <inheritdoc/>
-        public int FindLast(IInterval<T> query)
+        public int FindLastOverlap(IInterval<T> query)
         {
-            Contract.Requires(query != null);
-
-            // Either the interval at index result overlaps or no intervals in the layer overlap
-            Contract.Ensures(Contract.Result<int>() == 0 || _list[Contract.Result<int>() - 1].Overlaps(query) || Contract.ForAll(_list, x => !x.Overlaps(query)));
-            // All intervals after index result do not overlap the query
-            Contract.Ensures(Contract.ForAll(Contract.Result<int>(), Count, i => !_list[i].Overlaps(query)));
-
             int min = -1, max = Count;
 
             while (min + 1 < max)
@@ -147,18 +133,12 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public IEnumerable<I> EnumerateFromIndex(int index)
         {
-            Contract.Requires(0 <= index && index < Count);
-
             return EnumerateRange(index, Count);
         }
 
         /// <inheritdoc/>
         public IEnumerable<I> EnumerateRange(int inclusiveFrom, int exclusiveTo)
         {
-            Contract.Requires(0 <= inclusiveFrom && inclusiveFrom < Count);
-            Contract.Requires(1 <= exclusiveTo && exclusiveTo <= Count);
-            Contract.Requires(inclusiveFrom < exclusiveTo);
-
             while (inclusiveFrom < exclusiveTo)
                 yield return _list[inclusiveFrom++];
         }
@@ -166,8 +146,6 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public IEnumerable<I> EnumerateBackwardsFromIndex(int index)
         {
-            Contract.Requires(0 <= index && index < Count);
-
             while (index >= 0)
                 yield return _list[index--];
         }
@@ -185,7 +163,7 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public bool Add(I interval)
         {
-            var index = Find(interval);
+            var index = IndexOf(interval);
 
             if (index < 0)
                 index = ~index;
@@ -201,7 +179,7 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public bool Remove(I interval)
         {
-            var index = Find(interval);
+            var index = IndexOf(interval);
 
             if (index < 0 || Count <= index)
                 return false;

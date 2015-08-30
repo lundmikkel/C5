@@ -783,6 +783,9 @@ namespace C5.Intervals
             // The collection must be empty afterwards
             Contract.Ensures(IsEmpty);
 
+            // Enumerator is empty
+            Contract.Ensures(!this.Any());
+
             throw new NotImplementedException();
         }
 

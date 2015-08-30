@@ -179,7 +179,7 @@ namespace C5.Intervals
         public override IEnumerable<I> EnumerateFrom(T point, bool includeOverlaps = true)
         {
             var query = new IntervalBase<T>(point);
-            var index = includeOverlaps ? _list.FindFirst(query) : _list.FindLast(query);
+            var index = includeOverlaps ? _list.FindFirstOverlap(query) : _list.FindLastOverlap(query);
             return EnumerateFromIndex(index);
         }
 
@@ -187,7 +187,7 @@ namespace C5.Intervals
         public override IEnumerable<I> EnumerateBackwardsFrom(T point, bool includeOverlaps = true)
         {
             var query = new IntervalBase<T>(point);
-            var index = (includeOverlaps ? _list.FindLast(query) : _list.FindFirst(query)) - 1;
+            var index = (includeOverlaps ? _list.FindLastOverlap(query) : _list.FindFirstOverlap(query)) - 1;
             return EnumerateBackwardsFromIndex(index);
         }
 
@@ -197,7 +197,7 @@ namespace C5.Intervals
             if (IsEmpty)
                 return Enumerable.Empty<I>();
 
-            var index = includeOverlaps ? _list.FindFirst(interval) : _list.FindLast(interval);
+            var index = includeOverlaps ? _list.FindFirstOverlap(interval) : _list.FindLastOverlap(interval);
             return EnumerateFromIndex(index);
         }
 
@@ -207,7 +207,7 @@ namespace C5.Intervals
             if (IsEmpty)
                 return Enumerable.Empty<I>();
 
-            var index = includeOverlaps ? _list.FindLast(interval) : _list.FindFirst(interval);
+            var index = includeOverlaps ? _list.FindLastOverlap(interval) : _list.FindFirstOverlap(interval);
             return EnumerateBackwardsFromIndex(index - 1);
         }
 
@@ -249,7 +249,7 @@ namespace C5.Intervals
 
         public override IEnumerable<I> FindEquals(IInterval<T> query)
         {
-            var index = _list.Find(query);
+            var index = _list.IndexOf(query);
             return index < 0 ? Enumerable.Empty<I>() : _list.EnumerateFromIndex(index).TakeWhile(interval => interval.IntervalEquals(query));
         }
 
@@ -265,14 +265,14 @@ namespace C5.Intervals
                 return Enumerable.Empty<I>();
 
             // We know first doesn't overlap so we can increment it before searching
-            var first = _list.FindFirst(query);
+            var first = _list.FindFirstOverlap(query);
 
             // If index is out of bound, or found interval doesn't overlap, then the list won't contain any overlaps
             if (Count <= first || !(_list[first].CompareLowHigh(query) <= 0))
                 return Enumerable.Empty<I>();
 
             // We can use first as lower to minimize search area
-            var last = _list.FindLast(query);
+            var last = _list.FindLastOverlap(query);
 
             return _list.EnumerateRange(first, last);
         }
@@ -300,12 +300,12 @@ namespace C5.Intervals
             if (IsEmpty)
                 return 0;
 
-            var first = _list.FindFirst(query);
+            var first = _list.FindFirstOverlap(query);
 
             if (Count <= first || !(_list[first].CompareLowHigh(query) <= 0))
                 return 0;
 
-            var last = _list.FindLast(query);
+            var last = _list.FindLastOverlap(query);
 
             return last - first;
         }
