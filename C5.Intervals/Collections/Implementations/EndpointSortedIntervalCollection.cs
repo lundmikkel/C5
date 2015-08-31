@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -39,7 +38,7 @@ namespace C5.Intervals
 
         #region Constructors
 
-        public EndpointSortedIntervalCollection(/*bool allowsReferenceDuplicates = false, */ bool allowsOverlaps = false, bool isReadOnly = false)
+        public EndpointSortedIntervalCollection(/*bool allowsReferenceDuplicates = false, */ bool allowsOverlaps = true, bool isReadOnly = false)
             : this(Enumerable.Empty<I>(), /*allowsReferenceDuplicates, */ allowsOverlaps, isReadOnly)
         { }
 
