@@ -48,7 +48,7 @@ namespace C5.Intervals
 
             return Overlaps(interval, new IntervalBase<T>(point));
         }
-        
+
         // TODO: Change argument order
         /// <summary>
         /// Check if an interval overlaps any interval in a collection.
@@ -828,13 +828,13 @@ namespace C5.Intervals
         /// <returns>The maximum depth.</returns>
         [Pure]
         public static int MaximumDepth<I, T>(this IEnumerable<I> intervals, out IInterval<T> intervalOfMaximumDepth, bool isSorted = true)
-            where I : IInterval<T>
+            where I : class, IInterval<T>
             where T : IComparable<T>
         {
             Contract.Requires(intervals != null);
             Contract.Requires(IntervalContractHelper.IsSorted<I, T>(intervals, isSorted));
             Contract.Ensures(Contract.Result<int>() >= 0);
-            Contract.Ensures(Contract.Result<int>() == 0 || IntervalCollectionContractHelper.CountOverlaps(((IEnumerable<IInterval<T>>)intervals), Contract.ValueAtReturn(out intervalOfMaximumDepth)) == Contract.Result<int>());
+            Contract.Ensures(Contract.Result<int>() == 0 || IntervalCollectionContractHelper.CountOverlaps(((IEnumerable<IInterval<T>>) intervals), Contract.ValueAtReturn(out intervalOfMaximumDepth)) == Contract.Result<int>());
 
             // Sort the intervals if necessary
             if (!isSorted)
@@ -871,6 +871,21 @@ namespace C5.Intervals
             }
 
             return max;
+        }
+
+        public static int MaximumDepth<I, T>(this IIntervalCollection<I, T> collection, IInterval<T> query, out IInterval<T> intervalOfMaximumDepth)
+            where I : class, IInterval<T>
+            where T : IComparable<T>
+        {
+            return collection.FindOverlaps(query).MaximumDepth(out intervalOfMaximumDepth, collection.IsFindOverlapsSorted);
+        }
+
+        public static bool ExceedsMaximumAllowedDepth<I, T>(this IIntervalCollection<I, T> collection, IInterval<T> query, int maximumAllowedDepth)
+            where I : class, IInterval<T>
+            where T : IComparable<T>
+        {
+            IInterval<T> dummy;
+            return MaximumDepth(collection, query, out dummy) > maximumAllowedDepth;
         }
 
         public static bool IsContiguous<T>(this IEnumerable<IInterval<T>> intervals) where T : IComparable<T>
@@ -1159,7 +1174,6 @@ namespace C5.Intervals
     // TODO: Find the proper file for the extension class
     public static class C5Extensions
     {
-
         /// <summary>
         /// Convert an IEnumerator to an IEnumerable.
         /// </summary>
