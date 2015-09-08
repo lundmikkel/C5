@@ -569,7 +569,27 @@ namespace C5.Intervals
             if (IsEmpty)
                 return Enumerable.Empty<I>();
 
-            var node = includeOverlaps ? findFirst(interval) : findLast(interval);
+            var intervalFound = false;
+            Node node = null;
+
+            var typedInterval = interval as I;
+            if (typedInterval != null)
+            {
+                node = findContainingNode(typedInterval, out intervalFound);
+            }
+
+            if (intervalFound)
+            {
+                if (!includeOverlaps)
+                {
+                    node = node.Next;
+                }
+            }
+            else
+            {
+                node = includeOverlaps ? findFirst(interval) : findLast(interval);
+            }
+
             return enumerateFrom(node);
         }
 
@@ -1208,30 +1228,31 @@ namespace C5.Intervals
         public override int IndexOf(I interval)
         {
             bool intervalFound;
-            var index = indexOf(interval, _root, out intervalFound);
+            var index = indexOf(interval, out intervalFound);
             return intervalFound ? index : ~index;
         }
 
-        private static int indexOf(IInterval<T> interval, Node root, out bool intervalFound)
+        private int indexOf(IInterval<T> interval, out bool intervalFound)
         {
             intervalFound = false;
             var index = 0;
+            var node = _root;
 
-            while (root != null)
+            while (node != null)
             {
-                var compareLow = interval.CompareLow(root.Key);
+                var compareLow = interval.CompareLow(node.Key);
 
                 if (compareLow < 0)
-                    root = root.Left;
+                    node = node.Left;
                 else if (compareLow > 0)
                 {
-                    index += 1 + count(root.Left);
-                    root = root.Right;
+                    index += 1 + count(node.Left);
+                    node = node.Right;
                 }
                 else
                 {
-                    intervalFound = ReferenceEquals(interval, root.Key);
-                    index += count(root.Left) + (interval.CompareHigh(root.Key) <= 0 ? 0 : 1);
+                    intervalFound = ReferenceEquals(interval, node.Key);
+                    index += count(node.Left) + (interval.CompareHigh(node.Key) <= 0 ? 0 : 1);
                     break;
                 }
             }
