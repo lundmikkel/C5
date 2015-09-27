@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 
 namespace C5.Intervals
@@ -13,17 +14,21 @@ namespace C5.Intervals
 
         // Uses read-only fields to avoid breaking data structures, if values were changed
         // Uses protected fields to allow inheriting classes to access the fields directly avoiding the overhead from the accessor internally
-        /// <inheritdoc/>
+
         [ContractPublicPropertyName("Low")]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         protected readonly T _low;
-        /// <inheritdoc/>
+
         [ContractPublicPropertyName("High")]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         protected readonly T _high;
-        /// <inheritdoc/>
+
         [ContractPublicPropertyName("LowIncluded")]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         protected readonly bool _lowIncluded;
-        /// <inheritdoc/>
+
         [ContractPublicPropertyName("HighIncluded")]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         protected readonly bool _highIncluded;
 
         /// <inheritdoc/>
