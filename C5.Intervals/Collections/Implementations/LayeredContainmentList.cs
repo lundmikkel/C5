@@ -546,23 +546,19 @@ namespace C5.Intervals
                 _intervals[Contract.Result<int>()].Overlaps(query) && Contract.ForAll(lower, Contract.Result<int>(), i => !_intervals[i].Overlaps(query))
             );
 
-            int min = lower - 1, max = upper;
+            int min = lower, max = upper;
 
-            while (min + 1 < max)
+            while (min < max)
             {
-                var middle = min + ((max - min) >> 1); // Divide by 2, by shifting one to the left
+                var middle = min + (max - min >> 1); // Divide by 2, by shifting one to the left
 
-                var interval = _intervals[middle];
-
-                var compare = query.Low.CompareTo(interval.High);
-
-                if (compare < 0 || compare == 0 && query.LowIncluded && interval.HighIncluded)
-                    max = middle;
+                if (_intervals[middle].CompareHighLow(query) < 0)
+                    min = middle + 1;
                 else
-                    min = middle;
+                    max = middle;
             }
 
-            return max;
+            return min;
         }
 
         [Pure]
@@ -583,23 +579,19 @@ namespace C5.Intervals
                 _intervals[Contract.Result<int>() - 1].Overlaps(query) && Contract.ForAll(Contract.Result<int>(), upper, i => !_intervals[i].Overlaps(query))
             );
 
-            int min = lower - 1, max = upper;
+            int min = lower, max = upper;
 
-            while (min + 1 < max)
+            while (min < max)
             {
-                var middle = min + ((max - min) >> 1); // Divide by 2, by shifting one to the left
+                var middle = min + (max - min >> 1); // Divide by 2, by shifting one to the left
 
-                var interval = _intervals[middle];
-
-                var compare = interval.Low.CompareTo(query.High);
-
-                if (compare < 0 || compare == 0 && interval.LowIncluded && query.HighIncluded)
-                    min = middle;
-                else
+                if (query.CompareHighLow(_intervals[middle]) < 0)
                     max = middle;
+                else
+                    min = middle + 1;
             }
 
-            return max;
+            return min;
         }
 
         #endregion
