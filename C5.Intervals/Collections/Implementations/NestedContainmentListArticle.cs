@@ -167,7 +167,7 @@ namespace C5.Intervals
             _header[0] = new Sublist(-1, 1);
             var parent = 0;
             var parentList = 1;
-            var listCount = 1;
+            var currentList = 1;
 
             for (var i = 1; i < _count; /**/)
             {
@@ -175,14 +175,14 @@ namespace C5.Intervals
                 {
                     if (_header[parentList].End == 0)
                     {
-                        listCount++;
+                        currentList++;
                         _header[parentList].Start = parent;
                     }
 
                     _header[parentList].End++;
                     _list[i].Sublist = parentList;
                     parent = i;
-                    parentList = listCount;
+                    parentList = currentList;
                     ++i;
                 }
                 else
@@ -469,20 +469,19 @@ namespace C5.Intervals
 
         private int findFirst(Sublist sublist, IInterval<T> query)
         {
-            int min = sublist.Start - 1,
-                max = sublist.End;
+            int min = sublist.Start, max = sublist.End;
 
-            while (min + 1 < max)
+            while (min < max)
             {
-                var middle = min + ((max - min) >> 1);
+                var middle = min + (max - min >> 1);
 
-                if (query.CompareLowHigh(_list[middle].Interval) <= 0)
-                    max = middle;
+                if (_list[middle].Interval.CompareHighLow(query) < 0)
+                    min = middle + 1;
                 else
-                    min = middle;
+                    max = middle;
             }
 
-            return max;
+            return min;
         }
 
         #endregion
