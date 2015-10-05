@@ -112,7 +112,6 @@
     <Compile Include="Collections\BaseClasses\SortedIntervalCollectionTester.cs" />
     <Compile Include="Collections\BaseClasses\OverlapFreeIntervalCollectionTester.cs" />
     <Compile Include="Collections\BaseClasses\ContainmentFreeIntervalCollectionTester.cs" />
-    <Compile Include="Collections\Implementations\LayeredContainmentListGallopTester.cs" />
     <Compile Include="Collections\Implementations\NestedContainmentListArticleTester.cs" />
     <Compile Include="Collections\Implementations\NestedContainmentListTester.cs" />
     <Compile Include="Extensions\IntervalExtensionTester.cs" />
@@ -120,7 +119,6 @@
     <Compile Include="Collections\Implementations\BinaryIntervalSearchTester.cs" />
     <Compile Include="Collections\Implementations\DoublyLinkedFiniteIntervalTreeTester.cs" />
     <Compile Include="Collections\Implementations\DynamicIntervalTreeTester.cs" />
-    <Compile Include="Collections\Implementations\IntervalBinarySearchTreeOldTester.cs" />
     <Compile Include="Collections\Implementations\IntervalBinarySearchTreeTester.cs" />
     <Compile Include="Collections\BaseClasses\IntervalCollectionTester.cs" />
     <Compile Include="Collections\Implementations\LayeredContainmentListTester.cs" />

@@ -20,12 +20,12 @@ namespace C5.Intervals
         // Number of intervals in the collection
         private readonly int _count;
         // Number of intervals in the first layer
-        protected readonly int _firstLayerCount;
+        private readonly int _firstLayerCount;
         // Number of layers
         private readonly int _layerCount;
 
-        protected readonly I[] _intervals;
-        protected readonly int[] _pointers;
+        private readonly I[] _intervals;
+        private readonly int[] _pointers;
         private readonly I[] _intervalArray;
 
         private readonly IInterval<T> _span;
@@ -529,7 +529,7 @@ namespace C5.Intervals
         }
 
         [Pure]
-        protected int findFirst(IInterval<T> query, int lower, int upper)
+        private int findFirst(IInterval<T> query, int lower, int upper)
         {
             Contract.Requires(query != null);
             // Bounds must be in bounds
@@ -562,7 +562,7 @@ namespace C5.Intervals
         }
 
         [Pure]
-        protected int findLast(IInterval<T> query, int lower, int upper)
+        private int findLast(IInterval<T> query, int lower, int upper)
         {
             Contract.Requires(query != null);
             // Bounds must be in bounds
