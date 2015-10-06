@@ -714,6 +714,17 @@ namespace C5.Intervals
 
         #endregion
 
+        #region Contains
+
+        public override bool Contains(I interval)
+        {
+            bool intervalFound;
+            findContainingNode(interval, out intervalFound);
+            return intervalFound;
+        }
+
+        #endregion
+
         #region Find Overlaps
 
         /// <inheritdoc/>

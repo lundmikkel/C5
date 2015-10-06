@@ -162,6 +162,19 @@ namespace C5.Intervals
 
         #endregion
 
+        #region Contains
+
+        /// <summary>
+        /// Checks if the collection contains the interval.
+        /// </summary>
+        /// <param name="interval">The interval.</param>
+        /// <returns>True if collection contains interval.</returns>
+        /// <remarks>Works on reference equality.</remarks>
+        [Pure]
+        bool Contains(I interval);
+
+        #endregion
+
         #region Find Overlaps
 
         // @design: made to spare the user of making a point interval [q:q] and allow for
@@ -513,12 +526,29 @@ namespace C5.Intervals
 
             // The collection of intervals that overlap the query must be equal to the result
             Contract.Ensures(IntervalCollectionContractHelper.CollectionEquals(this.Where(x => x.IntervalEquals(query)), Contract.Result<IEnumerable<I>>()));
-            // All intervals in the collection that do not overlap cannot by in the result
+            // All intervals in the collection that are not equal cannot by in the result
             Contract.Ensures(Contract.ForAll(this.Where(x => !x.IntervalEquals(query)), x => Contract.ForAll(Contract.Result<IEnumerable<I>>(), y => !ReferenceEquals(x, y))));
             // If the collection is empty, then so is the result
             Contract.Ensures(!IsEmpty || !Contract.Result<IEnumerable<I>>().Any());
             // If the collection doesn't allow overlaps, there can at most be one equal to the query
             Contract.Ensures(AllowsOverlaps || Contract.Result<IEnumerable<I>>().Count() <= 1);
+
+            throw new NotImplementedException();
+        }
+        
+        #endregion
+
+        #region Contains
+
+        public bool Contains(I interval)
+        {
+            Contract.Requires(interval != null);
+
+            // If the collection is empty, it doesn't contain the interval
+            Contract.Ensures(!IsEmpty || !Contract.Result<bool>());
+
+            // Result is equal to the collection containing a reference equal object
+            Contract.Ensures(Contract.Result<bool>() == Contract.Exists(this, x => ReferenceEquals(x, interval)));
 
             throw new NotImplementedException();
         }
@@ -702,6 +732,7 @@ namespace C5.Intervals
             Contract.Ensures(!IsEmpty);
 
             // The collection contains the interval
+            // TODO: Use Contains method?
             Contract.Ensures(!Contract.Result<bool>() || Contract.Exists(this, x => ReferenceEquals(x, interval)));
 
             // If the interval was added, the number of object with the same reference goes up by one

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
@@ -35,6 +36,7 @@ namespace C5.Intervals
 
         #region Inner classes
 
+        [DebuggerDisplay("{Key}")]
         private class Node
         {
             #region Fields
@@ -113,15 +115,6 @@ namespace C5.Intervals
                     Right = new Node(rights.ToArray(), ref lowestInterval, ref highestInterval, ref rightHeight);
 
                 height = Math.Max(leftHeight, rightHeight) + 1;
-            }
-
-            #endregion
-
-            #region Public Methods
-
-            public override string ToString()
-            {
-                return Key.ToString();
             }
 
             #endregion
@@ -424,6 +417,48 @@ namespace C5.Intervals
                 foreach (var interval in node.LeftList)
                     yield return interval;
             }
+        }
+
+        #endregion
+
+        #region Find Equals
+
+        public override IEnumerable<I> FindEquals(IInterval<T> query)
+        {
+            var array = findContainingIntervalArray(query);
+
+            if (array != null)
+            {
+                // TODO: Use binary search within the sorted array to find it first
+                foreach (var interval in array)
+                {
+                    if (interval.IntervalEquals(query))
+                        yield return interval;
+                }
+            }
+        }
+
+        private I[] findContainingIntervalArray(IInterval<T> query)
+        {
+            var root = _root;
+
+            while (root != null)
+            {
+                var compareLow = query.Low.CompareTo(root.Key);
+                var compareHigh = root.Key.CompareTo(query.High);
+
+                if (compareLow <= 0 && compareHigh <= 0)
+                    return root.LeftList;
+
+                if (compareLow > 0)
+                    root = root.Right;
+                else if (compareLow < 0)
+                    root = root.Left;
+                else
+                    return null;
+            }
+
+            return null;
         }
 
         #endregion

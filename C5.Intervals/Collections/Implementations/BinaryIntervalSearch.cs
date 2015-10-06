@@ -98,8 +98,8 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override bool IsReadOnly { get { return true; } }
 
-        /// <inheritdoc/>
         // TODO: Allow user to set
+        /// <inheritdoc/>
         public override bool IsFindOverlapsSorted { get { return false; } }
 
         #endregion
@@ -177,7 +177,7 @@ namespace C5.Intervals
         }
 
         #endregion
-        
+
         #region Enumerable
 
         /// <inheritdoc/>
@@ -194,6 +194,45 @@ namespace C5.Intervals
                 foreach (var interval in _lowSorted)
                     yield return interval;
             }
+        }
+
+        #endregion
+
+        #region Find Equals
+
+        public override IEnumerable<I> FindEquals(IInterval<T> query)
+        {
+            var i = indexOf(query);
+
+            // No equal found
+            if (i < 0)
+                yield break;
+
+            // Enumerate equals
+            while (i < _count && _lowSorted[i].IntervalEquals(query))
+                yield return _lowSorted[i++];
+        }
+
+        private int indexOf(IInterval<T> query)
+        {
+            int low = 0, high = _count - 1;
+
+            while (low <= high)
+            {
+                var mid = low + (high - low >> 1);
+                var compareTo = _lowSorted[mid].CompareTo(query);
+
+                if (compareTo < 0)
+                    low = mid + 1;
+                else if (compareTo > 0)
+                    high = mid - 1;
+                else if (low != mid)
+                    high = mid;
+                else
+                    return mid;
+            }
+
+            return ~low;
         }
 
         #endregion
@@ -246,6 +285,7 @@ namespace C5.Intervals
             }
         }
 
+        // TODO: Update to NCList article version
         private int findFirst(IInterval<T> query)
         {
             Contract.Requires(query != null);
@@ -272,6 +312,7 @@ namespace C5.Intervals
             return max;
         }
 
+        // TODO: Update to NCList article version
         private int findLast(IInterval<T> query)
         {
             Contract.Requires(query != null);

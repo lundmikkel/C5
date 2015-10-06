@@ -194,6 +194,21 @@ namespace C5.Intervals
             }
         }
 
+        #region Contains
+
+        public override bool Contains(I interval)
+        {
+            foreach (var collection in _collections)
+            {
+                if (collection.Contains(interval))
+                    return true;
+            }
+
+            return false;
+        }
+
+        #endregion
+
         #endregion
 
         #region Find Overlaps

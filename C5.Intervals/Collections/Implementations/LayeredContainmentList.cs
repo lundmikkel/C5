@@ -493,6 +493,45 @@ namespace C5.Intervals
 
         #endregion
 
+        #region Find Equals
+
+        public override IEnumerable<I> FindEquals(IInterval<T> query)
+        {
+            var i = indexOf(query);
+
+            // No equal found
+            if (i < 0)
+                yield break;
+
+            // Enumerate equals
+            while (i < _count && _intervalArray[i].IntervalEquals(query))
+                yield return _intervalArray[i++];
+        }
+
+        private int indexOf(IInterval<T> query)
+        {
+            int lower = 0, upper = _count - 1;
+
+            while (lower <= upper)
+            {
+                var mid = lower + (upper - lower >> 1);
+                var compareTo = _intervalArray[mid].CompareTo(query);
+
+                if (compareTo < 0)
+                    lower = mid + 1;
+                else if (compareTo > 0)
+                    upper = mid - 1;
+                else if (lower != mid)
+                    upper = mid;
+                else
+                    return mid;
+            }
+
+            return ~lower;
+        }
+
+        #endregion
+
         #region Find Overlaps
 
         /// <inheritdoc/>

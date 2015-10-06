@@ -1453,6 +1453,54 @@ namespace C5.Intervals
 
         #endregion
 
+        #region Find Equals
+
+        public override IEnumerable<I> FindEquals(IInterval<T> query)
+        {
+            var list = findContainingIntervalList(query);
+
+            if (list != null)
+            {
+                foreach (var interval in list)
+                {
+                    if (interval.IntervalEquals(query))
+                        yield return interval;
+                }
+            }
+        }
+
+        private IntervalList findContainingIntervalList(IInterval<T> query)
+        {
+            var root = _root;
+
+            while (root != null)
+            {
+                var compare = query.Low.CompareTo(root.Key);
+
+                if (compare > 0)
+                    root = root.Right;
+                else if (compare < 0)
+                    root = root.Left;
+                else
+                    return query.LowIncluded ? root.IncludedList : root.ExcludedList;
+            }
+
+            return null;
+        }
+
+        #endregion
+
+        #region Contains
+
+        public override bool Contains(I interval)
+        {
+            var list = findContainingIntervalList(interval);
+            return list != null && list.ContainsReferenceEqualInterval(interval);
+        }
+
+        #endregion
+
+
         #region Find Overlaps
 
         /// <inheritdoc/>

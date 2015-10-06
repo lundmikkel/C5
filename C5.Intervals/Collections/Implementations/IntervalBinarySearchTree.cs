@@ -819,6 +819,11 @@ namespace C5.Intervals
                 return array;
             }
 
+            public bool ContainsReferenceEqualInterval(I interval)
+            {
+                return _set.Contains(interval);
+            }
+
             public static IntervalSet operator -(IntervalSet s1, IntervalSet s2)
             {
                 IntervalSet res = null;
@@ -1639,6 +1644,53 @@ namespace C5.Intervals
 
                 root = root.Right;
             }
+        }
+
+        #endregion
+
+        #region Find Equals
+
+        public override IEnumerable<I> FindEquals(IInterval<T> query)
+        {
+            var set = findContainingIntervalSet(query);
+
+            if (set != null)
+            {
+                foreach (var interval in set)
+                {
+                    if (interval.IntervalEquals(query))
+                        yield return interval;
+                }
+            }
+        }
+
+        private IntervalSet findContainingIntervalSet(IInterval<T> query)
+        {
+            var root = _root;
+
+            while (root != null)
+            {
+                var compare = query.Low.CompareTo(root.Key);
+
+                if (compare > 0)
+                    root = root.Right;
+                else if (compare < 0)
+                    root = root.Left;
+                else
+                    return root.IntervalsEndingInNode;
+            }
+
+            return null;
+        }
+
+        #endregion
+
+        #region Contains
+
+        public override bool Contains(I interval)
+        {
+            var set = findContainingIntervalSet(interval);
+            return set != null && set.ContainsReferenceEqualInterval(interval);
         }
 
         #endregion

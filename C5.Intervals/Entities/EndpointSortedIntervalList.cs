@@ -67,8 +67,7 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public int IndexOf(IInterval<T> query)
         {
-            var low = 0;
-            var high = _list.Count - 1;
+            int low = 0, high = _list.Count - 1;
 
             while (low <= high)
             {
@@ -79,16 +78,12 @@ namespace C5.Intervals
                     low = mid + 1;
                 else if (compareTo > 0)
                     high = mid - 1;
-                //Equal but range is not fully scanned
                 else if (low != mid)
-                    //Set upper bound to current number and rescan
                     high = mid;
-                //Equal and full range is scanned
                 else
                     return mid;
             }
 
-            // key not found. return insertion point
             return ~low;
         }
 
