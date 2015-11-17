@@ -295,25 +295,26 @@ namespace C5.Intervals
 
         private static int binaryLayerSearch(ArrayList<Node> layers, I query, int lower, int upper)
         {
-            while (lower < upper)
-            {
-                // Binarily pick the next layer to check
-                var current = lower + (upper - lower >> 1);
+            int min = lower, max = upper;
 
-                var compare = layers[current].Interval.CompareHigh(query);
+            while (min < max)
+            {
+                var mid = min + (max - min >> 1);
+
+                var compare = layers[mid].Interval.CompareHigh(query);
 
                 // interval contains the last interval
                 if (compare < 0)
-                    upper = current;
+                    max = mid;
                 // The last interval contains interval
                 else if (compare > 0)
-                    lower = current + 1;
+                    min = mid + 1;
                 // We have found an interval with the same high
                 else
-                    return current;
+                    return mid;
             }
 
-            return lower;
+            return min;
         }
 
         #endregion
@@ -589,12 +590,12 @@ namespace C5.Intervals
 
             while (min < max)
             {
-                var middle = min + (max - min >> 1); // Divide by 2, by shifting one to the left
+                var mid = min + (max - min >> 1); // Divide by 2, by shifting one to the left
 
-                if (_intervals[middle].CompareHighLow(query) < 0)
-                    min = middle + 1;
+                if (_intervals[mid].CompareHighLow(query) < 0)
+                    min = mid + 1;
                 else
-                    max = middle;
+                    max = mid;
             }
 
             return min;
@@ -622,12 +623,12 @@ namespace C5.Intervals
 
             while (min < max)
             {
-                var middle = min + (max - min >> 1); // Divide by 2, by shifting one to the left
+                var mid = min + (max - min >> 1); // Divide by 2, by shifting one to the left
 
-                if (query.CompareHighLow(_intervals[middle]) < 0)
-                    max = middle;
+                if (query.CompareHighLow(_intervals[mid]) < 0)
+                    max = mid;
                 else
-                    min = middle + 1;
+                    min = mid + 1;
             }
 
             return min;
