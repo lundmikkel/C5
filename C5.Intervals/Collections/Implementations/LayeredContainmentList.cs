@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
@@ -565,6 +566,67 @@ namespace C5.Intervals
 
                 while (first < last)
                     yield return _intervals[first++];
+            }
+        }
+
+        [DebuggerDisplay("Section: [{First} : {Last}). Interval: {Interval}")]
+        struct LayerSection : IComparable<LayerSection>
+        {
+            public int First;
+            public int Last;
+            public I Interval;
+
+            public int CompareTo(LayerSection other)
+            {
+                return Interval.CompareTo(other.Interval);
+            }
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<I> FindOverlapsSorted(IInterval<T> query)
+        {
+            var queue = new IntervalHeap<LayerSection>();
+
+            int lower = 0, upper = _firstLayerCount;
+
+            while (lower < upper)
+            {
+                var first = lower;
+
+                // The first interval doesn't overlap we need to search for it
+                if (!_intervals[first].Overlaps(query))
+                {
+                    // We know first doesn't overlap so we can increment it before searching
+                    first = findFirst(query, ++first, upper);
+
+                    // If index is out of bound, or found interval doesn't overlap, then the list won't contain any overlaps
+                    if (upper <= first || !(_intervals[first].CompareLowHigh(query) <= 0))
+                        break;
+                }
+
+                // We can use first as lower to minimize search area
+                var last = findLast(query, first, upper);
+
+                // Save values for next iteration
+                lower = _pointers[first];
+                upper = _pointers[last];
+
+                if (first < last)
+                    queue.Add(new LayerSection {First = first, Last = last, Interval = _intervals[first]});
+            }
+            
+            while (!queue.IsEmpty)
+            {
+                // Return interval
+                var section = queue.DeleteMin();
+                yield return section.Interval;
+
+                // Move pointer to subsequent interval
+                section.Interval = _intervals[++section.First];
+
+                // Add section again if there are more overlaps
+                if (section.First < section.Last)
+                    queue.Add(section);
             }
         }
 
