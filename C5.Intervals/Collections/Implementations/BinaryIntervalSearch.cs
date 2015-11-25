@@ -5,7 +5,6 @@ using System.Linq;
 
 namespace C5.Intervals
 {
-    // TODO: Finish data structure
     public class BinaryIntervalSearch<I, T> : SortedIntervalCollectionBase<I, T>
         where I : class, IInterval<T>
         where T : IComparable<T>
@@ -16,6 +15,7 @@ namespace C5.Intervals
         private readonly int _count;
         private readonly IInterval<T> _span;
         private int _maximumDepth = -1;
+        private readonly bool _keepOverlapsSorted = true;
 
         #endregion Fields
 
@@ -25,7 +25,8 @@ namespace C5.Intervals
         /// Create a Binary Interval Search using a collection of intervals.
         /// </summary>
         /// <param name="intervals"></param>
-        public BinaryIntervalSearch(IEnumerable<I> intervals)
+        /// <param name="keepOverlapsSorted">If true, overlaps will be sorted.</param>
+        public BinaryIntervalSearch(IEnumerable<I> intervals, bool keepOverlapsSorted = false)
         {
             // Make intervals to array to allow fast sorting and counting
             var intervalArray = intervals as I[] ?? intervals.ToArray();
@@ -45,12 +46,13 @@ namespace C5.Intervals
 
             // Sort intervals
             var lowComparer = IntervalExtensions.CreateComparer<I, T>();
-            Sorting.IntroSort(_lowSorted, 0, _count, lowComparer);
+            Sorting.Timsort(_lowSorted, 0, _count, lowComparer);
 
             var highComparer = ComparerFactory<I>.CreateComparer((x, y) => x.CompareHigh(y));
-            Sorting.IntroSort(_highSorted, 0, _count, highComparer);
+            Sorting.Timsort(_highSorted, 0, _count, highComparer);
 
-            _span = new IntervalBase<T>(_lowSorted.First(), _highSorted.Last());
+            _span = new IntervalBase<T>(_lowSorted[0], _highSorted[_count - 1]);
+            _keepOverlapsSorted = keepOverlapsSorted;
         }
 
         #endregion Constructor
@@ -83,7 +85,7 @@ namespace C5.Intervals
             if (IsEmpty)
                 throw new NoSuchItemException();
 
-            return _lowSorted.First();
+            return _lowSorted[0];
         }
 
         #endregion Collection Value
@@ -98,9 +100,8 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override bool IsReadOnly { get { return true; } }
 
-        // TODO: Allow user to set
         /// <inheritdoc/>
-        public override bool IsFindOverlapsSorted { get { return false; } }
+        public override bool IsFindOverlapsSorted { get { return _keepOverlapsSorted; } }
 
         #endregion
 
@@ -120,14 +121,13 @@ namespace C5.Intervals
                 if (IsEmpty)
                     yield break;
 
-                var lowestInterval = _lowSorted[0];
-
+                var lowestInterval = LowestInterval;
                 yield return lowestInterval;
 
                 // Iterate through bottom layer as long as the intervals share a low
                 for (var i = 1; i < _count; i++)
                 {
-                    if (_lowSorted[i].CompareLow(lowestInterval) == 0)
+                    if (_lowSorted[i].LowEquals(lowestInterval))
                         yield return _lowSorted[i];
                     else
                         yield break;
@@ -146,14 +146,13 @@ namespace C5.Intervals
                 if (IsEmpty)
                     yield break;
 
-                var highestInterval = _highSorted[_count - 1];
-
+                var highestInterval = HighestInterval;
                 yield return highestInterval;
 
                 // Iterate through bottom layer as long as the intervals share a low
                 for (var i = _count - 2; i >= 0; i--)
                 {
-                    if (_highSorted[i].CompareHigh(highestInterval) == 0)
+                    if (_highSorted[i].HighEquals(highestInterval))
                         yield return _highSorted[i];
                     else
                         yield break;
@@ -188,9 +187,6 @@ namespace C5.Intervals
         {
             get
             {
-                if (IsEmpty)
-                    yield break;
-
                 foreach (var interval in _lowSorted)
                     yield return interval;
             }
@@ -215,24 +211,24 @@ namespace C5.Intervals
 
         private int indexOf(IInterval<T> query)
         {
-            int low = 0, high = _count - 1;
+            int min = 0, max = _count - 1;
 
-            while (low <= high)
+            while (min <= max)
             {
-                var mid = low + (high - low >> 1);
+                var mid = min + (max - min >> 1);
                 var compareTo = _lowSorted[mid].CompareTo(query);
 
                 if (compareTo < 0)
-                    low = mid + 1;
+                    min = mid + 1;
                 else if (compareTo > 0)
-                    high = mid - 1;
-                else if (low != mid)
-                    high = mid;
+                    max = mid - 1;
+                else if (min != mid)
+                    max = mid;
                 else
                     return mid;
             }
 
-            return ~low;
+            return ~min;
         }
 
         #endregion
@@ -264,8 +260,8 @@ namespace C5.Intervals
             var lower = 0;
             var upper = last;
 
-            // If we have fewer intervals to iterate in high sorted list, we do that
-            if (_count - first < last)
+            // If result must not necessarily be sorted, we iterate the shortest range
+            if (!_keepOverlapsSorted && _count - first < last)
             {
                 lower = first;
                 upper = _count;
@@ -275,17 +271,15 @@ namespace C5.Intervals
             // Enumerate collection until end is reached or all overlaps have been found
             for (var i = lower; 0 < overlapsRemaining && i < upper; ++i)
             {
-                I interval;
                 // Only return if it actually overlaps
-                if ((interval = intervals[i]).Overlaps(query))
+                if (intervals[i].Overlaps(query))
                 {
-                    yield return interval;
+                    yield return intervals[i];
                     --overlapsRemaining;
                 }
             }
         }
 
-        // TODO: Update to NCList article version
         private int findFirst(IInterval<T> query)
         {
             Contract.Requires(query != null);
@@ -293,26 +287,21 @@ namespace C5.Intervals
             // All intervals before index result do not overlap the query
             Contract.Ensures(Contract.ForAll(0, Contract.Result<int>(), i => !_highSorted[i].Overlaps(query)));
 
-            int min = -1, max = _count;
+            int min = 0, max = _count;
 
-            while (min + 1 < max)
+            while (min < max)
             {
-                var middle = min + ((max - min) >> 1); // Shift one is the same as dividing by 2
+                var mid = min + (max - min >> 1);
 
-                var interval = _highSorted[middle];
-
-                var compare = query.Low.CompareTo(interval.High);
-
-                if (compare < 0 || compare == 0 && query.LowIncluded && interval.HighIncluded)
-                    max = middle;
+                if (_highSorted[mid].CompareHighLow(query) < 0)
+                    min = mid + 1;
                 else
-                    min = middle;
+                    max = mid;
             }
 
-            return max;
+            return min;
         }
 
-        // TODO: Update to NCList article version
         private int findLast(IInterval<T> query)
         {
             Contract.Requires(query != null);
@@ -320,23 +309,19 @@ namespace C5.Intervals
             // All intervals after index result do not overlap the query
             Contract.Ensures(Contract.ForAll(Contract.Result<int>(), _lowSorted.Count(), i => !_lowSorted[i].Overlaps(query)));
 
-            int min = -1, max = _count;
+            int min = 0, max = _count;
 
-            while (min + 1 < max)
+            while (min < max)
             {
-                var middle = min + ((max - min) >> 1); // Shift one is the same as dividing by 2
+                var mid = min + (max - min >> 1); // Divide by 2, by shifting one to the left
 
-                var interval = _lowSorted[middle];
-
-                var compare = interval.Low.CompareTo(query.High);
-
-                if (compare < 0 || compare == 0 && interval.LowIncluded && query.HighIncluded)
-                    min = middle;
+                if (query.CompareHighLow(_lowSorted[mid]) < 0)
+                    max = mid;
                 else
-                    max = middle;
+                    min = mid + 1;
             }
 
-            return max;
+            return min;
         }
 
         #endregion
