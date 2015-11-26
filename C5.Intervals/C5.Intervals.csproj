@@ -179,6 +179,7 @@
     <Compile Include="Entities\EndpointSortedIntervalList.cs" />
     <Compile Include="Entities\IntervalBase.cs" />
     <Compile Include="Entities\IntervalType.cs" />
+    <Compile Include="Entities\MultiWayMergeQueue.cs" />
     <Compile Include="Extensions\IntervalExtensions.cs" />
     <Compile Include="Extensions\IntervalRelations.cs" />
     <Compile Include="Extensions\IntervalTypeExtensions.cs" />

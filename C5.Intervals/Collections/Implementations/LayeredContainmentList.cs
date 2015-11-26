@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using SCG = System.Collections.Generic;
 
 namespace C5.Intervals
 {
@@ -18,18 +19,25 @@ namespace C5.Intervals
     {
         #region Fields
 
-        // Number of intervals in the collection
+        // Number of intervals
         private readonly int _count;
-        // Number of intervals in the first layer
+        // Number of intervals in first layer
         private readonly int _firstLayerCount;
         // Number of layers
         private readonly int _layerCount;
 
+        // Joined interval array with all layers
         private readonly I[] _intervals;
+        // Joined interval array with all layers
         private readonly int[] _pointers;
-        private readonly I[] _intervalArray;
 
+        // Sorted interval array
+        private readonly I[] _sorted;
+
+        // Collection span
         private readonly IInterval<T> _span;
+
+        private readonly bool _sortFindOverlaps = false;
 
         // Maximum Depth
         private int _maximumDepth = -1;
@@ -40,8 +48,8 @@ namespace C5.Intervals
         #region Properties
 
         /// <summary>
-        /// The degree of containment for a collection. This is the length of the longest chain of
-        /// intervals strictly contained in each other.
+        /// The degree of containment for the collection. This is the length of the longest 
+        /// chain of intervals containing each other without any of them sharing endpoints.
         /// </summary>
         public int ContainmentDegree
         {
@@ -92,6 +100,7 @@ namespace C5.Intervals
             Contract.Invariant(IsEmpty || Contract.ForAll(0, _intervals.Length - 1, i => _intervals[i] == null || _intervals[i + 1] == null || _intervals[i].CompareTo(_intervals[i + 1]) <= 0));
             // Each layer is sorted on both low and high endpoint
             Contract.Invariant(IsEmpty || Contract.ForAll(0, _intervals.Length - 1, i => _intervals[i] == null || _intervals[i + 1] == null || _intervals[i].CompareLow(_intervals[i + 1]) <= 0 && _intervals[i].CompareHigh(_intervals[i + 1]) <= 0));
+            // Each interval in a higher layer is contained in some interval in the layer below
             Contract.Invariant(checkContainmentInvariant());
         }
 
@@ -101,12 +110,10 @@ namespace C5.Intervals
             if (IsEmpty)
                 return true;
 
+            // First layer bounds
             var previousLower = 0;
             var previousUpper = _firstLayerCount;
-
-            if (previousLower == previousUpper)
-                return true;
-
+            // Second layer bounds
             var lower = _pointers[previousLower];
             var upper = _pointers[previousUpper];
 
@@ -116,6 +123,7 @@ namespace C5.Intervals
                     if (!_intervals.Skip(previousLower).Take(previousUpper - previousLower).Any(x => x.StrictlyContains(_intervals[i])))
                         return false;
 
+                // Update bounds
                 previousLower = lower;
                 previousUpper = upper;
                 lower = _pointers[previousLower];
@@ -129,19 +137,18 @@ namespace C5.Intervals
 
         #region Inner Classes
 
+        /// <summary>
+        /// Node used only during construction.
+        /// </summary>
+        [DebuggerDisplay("{Interval} / {Pointer}")]
         private class Node
         {
             public I Interval;
             public int Pointer;
             public int Layer;
 
-            // TODO: Remove
+            // Pointer is used to store the layers' length
             public int Length { get { return Pointer; } set { Pointer = value; } }
-
-            public override string ToString()
-            {
-                return Interval + " / " + Pointer;
-            }
         }
 
         #endregion
@@ -149,7 +156,7 @@ namespace C5.Intervals
         #region Constructors
 
         /// <summary>
-        /// Create a Layered Containment List with a collection of intervals.
+        /// Create a Layered Containment List from a collection of intervals.
         /// </summary>
         /// <param name="intervals">The collection of intervals.</param>
         public LayeredContainmentList(IEnumerable<I> intervals)
@@ -157,71 +164,82 @@ namespace C5.Intervals
             // TODO: Calculate the maximum depth during construction based on argument
 
             // Make intervals to array to allow fast sorting and counting
-            _intervalArray = intervals as I[] ?? intervals.ToArray();
+            _sorted = intervals as I[] ?? intervals.ToArray();
 
             // Stop if we have no intervals
-            if ((_count = _intervalArray.Length) == 0)
+            if ((_count = _sorted.Length) == 0)
                 return;
 
-            constructLayers(ref _intervalArray, out _intervals, out _pointers, out _layerCount, out _firstLayerCount);
+            // Sort intervals
+            Sorting.Timsort(_sorted, IntervalExtensions.CreateComparer<I, T>());
+
+            constructLayers(_sorted, out _intervals, out _pointers, out _layerCount, out _firstLayerCount);
 
             // Cached values
             _span = new IntervalBase<T>(_intervals[0], _intervals[_firstLayerCount - 1]);
         }
 
-        private void constructLayers(ref I[] intervalArray, out I[] intervals, out int[] pointers, out int layerCount, out int firstLayerCount)
+        private void constructLayers(SCG.IList<I> sorted, out I[] intervals, out int[] pointers, out int layerCount, out int firstLayerCount)
         {
-            // Sort intervals
-            Sorting.Timsort(intervalArray, IntervalExtensions.CreateComparer<I, T>());
-
-            // Pointer is used to store the layers length
+            // TODO: Replace C5.ArrayList with SCG.List after testing
             var layers = new ArrayList<Node> {
-                // The main layer
+                // First layer
                 new Node {
-                    Interval = intervalArray[0],
+                    Interval = sorted[0],
                     Length = 1
                 },
-                // An extra empty layer
+                // Sentinel layer (for pointers)
                 new Node()
             };
 
+            // Create list for intervals (doesn't fit sentinel pointers yet)
             var nodes = new Node[_count];
+
             // Add first interval to layers manually
-            nodes[0] = new Node { Interval = intervalArray[0], Layer = 0, Pointer = 0 };
+            nodes[0] = new Node { Interval = sorted[0], Layer = 0, Pointer = 0 };
 
             // Figure out each intervals placement
             for (var i = 1; i < _count; ++i)
             {
-                var interval = intervalArray[i];
-                var layer = gallopLayerSearch(layers, interval);
+                var interval = sorted[i];
 
-                // Add a node if we are about to populate the last layer
-                if (layer == layers.Count - 1)
+                // Find layer using gallop/binary search
+                var l = gallopLayerSearch(layers, interval);
+
+                // Add sentinel node if we are about to populate the last layer
+                if (l == layers.Count - 1)
                     layers.Add(new Node());
 
                 // Store the layer's last interval and increment its size counter
-                layers[layer].Interval = interval;
-                layers[layer].Length++;
+                layers[l].Interval = interval;
+                layers[l].Length++;
 
-                // Slowly add each interval etc. to nodes array
-                nodes[i] = new Node { Interval = interval, Layer = layer, Pointer = layers[layer + 1].Length };
+                // Add each interval to nodes array
+                nodes[i] = new Node
+                {
+                    Interval = interval,
+                    Layer = l,
+                    Pointer = layers[l + 1].Length
+                };
             }
 
-            // Minus the one extra empty layer
+            // Cache values
             layerCount = layers.Count - 1;
-
             firstLayerCount = layers[0].Length;
 
-            // Create a new array for all interval nodes plus one sentinel node for each layer
+            // Resize list to fit sentinel nodes
             Array.Resize(ref nodes, _count + layerCount);
 
-            // Add sentinels
+            // Add sentinel nodes
             for (var l = 0; l < layerCount; ++l)
-                nodes[_count + l] = new Node { Layer = l, Pointer = layers[l + 1].Length };
+                nodes[_count + l] = new Node
+                {
+                    Layer = l,
+                    Pointer = layers[l + 1].Length
+                };
 
             // Stable sort intervals according to layer
-            var comparer = ComparerFactory<Node>.CreateComparer((x, y) => x.Layer - y.Layer);
-            Sorting.Timsort(nodes, comparer);
+            Sorting.Timsort(nodes, ComparerFactory<Node>.CreateComparer((x, y) => x.Layer - y.Layer));
 
             // Fix pointers
             for (int l = 0, offset = 0; l < layerCount; ++l)
@@ -244,22 +262,24 @@ namespace C5.Intervals
             }
         }
 
-        private static int gallopLayerSearch(ArrayList<Node> layers, I query)
+        private static int gallopLayerSearch(SCG.IList<Node> layers, I query)
         {
             Contract.Requires(query != null);
-            Contract.Requires(layers.Last.Interval == null);
+            // Sentinel layer
+            Contract.Requires(layers.Last().Interval == null);
+
             // The high endpoints of the last interval in each layer is sorted
             Contract.Requires(Contract.ForAll(1, layers.Count - 1, l => layers[l].Interval.CompareHigh(layers[l - 1].Interval) < 0));
             // Result is non-negative and less than layer count
             Contract.Ensures(0 <= Contract.Result<int>() && Contract.Result<int>() < layers.Count);
             // The last interval in the layer has a high less than or equal to interval's high
-            Contract.Ensures(layers[Contract.Result<int>()].Interval == null || layers[Contract.Result<int>()].Interval.CompareHigh(query) <= 0);
+            Contract.Ensures(Contract.Result<int>() == layers.Count - 1 || layers[Contract.Result<int>()].Interval.CompareHigh(query) <= 0);
             // The last interval in the layer below has a high greater than interval's high
             Contract.Ensures(Contract.Result<int>() == 0 || layers[Contract.Result<int>() - 1].Interval.CompareHigh(query) > 0);
 
-            var jump = 1;
             var lower = 0;
             var upper = layers.Count - 1;
+            var jump = 1;
 
             while (true)
             {
@@ -294,7 +314,7 @@ namespace C5.Intervals
             }
         }
 
-        private static int binaryLayerSearch(ArrayList<Node> layers, I query, int lower, int upper)
+        private static int binaryLayerSearch(SCG.IList<Node> layers, I query, int lower, int upper)
         {
             int min = lower, max = upper;
 
@@ -365,7 +385,7 @@ namespace C5.Intervals
         public override bool IsReadOnly { get { return true; } }
 
         /// <inheritdoc/>
-        public override bool IsFindOverlapsSorted { get { return false; } }
+        public override bool IsFindOverlapsSorted { get { return _sortFindOverlaps; } }
 
         #endregion
 
@@ -389,11 +409,10 @@ namespace C5.Intervals
                 yield return lowestInterval;
 
                 // Iterate through bottom layer as long as the intervals share a low
-                for (var i = 1; i < _firstLayerCount; i++)
+                for (var i = 1; i < _firstLayerCount; ++i)
                 {
-                    var interval = _intervals[i];
-                    if (interval.CompareLow(lowestInterval) == 0)
-                        yield return interval;
+                    if (_intervals[i].LowEquals(lowestInterval))
+                        yield return _intervals[i];
                     else
                         yield break;
                 }
@@ -414,12 +433,11 @@ namespace C5.Intervals
                 var highestInterval = HighestInterval;
                 yield return highestInterval;
 
-                // Iterate through bottom layer as long as the intervals share a low
+                // Iterate through bottom layer as long as the intervals share a high
                 for (var i = _firstLayerCount - 2; i >= 0; i--)
                 {
-                    var interval = _intervals[i];
-                    if (interval.CompareHigh(highestInterval) == 0)
-                        yield return interval;
+                    if (_intervals[i].HighEquals(highestInterval))
+                        yield return _intervals[i];
                     else
                         yield break;
                 }
@@ -488,7 +506,7 @@ namespace C5.Intervals
         {
             get
             {
-                foreach (var interval in _intervalArray)
+                foreach (var interval in _sorted)
                     yield return interval;
             }
         }
@@ -506,30 +524,30 @@ namespace C5.Intervals
                 yield break;
 
             // Enumerate equals
-            while (i < _count && _intervalArray[i].IntervalEquals(query))
-                yield return _intervalArray[i++];
+            while (i < _count && _sorted[i].IntervalEquals(query))
+                yield return _sorted[i++];
         }
 
         private int indexOf(IInterval<T> query)
         {
-            int lower = 0, upper = _count - 1;
+            int min = 0, max = _count - 1;
 
-            while (lower <= upper)
+            while (min <= max)
             {
-                var mid = lower + (upper - lower >> 1);
-                var compareTo = _intervalArray[mid].CompareTo(query);
+                var mid = min + (max - min >> 1);
+                var compareTo = _sorted[mid].CompareTo(query);
 
                 if (compareTo < 0)
-                    lower = mid + 1;
+                    min = mid + 1;
                 else if (compareTo > 0)
-                    upper = mid - 1;
-                else if (lower != mid)
-                    upper = mid;
+                    max = mid - 1;
+                else if (min != mid)
+                    max = mid;
                 else
                     return mid;
             }
 
-            return ~lower;
+            return ~min;
         }
 
         #endregion
@@ -539,21 +557,23 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override IEnumerable<I> FindOverlaps(IInterval<T> query)
         {
-            int lower = 0, upper = _firstLayerCount;
+            var lower = 0;
+            var upper = _firstLayerCount;
 
             // Make sure first and last don't point at the same interval (theorem 2)
             while (lower < upper)
             {
                 var first = lower;
 
+                // TODO: Test if
                 // The first interval doesn't overlap we need to search for it
                 if (!_intervals[first].Overlaps(query))
                 {
                     // We know first doesn't overlap so we can increment it before searching
-                    first = findFirst(query, ++first, upper);
+                    first = findFirst(query, first + 1, upper);
 
                     // If index is out of bound, or found interval doesn't overlap, then the list won't contain any overlaps
-                    if (upper <= first || !(_intervals[first].CompareLowHigh(query) <= 0))
+                    if (first >= upper || _intervals[first].CompareLowHigh(query) > 0)
                         yield break;
                 }
 
@@ -569,25 +589,12 @@ namespace C5.Intervals
             }
         }
 
-        [DebuggerDisplay("Section: [{First} : {Last}). Interval: {Interval}")]
-        struct LayerSection : IComparable<LayerSection>
-        {
-            public int First;
-            public int Last;
-            public I Interval;
-
-            public int CompareTo(LayerSection other)
-            {
-                return Interval.CompareTo(other.Interval);
-            }
-        }
-
-        /// <inheritdoc/>
         public IEnumerable<I> FindOverlapsSorted(IInterval<T> query)
         {
-            var queue = new IntervalHeap<LayerSection>();
+            var queue = new MultiWayMergeQueue<I>(_layerCount, _intervals, IntervalExtensions.CreateComparer<I, T>());
 
-            int lower = 0, upper = _firstLayerCount;
+            var lower = 0;
+            var upper = _firstLayerCount;
 
             while (lower < upper)
             {
@@ -611,23 +618,12 @@ namespace C5.Intervals
                 lower = _pointers[first];
                 upper = _pointers[last];
 
-                if (first < last)
-                    queue.Add(new LayerSection {First = first, Last = last, Interval = _intervals[first]});
+                queue.Insert(first, last);
             }
-            
+
+            // Return intervals in sorted order
             while (!queue.IsEmpty)
-            {
-                // Return interval
-                var section = queue.DeleteMin();
-                yield return section.Interval;
-
-                // Move pointer to subsequent interval
-                section.Interval = _intervals[++section.First];
-
-                // Add section again if there are more overlaps
-                if (section.First < section.Last)
-                    queue.Add(section);
-            }
+                yield return queue.Pop();
         }
 
         [Pure]
@@ -635,24 +631,20 @@ namespace C5.Intervals
         {
             Contract.Requires(query != null);
             // Bounds must be in bounds
-            Contract.Requires(0 <= lower && lower <= _intervals.Length);
-            Contract.Requires(0 <= upper && upper <= _intervals.Length);
+            Contract.Requires(0 <= lower && lower <= upper && upper <= _intervals.Length);
             // Lower and upper must be in the same layer
             Contract.Requires(Contract.ForAll(lower, upper, i => _intervals[i] != null));
 
-            // Either no interval overlaps or the interval at index result is the first overlap
-            Contract.Ensures(
-                Contract.Result<int>() < lower ||
-                upper <= Contract.Result<int>() ||
-                Contract.ForAll(lower, upper, i => !_intervals[i].Overlaps(query)) ||
-                _intervals[Contract.Result<int>()].Overlaps(query) && Contract.ForAll(lower, Contract.Result<int>(), i => !_intervals[i].Overlaps(query))
-            );
+            // First potential overlap is found
+            Contract.Ensures(Contract.ForAll(lower, Contract.Result<int>(), i => _intervals[i].CompareHighLow(query) < 0)
+                && Contract.ForAll(Contract.Result<int>(), upper, i => _intervals[i].CompareHighLow(query) >= 0));
+
 
             int min = lower, max = upper;
 
             while (min < max)
             {
-                var mid = min + (max - min >> 1); // Divide by 2, by shifting one to the left
+                var mid = min + (max - min >> 1);
 
                 if (_intervals[mid].CompareHighLow(query) < 0)
                     min = mid + 1;
@@ -668,24 +660,19 @@ namespace C5.Intervals
         {
             Contract.Requires(query != null);
             // Bounds must be in bounds
-            Contract.Requires(0 <= lower && lower <= _intervals.Length);
-            Contract.Requires(0 <= upper && upper <= _intervals.Length);
+            Contract.Requires(0 <= lower && lower <= upper && upper <= _intervals.Length);
             // Lower and upper must be in the same layer
             Contract.Requires(Contract.ForAll(lower, upper, i => _intervals[i] != null));
 
-            // Either no interval overlaps or the interval at index result is the first overlap
-            Contract.Ensures(
-                Contract.Result<int>() < lower ||
-                upper <= Contract.Result<int>() ||
-                Contract.ForAll(lower, upper, i => !_intervals[i].Overlaps(query)) ||
-                _intervals[Contract.Result<int>() - 1].Overlaps(query) && Contract.ForAll(Contract.Result<int>(), upper, i => !_intervals[i].Overlaps(query))
-            );
+            // Last potential overlap is found
+            Contract.Ensures(Contract.ForAll(lower, Contract.Result<int>(), i => _intervals[i].CompareLowHigh(query) <= 0)
+                && Contract.ForAll(Contract.Result<int>(), upper, i => _intervals[i].CompareLowHigh(query) > 0));
 
             int min = lower, max = upper;
 
             while (min < max)
             {
-                var mid = min + (max - min >> 1); // Divide by 2, by shifting one to the left
+                var mid = min + (max - min >> 1);
 
                 if (query.CompareHighLow(_intervals[mid]) < 0)
                     max = mid;
@@ -716,13 +703,13 @@ namespace C5.Intervals
                 return false;
 
             // Find first overlap
-            var i = findFirst(query, 0, _firstLayerCount);
+            var first = findFirst(query, 0, _firstLayerCount);
 
             // Check if index is in bound and if the interval overlaps the query
-            var result = 0 <= i && i < _firstLayerCount && _intervals[i].Overlaps(query);
+            var result = first < _firstLayerCount && _intervals[first].CompareLowHigh(query) <= 0;
 
             if (result)
-                overlap = _intervals[i];
+                overlap = _intervals[first];
 
             return result;
         }
@@ -734,23 +721,18 @@ namespace C5.Intervals
         /// <inheritdoc/>
         public override int CountOverlaps(T query)
         {
-            return countOverlaps(new IntervalBase<T>(query));
+            return CountOverlaps(new IntervalBase<T>(query));
         }
 
         /// <inheritdoc/>
         public override int CountOverlaps(IInterval<T> query)
         {
-            return countOverlaps(query);
-        }
-
-        private int countOverlaps(IInterval<T> query)
-        {
-            Contract.Requires(query != null);
-
             if (IsEmpty)
                 return 0;
 
-            int first = 0, last = _firstLayerCount, count = 0;
+            var first = 0;
+            var last = _firstLayerCount;
+            var count = 0;
 
             while (first < last)
             {
@@ -758,10 +740,10 @@ namespace C5.Intervals
                 if (!_intervals[first].Overlaps(query))
                 {
                     // We know first doesn't overlap so we can increment it before searching
-                    first = findFirst(query, ++first, last);
+                    first = findFirst(query, first + 1, last);
 
                     // If index is out of bound, or found interval doesn't overlap, then the layer won't contain any overlaps
-                    if (last <= first || !(_intervals[first].CompareLowHigh(query) <= 0))
+                    if (first >= last || _intervals[first].CompareLowHigh(query) > 0)
                         return count;
                 }
 
