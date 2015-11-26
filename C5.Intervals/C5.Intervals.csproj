@@ -166,6 +166,7 @@
     <Compile Include="Collections\BaseClasses\OverlapFreeIntervalCollectionBase.cs" />
     <Compile Include="Collections\BaseClasses\IntervalCollectionBase.cs" />
     <Compile Include="Collections\Implementations\EndpointSortedIntervalCollection.cs" />
+    <Compile Include="Collections\Implementations\SimpleLayeredContainmentList.cs" />
     <Compile Include="Collections\IntervalCollectionFactory.cs" />
     <Compile Include="Collections\Implementations\BinaryIntervalSearch.cs" />
     <Compile Include="Collections\Implementations\LayeredContainmentList.cs" />

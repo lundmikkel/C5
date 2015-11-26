@@ -112,6 +112,7 @@
     <Compile Include="Collections\BaseClasses\SortedIntervalCollectionTester.cs" />
     <Compile Include="Collections\BaseClasses\OverlapFreeIntervalCollectionTester.cs" />
     <Compile Include="Collections\BaseClasses\ContainmentFreeIntervalCollectionTester.cs" />
+    <Compile Include="Collections\Implementations\SimpleLayeredContainmentListTester.cs" />
     <Compile Include="Collections\Implementations\NestedContainmentListArticleTester.cs" />
     <Compile Include="Collections\Implementations\NestedContainmentListTester.cs" />
     <Compile Include="Extensions\IntervalExtensionTester.cs" />
