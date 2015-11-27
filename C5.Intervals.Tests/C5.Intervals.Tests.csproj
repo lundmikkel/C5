@@ -114,7 +114,6 @@
     <Compile Include="Collections\BaseClasses\ContainmentFreeIntervalCollectionTester.cs" />
     <Compile Include="Collections\Implementations\SimpleLayeredContainmentListTester.cs" />
     <Compile Include="Collections\Implementations\NestedContainmentListArticleTester.cs" />
-    <Compile Include="Collections\Implementations\NestedContainmentListTester.cs" />
     <Compile Include="Extensions\IntervalExtensionTester.cs" />
     <Compile Include="Extensions\IntervalRelationsTester.cs" />
     <Compile Include="Collections\Implementations\BinaryIntervalSearchTester.cs" />

@@ -171,8 +171,6 @@
     <Compile Include="Collections\Implementations\BinaryIntervalSearch.cs" />
     <Compile Include="Collections\Implementations\LayeredContainmentList.cs" />
     <Compile Include="Collections\Implementations\NestedContainmentList.cs" />
-    <Compile Include="Collections\Implementations\NestedContainmentList2.cs" />
-    <Compile Include="Collections\Implementations\NestedContainmentListArticle.cs" />
     <Compile Include="Collections\Implementations\StaticFiniteIntervalList.cs" />
     <Compile Include="Collections\Implementations\StaticIntervalTree.cs" />
     <Compile Include="Entities\DataIntervalBase.cs" />
