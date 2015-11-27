@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
@@ -59,29 +60,19 @@ namespace C5.Intervals
 
         #region Inner Classes
 
+        [DebuggerDisplay("{Interval} / {Sublist}")]
         private struct Node
         {
             public I Interval;
             public int Sublist;
 
             public bool HasSublist { get { return Sublist >= 0; } }
-
-            public override string ToString() { return String.Format("{0} / {1}", Interval, Sublist); }
         }
 
+        [DebuggerDisplay("{Start} / {End}")]
         private struct Sublist
         {
-            public int Start;
-            public int End;
-
-            public Sublist(int start, int end)
-                : this()
-            {
-                Start = start;
-                End = end;
-            }
-
-            public override string ToString() { return String.Format("{0} / {1}", Start, End); }
+            public int Start, End;
         }
 
         #endregion
@@ -91,27 +82,27 @@ namespace C5.Intervals
         // TODO: Make an out-of-place constructor
         public NestedContainmentListArticle(IEnumerable<I> intervals)
         {
-            var intervalArray = intervals as I[] ?? intervals.ToArray();
+            var sorted = intervals as I[] ?? intervals.ToArray();
 
-            if (!intervalArray.Any())
+            // Stop if we have no intervals
+            if ((_count = sorted.Length) == 0)
                 return;
 
-            _count = intervalArray.Length;
-
-            Sorting.HeapSort(intervalArray, 0, _count, IntervalExtensions.CreateComparer<I, T>());
+            // Sort intervals in place
+            Sorting.HeapSort(sorted, 0, _count, IntervalExtensions.CreateComparer<I, T>());
 
             // Create list with intervals
             _list = new Node[_count];
             for (var i = 0; i < _count; ++i)
-                _list[i].Interval = intervalArray[i];
+                _list[i].Interval = sorted[i];
 
-            var listCount = initSublists(ref intervalArray);
+            var listCount = initSublists(sorted);
 
             // If no intervals are contained, we can skip the list construction
             if (listCount == 1)
             {
                 // Initialize header to contain only main list
-                _header = new[] { new Sublist(0, _count) };
+                _header = new[] { new Sublist{Start = 0, End = _count} };
 
                 for (var i = 0; i < _count; ++i)
                     _list[i].Sublist = -1;
@@ -143,7 +134,7 @@ namespace C5.Intervals
         /// </summary>
         /// <param name="intervals">The intervals.</param>
         /// <returns>The number of sublists</returns>
-        private int initSublists(ref I[] intervals)
+        private int initSublists(I[] intervals)
         {
             var sublistCount = 1;
 
@@ -164,7 +155,7 @@ namespace C5.Intervals
         /// </summary>
         private void labelSublists()
         {
-            _header[0] = new Sublist(-1, 1);
+            _header[0] = new Sublist{Start = -1, End = 1};
             var parent = 0;
             var parentList = 1;
             var currentList = 1;
@@ -310,15 +301,14 @@ namespace C5.Intervals
                 if (IsEmpty)
                     yield break;
 
-                // Yield lowest iterval
-                var lowestInterval = _list[0].Interval;
+                var lowestInterval = LowestInterval;
                 yield return lowestInterval;
 
-                // Iterate through main list as long as the intervals share a low
+                // Iterate through main sublist as long as the intervals share a low
                 for (var i = 1; i < _header[0].End; ++i)
                 {
                     var interval = _list[i].Interval;
-                    if (interval.CompareLow(lowestInterval) == 0)
+                    if (interval.LowEquals(lowestInterval))
                         yield return interval;
                     else
                         yield break;
@@ -337,14 +327,14 @@ namespace C5.Intervals
                 if (IsEmpty)
                     yield break;
 
-                var highestInterval = _list[_header[0].End - 1].Interval;
+                var highestInterval = HighestInterval;
                 yield return highestInterval;
 
-                // Iterate through main list as long as the intervals share a low
+                // Iterate through main sublist as long as the intervals share a high
                 for (var i = _header[0].End - 2; i >= 0; --i)
                 {
                     var interval = _list[i].Interval;
-                    if (interval.CompareHigh(highestInterval) == 0)
+                    if (interval.HighEquals(highestInterval))
                         yield return interval;
                     else
                         yield break;
@@ -388,9 +378,10 @@ namespace C5.Intervals
         public override IEnumerator<I> GetEnumerator()
         {
             if (IsEmpty)
-                return Enumerable.Empty<I>().GetEnumerator();
+                yield break;
 
-            return _list.Select(node => node.Interval).GetEnumerator();
+            foreach (var node in _list)
+                yield return node.Interval;
         }
 
         /// <inheritdoc/>
@@ -407,10 +398,7 @@ namespace C5.Intervals
 
         private IEnumerable<I> sorted(Sublist sublist)
         {
-            int min = sublist.Start,
-                max = sublist.End;
-
-            for (var i = min; i < max; ++i)
+            for (var i = sublist.Start; i < sublist.End; ++i)
             {
                 var node = _list[i];
                 yield return node.Interval;
@@ -470,11 +458,7 @@ namespace C5.Intervals
 
             // Find first overlapping interval
             var first = takeAll ? sublist.Start : findFirst(sublist, query);
-
-            // If index is out of bound, or interval doesn't overlap, we can just stop our search
-            if (!takeAll && (first < sublist.Start || sublist.End - 1 < first || !_list[first].Interval.Overlaps(query)))
-                yield break;
-
+            
             while (first < sublist.End && (takeAll || _list[first].Interval.CompareLowHigh(query) <= 0))
             {
                 var node = _list[first++];
@@ -524,13 +508,13 @@ namespace C5.Intervals
                 return false;
 
             // Find first overlap
-            var i = findFirst(_header[0], query);
+            var first = findFirst(_header[0], query);
 
             // Check if index is in bound and if the interval overlaps the query
-            var result = 0 <= i && i < _header[0].End && _list[i].Interval.Overlaps(query);
+            var result = first < _header[0].End && _list[first].Interval.CompareLowHigh(query) <= 0;
 
             if (result)
-                overlap = _list[i].Interval;
+                overlap = _list[first].Interval;
 
             return result;
         }
