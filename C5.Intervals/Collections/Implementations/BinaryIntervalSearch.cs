@@ -187,6 +187,9 @@ namespace C5.Intervals
         {
             get
             {
+                if (IsEmpty)
+                    yield break;
+
                 foreach (var interval in _lowSorted)
                     yield return interval;
             }
