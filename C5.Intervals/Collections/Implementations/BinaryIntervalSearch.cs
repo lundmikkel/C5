@@ -283,6 +283,7 @@ namespace C5.Intervals
             }
         }
 
+        [Pure]
         private int findFirst(IInterval<T> query)
         {
             Contract.Requires(query != null);
@@ -305,6 +306,7 @@ namespace C5.Intervals
             return min;
         }
 
+        [Pure]
         private int findLast(IInterval<T> query)
         {
             Contract.Requires(query != null);
