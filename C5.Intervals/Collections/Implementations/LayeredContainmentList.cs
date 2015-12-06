@@ -182,7 +182,7 @@ namespace C5.Intervals
         private void constructLayers(SCG.IList<I> sorted, out I[] intervals, out int[] pointers, out int layerCount, out int firstLayerCount)
         {
             // TODO: Replace C5.ArrayList with SCG.List after testing
-            var layers = new ArrayList<Node> {
+            var layers = new List<Node> {
                 // First layer
                 new Node {
                     Interval = sorted[0],
@@ -227,38 +227,27 @@ namespace C5.Intervals
             layerCount = layers.Count - 1;
             firstLayerCount = layers[0].Length;
 
-            // Resize list to fit sentinel nodes
-            Array.Resize(ref nodes, _count + layerCount);
-
-            // Add sentinel nodes
-            for (var l = 0; l < layerCount; ++l)
-                nodes[_count + l] = new Node
-                {
-                    Layer = l,
-                    Pointer = layers[l + 1].Length
-                };
-
             // Stable sort intervals according to layer
             Sorting.Timsort(nodes, ComparerFactory<Node>.CreateComparer((x, y) => x.Layer - y.Layer));
-
-            // Fix pointers
-            for (int l = 0, offset = 0; l < layerCount; ++l)
-            {
-                var start = offset;
-                // Plus the sentinel node
-                offset += layers[l].Length + 1;
-
-                for (var i = start; i < offset; ++i)
-                    nodes[i].Length += offset;
-            }
 
             intervals = new I[_count + layerCount];
             pointers = new int[_count + layerCount];
 
-            for (var i = 0; i < nodes.Length; ++i)
+            for (int l = 0, offset = 0; l < layerCount; ++l)
             {
-                intervals[i] = nodes[i].Interval;
-                pointers[i] = nodes[i].Pointer;
+                var start = offset;
+                offset += layers[l].Length + 1;
+
+                // Move interval and pointer for current layer
+                for (int i = start - l, j = start; j < offset - 1; ++i, ++j)
+                {
+                    intervals[j] = nodes[i].Interval;
+                    // Add offset to fix pointer
+                    pointers[j]  = nodes[i].Pointer + offset;
+                }
+
+                // Add sentinel pointer
+                pointers[offset - 1] = offset + layers[l + 1].Length;
             }
         }
 
