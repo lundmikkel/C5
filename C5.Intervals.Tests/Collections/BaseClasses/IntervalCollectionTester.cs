@@ -2968,11 +2968,11 @@ namespace C5.Intervals.Tests
 
         #endregion
 
-        #region Nested Containment List Example
+        #region Containment List Example
 
         [Test]
         [Category("Example Cases")]
-        public void _NestedContainmentListArticleExample_()
+        public void NestedContainmentListArticleExample()
         {
             var intervals = new[]
                 {
@@ -2992,6 +2992,39 @@ namespace C5.Intervals.Tests
                     new Interval(25, 27),   // N
                     new Interval(26, 30),   // O
                     new Interval(28, 29)    // P
+                };
+
+            var collection = CreateCollection<Interval, int>(intervals);
+
+            var query = new Interval(13, 21);
+            var expected = InsertedIntervals(collection, intervals).Where(x => x.Overlaps(query));
+
+            CollectionAssert.AreEquivalent(expected, collection.FindOverlaps(query));
+        }
+
+        [Test]
+        [Category("Example Cases")]
+        public void LayeredContainmentListArticleExample()
+        {
+            var intervals = new[]
+                {
+                    new Interval( 0,  9),   // A
+                    new Interval( 3, 18),   // B
+                    new Interval( 9, 52),   // C
+                    new Interval(12, 25),   // D
+                    new Interval(16, 20),   // E
+                    new Interval(22, 28),   // F
+                    new Interval(22, 48),   // G
+                    new Interval(26, 32),   // H
+                    new Interval(27, 36),   // I
+                    new Interval(38, 53),   // J
+                    new Interval(43, 47),   // K
+                    new Interval(55, 71),   // L
+                    new Interval(61, 70),   // M
+                    new Interval(64, 68),   // N
+                    new Interval(69, 76),   // O
+                    new Interval(72, 80),   // P
+                    new Interval(76, 80)    // Q
                 };
 
             var collection = CreateCollection<Interval, int>(intervals);
