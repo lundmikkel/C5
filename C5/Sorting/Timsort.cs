@@ -14,15 +14,15 @@ namespace C5
             Contract.Requires(array != null, "array cannot be null.");
             Contract.Ensures(Contract.ForAll(1, array.Length, i => Comparer<T>.Default.Compare(array[i - 1], array[i]) <= 0));
 
-            new TimSorter<T>(array).Timsort(0, array.Length);
+            new TimSorter<T>(array).Sort(0, array.Length);
         }
 
         public static void Timsort<T>(T[] array, IComparer<T> comparer)
         {
             Contract.Requires(array != null, "array cannot be null.");
-            Contract.Ensures(Contract.ForAll(1, array.Length, i => (comparer ?? Comparer<T>.Default).Compare(array[i - 1], array[i]) <= 0));
+            Contract.Ensures(array.Length <= 1 || Contract.ForAll(1, array.Length, i => (comparer ?? Comparer<T>.Default).Compare(array[i - 1], array[i]) <= 0));
 
-            new TimSorter<T>(array, comparer).Timsort(0, array.Length);
+            new TimSorter<T>(array, comparer).Sort(0, array.Length);
         }
 
         public static void Timsort<T>(T[] array, int start, int length, IComparer<T> comparer = null)
@@ -33,7 +33,7 @@ namespace C5
             Contract.Requires(start + length <= array.Length);
             Contract.Ensures(length == 0 || Contract.ForAll(1, array.Length, i => (comparer ?? Comparer<T>.Default).Compare(array[i - 1], array[i]) <= 0));
 
-            new TimSorter<T>(array, comparer).Timsort(start, length);
+            new TimSorter<T>(array, comparer).Sort(start, length);
         }
 
         private struct Run
@@ -57,7 +57,7 @@ namespace C5
         class TimSorter<T>
         {
             private readonly T[] _array;
-            private readonly Comparison<T> compare;
+            private readonly Comparison<T> _compare;
             private T[] _aux;
 
             private int _minrun;
@@ -73,10 +73,10 @@ namespace C5
             public TimSorter(T[] array, IComparer<T> comparer = null)
             {
                 _array = array;
-                compare = (comparer ?? Comparer<T>.Default).Compare;
+                _compare = (comparer ?? Comparer<T>.Default).Compare;
             }
 
-            public void Timsort(int start, int length)
+            public void Sort(int start, int length)
             {
                 // Less than two elements will always be sorted
                 if (length < 2)
@@ -145,7 +145,7 @@ namespace C5
                 for (; current < end; current++)
                 {
                     // Continue if next doesn't need moving
-                    if (compare(_array[high = current - 1], next = _array[current]) <= 0)
+                    if (_compare(_array[high = current - 1], next = _array[current]) <= 0)
                         continue;
 
                     // Search for position
@@ -154,7 +154,7 @@ namespace C5
                     {
                         var middle = low + (high - low >> 1);
 
-                        if (compare(next, _array[middle]) < 0)
+                        if (_compare(next, _array[middle]) < 0)
                             high = middle;
                         else
                             low = middle + 1;
@@ -196,15 +196,15 @@ namespace C5
                     return _end - _index;
 
                 // The run is in non-descending order
-                if (compare(_array[_index], _array[high++]) <= 0)
+                if (_compare(_array[_index], _array[high++]) <= 0)
                 {
-                    while (high < _end && compare(_array[high - 1], _array[high]) <= 0)
+                    while (high < _end && _compare(_array[high - 1], _array[high]) <= 0)
                         high++;
                 }
                 // The run is in strict decreasing order
                 else
                 {
-                    while (high < _end && compare(_array[high - 1], _array[high]) > 0)
+                    while (high < _end && _compare(_array[high - 1], _array[high]) > 0)
                         high++;
 
                     // Revers the order of the run
@@ -342,7 +342,7 @@ namespace C5
                     // TODO: Handle galloping
                     // TODO: Catch exceptions with try-catch and move all elements from aux back to array
                     // Prefer a to keep sort stable
-                    if (/*takingFromA =*/ (compare(_aux[ai], _array[bi]) <= 0))
+                    if (/*takingFromA =*/ (_compare(_aux[ai], _array[bi]) <= 0))
                     {
                         _array[i] = _aux[ai++];
                         //aStrike++;
@@ -403,7 +403,7 @@ namespace C5
                     // TODO: Handle galloping
                     // TODO: Catch exceptions with try-catch and move all elements from aux back to array
                     // Prefer b to keep sort stable
-                    if (compare(_array[ai], _aux[bi]) <= 0)
+                    if (_compare(_array[ai], _aux[bi]) <= 0)
                         _array[i] = _aux[bi--];
                     else
                         _array[i] = _array[ai--];

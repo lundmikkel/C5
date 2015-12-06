@@ -162,6 +162,7 @@
     <Compile Include="Random.cs" />
     <Compile Include="Records.cs" />
     <Compile Include="Sorting.cs" />
+    <Compile Include="Sorting\StableSort.cs" />
     <Compile Include="Sorting\Timsort.cs" />
     <Compile Include="trees\RedBlackTreeBag.cs" />
     <Compile Include="trees\RedBlackTreeDictionary.cs" />
