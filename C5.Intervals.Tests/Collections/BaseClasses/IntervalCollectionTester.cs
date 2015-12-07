@@ -3029,7 +3029,7 @@ namespace C5.Intervals.Tests
 
             var collection = CreateCollection<Interval, int>(intervals);
 
-            var query = new Interval(13, 21);
+            var query = new Interval(35, 57);
             var expected = InsertedIntervals(collection, intervals).Where(x => x.Overlaps(query));
 
             CollectionAssert.AreEquivalent(expected, collection.FindOverlaps(query));
