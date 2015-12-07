@@ -37,19 +37,19 @@ namespace C5.Intervals
 
             _count = intervalArray.Length;
 
+            // Sort intervals
+            Sorting.Timsort(intervalArray, IntervalExtensions.CreateComparer<I, T>());
+
+            // Create arrays to store
             _lowSorted = new I[_count];
             _highSorted = new I[_count];
 
+            // Copy all intervals
             for (var i = 0; i < _count; i++)
                 _lowSorted[i] = _highSorted[i] = intervalArray[i];
 
-
-            // Sort intervals
-            var lowComparer = IntervalExtensions.CreateComparer<I, T>();
-            Sorting.Timsort(_lowSorted, 0, _count, lowComparer);
-
-            var highComparer = ComparerFactory<I>.CreateComparer((x, y) => x.CompareHigh(y));
-            Sorting.Timsort(_highSorted, 0, _count, highComparer);
+            // High sort last array
+            Sorting.Timsort(_highSorted, ComparerFactory<I>.CreateComparer((x, y) => x.CompareHigh(y)));
 
             _span = new IntervalBase<T>(_lowSorted[0], _highSorted[_count - 1]);
             _keepOverlapsSorted = keepOverlapsSorted;
