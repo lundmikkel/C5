@@ -83,7 +83,7 @@ namespace C5.Intervals
         private void invariant()
         {
             // Layer count is equal to the number of layers of intervals and pointers
-            Contract.Invariant(IsEmpty || _layerCount == _intervals.Count(x => x == null));
+            Contract.Invariant(IsEmpty || _layerCount == countLayersFromPointers());
             // The first layer's count is non-negative and at most as big as count
             Contract.Invariant(0 <= _firstLayerCount && _firstLayerCount <= _count);
             // Either the collection is empty or there are one layer or more
@@ -91,17 +91,54 @@ namespace C5.Intervals
             // Either all intervals are in the first layer, or there are more than one layer
             Contract.Invariant(_count == _firstLayerCount || _layerCount > 1);
             // The array is null if empty
-            Contract.Invariant(!IsEmpty || _intervals == null);
-            Contract.Invariant(!IsEmpty || _pointers == null);
-
-            // No layer is empty
-            Contract.Invariant(IsEmpty || Contract.ForAll(0, _intervals.Length - 1, i => _intervals[i] != null || _intervals[i + 1] != null));
+            Contract.Invariant(IsEmpty ? _intervals == null : _intervals.Length == _count);
+            Contract.Invariant(IsEmpty ? _pointers == null : _pointers.Length == _count + 1);
+            // First layer count is given by pointer[0]
+            Contract.Invariant(IsEmpty ? _firstLayerCount == 0 : _firstLayerCount == _pointers[0]);
+            // No interval is null
+            Contract.Invariant(IsEmpty || Contract.ForAll(_intervals, x => x != null));
+            // Pointers are sorted
+            Contract.Invariant(IsEmpty || Contract.ForAll(0, _count, i => i <= _pointers[i] && _pointers[i] <= _pointers[i + 1]));
             // Each layer is sorted
-            Contract.Invariant(IsEmpty || Contract.ForAll(0, _intervals.Length - 1, i => _intervals[i] == null || _intervals[i + 1] == null || _intervals[i].CompareTo(_intervals[i + 1]) <= 0));
-            // Each layer is sorted on both low and high endpoint
-            Contract.Invariant(IsEmpty || Contract.ForAll(0, _intervals.Length - 1, i => _intervals[i] == null || _intervals[i + 1] == null || _intervals[i].CompareLow(_intervals[i + 1]) <= 0 && _intervals[i].CompareHigh(_intervals[i + 1]) <= 0));
+            Contract.Invariant(layersAreSorted());
             // Each interval in a higher layer is contained in some interval in the layer below
             Contract.Invariant(checkContainmentInvariant());
+        }
+
+        [Pure]
+        private bool layersAreSorted()
+        {
+            var lower = 0;
+            var upper = _firstLayerCount;
+
+            while (lower < upper)
+            {
+                // Layer is sorted
+                for (var i = lower; i < upper - 1; ++i)
+                    if (!(_intervals[i].CompareLow(_intervals[i + 1]) <= 0 && _intervals[i].CompareHigh(_intervals[i + 1]) <= 0))
+                        return false;
+
+                lower = _pointers[lower];
+                upper = _pointers[upper];
+            }
+
+            // Validate that we are at the last pointer
+            return upper == _count;
+        }
+
+        [Pure]
+        private int countLayersFromPointers()
+        {
+            var layers = 1;
+            var pointer = _firstLayerCount;
+
+            while (_pointers[pointer] != pointer)
+            {
+                pointer = _pointers[pointer];
+                ++layers;
+            }
+
+            return layers;
         }
 
         [Pure]
@@ -181,8 +218,8 @@ namespace C5.Intervals
 
         private void constructLayers(SCG.IList<I> sorted, out I[] intervals, out int[] pointers, out int layerCount, out int firstLayerCount)
         {
-            // TODO: Replace C5.ArrayList with SCG.List after testing
-            var layers = new List<Node> {
+            // Start with initial capacity of 8, as this avoids resizing in most real-life situations
+            var layers = new List<Node>(8) {
                 // First layer
                 new Node {
                     Interval = sorted[0],
@@ -192,11 +229,11 @@ namespace C5.Intervals
                 new Node()
             };
 
-            // Create list for intervals (doesn't fit sentinel pointers yet)
+            // Create list for intervals
             var nodes = new Node[_count];
 
             // Add first interval to layers manually
-            nodes[0] = new Node { Interval = sorted[0], Layer = 0, Pointer = 0 };
+            nodes[0] = new Node { Interval = sorted[0] };
 
             // Figure out each intervals placement
             for (var i = 1; i < _count; ++i)
@@ -230,25 +267,26 @@ namespace C5.Intervals
             // Stable sort intervals according to layer
             Sorting.Timsort(nodes, ComparerFactory<Node>.CreateComparer((x, y) => x.Layer - y.Layer));
 
-            intervals = new I[_count + layerCount];
-            pointers = new int[_count + layerCount];
+            intervals = new I[_count];
+            // Create space for last sentinel pointer
+            pointers = new int[_count + 1];
 
             for (int l = 0, offset = 0; l < layerCount; ++l)
             {
-                var start = offset;
-                offset += layers[l].Length + 1;
+                var i = offset;
+                offset += layers[l].Length;
 
                 // Move interval and pointer for current layer
-                for (int i = start - l, j = start; j < offset - 1; ++i, ++j)
+                for (/**/; i < offset; ++i)
                 {
-                    intervals[j] = nodes[i].Interval;
+                    intervals[i] = nodes[i].Interval;
                     // Add offset to fix pointer
-                    pointers[j]  = nodes[i].Pointer + offset;
+                    pointers[i] = nodes[i].Pointer + offset;
                 }
-
-                // Add sentinel pointer
-                pointers[offset - 1] = offset + layers[l + 1].Length;
             }
+
+            // Add last sentinel pointer
+            pointers[_count] = _count;
         }
 
         private static int gallopLayerSearch(SCG.IList<Node> layers, I query)
@@ -283,30 +321,24 @@ namespace C5.Intervals
                 // We are in a higher layer than needed, do binary search for the rest
                 if (compare < 0 || upper <= next)
                 {
-                    if (compare < 0)
-                        upper = lower;
-
-                    if (upper == 0)
+                    // Check if we are in a higher layer than needed, set lower to upper and return if zero
+                    if (compare < 0 && (upper = lower) == 0)
                         return 0;
 
-                    // Back up to previous value
-                    lower = lower - (jump >> 1) + 1;
-
-                    return binaryLayerSearch(layers, query, lower, upper);
+                    //                                      Back up to previous value
+                    return binaryLayerSearch(layers, query, lower - (jump >> 1) + 1, upper);
                 }
 
                 // Jump
                 lower = next;
 
-                // Double jump
+                // Double jump distance
                 jump <<= 1;
             }
         }
 
-        private static int binaryLayerSearch(SCG.IList<Node> layers, I query, int lower, int upper)
+        private static int binaryLayerSearch(SCG.IList<Node> layers, I query, int min, int max)
         {
-            int min = lower, max = upper;
-
             while (min < max)
             {
                 var mid = min + (max - min >> 1);
