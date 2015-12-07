@@ -25,6 +25,16 @@ namespace C5
             new TimSorter<T>(array, comparer).Sort(0, array.Length);
         }
 
+        // TODO: Take comparison delegate instead of whole comparer
+        // public static void Timsort<T>(T[] array, Comparison<T> compare)
+        // {
+        //     Contract.Requires(array != null, "array cannot be null.");
+        //     Contract.Requires(compare != null);
+        //     Contract.Ensures(array.Length <= 1 || Contract.ForAll(1, array.Length, i => compare(array[i - 1], array[i]) <= 0));
+        // 
+        //     new TimSorter<T>(array, compare).Sort(0, array.Length);
+        // }
+
         public static void Timsort<T>(T[] array, int start, int length, IComparer<T> comparer = null)
         {
             Contract.Requires(array != null, "array cannot be null.");
@@ -75,6 +85,12 @@ namespace C5
                 _array = array;
                 _compare = (comparer ?? Comparer<T>.Default).Compare;
             }
+
+            // public TimSorter(T[] array, Comparison<T> compare)
+            // {
+            //     _array = array;
+            //     _compare = compare;
+            // } 
 
             public void Sort(int start, int length)
             {
