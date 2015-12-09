@@ -264,25 +264,25 @@ namespace C5.Intervals
             layerCount = layers.Count - 1;
             firstLayerCount = layers[0].Length;
 
-            // Stable sort intervals according to layer
-            Sorting.Timsort(nodes, ComparerFactory<Node>.CreateComparer((x, y) => x.Layer - y.Layer));
+            // Compute offsets and indices
+            var offsets = new int[layerCount];
+            var indices = new int[layerCount + 1];
+            for (int l = 0, offset = 0; l < layerCount; l++)
+                offsets[l] = indices[l + 1] = offset += layers[l].Length;
+
 
             intervals = new I[_count];
             // Create space for last sentinel pointer
             pointers = new int[_count + 1];
 
-            for (int l = 0, offset = 0; l < layerCount; ++l)
+            // Distribute intervals and corrent pointers
+            foreach (var node in nodes)
             {
-                var i = offset;
-                offset += layers[l].Length;
+                var l = node.Layer;
+                var i = indices[l]++;
 
-                // Move interval and pointer for current layer
-                for (/**/; i < offset; ++i)
-                {
-                    intervals[i] = nodes[i].Interval;
-                    // Add offset to fix pointer
-                    pointers[i] = nodes[i].Pointer + offset;
-                }
+                intervals[i] = node.Interval;
+                pointers[i] = node.Pointer + offsets[l];
             }
 
             // Add last sentinel pointer
