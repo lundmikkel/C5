@@ -177,15 +177,14 @@ namespace C5.Intervals
         /// <summary>
         /// Node used only during construction.
         /// </summary>
-        [DebuggerDisplay("{Interval} / {Pointer}")]
+        [DebuggerDisplay("{Interval} / {Layer}")]
         private class Node
         {
             public I Interval;
-            public int Pointer;
             public int Layer;
 
-            // Pointer is used to store the layers' length
-            public int Length { get { return Pointer; } set { Pointer = value; } }
+            // Layer is used to store the layers' length
+            public int Length { get { return Layer; } set { Layer = value; } }
         }
 
         #endregion
@@ -255,8 +254,7 @@ namespace C5.Intervals
                 nodes[i] = new Node
                 {
                     Interval = interval,
-                    Layer = l,
-                    Pointer = layers[l + 1].Length
+                    Layer = l
                 };
             }
 
@@ -264,15 +262,14 @@ namespace C5.Intervals
             layerCount = layers.Count - 1;
             firstLayerCount = layers[0].Length;
 
-            // Compute offsets and indices
-            var offsets = new int[layerCount];
+            // Compute indices
             var indices = new int[layerCount + 1];
             for (int l = 0, offset = 0; l < layerCount; l++)
-                offsets[l] = indices[l + 1] = offset += layers[l].Length;
+                indices[l + 1] = offset += layers[l].Length;
 
 
             intervals = new I[_count];
-            // Create space for last sentinel pointer
+            // Create extra space for last sentinel pointer
             pointers = new int[_count + 1];
 
             // Distribute intervals and corrent pointers
@@ -282,7 +279,7 @@ namespace C5.Intervals
                 var i = indices[l]++;
 
                 intervals[i] = node.Interval;
-                pointers[i] = node.Pointer + offsets[l];
+                pointers[i] = indices[l + 1];
             }
 
             // Add last sentinel pointer
