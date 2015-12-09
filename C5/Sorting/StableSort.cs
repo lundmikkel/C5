@@ -9,6 +9,8 @@ namespace C5
 {
     public partial class Sorting
     {
+        // BUG: Breaks with MaximumDepth_ManyOverlappingIntervals_Four test!!
+
         public static void StableSort<T>(T[] array)
         {
             Contract.Requires(array != null, "array cannot be null.");
