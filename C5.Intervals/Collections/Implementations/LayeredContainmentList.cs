@@ -178,7 +178,7 @@ namespace C5.Intervals
         /// Node used only during construction.
         /// </summary>
         [DebuggerDisplay("{Interval} / {Layer}")]
-        private class Node
+        private struct Node
         {
             public I Interval;
             public int Layer;
@@ -247,8 +247,7 @@ namespace C5.Intervals
                     layers.Add(new Node());
 
                 // Store the layer's last interval and increment its size counter
-                layers[l].Interval = interval;
-                layers[l].Length++;
+                layers[l] = new Node { Interval = interval, Length = layers[l].Length + 1 };
 
                 // Add each interval to nodes array
                 nodes[i] = new Node
